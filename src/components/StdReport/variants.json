@@ -1,0 +1,73 @@
+[
+  {
+    "id": "1770407407216",
+    "appId": "excel-app",
+    "tableKey": "processed_SCHUNK_202601.xlsx",
+    "name": "Default2",
+    "description": "",
+    "isDefault": true,
+    "executeOnLoad": false,
+    "isPublic": true,
+    "scope": "Both",
+    "createdAt": "2026-02-06T19:50:07.216Z",
+    "filters": [
+      {
+        "scope": "processed_SCHUNK_202601.xlsx",
+        "filters": {
+          "values": {},
+          "visibleFields": [
+            "Phase_Code",
+            "Date",
+            "Project_Code",
+            "Consultant Name",
+            "CustomerCode"
+          ]
+        }
+      }
+    ],
+    "layout": {},
+    "layoutId": null,
+    "layoutRefs": [
+      {
+        "tableKey": "processed_SCHUNK_202601.xlsx",
+        "layoutId": null
+      }
+    ]
+  },
+  {
+    "id": "1770411522255",
+    "appId": "excel-app",
+    "tableKey": "excel-app-shared-view",
+    "name": "Default",
+    "description": "Default",
+    "isDefault": true,
+    "executeOnLoad": false,
+    "isPublic": true,
+    "scope": "Both",
+    "createdAt": "2026-02-06T20:58:42.255Z",
+    "filters": [
+      {
+        "scope": "excel-app-shared-view",
+        "filters": {
+          "values": {},
+          "visibleFields": [
+            "CustomerCode",
+            "Project_Code",
+            "Phase_Code",
+            "Consultant Name",
+            "Date",
+            "Status"
+          ]
+        }
+      }
+    ],
+    "layout": {},
+    "layoutId": null,
+    "layoutRefs": [
+      {
+        "tableKey": "excel-app-shared-view",
+        "layoutId": null
+      }
+    ]
+  }
+]

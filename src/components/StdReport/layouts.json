@@ -1,0 +1,66 @@
+[
+  {
+    "appId": "excel-app",
+    "tableKey": "excel-app-shared-view",
+    "layoutId": "1771565511560",
+    "name": "AICHECK",
+    "isDefault": false,
+    "isPublic": true,
+    "layout": {
+      "visibleColumns": [
+        "Phase_Desc",
+        "Consultant Name",
+        "Date",
+        "Description",
+        "Problem",
+        "Suggested Description",
+        "Status"
+      ],
+      "order": "asc",
+      "orderBy": "",
+      "grouping": [
+        "Customer Name",
+        "Project_Desc"
+      ],
+      "showSummary": false,
+      "summaryColumns": [
+        "Report_Hour",
+        "Billable_Hour",
+        "Unit Price",
+        "Total Amount"
+      ]
+    }
+  },
+  {
+    "appId": "excel-app",
+    "tableKey": "excel-app-shared-view",
+    "layoutId": "1771565636768",
+    "name": "BasicData",
+    "isDefault": true,
+    "isPublic": true,
+    "layout": {
+      "visibleColumns": [
+        "Phase_Desc",
+        "Consultant Name",
+        "Date",
+        "Description",
+        "Report_Hour",
+        "Billable_Hour",
+        "Total Amount",
+        "Unit Price"
+      ],
+      "order": "asc",
+      "orderBy": "",
+      "grouping": [
+        "Customer Name",
+        "Project_Desc"
+      ],
+      "showSummary": true,
+      "summaryColumns": [
+        "Report_Hour",
+        "Billable_Hour",
+        "Total Amount"
+      ]
+    }
+  }
+]
