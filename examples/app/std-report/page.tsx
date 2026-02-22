@@ -1,8 +1,10 @@
 'use client';
 
 import React from 'react';
-import { CStandardPage, useStandardReport, type ReportMetadata } from 'orbcafe-ui';
+import { CAppPageLayout, CStandardPage, useStandardReport, type ReportMetadata, type TreeMenuItem } from 'orbcafe-ui';
 import { Box, Chip } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
+import { LayoutDashboard, Settings, Mail } from 'lucide-react';
 
 // --- Metadata Definition ---
 
@@ -114,6 +116,20 @@ const fetchReportData = async (params: any) => {
     };
 };
 
+const HeaderBrandLogo = () => {
+    const theme = useTheme();
+    const src = theme.palette.mode === 'dark' ? '/LOGO3.png' : '/LOGO2.png';
+
+    return (
+        <Box
+            component="img"
+            src={src}
+            alt="ORBCAFE UI"
+            sx={{ width: 280, maxWidth: '32vw', height: 52, display: 'block', objectFit: 'contain', flexShrink: 0 }}
+        />
+    );
+};
+
 export default function StdReportExample() {
     // 4. Use the Hook
     const { pageProps } = useStandardReport({
@@ -121,11 +137,26 @@ export default function StdReportExample() {
         fetchData: fetchReportData
     });
 
+    const menuData: TreeMenuItem[] = [
+        { id: 'dashboard', title: 'Dashboard', href: '/', icon: <LayoutDashboard className="w-4 h-4" /> },
+        { id: 'std-report', title: 'Standard Report', href: '/std-report', icon: <LayoutDashboard className="w-4 h-4" /> },
+        { id: 'messages', title: 'Messages', href: '/messages', icon: <Mail className="w-4 h-4" /> },
+        { id: 'settings', title: 'Settings', href: '/settings', icon: <Settings className="w-4 h-4" /> },
+    ];
+
     return (
-        <Box sx={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
-            <CStandardPage {...pageProps}>
-                {/* Optional children for dialogs etc. */}
-            </CStandardPage>
-        </Box>
+        <CAppPageLayout
+            appTitle=""
+            menuData={menuData}
+            localeLabel="EN"
+            user={{ name: 'Ruiyang Shen', avatarSrc: '/orbcafe.png' }}
+            logo={<HeaderBrandLogo />}
+        >
+            <Box sx={{ height: 'calc(100vh - 120px)' }}>
+                <CStandardPage {...pageProps}>
+                    {/* Optional children for dialogs etc. */}
+                </CStandardPage>
+            </Box>
+        </CAppPageLayout>
     );
 }

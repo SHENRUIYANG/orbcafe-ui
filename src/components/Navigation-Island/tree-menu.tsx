@@ -59,9 +59,19 @@ interface TreeMenuProps {
   level?: number
   expandedIds?: Set<string>
   onToggleExpand?: (id: string) => void
+  colorMode?: 'light' | 'dark'
 }
 
-export function TreeMenu({ items, onItemClick, className = '', level = 0, expandedIds, onToggleExpand }: TreeMenuProps) {
+export function TreeMenu({
+  items,
+  onItemClick,
+  className = '',
+  level = 0,
+  expandedIds,
+  onToggleExpand,
+  colorMode = 'light',
+}: TreeMenuProps) {
+  const isDark = colorMode === 'dark'
   const pathname = usePathname()
   const [internalExpandedItems, setInternalExpandedItems] = useState<Set<string>>(new Set())
 
@@ -118,7 +128,12 @@ export function TreeMenu({ items, onItemClick, className = '', level = 0, expand
           <div key={item.id} className="tree-menu-item relative">
             {/* 选中态背景指示条 - 仅对非折叠父菜单或叶子节点显示 */}
             {isActive && (
-              <div className="absolute left-0 top-2 bottom-2 w-1 bg-blue-500 rounded-r-full z-10" />
+              <div
+                className={cn(
+                  'absolute left-0 top-2 bottom-2 w-[3px] rounded-r-full z-10',
+                  isDark ? 'bg-[#90caf9]' : 'bg-[#1976d2]',
+                )}
+              />
             )}
             
             <Button
@@ -127,8 +142,12 @@ export function TreeMenu({ items, onItemClick, className = '', level = 0, expand
                 'w-full justify-start gap-2 h-auto py-2 relative overflow-hidden group',
                 `ml-${level * 4}`,
                 isActive 
-                  ? 'bg-blue-50/80 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 hover:bg-blue-100/80 dark:hover:bg-blue-900/30' 
-                  : 'hover:bg-gray-100/50 dark:hover:bg-gray-800/50 text-gray-700 dark:text-gray-300'
+                  ? (isDark
+                      ? 'bg-transparent text-[#90caf9] hover:bg-gray-800/35'
+                      : 'bg-transparent text-[#1976d2] hover:bg-gray-100/60')
+                  : (isDark
+                      ? 'hover:bg-gray-800/50 text-gray-300'
+                      : 'hover:bg-gray-100/50 text-gray-700')
               )}
               onClick={() => handleItemClick(item)}
             >
@@ -136,7 +155,11 @@ export function TreeMenu({ items, onItemClick, className = '', level = 0, expand
                 <div className={cn(
                   "flex-shrink-0 transition-transform duration-200",
                   isExpanded && "rotate-90",
-                  isActive ? "text-blue-500" : "text-gray-400 group-hover:text-gray-600 dark:text-gray-500 dark:group-hover:text-gray-300"
+                  isActive
+                    ? (isDark ? 'text-[#90caf9]' : 'text-[#1976d2]')
+                    : (isDark
+                        ? "text-gray-500 group-hover:text-gray-300"
+                        : "text-gray-400 group-hover:text-gray-600")
                 )}>
                   <ChevronRight className="h-4 w-4" />
                 </div>
@@ -149,7 +172,11 @@ export function TreeMenu({ items, onItemClick, className = '', level = 0, expand
               {item.icon && (
                 <div className={cn(
                   "flex-shrink-0 transition-colors duration-200",
-                  isActive ? "text-blue-500" : "text-gray-400 group-hover:text-gray-600 dark:text-gray-500 dark:group-hover:text-gray-300"
+                  isActive
+                    ? (isDark ? 'text-[#90caf9]' : 'text-[#1976d2]')
+                    : (isDark
+                        ? "text-gray-500 group-hover:text-gray-300"
+                        : "text-gray-400 group-hover:text-gray-600")
                 )}>
                   {item.icon}
                 </div>
@@ -165,7 +192,9 @@ export function TreeMenu({ items, onItemClick, className = '', level = 0, expand
                 {item.description && (
                   <div className={cn(
                     "text-xs truncate transition-colors duration-200",
-                    isActive ? "text-blue-400/80 dark:text-blue-300/60" : "text-gray-500 dark:text-gray-400"
+                    isActive
+                      ? (isDark ? 'text-[#90caf9]/70' : 'text-[#1976d2]/75')
+                      : (isDark ? "text-gray-400" : "text-gray-500")
                   )} title={item.description}>
                     {item.description}
                   </div>
@@ -187,6 +216,7 @@ export function TreeMenu({ items, onItemClick, className = '', level = 0, expand
                     level={level + 1}
                     expandedIds={expandedIds}
                     onToggleExpand={onToggleExpand}
+                    colorMode={colorMode}
                   />
                 </div>
               </div>

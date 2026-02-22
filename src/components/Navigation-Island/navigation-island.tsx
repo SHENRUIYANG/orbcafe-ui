@@ -46,6 +46,7 @@ export interface NavigationIslandProps {
   className?: string
   maxHeight?: number
   menuData?: TreeMenuItem[]
+  colorMode?: 'light' | 'dark'
 }
 
 export const NavigationIsland: React.FC<NavigationIslandProps> = ({ 
@@ -54,7 +55,9 @@ export const NavigationIsland: React.FC<NavigationIslandProps> = ({
   className = '',
   maxHeight,
   menuData = [],
+  colorMode = 'light',
 }) => {
+  const isDark = colorMode === 'dark'
   const router = useRouter()
 
   // -------------
@@ -158,9 +161,13 @@ export const NavigationIsland: React.FC<NavigationIslandProps> = ({
   // -------------
   return (
     <div 
-      className={`flex flex-col bg-white/10 dark:bg-[#101928] backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-[0_4px_8px_0_rgba(31,38,135,0.1)] ${
+      className={`flex flex-col backdrop-blur-xl border shadow-[0_4px_8px_0_rgba(31,38,135,0.1)] ${
         collapsed ? 'w-14 rounded-full' : 'w-[234px] rounded-2xl'
-      } relative ${className}`}
+      } relative ${className} ${
+        isDark
+          ? 'bg-[#111111] border-white/10'
+          : 'bg-white/70 border-white/30'
+      }`}
       style={{
         backdropFilter: 'blur(16px) saturate(180%)',
         WebkitBackdropFilter: 'blur(16px) saturate(180%)',
@@ -174,7 +181,11 @@ export const NavigationIsland: React.FC<NavigationIslandProps> = ({
           <div className="flex justify-center">
             <button
               onClick={onToggle}
-              className="w-10 h-10 flex items-center justify-center rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200"
+              className={`w-10 h-10 flex items-center justify-center rounded-lg transition-colors duration-200 ${
+                isDark
+                  ? 'text-gray-300 hover:bg-gray-800'
+                  : 'text-gray-500 hover:bg-gray-50'
+              }`}
               title="展开导航"
             >
               <Search className="h-5 w-5" />
@@ -187,10 +198,14 @@ export const NavigationIsland: React.FC<NavigationIslandProps> = ({
               placeholder="搜索菜单..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className={`w-full pl-10 pr-4 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                isDark
+                  ? 'border-gray-700 bg-[#1A1A1A] text-white placeholder-gray-400'
+                  : 'border-gray-300 bg-white text-gray-900 placeholder-gray-500'
+              }`}
             />
             <div className="absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-              <Search className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+              <Search className={`h-4 w-4 ${isDark ? 'text-gray-500' : 'text-gray-400'}`} />
             </div>
           </div>
         )}
@@ -212,6 +227,7 @@ export const NavigationIsland: React.FC<NavigationIslandProps> = ({
                   onItemClick={handleNodeClick}
                   className="space-y-1"
                   expandedIds={searchExpandedNodes}
+                  colorMode={colorMode}
                   onToggleExpand={(id) => {
                     const newExpanded = new Set(expandedNodes)
                     
@@ -260,11 +276,19 @@ export const NavigationIsland: React.FC<NavigationIslandProps> = ({
                         const newExpanded = new Set<string>([category.id])
                         setExpandedNodes(newExpanded)
                       }}
-                      className="w-full flex items-center justify-center p-2 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors duration-200"
+                      className={`w-full flex items-center justify-center p-2 rounded-lg cursor-pointer transition-colors duration-200 ${
+                        isDark
+                          ? 'text-gray-400 hover:bg-gray-800'
+                          : 'text-gray-600 hover:bg-gray-50'
+                      }`}
                       title={`展开查看 ${category.title}`}
                     >
                       {category.icon || (
-                        <div className="w-6 h-6 bg-blue-100 dark:bg-blue-900/20 rounded text-xs flex items-center justify-center font-medium text-blue-600 dark:text-blue-400">
+                        <div className={`w-6 h-6 rounded text-xs flex items-center justify-center font-medium ${
+                          isDark
+                            ? 'bg-[#90caf9] text-[#0b0b0b]'
+                            : 'bg-[#1976d2] text-white'
+                        }`}>
                           {category.title?.charAt(0) || '?'}
                         </div>
                       )}
@@ -281,7 +305,9 @@ export const NavigationIsland: React.FC<NavigationIslandProps> = ({
       {!collapsed && (
         <button
           onClick={onToggle}
-          className="absolute -bottom-1 -right-1 w-6 h-6 bg-transparent hover:bg-white/20 dark:hover:bg-gray-800/50 rounded-full flex items-center justify-center transition-all duration-300 ease-in-out z-20"
+          className={`absolute -bottom-1 -right-1 w-6 h-6 bg-transparent rounded-full flex items-center justify-center transition-all duration-300 ease-in-out z-20 ${
+            isDark ? 'hover:bg-gray-800/50' : 'hover:bg-white/20'
+          }`}
           title="折叠导航"
         >
           <div 
@@ -295,7 +321,7 @@ export const NavigationIsland: React.FC<NavigationIslandProps> = ({
             }}
           >
             <div
-              className="dark:border-yellow-400"
+              className={isDark ? 'border-yellow-400' : ''}
               style={{
                 width: '32px',
                 height: '32px',
