@@ -1,5 +1,5 @@
 import React from 'react';
-import { Toolbar, Typography, IconButton, Tooltip, TextField, Box, Badge, InputAdornment } from '@mui/material';
+import { Toolbar, IconButton, Tooltip, TextField, Box, Badge, InputAdornment } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ViewColumnIcon from '@mui/icons-material/ViewColumn';
 import SaveIcon from '@mui/icons-material/Save';
@@ -10,39 +10,49 @@ import InsightsIcon from '@mui/icons-material/Insights';
 
 export const CTableToolbar = (props: any) => {
     const FONT_SIZE_SMALL = '0.75rem';
+    const actionNodes = Array.isArray(props.actions) ? props.actions : props.actions ? [props.actions] : [];
+    const extraToolNodes = Array.isArray(props.extraTools) ? props.extraTools : props.extraTools ? [props.extraTools] : [];
+    const customToolNodes = [...actionNodes, ...extraToolNodes];
 
     return (
-        <Toolbar sx={{ pl: { sm: 2 }, pr: { xs: 1, sm: 1 }, alignItems: 'center' }}>
-            <Typography sx={{ flex: '1 1 100%', fontWeight: 'bold' }} variant="h6" id="tableTitle" component="div">
-                {props.title || 'Table'}
-            </Typography>
-            
-            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                <TextField
-                    size="small"
-                    placeholder="Search..."
-                    value={props.filterText}
-                    onChange={(e) => props.setFilterText(e.target.value)}
-                    InputProps={{
-                        sx: {
+        <Toolbar sx={{ pl: { sm: 2 }, pr: { xs: 1, sm: 1 }, alignItems: 'center', gap: 1 }}>
+            <TextField
+                size="small"
+                placeholder="Search..."
+                value={props.filterText}
+                onChange={(e) => props.setFilterText(e.target.value)}
+                InputProps={{
+                    sx: {
+                        fontSize: FONT_SIZE_SMALL,
+                        '& .MuiInputBase-input': {
                             fontSize: FONT_SIZE_SMALL,
-                            '& .MuiInputBase-input': {
-                                fontSize: FONT_SIZE_SMALL,
-                            },
-                            '& .MuiInputBase-input::placeholder': {
-                                fontSize: FONT_SIZE_SMALL,
-                                opacity: 1,
-                            },
                         },
-                        startAdornment: (
-                            <InputAdornment position="start">
-                                <SearchIcon fontSize="small" />
-                            </InputAdornment>
-                        ),
+                        '& .MuiInputBase-input::placeholder': {
+                            fontSize: FONT_SIZE_SMALL,
+                            opacity: 1,
+                        },
+                    },
+                    startAdornment: (
+                        <InputAdornment position="start">
+                            <SearchIcon fontSize="small" />
+                        </InputAdornment>
+                    ),
+                }}
+                sx={{ width: 300 }}
+            />
+
+            <Box sx={{ flex: 1 }} />
+
+            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                <Box
+                    sx={{
+                        width: 1,
+                        height: 20,
+                        bgcolor: 'divider',
+                        mr: 0.5,
                     }}
-                    sx={{ width: 300 }}
                 />
-                
+
                 {/* Grouping */}
                 <Tooltip title="Group By">
                     <IconButton onClick={(e: React.MouseEvent<HTMLElement>) => props.setGroupAnchorEl(e.currentTarget)}>
@@ -100,6 +110,14 @@ export const CTableToolbar = (props: any) => {
                 
                 {/* Hidden Layout Manager for persistence logic */}
                 {props.layoutManager}
+
+                {customToolNodes.length > 0 && (
+                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                        {customToolNodes.map((node: React.ReactNode, idx: number) => (
+                            <React.Fragment key={`toolbar-custom-${idx}`}>{node}</React.Fragment>
+                        ))}
+                    </Box>
+                )}
             </Box>
         </Toolbar>
     );

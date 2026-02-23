@@ -3,6 +3,7 @@ import type { GraphReportConfig } from '../../../GraphReport/types';
 export interface CTableProps {
     appId?: string;
     title?: string;
+    showToolbar?: boolean;
     columns: any[];
     rows: any[];
     loading?: boolean;

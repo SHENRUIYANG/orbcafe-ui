@@ -116,6 +116,7 @@ export const CTableRow: React.FC<CTableRowProps> = (props) => <TableRow {...prop
 export const CTable: React.FC<CTableProps> = (props) => {
   const {
     title = 'Data Table',
+    showToolbar = true,
     selectionMode,
     selected = [],
     onSelectionChange,
@@ -352,29 +353,31 @@ export const CTable: React.FC<CTableProps> = (props) => {
             ...(maxHeight ? { height: maxHeight } : 
                fitContainer ? { flex: 1, minHeight: 0 } : {})
         }}>
-            <CTableToolbar
-                filterText={filterText}
-                setFilterText={setFilterText}
-                onRowsPerPageChange={onRowsPerPageChange}
-                rowsPerPage={rowsPerPage}
-                rowsPerPageOptions={rowsPerPageOptions}
-                page={page}
-                count={count}
-                onPageChange={onPageChange}
-                actions={actions}
-                extraTools={extraTools}
-                grouping={grouping}
-                setGroupAnchorEl={setGroupAnchorEl}
-                showSummary={showSummary}
-                setShowSummary={setShowSummary}
-                setAnchorEl={setAnchorEl}
-                setSummaryAnchorEl={setSummaryAnchorEl}
-                handleExport={handleExport}
-                onLayoutSave={(onLayoutSave || (filterConfig?.variantService && filterConfig?.appId)) ? handleLayoutSave : undefined}
-                loading={loading}
-                layoutManager={layoutManager}
-                onOpenGraphReport={graphReportEnabled ? handleOpenGraphReport : undefined}
-            />
+            {showToolbar && (
+                <CTableToolbar
+                    filterText={filterText}
+                    setFilterText={setFilterText}
+                    onRowsPerPageChange={onRowsPerPageChange}
+                    rowsPerPage={rowsPerPage}
+                    rowsPerPageOptions={rowsPerPageOptions}
+                    page={page}
+                    count={count}
+                    onPageChange={onPageChange}
+                    actions={actions}
+                    extraTools={extraTools}
+                    grouping={grouping}
+                    setGroupAnchorEl={setGroupAnchorEl}
+                    showSummary={showSummary}
+                    setShowSummary={setShowSummary}
+                    setAnchorEl={setAnchorEl}
+                    setSummaryAnchorEl={setSummaryAnchorEl}
+                    handleExport={handleExport}
+                    onLayoutSave={(onLayoutSave || (filterConfig?.variantService && filterConfig?.appId)) ? handleLayoutSave : undefined}
+                    loading={loading}
+                    layoutManager={layoutManager}
+                    onOpenGraphReport={graphReportEnabled ? handleOpenGraphReport : undefined}
+                />
+            )}
 
             <TableContainer sx={{ 
                 flex: 1,

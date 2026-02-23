@@ -1,0 +1,1 @@
+NPM_TOKEN=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 npm_config_cache=/tmp/.npm-cache npm publish --access public

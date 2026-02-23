@@ -36,6 +36,7 @@ export const CLayoutManager: React.FC<CLayoutManagerProps> = ({
 }) => {
     const [layouts, setLayouts] = useState<LayoutMetadata[]>([]);
     const [currentLayoutId, setCurrentLayoutId] = useState<string>('');
+    const storageKey = `orbcafe.layouts.${appId}.${tableKey}`;
 
     interface BackendLayout {
         appId: string;
@@ -70,6 +71,26 @@ export const CLayoutManager: React.FC<CLayoutManagerProps> = ({
         createdAt: item.createdAt,
         layout: item.layoutData
     });
+
+    const loadLayoutsFromLocal = useCallback((): LayoutMetadata[] => {
+        try {
+            const raw = localStorage.getItem(storageKey);
+            if (!raw) return [];
+            const parsed = JSON.parse(raw);
+            if (!Array.isArray(parsed)) return [];
+            return parsed as LayoutMetadata[];
+        } catch {
+            return [];
+        }
+    }, [storageKey]);
+
+    const saveLayoutsToLocal = useCallback((nextLayouts: LayoutMetadata[]) => {
+        try {
+            localStorage.setItem(storageKey, JSON.stringify(nextLayouts));
+        } catch {
+            // ignore localStorage errors (quota / SSR guards)
+        }
+    }, [storageKey]);
 
     // Sync active layout ID from parent
     useEffect(() => {
@@ -107,9 +128,16 @@ export const CLayoutManager: React.FC<CLayoutManagerProps> = ({
             }
         } catch (e) {
             console.error("Error fetching layouts", e);
-            if (onError) onError('Failed to load layouts');
+            const localLayouts = loadLayoutsFromLocal();
+            setLayouts(localLayouts);
+            const defaultLayout = localLayouts.find((l: LayoutMetadata) => l.isDefault);
+            if (defaultLayout && !currentLayoutId && !targetLayoutId) {
+                setCurrentLayoutId(defaultLayout.id);
+                onLayoutLoad(defaultLayout);
+            }
+            if (onError) onError('Failed to load layouts from backend, fallback to local storage');
         }
-    }, [appId, tableKey, serviceUrl, onError, currentLayoutId, onLayoutLoad, targetLayoutId]);
+    }, [appId, tableKey, serviceUrl, onError, currentLayoutId, onLayoutLoad, targetLayoutId, loadLayoutsFromLocal]);
 
     useEffect(() => {
         fetchLayouts();
@@ -117,17 +145,17 @@ export const CLayoutManager: React.FC<CLayoutManagerProps> = ({
     }, [appId, tableKey]);
 
     const handleSave = async (metadata: Omit<LayoutMetadata, 'id' | 'createdAt' | 'layoutData'>) => {
+        const existing = layouts.find(l => l.name === metadata.name);
+        const id = existing ? existing.id : Date.now().toString();
+        const layoutToSave: LayoutMetadata = {
+            id,
+            ...metadata,
+            createdAt: new Date().toISOString(),
+            layoutData: currentLayoutData,
+            isDefault: metadata.isDefault ?? false,
+            isPublic: metadata.isPublic ?? false
+        };
         try {
-            const existing = layouts.find(l => l.name === metadata.name);
-            const id = existing ? existing.id : Date.now().toString();
-            const layoutToSave: LayoutMetadata = {
-                id,
-                ...metadata,
-                createdAt: new Date().toISOString(),
-                layoutData: currentLayoutData,
-                isDefault: metadata.isDefault ?? false,
-                isPublic: metadata.isPublic ?? false
-            };
             const response = await fetch(`${serviceUrl}/api/layouts`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -141,7 +169,16 @@ export const CLayoutManager: React.FC<CLayoutManagerProps> = ({
             onLayoutLoad(layoutToSave);
         } catch (e) {
             console.error("Error saving layout", e);
-            if (onError) onError('Failed to save layout');
+            const hasReplaced = layouts.some((l) => l.id === id);
+            const nextLayouts = hasReplaced
+                ? layouts.map((l) => (l.id === id ? layoutToSave : l))
+                : [...layouts, layoutToSave];
+            setLayouts(nextLayouts);
+            saveLayoutsToLocal(nextLayouts);
+            setCurrentLayoutId(id);
+            onLayoutLoad(layoutToSave);
+            if (onSuccess) onSuccess('Layout saved to local storage');
+            if (onError) onError('Backend unavailable, saved to local storage');
         }
     };
 
@@ -157,7 +194,12 @@ export const CLayoutManager: React.FC<CLayoutManagerProps> = ({
             await fetchLayouts();
         } catch (e) {
             console.error("Error deleting layout", e);
-            if (onError) onError('Failed to delete layout');
+            const nextLayouts = layouts.filter((l) => l.id !== id);
+            setLayouts(nextLayouts);
+            saveLayoutsToLocal(nextLayouts);
+            if (currentLayoutId === id) setCurrentLayoutId('');
+            if (onSuccess) onSuccess('Layout deleted from local storage');
+            if (onError) onError('Backend unavailable, deleted from local storage');
         }
     };
 
@@ -177,7 +219,11 @@ export const CLayoutManager: React.FC<CLayoutManagerProps> = ({
             await fetchLayouts();
         } catch (e) {
             console.error("Error setting default", e);
-            if (onError) onError('Failed to set default layout');
+            const nextLayouts = layouts.map((l) => ({ ...l, isDefault: l.id === id }));
+            setLayouts(nextLayouts);
+            saveLayoutsToLocal(nextLayouts);
+            if (onSuccess) onSuccess('Default layout set in local storage');
+            if (onError) onError('Backend unavailable, default saved to local storage');
         }
     };
 

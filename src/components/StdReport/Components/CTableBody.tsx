@@ -54,7 +54,22 @@ export const CTableBody = (props: CTableBodyProps) => {
                     return (
                         <TableRow 
                             key={row.id}
-                            sx={{ backgroundColor: '#f5f5f5' }}
+                            sx={(theme) => ({
+                                backgroundColor: theme.palette.mode === 'dark' ? '#111111' : '#f5f5f5',
+                                '& .MuiTableCell-root': {
+                                    color: theme.palette.text.primary,
+                                    borderBottomColor: theme.palette.divider,
+                                },
+                                '& .MuiIconButton-root': {
+                                    color: theme.palette.text.primary,
+                                },
+                                '& .MuiCheckbox-root': {
+                                    color: theme.palette.text.secondary,
+                                },
+                                '& .MuiCheckbox-root.Mui-checked, & .MuiCheckbox-root.MuiCheckbox-indeterminate': {
+                                    color: theme.palette.primary.main,
+                                },
+                            })}
                         >
                             <TableCell colSpan={totalColumns} sx={{ py: 1, pl: (row.level * 4) + 2 }}>
                                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -75,7 +90,7 @@ export const CTableBody = (props: CTableBodyProps) => {
                                             sx={{ mr: 1, p: 0.5 }}
                                         />
                                     )}
-                                    <Typography variant="body2" fontWeight="bold">
+                                    <Typography variant="body2" fontWeight="bold" color="text.primary">
                                         {row.field}: {row.value} ({row.count})
                                     </Typography>
                                 </Box>

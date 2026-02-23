@@ -7,6 +7,10 @@ import {
   Box,
   IconButton,
   InputAdornment,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText,
   Stack,
   TextField,
   Toolbar,
@@ -18,6 +22,8 @@ import LanguageIcon from '@mui/icons-material/Language';
 import DesktopWindowsIcon from '@mui/icons-material/DesktopWindows';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
+import SettingsIcon from '@mui/icons-material/Settings';
+import LogoutIcon from '@mui/icons-material/Logout';
 import type { CAppHeaderProps } from '../types';
 
 const HEADER_HEIGHT = 64;
@@ -39,6 +45,7 @@ export const CAppHeader = ({
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
   const [query, setQuery] = useState('');
+  const [userMenuAnchor, setUserMenuAnchor] = useState<null | HTMLElement>(null);
 
   const handleSearchSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -54,6 +61,7 @@ export const CAppHeader = ({
         ? <DarkModeIcon fontSize="small" />
         : <LightModeIcon fontSize="small" />;
   const themeTooltip = mode === 'system' ? 'Theme: System' : mode === 'dark' ? 'Theme: Dark' : 'Theme: Light';
+  const userMenuOpen = Boolean(userMenuAnchor);
 
   return (
     <AppBar
@@ -166,24 +174,103 @@ export const CAppHeader = ({
 
           {user && (
             <Stack direction="row" alignItems="center" spacing={1}>
-              <Box sx={{ textAlign: 'right' }}>
-                <Typography variant="body2" sx={{ color: isDark ? 'common.white' : '#111827', fontWeight: 600, lineHeight: 1.2 }}>
+              <Box sx={{ textAlign: 'right', minWidth: 0 }}>
+                <Typography variant="body2" sx={{ color: isDark ? 'common.white' : '#111827', fontWeight: 700, lineHeight: 1.15 }}>
                   {user.name}
                 </Typography>
+                {user.subtitle && (
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      display: 'block',
+                      mt: 0.25,
+                      color: isDark ? 'rgba(255,255,255,0.72)' : 'rgba(17,24,39,0.62)',
+                      fontSize: '0.72rem',
+                      lineHeight: 1.1,
+                      letterSpacing: '0.01em',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      maxWidth: 220,
+                    }}
+                    title={user.subtitle}
+                  >
+                    {user.subtitle}
+                  </Typography>
+                )}
               </Box>
-              <Avatar
-                src={user.avatarSrc}
-                imgProps={{ style: { objectFit: 'cover' } }}
-                sx={{ width: 34, height: 34, bgcolor: 'grey.100', color: 'grey.700', fontSize: '0.85rem' }}
+              <IconButton
+                size="small"
+                onClick={(e) => setUserMenuAnchor(e.currentTarget)}
+                sx={{ p: 0 }}
               >
-                {user.avatarText || user.name.slice(0, 1).toUpperCase()}
-              </Avatar>
+                <Avatar
+                  src={user.avatarSrc}
+                  imgProps={{ style: { objectFit: 'cover' } }}
+                  sx={{ width: 34, height: 34, bgcolor: 'grey.100', color: 'grey.700', fontSize: '0.85rem' }}
+                >
+                  {user.avatarText || user.name.slice(0, 1).toUpperCase()}
+                </Avatar>
+              </IconButton>
             </Stack>
           )}
 
           {rightSlot}
         </Stack>
       </Toolbar>
+
+      <Menu
+        anchorEl={userMenuAnchor}
+        open={userMenuOpen}
+        onClose={() => setUserMenuAnchor(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+        slotProps={{
+          paper: {
+            sx: {
+              minWidth: 160,
+              '& .MuiMenuItem-root': {
+                minHeight: 34,
+                py: 0.5,
+                px: 1.25,
+              },
+            },
+          },
+        }}
+      >
+        <MenuItem onClick={() => setUserMenuAnchor(null)}>
+          <ListItemIcon>
+            <SettingsIcon sx={{ fontSize: 18 }} />
+          </ListItemIcon>
+          <ListItemText
+            primary="Setting"
+            slotProps={{
+              primary: {
+                sx: {
+                  fontSize: '0.86rem',
+                  fontWeight: 500,
+                },
+              },
+            }}
+          />
+        </MenuItem>
+        <MenuItem onClick={() => setUserMenuAnchor(null)}>
+          <ListItemIcon>
+            <LogoutIcon sx={{ fontSize: 18 }} />
+          </ListItemIcon>
+          <ListItemText
+            primary="Logout"
+            slotProps={{
+              primary: {
+                sx: {
+                  fontSize: '0.86rem',
+                  fontWeight: 500,
+                },
+              },
+            }}
+          />
+        </MenuItem>
+      </Menu>
     </AppBar>
   );
 };

@@ -67,6 +67,7 @@ export const useCTable = (props: CTableProps) => {
     const [summaryAnchorEl, setSummaryAnchorEl] = useState<null | HTMLElement>(null);
     const [contextMenu, setContextMenu] = useState<{ mouseX: number; mouseY: number } | null>(null);
     const [graphReportOpen, setGraphReportOpen] = useState(false);
+    const [currentLayoutId, setCurrentLayoutId] = useState<string>('');
 
     // Sync props
     useEffect(() => {
@@ -405,6 +406,22 @@ export const useCTable = (props: CTableProps) => {
         }
     };
 
+    const handleLayoutLoad = (layoutMeta: any) => {
+        const layout = layoutMeta?.layoutData || layoutMeta?.layout || layoutMeta || {};
+        if (layout.visibleColumns) setVisibleColumns(layout.visibleColumns);
+        if (layout.order) setOrder(layout.order);
+        if (layout.orderBy !== undefined) setOrderBy(layout.orderBy);
+        if (layout.grouping) setGrouping(layout.grouping);
+        if (layout.columnWidths) setColumnWidths(layout.columnWidths);
+        if (layout.showSummary !== undefined) setShowSummary(Boolean(layout.showSummary));
+        setExpandedGroups(new Set());
+        setPage(0);
+
+        if (layoutMeta?.id) {
+            setCurrentLayoutId(layoutMeta.id);
+        }
+    };
+
     // Sync Layout Prop
     useEffect(() => {
         if (props.layout) {
@@ -540,7 +557,7 @@ export const useCTable = (props: CTableProps) => {
         handleToggleAll,
         handleExpandGroupRecursively,
         handleCollapseGroupRecursively,
-        handleLayoutLoad: () => {},
+        handleLayoutLoad,
         handleVariantLoad,
         handleLayoutSave,
         effectiveAppId: props.appId || '',
@@ -551,7 +568,7 @@ export const useCTable = (props: CTableProps) => {
             grouping,
             columnWidths
         },
-        currentLayoutId: '',
+        currentLayoutId,
         layoutIdToLoad: '',
         onPageChange: handleChangePage,
         onRowsPerPageChange: handleChangeRowsPerPage,

@@ -149,7 +149,7 @@ export default function StdReportExample() {
             appTitle=""
             menuData={menuData}
             localeLabel="EN"
-            user={{ name: 'Ruiyang Shen', avatarSrc: '/orbcafe.png' }}
+            user={{ name: 'Ruiyang Shen', subtitle: 'ruiyang.shen@orbis.de', avatarSrc: '/orbcafe.png' }}
             logo={<HeaderBrandLogo />}
         >
             <Box sx={{ height: 'calc(100vh - 120px)' }}>
