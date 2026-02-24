@@ -1,1 +1,0 @@
-NPM_TOKEN=<your_npm_token> npm run publish:npm:token
