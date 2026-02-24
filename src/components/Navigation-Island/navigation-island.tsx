@@ -39,6 +39,7 @@ import {
   Search
 } from 'lucide-react'
 import { TreeMenu, TreeMenuItem } from './tree-menu'
+import { useOrbcafeI18n } from '../../i18n'
 
 export interface NavigationIslandProps {
   collapsed: boolean
@@ -57,6 +58,7 @@ export const NavigationIsland: React.FC<NavigationIslandProps> = ({
   menuData = [],
   colorMode = 'light',
 }) => {
+  const { t } = useOrbcafeI18n()
   const isDark = colorMode === 'dark'
   const router = useRouter()
 
@@ -186,7 +188,7 @@ export const NavigationIsland: React.FC<NavigationIslandProps> = ({
                   ? 'text-gray-300 hover:bg-gray-800'
                   : 'text-gray-500 hover:bg-gray-50'
               }`}
-              title="展开导航"
+              title={t('navigation.expand')}
             >
               <Search className="h-5 w-5" />
             </button>
@@ -195,7 +197,7 @@ export const NavigationIsland: React.FC<NavigationIslandProps> = ({
           <div className={`relative transition-opacity duration-300 ${collapsed ? 'opacity-0' : 'opacity-100 delay-200'}`}>
             <input
               type="text"
-              placeholder="搜索菜单..."
+              placeholder={t('navigation.searchPlaceholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className={`w-full pl-10 pr-4 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
@@ -215,7 +217,7 @@ export const NavigationIsland: React.FC<NavigationIslandProps> = ({
       <nav className={`flex-1 pb-4 transition-all duration-500 ease-in-out overflow-y-auto min-h-0 ${collapsed ? 'px-1' : 'px-2'}`}>
         {filteredMenuData.length === 0 ? (
           <div className="flex items-center justify-center py-8 text-gray-500 text-sm">
-            {collapsed ? '📂' : (searchTerm ? '未找到匹配的菜单项' : '暂无可访问的应用')}
+            {collapsed ? '📂' : (searchTerm ? t('navigation.noMatch') : t('navigation.noAccessibleApp'))}
           </div>
         ) : (
           <>
@@ -281,7 +283,7 @@ export const NavigationIsland: React.FC<NavigationIslandProps> = ({
                           ? 'text-gray-400 hover:bg-gray-800'
                           : 'text-gray-600 hover:bg-gray-50'
                       }`}
-                      title={`展开查看 ${category.title}`}
+                      title={t('navigation.expandView', { title: category.title || '' })}
                     >
                       {category.icon || (
                         <div className={`w-6 h-6 rounded text-xs flex items-center justify-center font-medium ${
@@ -308,7 +310,7 @@ export const NavigationIsland: React.FC<NavigationIslandProps> = ({
           className={`absolute -bottom-1 -right-1 w-6 h-6 bg-transparent rounded-full flex items-center justify-center transition-all duration-300 ease-in-out z-20 ${
             isDark ? 'hover:bg-gray-800/50' : 'hover:bg-white/20'
           }`}
-          title="折叠导航"
+          title={t('navigation.collapse')}
         >
           <div 
             className="absolute"

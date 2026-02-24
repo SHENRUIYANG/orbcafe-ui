@@ -1,36 +1,63 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ORBCAFE UI Official Examples
 
-## Getting Started
+本目录是 `orbcafe-ui` 的官方示例工程（Next.js App Router）。
 
-First, run the development server:
+## 环境要求
+
+- Node.js 18+
+- npm 9+
+
+## 启动方式
+
+在仓库根目录先构建一次库产物：
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+再进入示例目录启动：
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+cd examples
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+默认访问：
 
-## Learn More
+- `http://localhost:3000/`
+- `http://localhost:3000/std-report`
+- `http://localhost:3000/detail-info/ID-1`
 
-To learn more about Next.js, take a look at the following resources:
+## 质量检查（建议提交前执行）
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+cd examples
+npm run lint
+npx tsc --noEmit
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Next.js 16 注意事项
 
-## Deploy on Vercel
+### 1. `page.tsx` 建议使用 Server Wrapper
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+`params` / `searchParams` 在 Next 16 是 Promise 语义。  
+推荐在 `page.tsx`（Server Component）里先解包，再把纯值传给 Client Component。
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 2. 避免 hydration mismatch
+
+不要让这些值直接影响首屏结构：
+
+- `usePathname()` 的动态路由高亮
+- `Date.now()` / `Math.random()`
+- `window` / `localStorage` 首屏条件分支
+
+需要时请在 `useEffect` 后再启用（`mounted` 模式）。
+
+## 常见问题
+
+- 报错 `searchParams is a Promise...`  
+  说明你在错误层级同步访问了 `searchParams`。
+- 报错 `params are being enumerated`  
+  说明你对 `params` 做了枚举操作（如 `Object.keys`）。
+- 报错 `Hydration failed...`  
+  说明 SSR/CSR 首屏渲染不一致。

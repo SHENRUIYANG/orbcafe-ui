@@ -33,11 +33,12 @@
 
 'use client'
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { ChevronRight } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { Button } from './button'
+import { useOrbcafeI18n } from '../../i18n'
 
 export interface TreeMenuItem {
   id: string
@@ -71,13 +72,19 @@ export function TreeMenu({
   onToggleExpand,
   colorMode = 'light',
 }: TreeMenuProps) {
+  const { t } = useOrbcafeI18n()
   const isDark = colorMode === 'dark'
   const pathname = usePathname()
+  const [mounted, setMounted] = useState(false)
   const [internalExpandedItems, setInternalExpandedItems] = useState<Set<string>>(new Set())
 
   const isControlled = expandedIds !== undefined && onToggleExpand !== undefined
   
   const currentExpandedItems = isControlled ? expandedIds : internalExpandedItems
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const toggleExpanded = (itemId: string) => {
     if (isControlled) {
@@ -107,7 +114,7 @@ export function TreeMenu({
   if (!items || !Array.isArray(items)) {
     return (
       <div className={cn('tree-menu', className)}>
-        <div className="text-sm text-gray-500 p-2">No items to display</div>
+        <div className="text-sm text-gray-500 p-2">{t('navigation.noItems')}</div>
       </div>
     )
   }
@@ -122,7 +129,7 @@ export function TreeMenu({
         // 1. 完全匹配 appurl 或 href
         // 2. 或者是当前路径的父路径 (可选，视需求而定，这里先做精确匹配)
         const targetUrl = item.appurl || item.href
-        const isActive = targetUrl ? pathname === targetUrl : false
+        const isActive = mounted && targetUrl ? pathname === targetUrl : false
         
         return (
           <div key={item.id} className="tree-menu-item relative">

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { 
     Box, 
     Button, 
-    Typography, 
+    Typography,
     Autocomplete, 
     TextField, 
     IconButton, 
@@ -12,10 +12,12 @@ import {
     DialogContent,
     DialogActions,
     FormControlLabel,
-    Checkbox
+    Checkbox,
+    useTheme
 } from '@mui/material';
 import SaveIcon from '@mui/icons-material/Save';
 import StarIcon from '@mui/icons-material/Star';
+import { useOrbcafeI18n } from '../../../i18n';
 
 export interface VariantMetadata {
     id: string;
@@ -49,7 +51,16 @@ export const CVariantManagement = ({
     onDelete,
     onSetDefault
 }: CVariantManagementProps) => {
-    const FONT_SIZE_SMALL = '0.75rem';
+    const { t } = useOrbcafeI18n();
+    const theme = useTheme();
+    const isDark = theme.palette.mode === 'dark';
+    const FONT_SIZE_SMALL = '0.85rem';
+    const FIELD_WIDTH = {
+        xs: 'calc((100% - 1 * 16px) / 2)',
+        sm: 'calc((100% - 2 * 16px) / 3)',
+        md: 'calc((100% - 3 * 16px) / 4)',
+        lg: 'calc((100% - 5 * 16px) / 6)',
+    };
     // Keep API compatibility even when manage dialog entry is hidden.
     void onDelete;
     void onSetDefault;
@@ -61,7 +72,7 @@ export const CVariantManagement = ({
     const currentVariant = variants.find(v => v.id === currentVariantId);
 
     const handleSaveClick = () => {
-        setVariantName(currentVariant?.name || 'New Variant');
+        setVariantName(currentVariant?.name || t('variant.newVariant'));
         setIsDefault(currentVariant?.isDefault || false);
         setIsPublic(currentVariant?.isPublic || false);
         setSaveDialogOpen(true);
@@ -78,16 +89,31 @@ export const CVariantManagement = ({
     };
 
     return (
-        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-            <Typography variant="body2" sx={{ fontWeight: 'bold', minWidth: 'fit-content', fontSize: FONT_SIZE_SMALL }}>
-                Variant:
-            </Typography>
+        <Box
+            sx={{
+                display: 'flex',
+                gap: 1,
+                alignItems: 'center',
+                width: '100%',
+                maxWidth: '100%',
+            }}
+        >
             <Autocomplete
                 size="small"
                 sx={{
-                    width: 200,
+                    width: FIELD_WIDTH,
                     '& .MuiInputBase-root': {
-                        fontSize: FONT_SIZE_SMALL
+                        fontSize: FONT_SIZE_SMALL,
+                        bgcolor: isDark ? 'rgba(25, 118, 210, 0.2)' : '#e7f1ff',
+                        '& .MuiOutlinedInput-notchedOutline': {
+                            borderColor: isDark ? 'rgba(144,202,249,0.45)' : 'rgba(25,118,210,0.45)',
+                        },
+                        '&:hover .MuiOutlinedInput-notchedOutline': {
+                            borderColor: isDark ? 'rgba(144,202,249,0.7)' : 'rgba(25,118,210,0.65)',
+                        },
+                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                            borderColor: isDark ? 'rgba(144,202,249,0.9)' : 'rgba(25,118,210,0.85)',
+                        },
                     },
                     '& .MuiInputBase-input': {
                         fontSize: FONT_SIZE_SMALL
@@ -96,9 +122,9 @@ export const CVariantManagement = ({
                         fontSize: FONT_SIZE_SMALL
                     }
                 }}
-                noOptionsText={<Typography sx={{ fontSize: FONT_SIZE_SMALL }}>No options</Typography>}
+                noOptionsText={<Typography sx={{ fontSize: FONT_SIZE_SMALL }}>{t('variant.noOptions')}</Typography>}
                 options={variants}
-                getOptionLabel={(option) => option.name + (option.isDefault ? ' (Default)' : '')}
+                getOptionLabel={(option) => option.name + (option.isDefault ? ` (${t('variant.defaultSuffix')})` : '')}
                 value={currentVariant || null}
                 onChange={(_, newValue) => {
                     if (newValue) onLoad(newValue);
@@ -111,10 +137,11 @@ export const CVariantManagement = ({
                         InputProps={{
                             ...params.InputProps,
                             sx: {
-                                fontSize: FONT_SIZE_SMALL
+                                fontSize: FONT_SIZE_SMALL,
+                                color: isDark ? '#E3F2FD' : '#0D47A1',
                             }
                         }}
-                        placeholder="Select Variant"
+                        placeholder={t('variant.selectVariant')}
                     />
                 )}
                 renderOption={(props, option) => (
@@ -127,20 +154,20 @@ export const CVariantManagement = ({
                 )}
             />
             
-            <Tooltip title="Save View">
+            <Tooltip title={t('variant.saveView')}>
                 <IconButton onClick={handleSaveClick} size="small" color="primary">
-                    <SaveIcon />
+                    <SaveIcon fontSize="small" />
                 </IconButton>
             </Tooltip>
 
             {/* Save Dialog */}
             <Dialog open={saveDialogOpen} onClose={() => setSaveDialogOpen(false)}>
-                <DialogTitle>Save View</DialogTitle>
+                <DialogTitle>{t('variant.saveView')}</DialogTitle>
                 <DialogContent>
                     <TextField
                         autoFocus
                         margin="dense"
-                        label="View Name"
+                        label={t('variant.viewName')}
                         fullWidth
                         variant="outlined"
                         value={variantName}
@@ -148,16 +175,16 @@ export const CVariantManagement = ({
                     />
                     <FormControlLabel
                         control={<Checkbox checked={isDefault} onChange={(e) => setIsDefault(e.target.checked)} />}
-                        label="Set as Default"
+                        label={t('variant.setDefault')}
                     />
                     <FormControlLabel
                         control={<Checkbox checked={isPublic} onChange={(e) => setIsPublic(e.target.checked)} />}
-                        label="Public (All Users)"
+                        label={t('variant.publicAllUsers')}
                     />
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => setSaveDialogOpen(false)}>Cancel</Button>
-                    <Button onClick={handleConfirmSave} variant="contained">Save</Button>
+                    <Button onClick={() => setSaveDialogOpen(false)}>{t('common.cancel')}</Button>
+                    <Button onClick={handleConfirmSave} variant="contained">{t('common.save')}</Button>
                 </DialogActions>
             </Dialog>
         </Box>

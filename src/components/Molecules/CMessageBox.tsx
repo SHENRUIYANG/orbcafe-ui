@@ -43,6 +43,7 @@ import WarningIcon from '@mui/icons-material/Warning';
 import ErrorIcon from '@mui/icons-material/Error';
 import InfoIcon from '@mui/icons-material/Info';
 import { CButton } from '../Atoms/CButton';
+import { useOrbcafeI18n } from '../../i18n';
 
 export type CMessageBoxType = 'success' | 'warning' | 'error' | 'info' | 'default';
 
@@ -98,12 +99,16 @@ export const CMessageBox: React.FC<CMessageBoxProps> = ({
   message,
   onClose,
   onConfirm,
-  confirmText = 'OK',
-  cancelText = 'Cancel',
+  confirmText,
+  cancelText,
   showCancel = true,
   maxWidth = 'xs',
   type = 'default',
 }) => {
+  const { t } = useOrbcafeI18n();
+  const effectiveConfirmText = confirmText || t('messageBox.confirm');
+  const effectiveCancelText = cancelText || t('messageBox.cancel');
+
   const handleConfirm = () => {
     if (onConfirm) {
       onConfirm();
@@ -165,7 +170,7 @@ export const CMessageBox: React.FC<CMessageBoxProps> = ({
       }}>
         {showCancel && (
           <CButton onClick={onClose} variant="text" color="inherit">
-            {cancelText}
+            {effectiveCancelText}
           </CButton>
         )}
         <CButton 
@@ -180,7 +185,7 @@ export const CMessageBox: React.FC<CMessageBoxProps> = ({
           }}
           autoFocus
         >
-          {confirmText}
+          {effectiveConfirmText}
         </CButton>
       </DialogActions>
     </Dialog>

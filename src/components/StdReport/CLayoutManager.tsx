@@ -8,6 +8,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { CLayoutManagement, LayoutMetadata } from '../Molecules/CLayoutManagement';
+import { useOrbcafeI18n } from '../../i18n';
 
 const DEFAULT_API_URL = 'http://127.0.0.1:8515';
 
@@ -34,6 +35,7 @@ export const CLayoutManager: React.FC<CLayoutManagerProps> = ({
     onError,
     onSuccess
 }) => {
+    const { t } = useOrbcafeI18n();
     const [layouts, setLayouts] = useState<LayoutMetadata[]>([]);
     const [currentLayoutId, setCurrentLayoutId] = useState<string>('');
     const storageKey = `orbcafe.layouts.${appId}.${tableKey}`;
@@ -116,7 +118,7 @@ export const CLayoutManager: React.FC<CLayoutManagerProps> = ({
             const response = await fetch(
                 `${serviceUrl}/api/layouts?appId=${encodeURIComponent(appId)}&tableKey=${encodeURIComponent(tableKey)}`
             );
-            if (!response.ok) throw new Error('Failed to fetch layouts');
+            if (!response.ok) throw new Error('LAYOUT_FETCH_FAILED');
             const backendData: BackendLayout[] = await response.json();
             const data = backendData.map(toFrontendLayout);
             setLayouts(data);
@@ -135,9 +137,9 @@ export const CLayoutManager: React.FC<CLayoutManagerProps> = ({
                 setCurrentLayoutId(defaultLayout.id);
                 onLayoutLoad(defaultLayout);
             }
-            if (onError) onError('Failed to load layouts from backend, fallback to local storage');
+            if (onError) onError(t('layout.toast.loadFallback'));
         }
-    }, [appId, tableKey, serviceUrl, onError, currentLayoutId, onLayoutLoad, targetLayoutId, loadLayoutsFromLocal]);
+    }, [appId, tableKey, serviceUrl, onError, currentLayoutId, onLayoutLoad, targetLayoutId, loadLayoutsFromLocal, t]);
 
     useEffect(() => {
         fetchLayouts();
@@ -161,9 +163,9 @@ export const CLayoutManager: React.FC<CLayoutManagerProps> = ({
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(toBackendLayout(layoutToSave))
             });
-            if (!response.ok) throw new Error('Failed to save layout');
+            if (!response.ok) throw new Error('LAYOUT_SAVE_FAILED');
 
-            if (onSuccess) onSuccess('Layout saved successfully');
+            if (onSuccess) onSuccess(t('layout.toast.saveSuccess'));
             await fetchLayouts();
             setCurrentLayoutId(id);
             onLayoutLoad(layoutToSave);
@@ -177,8 +179,8 @@ export const CLayoutManager: React.FC<CLayoutManagerProps> = ({
             saveLayoutsToLocal(nextLayouts);
             setCurrentLayoutId(id);
             onLayoutLoad(layoutToSave);
-            if (onSuccess) onSuccess('Layout saved to local storage');
-            if (onError) onError('Backend unavailable, saved to local storage');
+            if (onSuccess) onSuccess(t('layout.toast.saveLocalSuccess'));
+            if (onError) onError(t('layout.toast.backendUnavailableSavedLocal'));
         }
     };
 
@@ -187,10 +189,10 @@ export const CLayoutManager: React.FC<CLayoutManagerProps> = ({
             const response = await fetch(`${serviceUrl}/api/layouts/${encodeURIComponent(id)}`, {
                 method: 'DELETE'
             });
-            if (!response.ok) throw new Error('Failed to delete layout');
+            if (!response.ok) throw new Error('LAYOUT_DELETE_FAILED');
 
             if (currentLayoutId === id) setCurrentLayoutId('');
-            if (onSuccess) onSuccess('Layout deleted successfully');
+            if (onSuccess) onSuccess(t('layout.toast.deleteSuccess'));
             await fetchLayouts();
         } catch (e) {
             console.error("Error deleting layout", e);
@@ -198,8 +200,8 @@ export const CLayoutManager: React.FC<CLayoutManagerProps> = ({
             setLayouts(nextLayouts);
             saveLayoutsToLocal(nextLayouts);
             if (currentLayoutId === id) setCurrentLayoutId('');
-            if (onSuccess) onSuccess('Layout deleted from local storage');
-            if (onError) onError('Backend unavailable, deleted from local storage');
+            if (onSuccess) onSuccess(t('layout.toast.deleteLocalSuccess'));
+            if (onError) onError(t('layout.toast.backendUnavailableDeletedLocal'));
         }
     };
 
@@ -213,17 +215,17 @@ export const CLayoutManager: React.FC<CLayoutManagerProps> = ({
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(toBackendLayout({ ...layout, isDefault: true }))
             });
-            if (!response.ok) throw new Error('Failed to set default layout');
+            if (!response.ok) throw new Error('LAYOUT_DEFAULT_FAILED');
 
-            if (onSuccess) onSuccess('Default layout set');
+            if (onSuccess) onSuccess(t('layout.toast.defaultSuccess'));
             await fetchLayouts();
         } catch (e) {
             console.error("Error setting default", e);
             const nextLayouts = layouts.map((l) => ({ ...l, isDefault: l.id === id }));
             setLayouts(nextLayouts);
             saveLayoutsToLocal(nextLayouts);
-            if (onSuccess) onSuccess('Default layout set in local storage');
-            if (onError) onError('Backend unavailable, default saved to local storage');
+            if (onSuccess) onSuccess(t('layout.toast.defaultLocalSuccess'));
+            if (onError) onError(t('layout.toast.backendUnavailableDefaultLocal'));
         }
     };
 

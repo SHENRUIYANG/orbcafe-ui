@@ -2,21 +2,23 @@ import React from 'react';
 import { TableFooter, TableRow, TableCell } from '@mui/material';
 
 export const CTableFooter = (props: any) => {
-    const { visibleColumns, summaryRow, selectionMode } = props;
+    const { visibleColumns, summaryRow, selectionMode, grouping = [] } = props;
     if (!props.showSummary) return null;
 
     const isSelectionEnabled = selectionMode === 'multiple' || selectionMode === 'single';
+    const hasGrouping = grouping.length > 0;
 
     return (
         <TableFooter sx={{ position: 'sticky', bottom: 0, zIndex: props.zIndex, bgcolor: 'background.paper' }}>
             <TableRow>
                 {isSelectionEnabled && <TableCell padding="checkbox" sx={{ bgcolor: 'background.paper' }} />}
+                {hasGrouping && <TableCell padding="checkbox" sx={{ bgcolor: 'background.paper', width: 44 }} />}
                 {visibleColumns.map((colId: string) => (
                     <TableCell 
                         key={colId} 
                         sx={{ 
                             fontWeight: 'bold',
-                            fontSize: '0.875rem', // Match body font size
+                            fontSize: '0.85rem',
                             bgcolor: 'background.paper', // Ensure sticky footer has background
                             color: 'text.primary'
                         }}

@@ -24,27 +24,46 @@ import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/Logout';
-import type { CAppHeaderProps } from '../types';
+import type { CAppHeaderProps, CAppHeaderUserMenuItem } from '../types';
+import { useOrbcafeI18n } from '../../../i18n';
+import type { OrbcafeLocale } from '../../../i18n';
 
 const HEADER_HEIGHT = 64;
 const LIGHT_HEADER_BASE = '#E9EDF2';
 const LIGHT_HEADER_GRADIENT = 'linear-gradient(90deg, #F5F7FA 0%, #E9EDF2 50%, #F5F7FA 100%)';
+const DEFAULT_LOCALE_OPTIONS: OrbcafeLocale[] = ['en', 'zh', 'fr', 'de', 'ja', 'ko'];
+const DEFAULT_LOCALE_LABELS: Record<OrbcafeLocale, string> = {
+  en: 'EN',
+  zh: '中文',
+  fr: 'FR',
+  de: 'DE',
+  ja: '日本語',
+  ko: '한국어',
+};
 
 export const CAppHeader = ({
   appTitle,
   logo,
   mode = 'dark',
   onToggleMode,
-  localeLabel = 'EN',
-  searchPlaceholder = 'Ask me...',
+  locale: localeProp,
+  localeLabel,
+  localeOptions,
+  onLocaleChange,
+  searchPlaceholder,
   onSearch,
   user,
+  onUserSetting,
+  onUserLogout,
+  userMenuItems,
   leftSlot,
   rightSlot,
 }: CAppHeaderProps) => {
+  const { t, locale } = useOrbcafeI18n();
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
   const [query, setQuery] = useState('');
+  const [localeMenuAnchor, setLocaleMenuAnchor] = useState<null | HTMLElement>(null);
   const [userMenuAnchor, setUserMenuAnchor] = useState<null | HTMLElement>(null);
 
   const handleSearchSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -60,8 +79,39 @@ export const CAppHeader = ({
       : mode === 'dark'
         ? <DarkModeIcon fontSize="small" />
         : <LightModeIcon fontSize="small" />;
-  const themeTooltip = mode === 'system' ? 'Theme: System' : mode === 'dark' ? 'Theme: Dark' : 'Theme: Light';
+  const themeTooltip =
+    mode === 'system'
+      ? t('header.theme.system')
+      : mode === 'dark'
+        ? t('header.theme.dark')
+        : t('header.theme.light');
+  const effectiveLocale = localeProp || locale;
+  const effectiveLocaleOptions = localeOptions && localeOptions.length > 0 ? localeOptions : DEFAULT_LOCALE_OPTIONS;
+  const effectiveLocaleLabel = localeLabel || DEFAULT_LOCALE_LABELS[effectiveLocale] || effectiveLocale.toUpperCase();
+  const localeMenuOpen = Boolean(localeMenuAnchor);
+  const effectiveSearchPlaceholder = searchPlaceholder || t('header.searchPlaceholder');
   const userMenuOpen = Boolean(userMenuAnchor);
+  const defaultUserMenuItems: CAppHeaderUserMenuItem[] = [
+    {
+      key: 'setting',
+      label: t('header.menu.setting'),
+      icon: <SettingsIcon sx={{ fontSize: 18 }} />,
+      onClick: onUserSetting,
+    },
+    {
+      key: 'logout',
+      label: t('header.menu.logout'),
+      icon: <LogoutIcon sx={{ fontSize: 18 }} />,
+      onClick: onUserLogout,
+    },
+  ];
+  const effectiveUserMenuItems =
+    userMenuItems && userMenuItems.length > 0 ? userMenuItems : defaultUserMenuItems;
+
+  const handleUserMenuItemClick = (action?: () => void) => {
+    setUserMenuAnchor(null);
+    action?.();
+  };
 
   return (
     <AppBar
@@ -124,7 +174,7 @@ export const CAppHeader = ({
               fullWidth
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder={searchPlaceholder}
+              placeholder={effectiveSearchPlaceholder}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -162,12 +212,50 @@ export const CAppHeader = ({
         </Box>
 
         <Stack direction="row" alignItems="center" spacing={1.5}>
-          <Stack direction="row" alignItems="center" spacing={0.5}>
-            <LanguageIcon sx={{ color: isDark ? 'common.white' : '#111827', fontSize: 18 }} />
-            <Typography variant="caption" sx={{ color: isDark ? 'common.white' : '#111827', fontWeight: 500 }}>
-              {localeLabel}
-            </Typography>
-          </Stack>
+          {onLocaleChange ? (
+            <>
+              <IconButton
+                size="small"
+                onClick={(event) => setLocaleMenuAnchor(event.currentTarget)}
+                sx={{ color: isDark ? 'common.white' : '#111827', borderRadius: 1, px: 0.5 }}
+              >
+                <Stack direction="row" alignItems="center" spacing={0.45}>
+                  <LanguageIcon sx={{ fontSize: 18 }} />
+                  <Typography variant="caption" sx={{ fontWeight: 500 }}>
+                    {effectiveLocaleLabel}
+                  </Typography>
+                </Stack>
+              </IconButton>
+              <Menu
+                anchorEl={localeMenuAnchor}
+                open={localeMenuOpen}
+                onClose={() => setLocaleMenuAnchor(null)}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+              >
+                {effectiveLocaleOptions.map((localeCode) => (
+                  <MenuItem
+                    key={localeCode}
+                    selected={localeCode === effectiveLocale}
+                    onClick={() => {
+                      onLocaleChange(localeCode);
+                      setLocaleMenuAnchor(null);
+                    }}
+                    sx={{ fontSize: '0.82rem' }}
+                  >
+                    {DEFAULT_LOCALE_LABELS[localeCode]}
+                  </MenuItem>
+                ))}
+              </Menu>
+            </>
+          ) : (
+            <Stack direction="row" alignItems="center" spacing={0.5}>
+              <LanguageIcon sx={{ color: isDark ? 'common.white' : '#111827', fontSize: 18 }} />
+              <Typography variant="caption" sx={{ color: isDark ? 'common.white' : '#111827', fontWeight: 500 }}>
+                {effectiveLocaleLabel}
+              </Typography>
+            </Stack>
+          )}
           <IconButton size="small" sx={{ color: isDark ? 'common.white' : '#111827' }} onClick={onToggleMode} title={themeTooltip}>
             {themeIcon}
           </IconButton>
@@ -219,58 +307,48 @@ export const CAppHeader = ({
         </Stack>
       </Toolbar>
 
-      <Menu
-        anchorEl={userMenuAnchor}
-        open={userMenuOpen}
-        onClose={() => setUserMenuAnchor(null)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-        slotProps={{
-          paper: {
-            sx: {
-              minWidth: 160,
-              '& .MuiMenuItem-root': {
-                minHeight: 34,
-                py: 0.5,
-                px: 1.25,
+      {user && (
+        <Menu
+          anchorEl={userMenuAnchor}
+          open={userMenuOpen}
+          onClose={() => setUserMenuAnchor(null)}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+          transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+          slotProps={{
+            paper: {
+              sx: {
+                minWidth: 160,
+                '& .MuiMenuItem-root': {
+                  minHeight: 34,
+                  py: 0.5,
+                  px: 1.25,
+                },
               },
             },
-          },
-        }}
-      >
-        <MenuItem onClick={() => setUserMenuAnchor(null)}>
-          <ListItemIcon>
-            <SettingsIcon sx={{ fontSize: 18 }} />
-          </ListItemIcon>
-          <ListItemText
-            primary="Setting"
-            slotProps={{
-              primary: {
-                sx: {
-                  fontSize: '0.86rem',
-                  fontWeight: 500,
-                },
-              },
-            }}
-          />
-        </MenuItem>
-        <MenuItem onClick={() => setUserMenuAnchor(null)}>
-          <ListItemIcon>
-            <LogoutIcon sx={{ fontSize: 18 }} />
-          </ListItemIcon>
-          <ListItemText
-            primary="Logout"
-            slotProps={{
-              primary: {
-                sx: {
-                  fontSize: '0.86rem',
-                  fontWeight: 500,
-                },
-              },
-            }}
-          />
-        </MenuItem>
-      </Menu>
+          }}
+        >
+          {effectiveUserMenuItems.map((item) => (
+            <MenuItem
+              key={item.key}
+              disabled={item.disabled}
+              onClick={() => handleUserMenuItemClick(item.onClick)}
+            >
+              {item.icon && <ListItemIcon>{item.icon}</ListItemIcon>}
+              <ListItemText
+                primary={item.label}
+                slotProps={{
+                  primary: {
+                    sx: {
+                      fontSize: '0.86rem',
+                      fontWeight: 500,
+                    },
+                  },
+                }}
+              />
+            </MenuItem>
+          ))}
+        </Menu>
+      )}
     </AppBar>
   );
 };

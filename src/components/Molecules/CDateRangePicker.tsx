@@ -50,13 +50,24 @@ import {
 import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
 import { PickersDay } from '@mui/x-date-pickers/PickersDay';
 import type { PickersDayProps } from '@mui/x-date-pickers/PickersDay';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import ClearIcon from '@mui/icons-material/Clear';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import dayjs, { Dayjs } from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
+import localizedFormat from 'dayjs/plugin/localizedFormat';
+import 'dayjs/locale/zh-cn';
+import 'dayjs/locale/fr';
+import 'dayjs/locale/de';
+import 'dayjs/locale/ja';
+import 'dayjs/locale/ko';
+import { useOrbcafeI18n } from '../../i18n';
+import type { OrbcafeLocale } from '../../i18n';
 
 dayjs.extend(isBetween);
+dayjs.extend(localizedFormat);
 
 interface CDateRangePickerProps {
   label?: string;
@@ -65,7 +76,15 @@ interface CDateRangePickerProps {
 }
 
 const DEFAULT_VALUE: [Dayjs | null, Dayjs | null] = [null, null];
-const FILTER_FONT_SIZE = '0.75rem';
+const FILTER_FONT_SIZE = '0.85rem';
+const DAYJS_LOCALE_MAP: Record<OrbcafeLocale, string> = {
+  en: 'en',
+  zh: 'zh-cn',
+  fr: 'fr',
+  de: 'de',
+  ja: 'ja',
+  ko: 'ko',
+};
 
 // Custom styled Day component for range highlighting
 interface CustomPickerDayProps extends PickersDayProps {
@@ -118,15 +137,18 @@ const CustomPickersDay = styled(PickersDay, {
 })) as React.ComponentType<CustomPickerDayProps>;
 
 export const CDateRangePicker = ({ 
-  label = 'Date Range',
+  label,
   value = DEFAULT_VALUE,
   onChange,
 }: CDateRangePickerProps) => {
+  const { t, locale } = useOrbcafeI18n();
+  const dayjsLocale = DAYJS_LOCALE_MAP[locale] || 'en';
+  const effectiveLabel = label || t('dateRange.label');
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [internalValue, setInternalValue] = useState<[Dayjs | null, Dayjs | null]>(value);
   const [selectionStep, setSelectionStep] = useState<'start' | 'end'>('start');
   const [hoveredDay, setHoveredDay] = useState<Dayjs | null>(null);
-  const [viewDate, setViewDate] = useState<Dayjs>(value[0] || dayjs());
+  const [viewDate, setViewDate] = useState<Dayjs>((value[0] || dayjs()).locale(dayjsLocale));
   
   // Ref to track previous prop value for comparison
   const prevValueRef = React.useRef(value);
@@ -148,13 +170,13 @@ export const CDateRangePicker = ({
     if (startChanged || endChanged) {
         setInternalValue(value);
         if (value[0] && isDayjs(value[0])) {
-            setViewDate(value[0]);
+            setViewDate(value[0].locale(dayjsLocale));
         }
     }
     
     // Update ref
     prevValueRef.current = value;
-  }, [value]);
+  }, [value, dayjsLocale]);
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -198,7 +220,7 @@ export const CDateRangePicker = ({
 
   // Shortcuts
   const handleShortcut = (type: 'today' | 'week' | 'month') => {
-    const today = dayjs();
+    const today = dayjs().locale(dayjsLocale);
     let nextValue: [Dayjs | null, Dayjs | null] = [null, null];
 
     switch (type) {
@@ -221,7 +243,7 @@ export const CDateRangePicker = ({
   const handleReset = () => {
     setInternalValue([null, null]);
     setSelectionStep('start');
-    setViewDate(dayjs());
+    setViewDate(dayjs().locale(dayjsLocale));
   };
 
   const handleDone = () => {
@@ -268,12 +290,13 @@ export const CDateRangePicker = ({
     );
   }, [internalValue, selectionStep, hoveredDay]);
 
-  const formatDate = (date: Dayjs | null) => date ? date.format('YYYY-MM-DD') : '';
+  const formatDate = (date: Dayjs | null) => date ? date.locale(dayjsLocale).format('YYYY-MM-DD') : '';
+  const formatPreviewDate = (date: Dayjs | null) => date ? date.locale(dayjsLocale).format('ll') : '';
 
   return (
     <Box>
       <TextField
-        label={label}
+        label={effectiveLabel}
         value={internalValue[0] ? `${formatDate(internalValue[0])} - ${formatDate(internalValue[1])}` : ''}
         onClick={handleClick}
         fullWidth
@@ -350,9 +373,9 @@ export const CDateRangePicker = ({
                     }}
                     onClick={() => setSelectionStep('start')}
                 >
-                    <Typography variant="caption" color="text.secondary" display="block">Start Date</Typography>
+                    <Typography variant="caption" color="text.secondary" display="block">{t('dateRange.startDate')}</Typography>
                     <Typography variant="body2" fontWeight={500}>
-                        {internalValue[0] ? internalValue[0].format('MMM DD, YYYY') : 'Select...'}
+                        {internalValue[0] ? formatPreviewDate(internalValue[0]) : t('dateRange.select')}
                     </Typography>
                 </Box>
                 <ArrowForwardIcon color="action" fontSize="small" />
@@ -370,9 +393,9 @@ export const CDateRangePicker = ({
                         if (internalValue[0]) setSelectionStep('end');
                     }}
                 >
-                    <Typography variant="caption" color="text.secondary" display="block">End Date</Typography>
+                    <Typography variant="caption" color="text.secondary" display="block">{t('dateRange.endDate')}</Typography>
                     <Typography variant="body2" fontWeight={500}>
-                        {internalValue[1] ? internalValue[1].format('MMM DD, YYYY') : 'Select...'}
+                        {internalValue[1] ? formatPreviewDate(internalValue[1]) : t('dateRange.select')}
                     </Typography>
                 </Box>
             </Stack>
@@ -381,21 +404,21 @@ export const CDateRangePicker = ({
         <Box sx={{ p: 2, pb: 0 }}>
             <Stack direction="row" spacing={1} justifyContent="center">
             <Chip 
-                label="Today" 
+                label={t('dateRange.today')} 
                 onClick={() => handleShortcut('today')} 
                 clickable 
                 size="small"
                 variant="outlined"
             />
             <Chip 
-                label="This Week" 
+                label={t('dateRange.thisWeek')} 
                 onClick={() => handleShortcut('week')} 
                 clickable 
                 size="small"
                 variant="outlined"
             />
             <Chip 
-                label="This Month" 
+                label={t('dateRange.thisMonth')} 
                 onClick={() => handleShortcut('month')} 
                 clickable 
                 size="small"
@@ -404,24 +427,26 @@ export const CDateRangePicker = ({
             </Stack>
         </Box>
 
-        <DateCalendar
-            value={null}
-            referenceDate={viewDate}
-            onMonthChange={setViewDate}
-            onYearChange={setViewDate}
-            onChange={handleDateChange}
-            slots={{
-                day: renderWeekPickerDay
-            }}
-            views={['day']}
-            showDaysOutsideCurrentMonth
-            sx={{ m: 0 }}
-        />
+        <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={dayjsLocale}>
+          <DateCalendar
+              value={null}
+              referenceDate={viewDate}
+              onMonthChange={setViewDate}
+              onYearChange={setViewDate}
+              onChange={handleDateChange}
+              slots={{
+                  day: renderWeekPickerDay
+              }}
+              views={['day']}
+              showDaysOutsideCurrentMonth
+              sx={{ m: 0 }}
+          />
+        </LocalizationProvider>
 
         <Divider />
         <Stack direction="row" justifyContent="flex-end" spacing={1} sx={{ p: 2 }}>
-            <Button size="small" onClick={handleCancel} color="inherit">Cancel</Button>
-            <Button size="small" variant="contained" onClick={handleDone}>Done</Button>
+            <Button size="small" onClick={handleCancel} color="inherit">{t('common.cancel')}</Button>
+            <Button size="small" variant="contained" onClick={handleDone}>{t('common.done')}</Button>
         </Stack>
       </Popover>
     </Box>

@@ -40,6 +40,11 @@ export const useCTable = (props: CTableProps) => {
         return Math.max(100, configuredMin, estimatedByLabel);
     }, []);
 
+    const getNumericColumnIds = useCallback(
+        () => (props.columns || []).filter((c: any) => Boolean(c?.numeric)).map((c: any) => c.id),
+        [props.columns],
+    );
+
     // State
     const [filterText, setFilterText] = useState('');
     const [order, setOrder] = useState<'asc' | 'desc'>(props.order || 'asc');
@@ -51,6 +56,7 @@ export const useCTable = (props: CTableProps) => {
         props.columns ? props.columns.map((c: any) => c.id) : []
     );
     const [showSummary, setShowSummary] = useState(props.showSummary || false);
+    const [summaryColumns, setSummaryColumns] = useState<string[]>(() => getNumericColumnIds());
     const [grouping, setGrouping] = useState<string[]>([]);
     const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
     const [columnWidths, setColumnWidths] = useState<Record<string, number>>(() => {
@@ -86,6 +92,20 @@ export const useCTable = (props: CTableProps) => {
             setPage(props.page);
         }
     }, [props.page]);
+
+    useEffect(() => {
+        if (props.rowsPerPage !== undefined) {
+            setRowsPerPage(props.rowsPerPage);
+        }
+    }, [props.rowsPerPage]);
+
+    useEffect(() => {
+        const numericIds = getNumericColumnIds();
+        setSummaryColumns((prev) => {
+            const filtered = prev.filter((id) => numericIds.includes(id));
+            return filtered;
+        });
+    }, [getNumericColumnIds]);
 
     // Ensure newly added columns always have a readable initial width.
     useEffect(() => {
@@ -231,52 +251,125 @@ export const useCTable = (props: CTableProps) => {
 
     }, [grouping, expandedGroups, props.rowKey]);
 
+    const getAllGroupKeys = useCallback((rows: any[]) => {
+        if (grouping.length === 0) return [] as string[];
+
+        const sortedByGroups = [...rows].sort((a, b) => {
+            for (const field of grouping) {
+                if (a[field] < b[field]) return -1;
+                if (a[field] > b[field]) return 1;
+            }
+            return 0;
+        });
+
+        const keys: string[] = [];
+
+        const visit = (items: any[], depth: number, parentKey: string) => {
+            if (depth >= grouping.length) return;
+            const field = grouping[depth];
+            const groups = new Map<any, any[]>();
+
+            items.forEach((item) => {
+                const value = item[field];
+                const bucket = groups.get(value);
+                if (bucket) {
+                    bucket.push(item);
+                } else {
+                    groups.set(value, [item]);
+                }
+            });
+
+            groups.forEach((groupItems, value) => {
+                const key = `${field}:${value}`;
+                const fullKey = parentKey ? `${parentKey}>${key}` : key;
+                keys.push(fullKey);
+                visit(groupItems, depth + 1, fullKey);
+            });
+        };
+
+        visit(sortedByGroups, 0, '');
+        return keys;
+    }, [grouping]);
+
     // Grouped Rows
     const groupedRows = useMemo(() => {
         return getGroupedRows(sortedRows);
     }, [sortedRows, getGroupedRows]);
 
+    const allGroupKeys = useMemo(() => {
+        return getAllGroupKeys(sortedRows);
+    }, [sortedRows, getAllGroupKeys]);
+
+    const isServerPaginated = useMemo(() => {
+        const rowCount = (props.rows || []).length;
+        return typeof props.count === 'number' && props.count > rowCount;
+    }, [props.count, props.rows]);
+
     // Pagination Logic (applied to the flattened grouped list)
     const visibleRows = useMemo(() => {
+        // In server-side pagination mode, rows are already paged by backend.
+        // Do NOT slice again on the client after grouping.
+        if (isServerPaginated) {
+            return groupedRows;
+        }
         if (rowsPerPage > 0) {
             return groupedRows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
         }
         return groupedRows;
-    }, [groupedRows, page, rowsPerPage]);
+    }, [groupedRows, page, rowsPerPage, isServerPaginated]);
+
+    const totalDisplayCount = useMemo(() => {
+        if (isServerPaginated) {
+            return typeof props.count === 'number' ? props.count : groupedRows.length;
+        }
+        return groupedRows.length;
+    }, [groupedRows.length, isServerPaginated, props.count]);
 
     const toggleGroupExpand = (groupKey: string) => {
-        const newExpanded = new Set(expandedGroups);
-        if (newExpanded.has(groupKey)) {
-            newExpanded.delete(groupKey);
-        } else {
-            newExpanded.add(groupKey);
-        }
-        setExpandedGroups(newExpanded);
+        setExpandedGroups((prev) => {
+            const next = new Set(prev);
+            if (next.has(groupKey)) {
+                next.delete(groupKey);
+            } else {
+                next.add(groupKey);
+            }
+            return next;
+        });
     };
 
     const handleExpandGroupRecursively = (groupKey: string) => {
-         // This is complex because we need to know all children keys.
-         // For now, let's just toggle the single group.
-         toggleGroupExpand(groupKey);
+        const keysToExpand = allGroupKeys.filter((k) => k === groupKey || k.startsWith(`${groupKey}>`));
+        setExpandedGroups((prev) => {
+            const next = new Set(prev);
+            keysToExpand.forEach((k) => next.add(k));
+            return next;
+        });
     };
     
     const handleCollapseGroupRecursively = (groupKey: string) => {
-        // Remove all keys starting with groupKey
-        const newExpanded = new Set(expandedGroups);
-        Array.from(newExpanded).forEach(k => {
-            if (k.startsWith(groupKey)) newExpanded.delete(k);
+        setExpandedGroups((prev) => {
+            const next = new Set(prev);
+            Array.from(next).forEach((k) => {
+                if (k === groupKey || k.startsWith(`${groupKey}>`)) next.delete(k);
+            });
+            return next;
         });
-        setExpandedGroups(newExpanded);
     };
 
     const handleToggleAll = (expand: boolean) => {
          if (!expand) {
              setExpandedGroups(new Set());
-         } else {
-             // For expand all, we need to generate all keys. 
-             // Maybe we can optimize this later. 
-             // For now, we can just "Collapse All" effectively.
+             return;
          }
+         setExpandedGroups(new Set(allGroupKeys));
+    };
+
+    const isGroupFullyExpanded = (groupKey: string) => {
+        const descendants = allGroupKeys.filter((k) => k.startsWith(`${groupKey}>`));
+        if (descendants.length === 0) {
+            return expandedGroups.has(groupKey);
+        }
+        return expandedGroups.has(groupKey) && descendants.every((k) => expandedGroups.has(k));
     };
 
     const handleRequestSort = (property: string) => {
@@ -353,6 +446,7 @@ export const useCTable = (props: CTableProps) => {
     const handleChangeRowsPerPage = (newRowsPerPage: number) => {
         setRowsPerPage(newRowsPerPage);
         setPage(0);
+        if (props.onPageChange) props.onPageChange(0);
         if (props.onRowsPerPageChange) props.onRowsPerPageChange(newRowsPerPage);
     };
 
@@ -380,6 +474,18 @@ export const useCTable = (props: CTableProps) => {
         setGrouping(newGrouping);
     };
 
+    const toggleSummaryColumn = (field: string) => {
+        const numericIds = getNumericColumnIds();
+        if (!numericIds.includes(field)) return;
+
+        setSummaryColumns((prev) => {
+            if (prev.includes(field)) {
+                return prev.filter((id) => id !== field);
+            }
+            return [...prev, field];
+        });
+    };
+
     // Layout Save
     const handleLayoutSave = (_e: any) => {
         if (props.onLayoutSave) {
@@ -388,7 +494,9 @@ export const useCTable = (props: CTableProps) => {
                 order,
                 orderBy,
                 grouping,
-                columnWidths
+                columnWidths,
+                showSummary,
+                summaryColumns,
             });
         }
     };
@@ -403,6 +511,8 @@ export const useCTable = (props: CTableProps) => {
             if (variant.layout.orderBy) setOrderBy(variant.layout.orderBy);
             if (variant.layout.grouping) setGrouping(variant.layout.grouping);
             if (variant.layout.columnWidths) setColumnWidths(variant.layout.columnWidths);
+            if (variant.layout.showSummary !== undefined) setShowSummary(Boolean(variant.layout.showSummary));
+            if (Array.isArray(variant.layout.summaryColumns)) setSummaryColumns(variant.layout.summaryColumns);
         }
     };
 
@@ -414,6 +524,7 @@ export const useCTable = (props: CTableProps) => {
         if (layout.grouping) setGrouping(layout.grouping);
         if (layout.columnWidths) setColumnWidths(layout.columnWidths);
         if (layout.showSummary !== undefined) setShowSummary(Boolean(layout.showSummary));
+        if (Array.isArray(layout.summaryColumns)) setSummaryColumns(layout.summaryColumns);
         setExpandedGroups(new Set());
         setPage(0);
 
@@ -453,7 +564,7 @@ export const useCTable = (props: CTableProps) => {
         
         const summary: Record<string, any> = {};
         props.columns.forEach((col: any) => {
-            if (col.numeric) {
+            if (col.numeric && summaryColumns.includes(col.id)) {
                 const total = filteredRows.reduce((acc, curr) => {
                     const val = parseFloat(curr[col.id]);
                     return acc + (isNaN(val) ? 0 : val);
@@ -471,7 +582,7 @@ export const useCTable = (props: CTableProps) => {
         }
         
         return summary;
-    }, [filteredRows, props.columns, showSummary, visibleColumns]);
+    }, [filteredRows, props.columns, showSummary, summaryColumns, visibleColumns]);
 
     const handleExport = () => {
         if (!props.columns || !filteredRows) return;
@@ -516,7 +627,7 @@ export const useCTable = (props: CTableProps) => {
         setVisibleColumns,
         showSummary,
         setShowSummary,
-        summaryColumns: [],
+        summaryColumns,
         grouping,
         setGrouping,
         expandedGroups,
@@ -539,14 +650,15 @@ export const useCTable = (props: CTableProps) => {
         setPage: handleChangePage, // Correct signature
         rowsPerPage,
         setRowsPerPage: handleChangeRowsPerPage,
+        totalDisplayCount,
         selected,
         setSelected,
-        isAllExpanded: false,
+        isAllExpanded: allGroupKeys.length > 0 && allGroupKeys.every((key) => expandedGroups.has(key)),
         handleColumnResize,
         handleRequestSort,
         handleSelectAllClick,
         handleClick,
-        toggleSummaryColumn: () => {},
+        toggleSummaryColumn,
         handleDragEnd: () => {},
         handleExport,
         handleContextMenu,
@@ -557,6 +669,7 @@ export const useCTable = (props: CTableProps) => {
         handleToggleAll,
         handleExpandGroupRecursively,
         handleCollapseGroupRecursively,
+        isGroupFullyExpanded,
         handleLayoutLoad,
         handleVariantLoad,
         handleLayoutSave,
@@ -566,7 +679,9 @@ export const useCTable = (props: CTableProps) => {
             order,
             orderBy,
             grouping,
-            columnWidths
+            columnWidths,
+            showSummary,
+            summaryColumns,
         },
         currentLayoutId,
         layoutIdToLoad: '',

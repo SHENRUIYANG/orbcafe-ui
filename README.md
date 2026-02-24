@@ -10,6 +10,82 @@
 
 ---
 
+## 组件总目录（先看这里）
+
+下表用于快速判断“该用哪个组件、去哪个目录、看哪份细节文档”。
+
+| 模块 | 典型用途 | 代码目录 | 先看文档 |
+| --- | --- | --- | --- |
+| `Atoms` | 基础输入/按钮/文本等原子能力，作为上层组件基础件 | `src/components/Atoms` | `src/components/Atoms/README.md` |
+| `Molecules` | 组合型基础组件（如统一消息框） | `src/components/Molecules` | `src/components/Molecules/README.md` |
+| `Navigation-Island` | 左侧导航树、折叠导航、菜单路由入口 | `src/components/Navigation-Island` | `src/components/Navigation-Island/README.md` |
+| `StdReport` | 标准报表主容器（筛选、表格、分页、变体、布局） | `src/components/StdReport` | `src/components/StdReport/README.md` |
+| `GraphReport` | 图形报表弹窗（KPI、图表、联动、AI 输入区） | `src/components/GraphReport` | `src/components/GraphReport/README.md` |
+| `CustomizeAgent` | AI 参数与 Prompt 模板设置弹窗 | `src/components/CustomizeAgent` | `src/components/CustomizeAgent/README.md` |
+| `DetailInfo` | 标准详情页容器（信息块 + Tabs + 底部表格 + AI/搜索） | `src/components/DetailInfo` | `src/components/DetailInfo/README.md` |
+| `PageLayout` | 页面壳层（Header + Navigation + Content） | `src/components/PageLayout` | `src/components/PageLayout/README.md` |
+
+### 文档查阅顺序（推荐）
+
+1. 先看模块根 README：了解能力边界、最小接入示例。  
+2. 再看模块 `Hooks/README.md`：确认状态管理、参数、返回值与联动方式。  
+3. 最后看模块详细设计文档（如 `graphreport.md`）：理解内部结构与扩展点。  
+
+### 常用文档索引
+
+- `GraphReport` 详细设计：`src/components/GraphReport/graphreport.md`
+- `GraphReport Hooks`：`src/components/GraphReport/Hooks/README.md`
+- `StdReport Hooks`：`src/components/StdReport/Hooks/README.md`
+- `PageLayout Hooks`：`src/components/PageLayout/Hooks/README.md`
+- `DetailInfo` 模块文档：`src/components/DetailInfo/README.md`
+
+---
+
+## 重点组件：CMessageBox（请优先使用）
+
+`CMessageBox` 是标准体系里用于统一提示/确认交互的基础分子组件，适用于：
+
+- 删除确认
+- 保存成功提示
+- 警告/错误弹窗
+- 通用信息提醒
+
+> 建议在项目中统一使用 `CMessageBox`，避免各页面自行拼装不一致的 Dialog 样式。
+
+### Import
+
+```tsx
+import { CMessageBox } from 'orbcafe-ui';
+```
+
+### 最小示例
+
+```tsx
+const [open, setOpen] = useState(false);
+
+<CMessageBox
+  open={open}
+  type="warning"
+  title="Delete Item"
+  message="Are you sure you want to delete this record?"
+  confirmText="Delete"
+  cancelText="Cancel"
+  onClose={() => setOpen(false)}
+  onConfirm={() => {
+    // do delete
+    setOpen(false);
+  }}
+/>;
+```
+
+### 标准约定
+
+- `type`: `success | warning | error | info | default`
+- 默认支持确认与取消按钮，可通过 `showCancel` 控制
+- 建议所有业务确认弹窗统一走该组件，保证品牌与交互一致
+
+---
+
 ## Installation
 
 ```bash
@@ -30,6 +106,148 @@ module.exports = {
   ],
 }
 ```
+
+### Next.js App Router 最小接入（推荐）
+
+```tsx
+// app/page.tsx (Server Component)
+import HomeClientPage from './HomeClientPage';
+
+export default function Page() {
+  return <HomeClientPage />;
+}
+```
+
+```tsx
+// app/HomeClientPage.tsx (Client Component)
+'use client';
+
+import { CAppPageLayout } from 'orbcafe-ui';
+
+export default function HomeClientPage() {
+  return <CAppPageLayout appTitle="ORBCAFE" menuData={[]} />;
+}
+```
+
+---
+
+## Next.js 16 兼容性说明（务必阅读）
+
+官方 example 已按 Next.js `16.1.6` 调整，接入时请遵循以下规则：
+
+### 1. 动态路由参数必须在 Server Page 解包
+
+在 Next 16 中，`params` / `searchParams` 是 Promise 语义。  
+不要在 Client Page 里直接把它当普通对象枚举或访问属性。
+
+推荐写法：
+
+```tsx
+// app/detail/[id]/page.tsx (Server Component)
+import DetailClientPage from './DetailClientPage';
+
+interface PageProps {
+  params: Promise<{ id: string }>;
+}
+
+export default async function Page({ params }: PageProps) {
+  const { id } = await params;
+  return <DetailClientPage rowId={id} />;
+}
+```
+
+### 2. Client Component 避免首屏依赖不稳定值
+
+Hydration mismatch 常见来源：
+
+- 首屏直接使用 `usePathname()` 结果做高亮
+- `Date.now()` / `Math.random()` 直接参与首屏渲染
+- 仅在浏览器可用的数据（`window` / `localStorage`）首屏参与结构分支
+
+建议：
+
+- 用 `mounted`（`useEffect` 后置为 `true`）再启用这类 UI 高亮/分支
+- 浏览器侧状态在 `useEffect` 中读取
+- 保持 SSR 首屏与 CSR 首帧 DOM 结构一致
+
+### 3. 常见报错对照
+
+- `searchParams is a Promise and must be unwrapped with React.use()`  
+  根因：在错误层级直接同步访问了 `searchParams`。
+- `params are being enumerated`  
+  根因：对 `params` 做了 `Object.keys/entries` 或扩展操作。
+- `Hydration failed because the server rendered HTML didn't match the client`  
+  根因：SSR 与 CSR 首屏输出不一致（通常由路由状态或浏览器变量引起）。
+
+---
+
+## 官方 Example 验证命令
+
+提交前建议至少执行：
+
+```bash
+# 1) 构建组件库
+npm run build
+
+# 2) 校验 examples
+cd examples
+npm run lint
+npx tsc --noEmit
+```
+
+如果只想快速看运行效果：
+
+```bash
+cd examples
+npm run dev
+```
+
+---
+
+## Internationalization (i18n)
+
+ORBCAFE UI 标准组件已内置 6 种语言：
+
+- `en` (English)
+- `zh` (中文)
+- `fr` (Français)
+- `de` (Deutsch)
+- `ja` (日本語)
+- `ko` (한국어)
+
+可通过 `OrbcafeI18nProvider` 或 `CAppPageLayout.locale` 统一控制语言。
+
+### 方式 1：在应用根部包裹 Provider
+
+```tsx
+import { OrbcafeI18nProvider } from 'orbcafe-ui';
+
+<OrbcafeI18nProvider locale="de">
+  <YourApp />
+</OrbcafeI18nProvider>
+```
+
+### 方式 2：使用 PageLayout 时直接传 `locale`
+
+```tsx
+<CAppPageLayout
+  appTitle="ORBCAFE"
+  locale="ja"
+  menuData={menuData}
+>
+  {children}
+</CAppPageLayout>
+```
+
+组件内部统一使用同一套翻译 key，避免出现中英混搭。
+
+### 国际化维护规范（必须）
+
+- 所有标准组件可见文案必须通过 `useOrbcafeI18n().t()` 读取，不允许新增硬编码文案。
+- 统一词条源：`src/i18n/messages.ts`。
+- 新增文案时必须同时补齐 6 个语言分支：`en/zh/fr/de/ja/ko`。
+- 业务字段值（如状态、类别）建议采用“稳定 value + 本地化 label”模式，避免筛选逻辑与展示文案耦合。
+- 示例工程（`examples/app/std-report/page.tsx`）已按该模式实现，作为接入参考。
 
 ---
 
@@ -169,4 +387,3 @@ const { navigationIslandProps } = useNavigationIsland({
 ## License
 
 MIT
-

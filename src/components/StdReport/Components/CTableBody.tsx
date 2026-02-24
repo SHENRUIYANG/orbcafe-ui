@@ -1,10 +1,14 @@
 import React from 'react';
-import { TableBody, TableRow, TableCell, Checkbox, IconButton, Typography, Box } from '@mui/material';
+import { TableBody, TableRow, TableCell, Checkbox, IconButton, Typography, Box, Tooltip } from '@mui/material';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore';
+import UnfoldLessIcon from '@mui/icons-material/UnfoldLess';
 import { CTableBodyProps } from '../Hooks/CTable/types';
+import { useOrbcafeI18n } from '../../../i18n';
 
 export const CTableBody = (props: CTableBodyProps) => {
+    const { t } = useOrbcafeI18n();
     const { 
         visibleRows, 
         visibleColumns, 
@@ -14,14 +18,19 @@ export const CTableBody = (props: CTableBodyProps) => {
         // grouping = [], 
         toggleGroupExpand,
         expandedGroups = new Set(),
-        selectionMode
+        selectionMode,
+        grouping = [],
+        isGroupFullyExpanded,
+        handleExpandGroupRecursively,
+        handleCollapseGroupRecursively,
     } = props;
     
     const isSelected = (id: any) => selected.indexOf(id) !== -1;
     const isSelectionEnabled = selectionMode === 'multiple' || selectionMode === 'single';
+    const hasGrouping = grouping.length > 0;
 
     // Helper to calculate colSpan for group rows
-    const totalColumns = visibleColumns.length + (isSelectionEnabled ? 1 : 0);
+    const totalColumns = visibleColumns.length + (isSelectionEnabled ? 1 : 0) + (hasGrouping ? 1 : 0);
 
     return (
         <TableBody>
@@ -71,29 +80,57 @@ export const CTableBody = (props: CTableBodyProps) => {
                                 },
                             })}
                         >
-                            <TableCell colSpan={totalColumns} sx={{ py: 1, pl: (row.level * 4) + 2 }}>
-                                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                    <IconButton 
+                            {isSelectionEnabled && (
+                                <TableCell padding="checkbox">
+                                    <Checkbox
                                         size="small"
-                                        onClick={() => toggleGroupExpand && toggleGroupExpand(row.id)}
-                                        sx={{ mr: 1 }}
-                                    >
-                                        {isExpanded ? <KeyboardArrowDownIcon /> : <KeyboardArrowRightIcon />}
-                                    </IconButton>
-                                    {isSelectionEnabled && (
-                                        <Checkbox
+                                        checked={isGroupSelected}
+                                        indeterminate={isGroupIndeterminate}
+                                        onChange={handleGroupSelect}
+                                        onClick={(e) => e.stopPropagation()}
+                                        sx={{ p: 0.5 }}
+                                    />
+                                </TableCell>
+                            )}
+                            {hasGrouping && (
+                                <TableCell padding="checkbox" sx={{ width: 44 }}>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25 }}>
+                                        {grouping.length > 1 && row.level < grouping.length - 1 && (
+                                            <Tooltip title={isGroupFullyExpanded?.(row.id) ? t('table.group.collapseAll') : t('table.group.expandAll')}>
+                                                <IconButton
+                                                    size="small"
+                                                    onClick={() => {
+                                                        const fullyExpanded = isGroupFullyExpanded?.(row.id);
+                                                        if (fullyExpanded) {
+                                                            handleCollapseGroupRecursively?.(row.id);
+                                                        } else {
+                                                            handleExpandGroupRecursively?.(row.id);
+                                                        }
+                                                    }}
+                                                    sx={{ p: 0.25 }}
+                                                >
+                                                    {isGroupFullyExpanded?.(row.id) ? (
+                                                        <UnfoldLessIcon fontSize="small" />
+                                                    ) : (
+                                                        <UnfoldMoreIcon fontSize="small" />
+                                                    )}
+                                                </IconButton>
+                                            </Tooltip>
+                                        )}
+                                        <IconButton
                                             size="small"
-                                            checked={isGroupSelected}
-                                            indeterminate={isGroupIndeterminate}
-                                            onChange={handleGroupSelect}
-                                            onClick={(e) => e.stopPropagation()}
-                                            sx={{ mr: 1, p: 0.5 }}
-                                        />
-                                    )}
-                                    <Typography variant="body2" fontWeight="bold" color="text.primary">
-                                        {row.field}: {row.value} ({row.count})
-                                    </Typography>
-                                </Box>
+                                            onClick={() => toggleGroupExpand && toggleGroupExpand(row.id)}
+                                            sx={{ p: 0.25 }}
+                                        >
+                                            {isExpanded ? <KeyboardArrowDownIcon /> : <KeyboardArrowRightIcon />}
+                                        </IconButton>
+                                    </Box>
+                                </TableCell>
+                            )}
+                            <TableCell colSpan={visibleColumns.length} sx={{ py: 1, pl: (row.level * 3) + 1 }}>
+                                <Typography variant="body2" fontWeight="bold" color="text.primary" sx={{ fontSize: '0.85rem' }}>
+                                    {row.field}: {row.value} ({row.count})
+                                </Typography>
                             </TableCell>
                         </TableRow>
                     );
@@ -133,6 +170,7 @@ export const CTableBody = (props: CTableBodyProps) => {
                                     />
                                 </TableCell>
                             )}
+                            {hasGrouping && <TableCell padding="checkbox" sx={{ width: 44 }} />}
                             {columns.filter((c: any) => visibleColumns.includes(c.id)).map((column: any, colIndex: number) => {
                                 // If selection is not enabled, apply indentation to the first data column
                                 const isFirstColumn = !isSelectionEnabled && colIndex === 0;
@@ -167,7 +205,7 @@ export const CTableBody = (props: CTableBodyProps) => {
             {visibleRows.length === 0 && (
                 <TableRow>
                     <TableCell colSpan={totalColumns} align="center">
-                        No data
+                        {t('common.noData')}
                     </TableCell>
                 </TableRow>
             )}

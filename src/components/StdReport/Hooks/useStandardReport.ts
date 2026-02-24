@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { CStandardPageProps } from '../CStandardPage';
 import type { GraphReportConfig } from '../../GraphReport/types';
+import { useOrbcafeI18n } from '../../../i18n';
 
 export interface ReportColumn {
     id: string;
@@ -42,9 +43,17 @@ export interface ReportMetadata {
 export interface UseStandardReportOptions {
     metadata: ReportMetadata;
     fetchData?: (params: any) => Promise<any>; // Optional override for data fetching
+    initialRowsPerPage?: number;
+    rowsPerPageOptions?: number[];
 }
 
-export const useStandardReport = ({ metadata, fetchData }: UseStandardReportOptions) => {
+export const useStandardReport = ({
+    metadata,
+    fetchData,
+    initialRowsPerPage = 20,
+    rowsPerPageOptions = [20, 50, 100, -1],
+}: UseStandardReportOptions) => {
+    const { t } = useOrbcafeI18n();
     const [loading, setLoading] = useState(false);
     const [rows, setRows] = useState<any[]>([]);
     const [filters, setFilters] = useState<Record<string, any>>({});
@@ -52,7 +61,7 @@ export const useStandardReport = ({ metadata, fetchData }: UseStandardReportOpti
     const [currentLayout, setCurrentLayout] = useState<any>(metadata.layout || null);
     const [total, setTotal] = useState(0);
     const [page, setPage] = useState(0);
-    const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [rowsPerPage, setRowsPerPage] = useState(initialRowsPerPage);
     const [selection, setSelection] = useState<any[]>([]);
     const [order, setOrder] = useState<'asc' | 'desc'>('asc');
     const [orderBy, setOrderBy] = useState<string>('');
@@ -116,6 +125,11 @@ export const useStandardReport = ({ metadata, fetchData }: UseStandardReportOpti
     const handleSearch = () => {
         setPage(0); // Reset to first page
         handleFetchData(filters, 0, rowsPerPage, order, orderBy);
+    };
+
+    const handleRowsPerPageChange = (nextRowsPerPage: number) => {
+        setPage(0);
+        setRowsPerPage(nextRowsPerPage);
     };
 
     const handleSortChange = (property: string, direction: 'asc' | 'desc') => {
@@ -186,9 +200,9 @@ export const useStandardReport = ({ metadata, fetchData }: UseStandardReportOpti
             count: total,
             page: page,
             rowsPerPage: rowsPerPage,
-            rowsPerPageOptions: [10, 25, 50, 100],
+            rowsPerPageOptions: rowsPerPageOptions,
             onPageChange: setPage,
-            onRowsPerPageChange: setRowsPerPage,
+            onRowsPerPageChange: handleRowsPerPageChange,
             selectionMode: 'multiple',
             selected: selection,
             onSelectionChange: setSelection,
@@ -199,7 +213,7 @@ export const useStandardReport = ({ metadata, fetchData }: UseStandardReportOpti
             order: order,
             orderBy: orderBy,
             onSortChange: handleSortChange,
-            graphReport: metadata.graphReport || { enabled: true, title: `${metadata.title} Graphic Report` }
+            graphReport: metadata.graphReport || { enabled: true, title: `${metadata.title} ${t('graph.reportTitle')}` }
         }
     };
 

@@ -5,9 +5,15 @@ import TableCell from '@mui/material/TableCell';
 import Checkbox from '@mui/material/Checkbox';
 import TableSortLabel from '@mui/material/TableSortLabel';
 import Box from '@mui/material/Box';
+import IconButton from '@mui/material/IconButton';
+import Tooltip from '@mui/material/Tooltip';
+import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore';
+import UnfoldLessIcon from '@mui/icons-material/UnfoldLess';
 import { CTableHeadProps } from '../Hooks/CTable/types';
+import { useOrbcafeI18n } from '../../../i18n';
 
 export const CTableHead = (props: CTableHeadProps) => {
+    const { t } = useOrbcafeI18n();
     const { 
         onSelectAllClick, 
         order, 
@@ -18,6 +24,9 @@ export const CTableHead = (props: CTableHeadProps) => {
         columns, 
         visibleColumns, 
         selectionMode,
+        grouping = [],
+        isAllExpanded = false,
+        handleToggleAll,
         onColumnResize,
         columnWidths
     } = props;
@@ -76,6 +85,9 @@ export const CTableHead = (props: CTableHeadProps) => {
     }, []);
 
     const isSelectionEnabled = selectionMode === 'multiple' || selectionMode === 'single';
+    const showGroupToggle = grouping.length > 0 && Boolean(handleToggleAll);
+    const groupToggleTitle = isAllExpanded ? t('table.group.collapseAll') : t('table.group.expandAll');
+    const visibleLeafColumns = columns.filter((c: any) => visibleColumns.includes(c.id));
 
     return (
         <TableHead>
@@ -85,6 +97,9 @@ export const CTableHead = (props: CTableHeadProps) => {
                         padding="checkbox"
                         sx={(theme) => ({
                             width: 48,
+                            position: 'sticky',
+                            top: 0,
+                            zIndex: 4,
                             backgroundColor: theme.palette.mode === 'dark' ? '#000000' : '#f5f5f5',
                             color: theme.palette.mode === 'dark' ? '#ffffff' : theme.palette.text.primary,
                         })}
@@ -98,7 +113,34 @@ export const CTableHead = (props: CTableHeadProps) => {
                         />
                     </TableCell>
                 )}
-                {columns.filter((c: any) => visibleColumns.includes(c.id)).map((headCell: any) => {
+                {showGroupToggle && (
+                    <TableCell
+                        align="center"
+                        padding="checkbox"
+                        sx={(theme) => ({
+                            width: 44,
+                            position: 'sticky',
+                            top: 0,
+                            zIndex: 4,
+                            backgroundColor: theme.palette.mode === 'dark' ? '#000000' : '#f5f5f5',
+                            color: theme.palette.mode === 'dark' ? '#ffffff' : theme.palette.text.primary,
+                        })}
+                    >
+                        <Tooltip title={groupToggleTitle}>
+                            <IconButton
+                                size="small"
+                                onClick={(event) => {
+                                    event.stopPropagation();
+                                    handleToggleAll?.(!isAllExpanded);
+                                }}
+                                sx={{ p: 0.2 }}
+                            >
+                                {isAllExpanded ? <UnfoldLessIcon fontSize="small" /> : <UnfoldMoreIcon fontSize="small" />}
+                            </IconButton>
+                        </Tooltip>
+                    </TableCell>
+                )}
+                {visibleLeafColumns.map((headCell: any) => {
                     const width = columnWidths?.[headCell.id] || headCell.minWidth || 100;
                     
                     return (
@@ -109,7 +151,9 @@ export const CTableHead = (props: CTableHeadProps) => {
                             sortDirection={orderBy === headCell.id ? order : false}
                             style={{ width: width, minWidth: width, maxWidth: width }}
                             sx={(theme) => ({
-                                position: 'relative',
+                                position: 'sticky',
+                                top: 0,
+                                zIndex: 4,
                                 backgroundColor: theme.palette.mode === 'dark' ? '#000000' : '#f5f5f5',
                                 color: theme.palette.mode === 'dark' ? '#ffffff' : theme.palette.text.primary,
                                 fontWeight: 'bold',
@@ -137,6 +181,7 @@ export const CTableHead = (props: CTableHeadProps) => {
                                         color: theme.palette.mode === 'dark' ? '#ffffff' : theme.palette.text.primary
                                     },
                                     fontWeight: 'bold',
+                                    fontSize: '0.85rem',
                                     color: theme.palette.mode === 'dark' ? '#ffffff' : theme.palette.text.primary
                                 })}
                             >

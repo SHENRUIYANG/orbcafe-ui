@@ -1,5 +1,41 @@
 import type { GraphReportConfig } from '../../../GraphReport/types';
 
+export interface CTableQuickCreateConfig {
+    enabled?: boolean;
+    title?: string;
+    description?: string;
+    submitLabel?: string;
+    cancelLabel?: string;
+    fields?: string[];
+    excludeFields?: string[];
+    initialValues?: Record<string, any>;
+    onSubmit?: (payload: Record<string, any>) => void | Promise<void>;
+}
+
+export interface CTableQuickEditConfig {
+    enabled?: boolean;
+    title?: string;
+    description?: string;
+    submitLabel?: string;
+    cancelLabel?: string;
+    fields?: string[];
+    excludeFields?: string[];
+    editableFields?: string[];
+    nonEditableFields?: string[];
+    primaryKeys?: string[];
+    getInitialValues?: (row: Record<string, any>) => Record<string, any>;
+    onSubmit?: (payload: Record<string, any>, row: Record<string, any>) => void | Promise<void>;
+}
+
+export interface CTableQuickDeleteConfig {
+    enabled?: boolean;
+    title?: string;
+    message?: string;
+    confirmText?: string;
+    cancelText?: string;
+    onConfirm?: (rows: Record<string, any>[]) => void | Promise<void>;
+}
+
 export interface CTableProps {
     appId?: string;
     title?: string;
@@ -31,6 +67,9 @@ export interface CTableProps {
     orderBy?: string;
     onSortChange?: (property: string, direction: 'asc' | 'desc') => void;
     graphReport?: GraphReportConfig;
+    quickCreate?: CTableQuickCreateConfig;
+    quickEdit?: CTableQuickEditConfig;
+    quickDelete?: CTableQuickDeleteConfig;
 }
 
 export interface CTableHeadProps {
@@ -61,6 +100,7 @@ export interface CTableBodyProps {
     loading?: boolean;
     expandedGroups?: Set<string>;
     toggleGroupExpand?: (groupId: string) => void;
+    isGroupFullyExpanded?: (groupId: string) => boolean;
     handleExpandGroupRecursively?: (groupId: string) => void;
     handleCollapseGroupRecursively?: (groupId: string) => void;
     handleClick?: (event: React.MouseEvent, row: any) => void;

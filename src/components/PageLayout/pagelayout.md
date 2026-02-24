@@ -34,3 +34,48 @@ src/components/PageLayout/
 </CAppPageLayout>
 ```
 
+## 用户菜单扩展策略
+
+为避免把业务登出逻辑写死在组件库中，`PageLayout` 提供了两层扩展能力：
+
+1. `onUserSetting` / `onUserLogout`
+2. `userMenuItems`（完全覆盖默认菜单）
+
+### 推荐：接管默认菜单行为
+
+```tsx
+<CAppPageLayout
+  appTitle="ORBCAFE"
+  menuData={menuData}
+  user={{ name: 'Ruiyang Shen' }}
+  onUserSetting={() => router.push('/settings')}
+  onUserLogout={() => auth.logout()}
+>
+  <CStandardPage {...pageProps} />
+</CAppPageLayout>
+```
+
+### 高自定义：覆盖菜单定义
+
+```tsx
+<CAppPageLayout
+  appTitle="ORBCAFE"
+  menuData={menuData}
+  user={{ name: 'Ruiyang Shen' }}
+  userMenuItems={[
+    { key: 'setting', label: 'Setting', onClick: () => router.push('/settings') },
+    { key: 'logoff', label: 'Logoff', onClick: () => auth.logout() },
+  ]}
+>
+  <CStandardPage {...pageProps} />
+</CAppPageLayout>
+```
+
+## 关键 Props
+
+| Props | 说明 |
+| --- | --- |
+| `user` | 用户信息，不传则不显示头像与用户菜单。 |
+| `onUserSetting` | 默认 Setting 菜单回调。 |
+| `onUserLogout` | 默认 Logout 菜单回调。 |
+| `userMenuItems` | 完全自定义用户菜单项。 |

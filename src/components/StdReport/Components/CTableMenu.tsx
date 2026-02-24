@@ -1,6 +1,7 @@
 import { Menu, MenuItem, Checkbox, ListItemText, ListItemIcon, Divider, Switch, FormControlLabel, Box, Badge, Typography, Button } from '@mui/material';
 import CheckIcon from '@mui/icons-material/Check';
 import ClearAllIcon from '@mui/icons-material/ClearAll';
+import { useOrbcafeI18n } from '../../../i18n';
 
 // --- Types ---
 interface Column {
@@ -27,6 +28,7 @@ export const CTableGroupMenu = ({
     columns,
     toggleGroupField
 }: CTableGroupMenuProps) => {
+    const { t } = useOrbcafeI18n();
     return (
         <Menu
             anchorEl={groupAnchorEl}
@@ -34,7 +36,7 @@ export const CTableGroupMenu = ({
             onClose={() => setGroupAnchorEl(null)}
         >
             <Box sx={{ p: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography variant="subtitle2" sx={{ px: 1 }}>Group By</Typography>
+                <Typography variant="subtitle2" sx={{ px: 1 }}>{t('table.menu.groupBy')}</Typography>
                 {grouping.length > 0 && (
                     <Button 
                         size="small" 
@@ -42,7 +44,7 @@ export const CTableGroupMenu = ({
                         onClick={() => setGrouping([])}
                         startIcon={<ClearAllIcon />}
                     >
-                        Clear All
+                        {t('table.menu.clearAll')}
                     </Button>
                 )}
             </Box>
@@ -87,6 +89,7 @@ export const CTableColumnMenu = ({
     visibleColumns,
     toggleColumnVisibility
 }: CTableColumnMenuProps) => {
+    const { t } = useOrbcafeI18n();
     return (
         <Menu
             anchorEl={anchorEl}
@@ -94,7 +97,7 @@ export const CTableColumnMenu = ({
             onClose={() => setAnchorEl(null)}
         >
             <MenuItem disabled>
-                <ListItemText primary="Visible Columns" />
+                <ListItemText primary={t('table.menu.visibleColumns')} />
             </MenuItem>
             <Divider />
             {columns.map((col) => (
@@ -127,6 +130,7 @@ export const CTableSummaryMenu = ({
     summaryColumns,
     toggleSummaryColumn
 }: CTableSummaryMenuProps) => {
+    const { t } = useOrbcafeI18n();
     return (
         <Menu
             anchorEl={anchorEl}
@@ -142,7 +146,7 @@ export const CTableSummaryMenu = ({
                             size="small"
                         />
                     }
-                    label="Show Summary Row"
+                    label={t('table.menu.showSummaryRow')}
                 />
             </MenuItem>
             <Divider />
@@ -154,7 +158,7 @@ export const CTableSummaryMenu = ({
             ))}
             {columns.filter(col => col.numeric).length === 0 && (
                 <MenuItem disabled>
-                    <ListItemText primary="No numeric columns" />
+                    <ListItemText primary={t('table.menu.noNumericColumns')} />
                 </MenuItem>
             )}
         </Menu>
@@ -177,6 +181,7 @@ export const CTableContextMenu = ({
     visibleColumns,
     toggleColumnVisibility
 }: CTableContextMenuProps) => {
+    const { t } = useOrbcafeI18n();
     return (
         <Menu
             open={contextMenu !== null}
@@ -188,9 +193,9 @@ export const CTableContextMenu = ({
                     : undefined
             }
         >
-            <MenuItem onClick={handleCloseContextMenu}>Copy</MenuItem>
+            <MenuItem onClick={handleCloseContextMenu}>{t('common.copy')}</MenuItem>
             <Divider />
-            <MenuItem disabled>Visible Columns</MenuItem>
+            <MenuItem disabled>{t('table.menu.visibleColumns')}</MenuItem>
             {columns.map((col) => (
                 <MenuItem key={col.id} onClick={() => toggleColumnVisibility(col.id)}>
                     <ListItemIcon>

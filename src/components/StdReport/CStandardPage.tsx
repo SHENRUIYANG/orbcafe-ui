@@ -64,7 +64,7 @@ export const CStandardPage = ({
                 )}
                 
                 {/* Table Section */}
-                <Box sx={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
+                <Box sx={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
                    <CTable 
                         {...tableProps}
                         fitContainer={true}

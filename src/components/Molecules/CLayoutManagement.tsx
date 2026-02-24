@@ -47,6 +47,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import StarIcon from '@mui/icons-material/Star';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
 import ViewQuiltIcon from '@mui/icons-material/ViewQuilt'; // Icon for Layout
+import { useOrbcafeI18n } from '../../i18n';
 
 // --- Interfaces ---
 
@@ -86,6 +87,7 @@ export const CLayoutManagement: React.FC<CLayoutManagementProps> = ({
   onDelete,
   onSetDefault
 }) => {
+  const { t } = useOrbcafeI18n();
   // --- State ---
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
@@ -140,14 +142,14 @@ export const CLayoutManagement: React.FC<CLayoutManagementProps> = ({
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
       {/* Save Layout Button - Explicit Action */}
-      <Tooltip title={'Save Layout'}>
+      <Tooltip title={t('layout.saveLayout')}>
         <IconButton onClick={handleOpenSaveDialog} color="primary" size="small">
             <SaveIcon />
         </IconButton>
       </Tooltip>
 
       {/* Layout Options (Load, Manage) */}
-      <Tooltip title={'Layout Options'}>
+      <Tooltip title={t('layout.layoutOptions')}>
         <IconButton onClick={handleMenuOpen} color={currentLayout ? 'primary' : 'default'}>
             <ViewQuiltIcon />
         </IconButton>
@@ -161,7 +163,7 @@ export const CLayoutManagement: React.FC<CLayoutManagementProps> = ({
         PaperProps={{ sx: { width: 320, maxHeight: 400 } }}
       >
         <MenuItem disabled>
-          <Typography variant="caption">{'Select Layout'}</Typography>
+          <Typography variant="caption">{t('layout.selectLayout')}</Typography>
         </MenuItem>
         
         {/* Save Current Action */}
@@ -169,14 +171,14 @@ export const CLayoutManagement: React.FC<CLayoutManagementProps> = ({
             <ListItemIcon>
                 <SaveIcon fontSize="small" />
             </ListItemIcon>
-            <ListItemText>{'Save Current Layout...'}</ListItemText>
+            <ListItemText>{t('layout.saveCurrentLayout')}</ListItemText>
         </MenuItem>
 
         <Divider />
         
         {layouts.length === 0 && (
           <MenuItem disabled>
-            <Typography variant="body2" color="text.secondary">{'No saved layouts'}</Typography>
+            <Typography variant="body2" color="text.secondary">{t('layout.noSavedLayouts')}</Typography>
           </MenuItem>
         )}
         
@@ -201,7 +203,7 @@ export const CLayoutManagement: React.FC<CLayoutManagementProps> = ({
                 </Box>
 
                 <Box sx={{ display: 'flex', alignItems: 'center' }} onClick={(e) => e.stopPropagation()}>
-                    <Tooltip title={layout.isDefault ? 'Remove Default' : 'Set as Default'}>
+                    <Tooltip title={layout.isDefault ? t('layout.removeDefault') : t('layout.setAsDefault')}>
                         <IconButton 
                             size="small" 
                             onClick={(e) => {
@@ -213,7 +215,7 @@ export const CLayoutManagement: React.FC<CLayoutManagementProps> = ({
                         </IconButton>
                     </Tooltip>
 
-                    <Tooltip title={'Delete'}>
+                    <Tooltip title={t('common.delete')}>
                         <IconButton 
                             size="small" 
                             color="error"
@@ -233,25 +235,25 @@ export const CLayoutManagement: React.FC<CLayoutManagementProps> = ({
 
       {/* --- Save Dialog --- */}
       <Dialog open={isSaveDialogOpen} onClose={() => setIsSaveDialogOpen(false)} maxWidth="xs" fullWidth>
-        <DialogTitle>{'Save Layout'}</DialogTitle>
+        <DialogTitle>{t('layout.saveLayout')}</DialogTitle>
         <DialogContent>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
             <TextField
-              label={'Layout Name'}
+              label={t('layout.layoutName')}
               value={newLayoutName}
               onChange={(e) => setNewLayoutName(e.target.value)}
               fullWidth
               autoFocus
               size="small"
-              helperText={"e.g., 'Compact View'"}
+              helperText={t('layout.layoutNameHelper')}
             />
              {layouts.some(l => l.name === newLayoutName) && (
                <Typography variant="caption" color="warning.main" sx={{ ml: 1 }}>
-                 {'Warning: Existing layout will be overwritten'}
+                 {t('layout.warningOverwrite')}
                </Typography>
              )}
             <TextField
-              label={'Description'}
+              label={t('layout.layoutDescription')}
               value={newLayoutDesc}
               onChange={(e) => setNewLayoutDesc(e.target.value)}
               fullWidth
@@ -265,7 +267,7 @@ export const CLayoutManagement: React.FC<CLayoutManagementProps> = ({
                   onChange={(e) => setSaveOptions({...saveOptions, isDefault: e.target.checked})}
                 />
               }
-              label={'Use as Default Layout'}
+              label={t('layout.useAsDefault')}
             />
 
             <FormControlLabel
@@ -275,19 +277,18 @@ export const CLayoutManagement: React.FC<CLayoutManagementProps> = ({
                   onChange={(e) => setSaveOptions({...saveOptions, isPublic: e.target.checked})}
                 />
               }
-              label={'Public (Visible to all users)'}
+              label={t('layout.publicAllUsers')}
             />
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setIsSaveDialogOpen(false)}>{'Cancel'}</Button>
+          <Button onClick={() => setIsSaveDialogOpen(false)}>{t('common.cancel')}</Button>
           <Button onClick={handleSaveConfirm} variant="contained" disabled={!newLayoutName}>
-            {'Save'}
+            {t('common.save')}
           </Button>
         </DialogActions>
       </Dialog>
     </Box>
   );
 };
-
 

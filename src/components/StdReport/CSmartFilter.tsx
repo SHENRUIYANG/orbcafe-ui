@@ -71,6 +71,7 @@ import { CVariantManagement, type VariantMetadata } from './Components/CVariantM
 import { CVariantManager, type IVariantService } from './CVariantManager';
 import { CDateRangePicker } from '../Molecules/CDateRangePicker';
 import dayjs, { type Dayjs } from 'dayjs';
+import { useOrbcafeI18n } from '../../i18n';
 
 // --- Types ---
 
@@ -142,18 +143,18 @@ const OPERATOR_LABELS: Record<string, string> = {
     // 'between' is shared
 };
 
-const OPERATOR_TOOLTIP_DEFAULTS: Record<string, string> = {
-    'equals': 'Equals',
-    'contains': 'Contains',
-    'notContains': 'Does Not Contain',
-    'wildcard': 'Wildcard Search',
-    '=': 'Equals',
-    '!=': 'Not Equals',
-    '>': 'Greater Than',
-    '<': 'Less Than',
-    '>=': 'Greater Than or Equal',
-    '<=': 'Less Than or Equal',
-    'between': 'Between',
+const OPERATOR_TOOLTIP_KEYS: Record<string, string> = {
+    'equals': 'smartFilter.operator.equals',
+    'contains': 'smartFilter.operator.contains',
+    'notContains': 'smartFilter.operator.notContains',
+    'wildcard': 'smartFilter.operator.wildcard',
+    '=': 'smartFilter.operator.equals',
+    '!=': 'smartFilter.operator.notEquals',
+    '>': 'smartFilter.operator.greaterThan',
+    '<': 'smartFilter.operator.lessThan',
+    '>=': 'smartFilter.operator.greaterOrEqual',
+    '<=': 'smartFilter.operator.lessOrEqual',
+    'between': 'smartFilter.operator.between',
 };
 
 const TEXT_OPERATORS: TextOperator[] = ['equals', 'contains', 'notContains', 'wildcard'];
@@ -161,7 +162,7 @@ const NUMBER_OPERATORS: NumberOperator[] = ['=', '!=', '>', '<', '>=', '<=', 'be
 
 // --- Helper Component: FilterInput ---
 
-const FONT_SIZE_SMALL = '0.75rem';
+const FONT_SIZE_SMALL = '0.85rem';
 
 const FilterInput = ({ 
     field, 
@@ -172,6 +173,7 @@ const FilterInput = ({
     value: FilterValue; 
     onChange: (val: FilterValue) => void; 
 }) => {
+    const { t } = useOrbcafeI18n();
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [rangeAnchorEl, setRangeAnchorEl] = useState<null | HTMLElement>(null); // For number between
     
@@ -199,7 +201,10 @@ const FilterInput = ({
     const currentOperator = value?.operator || (field.type === 'number' ? '=' : 'equals');
     const currentValue = value?.value;
 
-    const getTooltip = (op: string) => OPERATOR_TOOLTIP_DEFAULTS[op] || op;
+    const getTooltip = (op: string) => {
+        const key = OPERATOR_TOOLTIP_KEYS[op];
+        return key ? t(key as any) : op;
+    };
 
     const handleOperatorClick = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorEl(event.currentTarget);
@@ -282,7 +287,7 @@ const FilterInput = ({
                     {...commonTextFieldProps}
                     label={field.label}
                     value={displayValue}
-                    placeholder={'Min - Max'}
+                    placeholder={t('smartFilter.minMaxPlaceholder')}
                     InputProps={{
                         ...commonTextFieldProps.InputProps,
                         startAdornment: (
@@ -332,7 +337,7 @@ const FilterInput = ({
                     <Box sx={{ p: 2, display: 'flex', gap: 1, alignItems: 'center' }}>
                         <TextField 
                             size="small" 
-                            label={'Min'} 
+                            label={t('smartFilter.min')} 
                             type="number"
                             value={minVal}
                             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMinVal(e.target.value)}
@@ -343,7 +348,7 @@ const FilterInput = ({
                         <ArrowRightAltIcon color="action" />
                         <TextField 
                             size="small" 
-                            label={'Max'} 
+                            label={t('smartFilter.max')} 
                             type="number"
                             value={maxVal}
                             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMaxVal(e.target.value)}
@@ -351,7 +356,7 @@ const FilterInput = ({
                             InputLabelProps={{ sx: { fontSize: FONT_SIZE_SMALL } }}
                             InputProps={{ sx: { fontSize: FONT_SIZE_SMALL } }}
                         />
-                        <Button variant="contained" size="small" onClick={handleRangeConfirm}>{'OK'}</Button>
+                        <Button variant="contained" size="small" onClick={handleRangeConfirm}>{t('common.ok')}</Button>
                     </Box>
                 </Popover>
             </>
@@ -369,7 +374,7 @@ const FilterInput = ({
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChange({ ...value, value: e.target.value, operator: 'equals' })}
             >
                 <MenuItem value="">
-                    <em>None</em>
+                    <em>{t('common.none')}</em>
                 </MenuItem>
                 {field.options?.map((option) => (
                     <MenuItem key={option.value} value={option.value}>
@@ -404,7 +409,7 @@ const FilterInput = ({
                         setDebouncedSearchText('');
                     }, // Clear search on close
                     renderValue: (selected: any) => {
-                         if (!Array.isArray(selected) || selected.length === 0) return <em>None</em>;
+                         if (!Array.isArray(selected) || selected.length === 0) return <em>{t('common.none')}</em>;
                          // Map values back to labels if possible
                          const getLabel = (val: any) => field.options?.find(o => o.value === val)?.label || val;
                          // Truncate if too long
@@ -420,7 +425,7 @@ const FilterInput = ({
                     <TextField
                         size="small"
                         autoFocus
-                        placeholder="Search..."
+                        placeholder={t('smartFilter.searchPlaceholder')}
                         fullWidth
                         InputProps={{
                             startAdornment: (
@@ -449,7 +454,7 @@ const FilterInput = ({
                     ))
                 ) : (
                     <MenuItem disabled>
-                        <ListItemText primary="No options found" primaryTypographyProps={{ fontSize: FONT_SIZE_SMALL }} />
+                        <ListItemText primary={t('smartFilter.noOptionsFound')} primaryTypographyProps={{ fontSize: FONT_SIZE_SMALL }} />
                     </MenuItem>
                 )}
             </TextField>
@@ -548,6 +553,7 @@ export const CSmartFilter = ({
     layoutRefs,
     variantService
 }: CSmartFilterProps) => {
+    const { t } = useOrbcafeI18n();
     // State
     const [isExpanded, setIsExpanded] = useState(true);
     const [settingsAnchorEl, setSettingsAnchorEl] = useState<null | HTMLElement>(null);
@@ -646,15 +652,20 @@ export const CSmartFilter = ({
                 )}
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     {/* Add Filter Button */}
-                    <Tooltip title={'Add Filters'}>
+                    <Tooltip title={t('smartFilter.addFilters')}>
                         <Button 
                             onClick={(e) => setSettingsAnchorEl(e.currentTarget)} 
                             size="small" 
                             color="primary"
                             startIcon={<SettingsIcon fontSize="small" />}
-                            sx={{ textTransform: 'none', fontSize: FONT_SIZE_SMALL }}
+                            sx={{
+                                textTransform: 'none',
+                                fontSize: FONT_SIZE_SMALL,
+                                whiteSpace: 'nowrap',
+                                minWidth: 'fit-content',
+                            }}
                         >
-                            Adapt Filters
+                            {t('smartFilter.adaptFilters')}
                         </Button>
                     </Tooltip>
                     <Button 
@@ -662,9 +673,9 @@ export const CSmartFilter = ({
                         size="small" 
                         onClick={onSearch}
                         disabled={loading}
-                        sx={{ minWidth: '40px', fontWeight: 'bold' }}
+                        sx={{ minWidth: '40px', fontWeight: 'bold', fontSize: FONT_SIZE_SMALL }}
                     >
-                        {loading ? '...' : 'Go'}
+                        {loading ? t('common.loading') : t('smartFilter.go')}
                     </Button>
                     <Menu
                         anchorEl={settingsAnchorEl}
@@ -676,17 +687,23 @@ export const CSmartFilter = ({
                                     maxHeight: 400,
                                     width: '25ch',
                                 },
+                                sx: {
+                                    '& .MuiMenuItem-root': {
+                                        fontSize: FONT_SIZE_SMALL,
+                                        minHeight: 32,
+                                    },
+                                },
                             }
                         }}
                     >
                         <MenuItem disabled>
-                            <ListItemText primary={'Visible Filters'} />
+                            <ListItemText primary={t('smartFilter.visibleFilters')} primaryTypographyProps={{ fontSize: FONT_SIZE_SMALL }} />
                         </MenuItem>
                         <Divider />
                         {fields.map(field => (
                             <MenuItem key={field.id} onClick={() => toggleFieldVisibility(field.id)}>
                                 <Checkbox checked={visibleFields.includes(field.id)} size="small" />
-                                <ListItemText primary={field.label} />
+                                <ListItemText primary={field.label} primaryTypographyProps={{ fontSize: FONT_SIZE_SMALL }} />
                             </MenuItem>
                         ))}
                     </Menu>

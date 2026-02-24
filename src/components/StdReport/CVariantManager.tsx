@@ -17,6 +17,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { CVariantManagement, VariantMetadata } from './Components/CVariantManagement';
+import { useOrbcafeI18n } from '../../i18n';
 
 const DEFAULT_API_URL = 'http://127.0.0.1:8515';
 
@@ -56,6 +57,7 @@ export const CVariantManager: React.FC<CVariantManagerProps> = ({
     currentVariantId: propCurrentVariantId,
     onVariantChange
 }) => {
+    const { t } = useOrbcafeI18n();
     const [variants, setVariants] = useState<VariantMetadata[]>([]);
     const [internalCurrentVariantId, setInternalCurrentVariantId] = useState<string>('');
 
@@ -76,7 +78,7 @@ export const CVariantManager: React.FC<CVariantManagerProps> = ({
         if (!appId) return [];
         try {
             const response = await fetch(`${serviceUrl}/api/variants?appId=${encodeURIComponent(appId)}&tableKey=${encodeURIComponent(tableKey)}`);
-            if (!response.ok) throw new Error('Failed to fetch variants');
+            if (!response.ok) throw new Error(t('variant.toast.fetchFailed'));
             const data: VariantMetadata[] = await response.json();
             
             setVariants(data);
@@ -90,10 +92,10 @@ export const CVariantManager: React.FC<CVariantManagerProps> = ({
             return data;
         } catch (e) {
             console.error("Error fetching variants", e);
-            if (onError) onError('Failed to load variants');
+            if (onError) onError(t('variant.toast.fetchFailed'));
             return [];
         }
-    }, [appId, tableKey, serviceUrl, onError, currentVariantId, onLoad]);
+    }, [appId, tableKey, serviceUrl, onError, currentVariantId, onLoad, t]);
 
     // Initial Load
     useEffect(() => {
@@ -183,9 +185,9 @@ export const CVariantManager: React.FC<CVariantManagerProps> = ({
                 body: JSON.stringify(variantToSave)
             });
 
-            if (!response.ok) throw new Error('Failed to save variant');
+            if (!response.ok) throw new Error(t('variant.toast.saveFailed'));
             
-            if (onSuccess) onSuccess('Variant saved successfully');
+            if (onSuccess) onSuccess(t('variant.toast.saveSuccess'));
             
             // Refresh list and select the new variant
             await fetchVariants();
@@ -195,7 +197,7 @@ export const CVariantManager: React.FC<CVariantManagerProps> = ({
             onLoad(variantToSave);
         } catch (e) {
             console.error("Error saving variant", e);
-            if (onError) onError('Failed to save variant');
+            if (onError) onError(t('variant.toast.saveFailed'));
         }
     };
 
@@ -204,17 +206,17 @@ export const CVariantManager: React.FC<CVariantManagerProps> = ({
             const response = await fetch(`${serviceUrl}/api/variants/${id}`, {
                 method: 'DELETE'
             });
-            if (!response.ok) throw new Error('Failed to delete variant');
+            if (!response.ok) throw new Error(t('variant.toast.deleteFailed'));
 
             if (currentVariantId === id) {
                 handleVariantChange('');
             }
             
             fetchVariants();
-            if (onSuccess) onSuccess('Variant deleted successfully');
+            if (onSuccess) onSuccess(t('variant.toast.deleteSuccess'));
         } catch (e) {
             console.error("Error deleting variant", e);
-            if (onError) onError('Failed to delete variant');
+            if (onError) onError(t('variant.toast.deleteFailed'));
         }
     };
 
@@ -236,13 +238,13 @@ export const CVariantManager: React.FC<CVariantManagerProps> = ({
                 body: JSON.stringify(variantToSave)
             });
 
-            if (!response.ok) throw new Error('Failed to set default variant');
+            if (!response.ok) throw new Error(t('variant.toast.defaultFailed'));
 
              await fetchVariants();
-             if (onSuccess) onSuccess('Default variant updated');
+             if (onSuccess) onSuccess(t('variant.toast.defaultSuccess'));
         } catch (e) {
             console.error("Error setting default variant", e);
-            if (onError) onError('Failed to update default variant');
+            if (onError) onError(t('variant.toast.defaultFailed'));
         }
     };
 

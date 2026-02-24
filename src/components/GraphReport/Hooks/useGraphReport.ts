@@ -1,6 +1,10 @@
 import { useMemo } from 'react';
 import type {
   GraphBarDatum,
+  GraphComboDatum,
+  GraphFishboneBranch,
+  GraphHeatmapDatum,
+  GraphLineDatum,
   GraphPieDatum,
   GraphReportConfig,
   GraphReportFieldMapping,
@@ -8,6 +12,7 @@ import type {
   GraphReportModel,
   GraphRow,
 } from '../types';
+import { useOrbcafeI18n } from '../../../i18n';
 
 const DEFAULT_FIELD_CANDIDATES = {
   primaryDimension: ['Client', 'Customer', 'Category', 'Project'],
@@ -56,10 +61,16 @@ const toStringOr = (value: unknown, fallback: string): string => {
   return String(value);
 };
 
-const aggregateTopN = (rows: GraphRow[], key: string, metric: string, topN: number): GraphBarDatum[] => {
+const aggregateTopN = (
+  rows: GraphRow[],
+  key: string,
+  metric: string,
+  topN: number,
+  unassignedLabel: string,
+): GraphBarDatum[] => {
   const map = new Map<string, number>();
   rows.forEach((row) => {
-    const name = toStringOr(row[key], 'Unassigned');
+    const name = toStringOr(row[key], unassignedLabel);
     map.set(name, (map.get(name) || 0) + toNumber(row[metric]));
   });
   return Array.from(map.entries())
@@ -74,10 +85,11 @@ const aggregateBottomNEfficiency = (
   reportHoursKey: string,
   billableHoursKey: string,
   topN: number,
+  unassignedLabel: string,
 ): GraphBarDatum[] => {
   const map = new Map<string, { report: number; billable: number }>();
   rows.forEach((row) => {
-    const name = toStringOr(row[key], 'Unassigned');
+    const name = toStringOr(row[key], unassignedLabel);
     const prev = map.get(name) || { report: 0, billable: 0 };
     prev.report += toNumber(row[reportHoursKey]);
     prev.billable += toNumber(row[billableHoursKey]);
@@ -92,12 +104,12 @@ const aggregateBottomNEfficiency = (
     .slice(0, topN);
 };
 
-const aggregateStatusDistribution = (rows: GraphRow[], statusKey: string): GraphPieDatum[] => {
+const aggregateStatusDistribution = (rows: GraphRow[], statusKey: string, unassignedLabel: string): GraphPieDatum[] => {
   const total = rows.length;
   if (total === 0) return [];
   const map = new Map<string, number>();
   rows.forEach((row) => {
-    const status = toStringOr(row[statusKey], 'Unassigned');
+    const status = toStringOr(row[statusKey], unassignedLabel);
     map.set(status, (map.get(status) || 0) + 1);
   });
   return Array.from(map.entries()).map(([name, value]) => ({
@@ -105,6 +117,101 @@ const aggregateStatusDistribution = (rows: GraphRow[], statusKey: string): Graph
     value,
     percent: (value / total) * 100,
   }));
+};
+
+const aggregateLineByDate = (
+  rows: GraphRow[],
+  dateKey: string,
+  metric: string,
+): GraphLineDatum[] => {
+  const map = new Map<string, number>();
+  rows.forEach((row) => {
+    const date = toStringOr(row[dateKey], 'N/A');
+    map.set(date, (map.get(date) || 0) + toNumber(row[metric]));
+  });
+  return Array.from(map.entries())
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([name, value]) => ({ name, value }));
+};
+
+const aggregateComboByPrimary = (
+  rows: GraphRow[],
+  key: string,
+  reportHoursKey: string,
+  billableHoursKey: string,
+  topN: number,
+  unassignedLabel: string,
+): GraphComboDatum[] => {
+  const map = new Map<string, { report: number; billable: number }>();
+  rows.forEach((row) => {
+    const name = toStringOr(row[key], unassignedLabel);
+    const prev = map.get(name) || { report: 0, billable: 0 };
+    prev.report += toNumber(row[reportHoursKey]);
+    prev.billable += toNumber(row[billableHoursKey]);
+    map.set(name, prev);
+  });
+  return Array.from(map.entries())
+    .map(([name, value]) => ({
+      name,
+      barValue: value.billable,
+      lineValue: value.report > 0 ? (value.billable / value.report) * 100 : 0,
+    }))
+    .sort((a, b) => b.barValue - a.barValue)
+    .slice(0, topN);
+};
+
+const aggregateHeatmapPrimarySecondary = (
+  rows: GraphRow[],
+  primaryKey: string,
+  secondaryKey: string,
+  metric: string,
+  unassignedLabel: string,
+): GraphHeatmapDatum[] => {
+  const map = new Map<string, number>();
+  rows.forEach((row) => {
+    const x = toStringOr(row[primaryKey], unassignedLabel);
+    const y = toStringOr(row[secondaryKey], unassignedLabel);
+    const mapKey = `${x}__${y}`;
+    map.set(mapKey, (map.get(mapKey) || 0) + toNumber(row[metric]));
+  });
+  return Array.from(map.entries()).map(([key, value]) => {
+    const [x, y] = key.split('__');
+    return { x, y, value };
+  });
+};
+
+const aggregateWaterfallBillable = (rows: GraphRow[], dateKey: string, billableHoursKey: string) => {
+  const line = aggregateLineByDate(rows, dateKey, billableHoursKey);
+  const running = line.map((item) => ({ name: item.name, value: item.value, type: 'delta' as const }));
+  const total = line.reduce((sum, item) => sum + item.value, 0);
+  return [...running, { name: 'Total', value: total, type: 'total' as const }];
+};
+
+const aggregateFishboneByStatus = (
+  rows: GraphRow[],
+  statusKey: string,
+  primaryKey: string,
+  secondaryKey: string,
+  topN: number,
+  unassignedLabel: string,
+): GraphFishboneBranch[] => {
+  const statusMap = new Map<string, Map<string, number>>();
+  rows.forEach((row) => {
+    const status = toStringOr(row[statusKey], unassignedLabel);
+    const cause = `${toStringOr(row[primaryKey], unassignedLabel)} / ${toStringOr(row[secondaryKey], unassignedLabel)}`;
+    const causes = statusMap.get(status) || new Map<string, number>();
+    causes.set(cause, (causes.get(cause) || 0) + 1);
+    statusMap.set(status, causes);
+  });
+  return Array.from(statusMap.entries())
+    .map(([title, causes]) => ({
+      title,
+      causes: Array.from(causes.entries())
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, topN)
+        .map(([cause, count]) => `${cause} (${count})`),
+    }))
+    .slice(0, 6);
 };
 
 export interface UseGraphReportOptions {
@@ -118,6 +225,8 @@ export interface UseGraphReportResult {
 }
 
 export const useGraphReport = ({ rows, config }: UseGraphReportOptions): UseGraphReportResult => {
+  const { t } = useOrbcafeI18n();
+  const unassignedLabel = t('graph.unassigned');
   const fieldMapping = useMemo<GraphReportFieldMapping>(() => {
     const mapping = config?.fieldMapping;
     return {
@@ -167,17 +276,17 @@ export const useGraphReport = ({ rows, config }: UseGraphReportOptions): UseGrap
         return {
           id: `graph-row-${index}`,
           Date: toStringOr(row[fieldMapping.date], ''),
-          Primary: toStringOr(row[fieldMapping.primaryDimension], 'Unassigned'),
-          Secondary: toStringOr(row[fieldMapping.secondaryDimension], 'Unassigned'),
+          Primary: toStringOr(row[fieldMapping.primaryDimension], unassignedLabel),
+          Secondary: toStringOr(row[fieldMapping.secondaryDimension], unassignedLabel),
           Description: toStringOr(row[fieldMapping.description], ''),
           ReportHours: reportHours,
           BillableHours: billableHours,
           Amount: amount,
           Efficiency: efficiency,
-          Status: toStringOr(row[fieldMapping.status], 'Unassigned'),
+          Status: toStringOr(row[fieldMapping.status], unassignedLabel),
         };
       }),
-    [rows, fieldMapping],
+    [rows, fieldMapping, unassignedLabel],
   );
 
   const kpis = useMemo<GraphReportKpis>(() => {
@@ -204,22 +313,48 @@ export const useGraphReport = ({ rows, config }: UseGraphReportOptions): UseGrap
 
   const charts = useMemo(
     () => ({
-      billableByPrimary: aggregateTopN(normalizedRows, 'Primary', 'BillableHours', topN),
+      billableByPrimary: aggregateTopN(normalizedRows, 'Primary', 'BillableHours', topN, unassignedLabel),
       efficiencyBySecondary: aggregateBottomNEfficiency(
         normalizedRows,
         'Secondary',
         'ReportHours',
         'BillableHours',
         topN,
+        unassignedLabel,
       ),
-      statusDistribution: aggregateStatusDistribution(normalizedRows, 'Status'),
+      statusDistribution: aggregateStatusDistribution(normalizedRows, 'Status', unassignedLabel),
+      lineByDate: aggregateLineByDate(normalizedRows, 'Date', 'BillableHours'),
+      comboByPrimary: aggregateComboByPrimary(
+        normalizedRows,
+        'Primary',
+        'ReportHours',
+        'BillableHours',
+        topN,
+        unassignedLabel,
+      ),
+      heatmapPrimarySecondary: aggregateHeatmapPrimarySecondary(
+        normalizedRows,
+        'Primary',
+        'Secondary',
+        'BillableHours',
+        unassignedLabel,
+      ),
+      waterfallBillable: aggregateWaterfallBillable(normalizedRows, 'Date', 'BillableHours'),
+      fishboneStatusCauses: aggregateFishboneByStatus(
+        normalizedRows,
+        'Status',
+        'Primary',
+        'Secondary',
+        3,
+        unassignedLabel,
+      ),
     }),
-    [normalizedRows, topN],
+    [normalizedRows, topN, unassignedLabel],
   );
 
   const model = useMemo<GraphReportModel>(
     () => ({
-      title: config?.title || 'Graphic Report',
+      title: config?.title || t('graph.reportTitle'),
       kpis,
       charts,
       table: {
@@ -228,8 +363,8 @@ export const useGraphReport = ({ rows, config }: UseGraphReportOptions): UseGrap
           { id: 'Primary', label: fieldMapping.primaryDimension },
           { id: 'Secondary', label: fieldMapping.secondaryDimension },
           { id: 'Description', label: fieldMapping.description },
-          { id: 'ReportHours', label: 'Report Hours', align: 'right' },
-          { id: 'BillableHours', label: 'Billable Hours', align: 'right' },
+          { id: 'ReportHours', label: t('graph.column.reportHours'), align: 'right' },
+          { id: 'BillableHours', label: t('graph.column.billableHours'), align: 'right' },
           { id: 'Amount', label: 'Amount', align: 'right' },
           { id: 'Efficiency', label: 'Efficiency', align: 'right' },
           { id: 'Status', label: fieldMapping.status },
@@ -237,7 +372,7 @@ export const useGraphReport = ({ rows, config }: UseGraphReportOptions): UseGrap
         rows: normalizedRows,
       },
     }),
-    [charts, config?.title, fieldMapping, kpis, normalizedRows],
+    [charts, config?.title, fieldMapping, kpis, normalizedRows, t],
   );
 
   return {
