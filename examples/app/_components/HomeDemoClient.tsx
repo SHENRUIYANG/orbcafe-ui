@@ -7,7 +7,8 @@ import {
   User, 
   Mail, 
   Bell,
-  LayoutDashboard
+  LayoutDashboard,
+  Table2,
 } from 'lucide-react';
 
 export default function DemoPage() {
@@ -33,6 +34,12 @@ export default function DemoPage() {
       title: 'Standard Report',
       icon: <LayoutDashboard className="w-4 h-4" />,
       href: '/std-report',
+    },
+    {
+      id: 'pivot-table',
+      title: 'Pivot Table',
+      icon: <Table2 className="w-4 h-4" />,
+      href: '/pivot-table',
     },
     {
       id: 'detail-info',

@@ -77,6 +77,12 @@ export const useCTable = (props: CTableProps) => {
 
     // Sync props
     useEffect(() => {
+        if (props.layout) {
+            handleLayoutLoad(props.layout);
+        }
+    }, [props.layout]);
+
+    useEffect(() => {
         if (props.order !== undefined) setOrder(props.order);
         if (props.orderBy !== undefined) setOrderBy(props.orderBy);
     }, [props.order, props.orderBy]);

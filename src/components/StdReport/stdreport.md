@@ -86,4 +86,5 @@ The components support backend persistence via `serviceUrl`.
 - **Layouts**: Stores table column configuration.
 - **Variants**: Stores filter criteria + layout reference.
 
-By default, it expects a REST API at `http://127.0.0.1:8515`. You can override this via the `serviceUrl` prop.
+Default behavior (no `serviceUrl`): localStorage persistence only, no backend request.
+If you pass `serviceUrl`, it will use your REST API (e.g. `/api/layouts`, `/api/variants`) and automatically fall back to localStorage when unavailable.

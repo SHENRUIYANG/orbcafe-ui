@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { Box, Chip } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-import { LayoutDashboard, Settings, Mail } from 'lucide-react';
+import { LayoutDashboard, Settings, Mail, Table2 } from 'lucide-react';
 import { CAppPageLayout, CDetailInfoPage, CPageTransition, type TreeMenuItem } from 'orbcafe-ui';
 
 const buildRows = (id: string) => ([
@@ -63,6 +63,7 @@ export default function DetailInfoExampleClient({ rowId }: DetailInfoExampleClie
   const menuData: TreeMenuItem[] = useMemo(() => [
     { id: 'dashboard', title: 'Dashboard', href: '/', icon: <LayoutDashboard className="w-4 h-4" /> },
     { id: 'std-report', title: 'Standard Report', href: '/std-report', icon: <LayoutDashboard className="w-4 h-4" /> },
+    { id: 'pivot-table', title: 'Pivot Table', href: '/pivot-table', icon: <Table2 className="w-4 h-4" /> },
     { id: 'detail-info', title: 'Detail Info', href: `/detail-info/${rowId}`, icon: <LayoutDashboard className="w-4 h-4" /> },
     { id: 'messages', title: 'Messages', href: '/messages', icon: <Mail className="w-4 h-4" /> },
     { id: 'settings', title: 'Settings', href: '/settings', icon: <Settings className="w-4 h-4" /> },
@@ -166,6 +167,7 @@ export default function DetailInfoExampleClient({ rowId }: DetailInfoExampleClie
           }}
           table={{
             tableProps: {
+              appId: 'detail-info-example-table',
               rowKey: 'id',
               columns: [
                 { id: 'id', label: 'ID' },

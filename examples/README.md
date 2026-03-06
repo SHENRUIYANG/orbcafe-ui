@@ -26,6 +26,7 @@ npm run dev
 
 - `http://localhost:3000/`
 - `http://localhost:3000/std-report`
+- `http://localhost:3000/pivot-table`
 - `http://localhost:3000/detail-info/ID-1`
 
 ## 质量检查（建议提交前执行）

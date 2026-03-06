@@ -19,13 +19,11 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { CVariantManagement, VariantMetadata } from './Components/CVariantManagement';
 import { useOrbcafeI18n } from '../../i18n';
 
-const DEFAULT_API_URL = 'http://127.0.0.1:8515';
-
 export interface IVariantService {
-    getVariants: (appId: string) => Promise<VariantMetadata[]>;
-    saveVariant: (variant: VariantMetadata, appId: string) => Promise<void>;
+    getVariants: (appId: string, tableKey?: string) => Promise<VariantMetadata[]>;
+    saveVariant: (variant: VariantMetadata, appId: string, tableKey?: string) => Promise<void>;
     deleteVariant: (id: string) => Promise<void>;
-    setDefaultVariant: (id: string, appId: string) => Promise<void>;
+    setDefaultVariant: (id: string, appId: string, tableKey?: string) => Promise<void>;
 }
 
 interface CVariantManagerProps {
@@ -51,7 +49,8 @@ export const CVariantManager: React.FC<CVariantManagerProps> = ({
     currentLayoutId: propLayoutId,
     layoutRefs,
     onLoad,
-    serviceUrl = DEFAULT_API_URL,
+    variantService,
+    serviceUrl,
     onError,
     onSuccess,
     currentVariantId: propCurrentVariantId,
@@ -60,6 +59,7 @@ export const CVariantManager: React.FC<CVariantManagerProps> = ({
     const { t } = useOrbcafeI18n();
     const [variants, setVariants] = useState<VariantMetadata[]>([]);
     const [internalCurrentVariantId, setInternalCurrentVariantId] = useState<string>('');
+    const storageKey = `orbcafe.variants.${appId}.${tableKey}`;
 
     const currentVariantId = propCurrentVariantId !== undefined ? propCurrentVariantId : internalCurrentVariantId;
 
@@ -72,30 +72,60 @@ export const CVariantManager: React.FC<CVariantManagerProps> = ({
         }
     };
 
+    const loadVariantsFromLocal = useCallback((): VariantMetadata[] => {
+        try {
+            const raw = localStorage.getItem(storageKey);
+            if (!raw) return [];
+            const parsed = JSON.parse(raw);
+            if (!Array.isArray(parsed)) return [];
+            return parsed as VariantMetadata[];
+        } catch {
+            return [];
+        }
+    }, [storageKey]);
+
+    const saveVariantsToLocal = useCallback((nextVariants: VariantMetadata[]) => {
+        try {
+            localStorage.setItem(storageKey, JSON.stringify(nextVariants));
+        } catch {
+            // ignore localStorage errors
+        }
+    }, [storageKey]);
+
+    const applyVariants = useCallback((data: VariantMetadata[]) => {
+        setVariants(data);
+        const defaultVariant = data.find((v: VariantMetadata) => v.isDefault);
+        if (defaultVariant && !currentVariantId) {
+            handleVariantChange(defaultVariant.id);
+            onLoad(defaultVariant);
+        }
+    }, [currentVariantId, onLoad, handleVariantChange]);
+
     // --- Service Methods (Backend API) ---
 
     const fetchVariants = useCallback(async () => {
         if (!appId) return [];
         try {
-            const response = await fetch(`${serviceUrl}/api/variants?appId=${encodeURIComponent(appId)}&tableKey=${encodeURIComponent(tableKey)}`);
-            if (!response.ok) throw new Error(t('variant.toast.fetchFailed'));
-            const data: VariantMetadata[] = await response.json();
-            
-            setVariants(data);
-            
-            // Check for default variant
-            const defaultVariant = data.find((v: VariantMetadata) => v.isDefault);
-            if (defaultVariant && !currentVariantId) {
-                handleVariantChange(defaultVariant.id);
-                onLoad(defaultVariant);
+            let data: VariantMetadata[] = [];
+            if (variantService) {
+                data = await variantService.getVariants(appId, tableKey);
+            } else if (serviceUrl) {
+                const response = await fetch(`${serviceUrl}/api/variants?appId=${encodeURIComponent(appId)}&tableKey=${encodeURIComponent(tableKey)}`);
+                if (!response.ok) throw new Error(t('variant.toast.fetchFailed'));
+                data = await response.json();
+            } else {
+                data = loadVariantsFromLocal();
             }
+            applyVariants(data);
             return data;
         } catch (e) {
             console.error("Error fetching variants", e);
+            const localData = loadVariantsFromLocal();
+            applyVariants(localData);
             if (onError) onError(t('variant.toast.fetchFailed'));
-            return [];
+            return localData;
         }
-    }, [appId, tableKey, serviceUrl, onError, currentVariantId, onLoad, t]);
+    }, [appId, tableKey, variantService, serviceUrl, loadVariantsFromLocal, applyVariants, onError, t]);
 
     // Initial Load
     useEffect(() => {
@@ -104,10 +134,12 @@ export const CVariantManager: React.FC<CVariantManagerProps> = ({
     }, [appId, tableKey]);
 
     const handleSave = async (metadata: Omit<VariantMetadata, 'id' | 'createdAt'>) => {
+        let id = Date.now().toString();
+        let variantToSave!: VariantMetadata;
         try {
             // Check for existing variant to merge with (for multi-table support)
             const existingVariant = variants.find(v => v.name === metadata.name);
-            const id = existingVariant ? existingVariant.id : Date.now().toString();
+            id = existingVariant ? existingVariant.id : Date.now().toString();
 
             // --- Merge Logic for Filters ---
             let filtersToSave: any[] = [];
@@ -168,7 +200,7 @@ export const CVariantManager: React.FC<CVariantManagerProps> = ({
                 }
             }
 
-            const variantToSave: VariantMetadata = {
+            variantToSave = {
                 appId, // Required by backend
                 tableKey, // Required by backend
                 ...metadata,
@@ -179,43 +211,79 @@ export const CVariantManager: React.FC<CVariantManagerProps> = ({
                 layoutRefs: layoutRefsToSave
             } as any; // Cast to any to include appId/tableKey which might not be in frontend interface yet
 
-            const response = await fetch(`${serviceUrl}/api/variants`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(variantToSave)
-            });
-
-            if (!response.ok) throw new Error(t('variant.toast.saveFailed'));
+            if (variantService) {
+                await variantService.saveVariant(variantToSave, appId, tableKey);
+            } else if (serviceUrl) {
+                const response = await fetch(`${serviceUrl}/api/variants`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(variantToSave)
+                });
+                if (!response.ok) throw new Error(t('variant.toast.saveFailed'));
+            } else {
+                const hasReplaced = variants.some((v) => v.id === id);
+                const nextVariants = hasReplaced
+                    ? variants.map((v) => (v.id === id ? variantToSave : v))
+                    : [...variants, variantToSave];
+                setVariants(nextVariants);
+                saveVariantsToLocal(nextVariants);
+            }
             
             if (onSuccess) onSuccess(t('variant.toast.saveSuccess'));
             
             // Refresh list and select the new variant
-            await fetchVariants();
+            if (variantService || serviceUrl) {
+                await fetchVariants();
+            }
             handleVariantChange(id);
 
             // Notify parent
             onLoad(variantToSave);
         } catch (e) {
             console.error("Error saving variant", e);
+            const hasReplaced = variants.some((v) => v.id === id);
+            const nextVariants = hasReplaced
+                ? variants.map((v) => (v.id === id ? variantToSave : v))
+                : [...variants, variantToSave];
+            setVariants(nextVariants);
+            saveVariantsToLocal(nextVariants);
+            handleVariantChange(id);
+            onLoad(variantToSave);
             if (onError) onError(t('variant.toast.saveFailed'));
         }
     };
 
     const handleDelete = async (id: string) => {
         try {
-            const response = await fetch(`${serviceUrl}/api/variants/${id}`, {
-                method: 'DELETE'
-            });
-            if (!response.ok) throw new Error(t('variant.toast.deleteFailed'));
+            if (variantService) {
+                await variantService.deleteVariant(id);
+            } else if (serviceUrl) {
+                const response = await fetch(`${serviceUrl}/api/variants/${id}`, {
+                    method: 'DELETE'
+                });
+                if (!response.ok) throw new Error(t('variant.toast.deleteFailed'));
+            } else {
+                const nextVariants = variants.filter((v) => v.id !== id);
+                setVariants(nextVariants);
+                saveVariantsToLocal(nextVariants);
+            }
 
             if (currentVariantId === id) {
                 handleVariantChange('');
             }
             
-            fetchVariants();
+            if (variantService || serviceUrl) {
+                fetchVariants();
+            }
             if (onSuccess) onSuccess(t('variant.toast.deleteSuccess'));
         } catch (e) {
             console.error("Error deleting variant", e);
+            const nextVariants = variants.filter((v) => v.id !== id);
+            setVariants(nextVariants);
+            saveVariantsToLocal(nextVariants);
+            if (currentVariantId === id) {
+                handleVariantChange('');
+            }
             if (onError) onError(t('variant.toast.deleteFailed'));
         }
     };
@@ -232,18 +300,30 @@ export const CVariantManager: React.FC<CVariantManagerProps> = ({
                 isDefault: true
             } as any;
 
-            const response = await fetch(`${serviceUrl}/api/variants`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(variantToSave)
-            });
+            if (variantService) {
+                await variantService.setDefaultVariant(id, appId, tableKey);
+            } else if (serviceUrl) {
+                const response = await fetch(`${serviceUrl}/api/variants`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(variantToSave)
+                });
+                if (!response.ok) throw new Error(t('variant.toast.defaultFailed'));
+            } else {
+                const nextVariants = variants.map((v) => ({ ...v, isDefault: v.id === id }));
+                setVariants(nextVariants);
+                saveVariantsToLocal(nextVariants);
+            }
 
-            if (!response.ok) throw new Error(t('variant.toast.defaultFailed'));
-
-             await fetchVariants();
-             if (onSuccess) onSuccess(t('variant.toast.defaultSuccess'));
+            if (variantService || serviceUrl) {
+                await fetchVariants();
+            }
+            if (onSuccess) onSuccess(t('variant.toast.defaultSuccess'));
         } catch (e) {
             console.error("Error setting default variant", e);
+            const nextVariants = variants.map((v) => ({ ...v, isDefault: v.id === id }));
+            setVariants(nextVariants);
+            saveVariantsToLocal(nextVariants);
             if (onError) onError(t('variant.toast.defaultFailed'));
         }
     };

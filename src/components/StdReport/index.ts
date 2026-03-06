@@ -8,3 +8,4 @@ export * from './Components/CVariantManagement';
 export * from '../Molecules/CLayoutManagement';
 export * from './Hooks/CTable/types';
 export * from './Hooks/useStandardReport';
+export * from './Utils/variantUtils';

@@ -37,7 +37,7 @@ export interface CTableQuickDeleteConfig {
 }
 
 export interface CTableProps {
-    appId?: string;
+    appId: string; // Required for Variant/Layout Management
     title?: string;
     showToolbar?: boolean;
     columns: any[];
@@ -70,6 +70,7 @@ export interface CTableProps {
     quickCreate?: CTableQuickCreateConfig;
     quickEdit?: CTableQuickEditConfig;
     quickDelete?: CTableQuickDeleteConfig;
+    serviceUrl?: string;
 }
 
 export interface CTableHeadProps {

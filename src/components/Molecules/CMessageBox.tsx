@@ -44,8 +44,9 @@ import ErrorIcon from '@mui/icons-material/Error';
 import InfoIcon from '@mui/icons-material/Info';
 import { CButton } from '../Atoms/CButton';
 import { useOrbcafeI18n } from '../../i18n';
-
-export type CMessageBoxType = 'success' | 'warning' | 'error' | 'info' | 'default';
+import { messageManager } from '../../lib/message';
+import type { CMessageBoxType, MessageEvent } from '../../lib/message';
+export type { CMessageBoxType } from '../../lib/message';
 
 export interface CMessageBoxProps {
   open: boolean;
@@ -189,5 +190,58 @@ export const CMessageBox: React.FC<CMessageBoxProps> = ({
         </CButton>
       </DialogActions>
     </Dialog>
+  );
+};
+
+export const GlobalMessage: React.FC = () => {
+  const [msgState, setMsgState] = React.useState<MessageEvent | null>(null);
+  const [open, setOpen] = React.useState(false);
+
+  React.useEffect(() => {
+    const handleMessage = (event: MessageEvent | null) => {
+      if (event) {
+        setMsgState(event);
+        setOpen(true);
+      } else {
+        setOpen(false);
+        setMsgState(null);
+      }
+    };
+
+    messageManager.register(handleMessage);
+    return () => messageManager.unregister();
+  }, []);
+
+  const handleClose = () => {
+    setOpen(false);
+    if (msgState?.options?.onClose) {
+      msgState.options.onClose();
+    }
+    setMsgState(null);
+  };
+
+  const handleConfirm = () => {
+    if (msgState?.options?.onConfirm) {
+      msgState.options.onConfirm();
+    }
+    setOpen(false);
+    setMsgState(null);
+  };
+
+  if (!msgState) return null;
+
+  return (
+    <CMessageBox
+      open={open}
+      type={msgState.type}
+      message={msgState.content}
+      title={msgState.options?.title}
+      onClose={handleClose}
+      onConfirm={handleConfirm}
+      confirmText={msgState.options?.confirmText}
+      cancelText={msgState.options?.cancelText}
+      showCancel={msgState.options?.showCancel}
+      maxWidth={msgState.options?.maxWidth}
+    />
   );
 };

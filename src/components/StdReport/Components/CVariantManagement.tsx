@@ -28,6 +28,7 @@ export interface VariantMetadata {
     createdAt?: string;
     filters?: any;
     layout?: any;
+    layoutId?: string;
     layoutRefs?: any[];
     scope?: string;
     appId?: string;

@@ -9,6 +9,8 @@ export * from './components/GraphReport';
 export * from './components/CustomizeAgent';
 export * from './components/DetailInfo';
 export * from './components/PageLayout';
+export * from './components/PivotTable';
 export * from './i18n';
 export * from './lib/renderer/md_renderer';
 export * from './lib/transitions';
+export * from './lib/message';

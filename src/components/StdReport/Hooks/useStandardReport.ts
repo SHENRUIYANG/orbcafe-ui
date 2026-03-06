@@ -173,6 +173,7 @@ export const useStandardReport = ({
     };
 
     const pageProps: CStandardPageProps = {
+        id: metadata.id, // Use metadata.id as the page ID
         title: metadata.title,
         filterConfig: {
             appId: metadata.id, // Ensure appId is passed to CSmartFilter

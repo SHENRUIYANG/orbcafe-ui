@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { TableFooter, TableRow, TableCell } from '@mui/material';
 
 export const CTableFooter = (props: any) => {

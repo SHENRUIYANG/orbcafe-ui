@@ -23,6 +23,13 @@ import type { CTableProps } from './Hooks/CTable/types';
 import type { CSmartFilterProps } from './CSmartFilter';
 
 export interface CStandardPageProps {
+    /** 
+     * Unique Identifier for the Page/Report.
+     * Used as the `appId` for Variant and Layout persistence.
+     * MUST be unique across the system to avoid configuration conflicts.
+     */
+    id: string;
+
     /** Page Title */
     title: string;
     
@@ -43,33 +50,55 @@ export interface CStandardPageProps {
      * Default: 1 (8px) - Much tighter than default CTable behavior
      */
     spacing?: number;
+
+    /**
+     * Mode of operation:
+     * - 'separated': SmartFilter and CTable are rendered separately (default).
+     *   Layout variants are applied via prop updates from parent.
+     * - 'integrated': SmartFilter is passed into CTable as filterConfig.
+     *   CTable manages the connection between Filter and Table internally.
+     */
+    mode?: 'separated' | 'integrated';
 }
 
 export const CStandardPage = ({
+    id,
     title,
     hideHeader = true,
     filterConfig,
     tableProps,
     children,
-    spacing = 1
+    spacing = 1,
+    mode = 'separated'
 }: CStandardPageProps) => {
+    // Ensure ID is passed down to components
+    const effectiveFilterConfig = filterConfig ? {
+        ...filterConfig,
+        appId: filterConfig.appId || id
+    } : undefined;
+
+    const effectiveTableProps = {
+        ...tableProps,
+        appId: tableProps.appId || id
+    };
+
     return (
         <CPageLayout title={title} hideHeader={hideHeader}>
             <Stack spacing={spacing} sx={{ height: '100%', overflow: 'hidden' }}>
-                {/* Filter Section */}
-                {filterConfig && (
+                {/* Filter Section - Only render if separated */}
+                {mode === 'separated' && effectiveFilterConfig && (
                     <Box sx={{ flexShrink: 0 }}>
-                        <CSmartFilter {...filterConfig} />
+                        <CSmartFilter {...effectiveFilterConfig} />
                     </Box>
                 )}
                 
                 {/* Table Section */}
                 <Box sx={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
                    <CTable 
-                        {...tableProps}
+                        {...effectiveTableProps}
                         fitContainer={true}
-                        // Explicitly pass undefined for filterConfig to prevent CTable from rendering it again
-                        filterConfig={undefined} 
+                        // If integrated, pass filterConfig. If separated, pass undefined.
+                        filterConfig={mode === 'integrated' ? effectiveFilterConfig : undefined} 
                    />
                 </Box>
             </Stack>

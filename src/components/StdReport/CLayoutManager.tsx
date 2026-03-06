@@ -10,8 +10,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { CLayoutManagement, LayoutMetadata } from '../Molecules/CLayoutManagement';
 import { useOrbcafeI18n } from '../../i18n';
 
-const DEFAULT_API_URL = 'http://127.0.0.1:8515';
-
 export interface CLayoutManagerProps {
     appId: string;
     tableKey?: string; // Optional table identifier for multi-table apps
@@ -31,7 +29,7 @@ export const CLayoutManager: React.FC<CLayoutManagerProps> = ({
     onLayoutLoad,
     targetLayoutId,
     activeLayoutId,
-    serviceUrl = DEFAULT_API_URL,
+    serviceUrl,
     onError,
     onSuccess
 }) => {
@@ -114,6 +112,16 @@ export const CLayoutManager: React.FC<CLayoutManagerProps> = ({
 
     const fetchLayouts = useCallback(async () => {
         if (!appId) return;
+        if (!serviceUrl) {
+            const localLayouts = loadLayoutsFromLocal();
+            setLayouts(localLayouts);
+            const defaultLayout = localLayouts.find((l: LayoutMetadata) => l.isDefault);
+            if (defaultLayout && !currentLayoutId && !targetLayoutId) {
+                setCurrentLayoutId(defaultLayout.id);
+                onLayoutLoad(defaultLayout);
+            }
+            return;
+        }
         try {
             const response = await fetch(
                 `${serviceUrl}/api/layouts?appId=${encodeURIComponent(appId)}&tableKey=${encodeURIComponent(tableKey)}`
@@ -157,6 +165,18 @@ export const CLayoutManager: React.FC<CLayoutManagerProps> = ({
             isDefault: metadata.isDefault ?? false,
             isPublic: metadata.isPublic ?? false
         };
+        if (!serviceUrl) {
+            const hasReplaced = layouts.some((l) => l.id === id);
+            const nextLayouts = hasReplaced
+                ? layouts.map((l) => (l.id === id ? layoutToSave : l))
+                : [...layouts, layoutToSave];
+            setLayouts(nextLayouts);
+            saveLayoutsToLocal(nextLayouts);
+            setCurrentLayoutId(id);
+            onLayoutLoad(layoutToSave);
+            if (onSuccess) onSuccess(t('layout.toast.saveLocalSuccess'));
+            return;
+        }
         try {
             const response = await fetch(`${serviceUrl}/api/layouts`, {
                 method: 'POST',
@@ -185,6 +205,14 @@ export const CLayoutManager: React.FC<CLayoutManagerProps> = ({
     };
 
     const handleDelete = async (id: string) => {
+        if (!serviceUrl) {
+            const nextLayouts = layouts.filter((l) => l.id !== id);
+            setLayouts(nextLayouts);
+            saveLayoutsToLocal(nextLayouts);
+            if (currentLayoutId === id) setCurrentLayoutId('');
+            if (onSuccess) onSuccess(t('layout.toast.deleteLocalSuccess'));
+            return;
+        }
         try {
             const response = await fetch(`${serviceUrl}/api/layouts/${encodeURIComponent(id)}`, {
                 method: 'DELETE'
@@ -206,6 +234,13 @@ export const CLayoutManager: React.FC<CLayoutManagerProps> = ({
     };
 
     const handleSetDefault = async (id: string) => {
+        if (!serviceUrl) {
+            const nextLayouts = layouts.map((l) => ({ ...l, isDefault: l.id === id }));
+            setLayouts(nextLayouts);
+            saveLayoutsToLocal(nextLayouts);
+            if (onSuccess) onSuccess(t('layout.toast.defaultLocalSuccess'));
+            return;
+        }
         try {
             const layout = layouts.find(l => l.id === id);
             if (!layout) return;

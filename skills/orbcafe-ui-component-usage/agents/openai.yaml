@@ -1,0 +1,4 @@
+interface:
+  display_name: "ORBCAFE UI Component Usage"
+  short_description: "Guide precise ORBCAFE UI component integration"
+  default_prompt: "Use $orbcafe-ui-component-usage to choose and implement the right ORBCAFE UI component for this screen."

@@ -115,12 +115,13 @@ export interface CSmartFilterProps {
     loading?: boolean;
 
     // Managed Variant Props
-    appId?: string;
+    appId: string; // Required for Variant Management
     tableKey?: string;
     currentLayout?: any;
     currentLayoutId?: string;
     layoutRefs?: Array<{ tableKey: string; layoutId: string | null }>;
     variantService?: IVariantService;
+    serviceUrl?: string;
 }
 
 // --- Operator Config ---
@@ -551,7 +552,8 @@ export const CSmartFilter = ({
     currentLayout,
     currentLayoutId,
     layoutRefs,
-    variantService
+    variantService,
+    serviceUrl
 }: CSmartFilterProps) => {
     const { t } = useOrbcafeI18n();
     // State
@@ -628,6 +630,7 @@ export const CSmartFilter = ({
                         layoutRefs={layoutRefs}
                         onLoad={handleInternalVariantLoad}
                         variantService={variantService}
+                        serviceUrl={serviceUrl}
                         currentVariantId={currentVariantId}
                     />
                 ) : (

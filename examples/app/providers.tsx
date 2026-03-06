@@ -5,6 +5,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline } from '@mui/material';
+import { GlobalMessage } from 'orbcafe-ui';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function Providers({ children }: { children: any }) {
@@ -23,6 +24,7 @@ export function Providers({ children }: { children: any }) {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <GlobalMessage />
         {children}
       </LocalizationProvider>
     </ThemeProvider>

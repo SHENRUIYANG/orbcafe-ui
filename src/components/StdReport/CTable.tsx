@@ -147,6 +147,7 @@ export const CTable: React.FC<CTableProps> = (props) => {
     quickCreate,
     quickEdit,
     quickDelete,
+    serviceUrl,
   } = props;
   const title = titleProp || t('table.title.default');
 
@@ -447,7 +448,7 @@ export const CTable: React.FC<CTableProps> = (props) => {
           onLayoutLoad={handleLayoutLoad}
           targetLayoutId={layoutIdToLoad}
           activeLayoutId={currentLayoutId}
-          serviceUrl={filterConfig?.variantService ? undefined : undefined} // Use default or passed
+          serviceUrl={serviceUrl ?? filterConfig?.serviceUrl}
       />
   ) : null;
 
@@ -513,6 +514,7 @@ export const CTable: React.FC<CTableProps> = (props) => {
                   tableKey={tableKey}
                   currentLayout={[{ tableKey, layoutData: currentLayoutData }]}
                   variantService={filterConfig.variantService}
+                  serviceUrl={serviceUrl ?? filterConfig.serviceUrl}
               />
           )}
           <CTableMobile
@@ -559,7 +561,12 @@ export const CTable: React.FC<CTableProps> = (props) => {
                     onSearch={filterConfig.onSearch}
                     variants={filterConfig.variants || []}
                     currentVariantId={filterConfig.currentVariantId}
-                    onVariantLoad={handleVariantLoad}
+                    onVariantLoad={(variant) => {
+                        handleVariantLoad(variant);
+                        if (filterConfig.onVariantLoad) {
+                            filterConfig.onVariantLoad(variant);
+                        }
+                    }}
                     onVariantSave={filterConfig.onVariantSave!}
                     onVariantDelete={filterConfig.onVariantDelete!}
                     onVariantSetDefault={filterConfig.onVariantSetDefault!}
@@ -570,6 +577,7 @@ export const CTable: React.FC<CTableProps> = (props) => {
                     currentLayoutId={currentLayoutId}
                     layoutRefs={[{ tableKey, layoutId: currentLayoutId }]}
                     variantService={filterConfig.variantService}
+                    serviceUrl={serviceUrl ?? filterConfig.serviceUrl}
                 />
             </Box>
         )}
@@ -900,6 +908,7 @@ export const CTable: React.FC<CTableProps> = (props) => {
                 }
                 tableContent={
                     <CTable
+                        appId={effectiveAppId || 'graph-report-internal'}
                         title={t('graph.dataBody')}
                         columns={graphTableColumns}
                         rows={graphReportModel.table.rows as any[]}
