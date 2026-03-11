@@ -1,60 +1,38 @@
 ---
 name: orbcafe-ui-component-usage
-description: Precise component selection and implementation guide for the ORBCAFE UI npm library in React/Next.js projects. Use when requests involve building list pages, tables, filter bars, graph report dialogs, detail pages, navigation shells, message dialogs, AI prompt settings, markdown rendering, transitions, i18n integration, or choosing among ORBCAFE UI controls with correct props and hooks.
+description: Router skill for ORBCAFE UI. Use when the request is unclear or spans multiple modules, then classify the task and hand off to the most specific ORBCAFE skill (StdReport, Graph+Detail+Agent, Layout+Navigation, Pivot+AINav).
 ---
 
-# Orbcafe Ui Component Usage
+# ORBCAFE UI Router
 
-## Overview
+## Purpose
 
-Generate precise ORBCAFE UI usage code from natural language requirements. Prefer minimal, runnable patterns and only publicly exported APIs from `orbcafe-ui`.
+Use this skill as the entry point when a request mentions ORBCAFE UI but does not clearly name the target module.
 
 ## Workflow
 
-1. Classify request into one primary UI task:
-- App shell/navigation
-- Standard list/report table
-- Chart report dialog
-- Detail page
-- Confirmation/message dialog
-- AI prompt settings dialog
-- Markdown renderer or page transition
+1. Classify the request using `references/skill-routing-map.md`.
+2. Load only the matched module skill references.
+3. Enforce public export boundaries from `references/public-export-index.md`.
+4. Apply baseline integration checks from `references/integration-baseline.md`.
+5. Return:
+- Component decision
+- Minimal runnable snippet
+- Required data shape
+- One optional upgrade path
 
-2. Load only needed reference file:
-- Component mapping and first choice: `references/component-map.md`
-- Drop-in implementation templates: `references/implementation-recipes.md`
-- Public API boundaries and guardrails: `references/public-api-guardrails.md`
+## Trigger Heuristics
 
-3. Pick lowest-complexity integration pattern first:
-- List/report page: `useStandardReport` + `CStandardPage`
-- Table-only view: `CTable`
-- Detail page: `CDetailInfoPage`
-- App shell: `CAppPageLayout`
-
-4. Return implementation in this order:
-- Import block from `orbcafe-ui`
-- Minimal runnable component snippet
-- Required data shape (metadata/rows/menu/tabs)
-- Optional enhancements (graph, quick create/edit/delete, i18n)
-
-5. Apply environment constraints:
-- For Next.js App Router, unwrap dynamic `params` in Server Page before passing to Client component.
-- If Tailwind is used, include `./node_modules/orbcafe-ui/dist/**/*.{js,mjs}` in `content`.
-- Keep first render deterministic to avoid hydration mismatch (`Date.now`, `Math.random`, pathname-only client highlight).
-
-## Guardrails
-
-- Use only APIs exported from `dist/index.d.ts`. Do not import private internals.
-- Do not recommend `Atoms/*` components as public API unless they are explicitly exported.
-- Use stable machine values plus localized labels for filter options.
-- Prefer `CMessageBox` for confirmation/warning dialogs instead of hand-rolled `Dialog`.
-- Keep examples type-safe and avoid business-specific hardcoded endpoints unless user asked.
+- Use this skill first when user asks for:
+  - "用 ORBCAFE 组件做一个页面"
+  - "不知道选哪个组件"
+  - "把旧页面改成 ORBCAFE 风格"
+- Do not stay in this skill if intent becomes specific. Switch to the matching module skill.
 
 ## Output Contract
 
-When answering UI build requests with this skill, output:
+Always provide:
 
-1. `Component choice`: why this component/hook pair is the best fit.
-2. `Minimal code`: complete snippet the user can paste.
-3. `Key props`: only the props that matter for this requirement.
-4. `Upgrade path`: one short optional next step (for example add `graphReport`, i18n, or variant/layout persistence).
+1. `Decision`: which ORBCAFE module and why.
+2. `Paste-ready code`: imports from `orbcafe-ui` only.
+3. `Boundary checks`: 2-4 checks to avoid non-public API usage and hydration/i18n issues.
