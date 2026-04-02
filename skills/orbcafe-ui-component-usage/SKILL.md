@@ -1,6 +1,6 @@
 ---
 name: orbcafe-ui-component-usage
-description: Route ORBCAFE UI requests to the correct module skill and enforce official examples-based integration baseline. Use when requests are ambiguous, cross-module, or when prior attempts had "no effect"; classify to StdReport, Graph+Detail+Agent, Kanban+Detail, Layout+Navigation, Pivot+AINav, or AgentUI Chat and require install/startup/verification steps.
+description: Route ORBCAFE UI requests to the correct module skill and enforce official examples-based integration baseline. Use when requests are ambiguous, cross-module, or when prior attempts had "no effect"; classify to StdReport, Graph+Detail+Agent, Kanban+Detail, Layout+Navigation, Pivot+AINav, Pad Workflow, or AgentUI Chat and require install/startup/verification steps.
 ---
 
 # ORBCAFE UI Router

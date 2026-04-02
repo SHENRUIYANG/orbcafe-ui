@@ -12,6 +12,8 @@
   - `orbcafe-layout-navigation`
 - Build pivot analytics or voice navigation:
   - `orbcafe-pivot-ainav`
+- Build iPad/pad touch workflow shell, touch table, keypad writeback, or orientation adaptation:
+  - `orbcafe-pad-workflow`
 - Build chat page, assistant panel, or floating copilot:
   - `orbcafe-agentui-chat`
 
@@ -27,6 +29,8 @@
   - Layout+Navigation skill
 - `透视表`, `pivot`, `拖拽维度`, `preset`, `语音导航`, `space 长按`:
   - Pivot+AINav skill
+- `pad`, `平板`, `触摸`, `横竖屏`, `小键盘`, `扫码`, `camera`, `barcode`, `PTable`, `PSmartFilter`, `PAppPageLayout`, `Navigation Island`:
+  - Pad Workflow skill
 - `聊天`, `chat`, `copilot`, `assistant`, `streaming`, `卡片消息`, `AgentUI`, `StdChat`, `CopilotChat`, `AgentPanel`:
   - AgentUI Chat skill
 
@@ -36,4 +40,5 @@
 - DetailInfo + CTable: choose Graph+Detail+Agent skill.
 - Kanban + DetailInfo: choose Kanban+Detail skill first, then attach DetailInfo route/query handling.
 - App shell + any page module: apply Layout+Navigation skill first for frame, then attach module skill.
+- Pad shell + touch report/keypad: apply Pad Workflow skill first, then attach StdReport or Layout skill when needed.
 - AgentUI + app shell: apply Layout+Navigation skill first for frame, then attach AgentUI Chat skill.

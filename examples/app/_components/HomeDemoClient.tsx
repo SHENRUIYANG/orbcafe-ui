@@ -13,6 +13,7 @@ import {
   MessageSquare,
   Bot,
   PanelRight,
+  TabletSmartphone,
 } from 'lucide-react';
 
 export default function DemoPage() {
@@ -62,6 +63,12 @@ export default function DemoPage() {
       title: 'Kanban',
       icon: <LayoutDashboard className="w-4 h-4" />,
       href: '/kanban',
+    },
+    {
+      id: 'pad',
+      title: 'Pad Demo',
+      icon: <TabletSmartphone className="w-4 h-4" />,
+      href: '/pad',
     },
     {
       id: 'pivot-table',

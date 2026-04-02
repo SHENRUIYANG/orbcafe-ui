@@ -25,6 +25,7 @@ export const PAppPageLayout = ({
   children,
   menuData = [],
   workloadItems = [],
+  workloadSelectedId,
   showNavigation = true,
   showWorkloadNav = true,
   orientation = 'auto',
@@ -42,14 +43,19 @@ export const PAppPageLayout = ({
   onWorkloadSelect,
 }: PAppPageLayoutProps) => {
   const theme = useTheme();
-  const isPortraitViewport = useMediaQuery('(orientation: portrait)');
-  const isCompactViewport = useMediaQuery(theme.breakpoints.down('md'));
+  const isPortraitViewport = useMediaQuery('(orientation: portrait)', { noSsr: true });
+  const isCompactViewport = useMediaQuery(theme.breakpoints.down('md'), { noSsr: true });
   const resolvedOrientation =
     orientation === 'auto' ? (isPortraitViewport || isCompactViewport ? 'portrait' : 'landscape') : orientation;
 
-  const [internalNavOpen, setInternalNavOpen] = useState(defaultNavigationOpen ?? resolvedOrientation === 'landscape');
+  const [internalNavOpen, setInternalNavOpen] = useState(defaultNavigationOpen ?? false);
   const [searchText, setSearchText] = useState('');
+  const [mounted, setMounted] = useState(false);
   const navigationOpen = navOpen ?? internalNavOpen;
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (navOpen !== undefined) return;
@@ -90,7 +96,7 @@ export const PAppPageLayout = ({
         <Box sx={{ minWidth: 0 }}>
           <Typography sx={{ fontSize: '1.05rem', fontWeight: 900 }}>{appTitle}</Typography>
           <Typography sx={{ fontSize: '0.78rem', color: 'text.secondary' }}>
-            {resolvedOrientation === 'portrait' ? 'Pad portrait workspace' : 'Pad landscape workspace'}
+            {!mounted ? 'Pad workspace' : resolvedOrientation === 'portrait' ? 'Pad portrait workspace' : 'Pad landscape workspace'}
           </Typography>
         </Box>
 
@@ -170,7 +176,6 @@ export const PAppPageLayout = ({
           <Drawer
             open={navigationOpen}
             onClose={() => updateNavigationOpen(false)}
-            ModalProps={{ keepMounted: true }}
             PaperProps={{
               sx: {
                 width: 'min(88vw, 360px)',
@@ -198,6 +203,7 @@ export const PAppPageLayout = ({
             {showWorkloadNav && workloadItems.length > 0 ? (
               <PWorkloadNav
                 items={workloadItems}
+                selectedId={workloadSelectedId}
                 orientation={resolvedOrientation}
                 onItemSelect={onWorkloadSelect}
               />

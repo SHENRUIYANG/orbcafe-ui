@@ -1,6 +1,6 @@
 'use client';
 
-import { Box, CardActionArea, Paper, Stack, Typography, useMediaQuery } from '@mui/material';
+import { Box, Paper, Stack, Typography, useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { useRouter } from 'next/navigation';
 import type { PWorkloadNavItem, PWorkloadNavProps } from './types';
@@ -51,13 +51,23 @@ export const PWorkloadNav = ({ items, selectedId, orientation = 'auto', onItemSe
               boxShadow: selected ? '0 18px 40px rgba(37, 99, 235, 0.16)' : 'none',
             }}
           >
-            <CardActionArea
+            <Box
+              component="button"
+              type="button"
               disabled={item.disabled}
               onClick={() => navigateItem(router, item, onItemSelect)}
               sx={{
+                width: '100%',
                 p: 2,
                 minHeight: resolvedOrientation === 'portrait' ? 156 : 148,
-                alignItems: 'stretch',
+                display: 'block',
+                border: 0,
+                background: 'transparent',
+                textAlign: 'left',
+                cursor: item.disabled ? 'not-allowed' : 'pointer',
+                appearance: 'none',
+                WebkitAppearance: 'none',
+                WebkitTapHighlightColor: 'transparent',
               }}
             >
               <Stack spacing={1.5} sx={{ height: '100%' }}>
@@ -113,7 +123,7 @@ export const PWorkloadNav = ({ items, selectedId, orientation = 'auto', onItemSe
                   ) : null}
                 </Box>
               </Stack>
-            </CardActionArea>
+            </Box>
           </Paper>
         );
       })}

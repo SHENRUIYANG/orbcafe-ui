@@ -68,6 +68,17 @@
       "minimal_state": ["messages", "isResponding", "assistant isStreaming", "copilot isOpen/corner/panelSize/panelPosition"],
       "verify": ["user send appends", "assistant streams", "streaming flag clears", "card hooks emit", "copilot shell interactions work"],
       "common_failure_modes": ["treating CopilotChat as full floating system", "forgetting streaming lifecycle", "coupling to internal renderers", "resize observer overwriting shell state"]
+    },
+    {
+      "name": "PadWorkflow",
+      "mode": "hook-first",
+      "public_entries": ["PAppPageLayout", "PNavIsland", "PWorkloadNav", "PSmartFilter", "PTable", "PNumericKeypad", "PBarcodeScanner", "PTouchCard", "usePadLayout", "usePadRecordEditor"],
+      "preferred_pattern": "PAppPageLayout + PTable + PSmartFilter + PNumericKeypad with hook-first state",
+      "public_hooks": ["usePadLayout", "usePadRecordEditor"],
+      "canonical_examples": ["examples/app/_components/PadExampleClient.tsx", "examples/app/pad/page.tsx"],
+      "minimal_state": ["orientation + nav open", "workload selected id", "filters + variant/layout identity", "selected row + editable numeric value", "scanner dialog open + scan result callback"],
+      "verify": ["orientation switch keeps interactions alive", "nav/workload cards are clickable", "PTable toolbar/actions keep expected alignment", "variant/layout save/load works", "keypad submit writes back row value", "barcode scan callback updates business state"],
+      "common_failure_modes": ["hidden drawer/modal layer intercepting clicks", "hydration mismatch from orientation-dependent first render", "rendering React nodes inside paragraph wrappers", "keypad updates input only but not data source", "camera stream not released after dialog close"]
     }
   ],
   "shared_rules": [

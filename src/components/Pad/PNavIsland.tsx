@@ -164,6 +164,9 @@ export const PNavIsland = ({
               background: 'transparent',
               textAlign: 'left',
               cursor: 'pointer',
+              appearance: 'none',
+              WebkitAppearance: 'none',
+              WebkitTapHighlightColor: 'transparent',
             }}
           >
             <Avatar
@@ -292,9 +295,11 @@ export const PNavIsland = ({
             }}
           />
 
-          <IconButton onClick={onToggle} sx={{ bgcolor: 'action.hover' }}>
-            <MenuOpenRoundedIcon />
-          </IconButton>
+          {resolvedOrientation === 'landscape' ? (
+            <IconButton onClick={onToggle} sx={{ bgcolor: 'action.hover' }}>
+              <MenuOpenRoundedIcon />
+            </IconButton>
+          ) : null}
         </Stack>
 
         {headerSlot}

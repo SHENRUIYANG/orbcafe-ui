@@ -9,4 +9,5 @@ If you need module-level mappings, load the target module skill references:
 - `orbcafe-kanban-detail/references/*`
 - `orbcafe-layout-navigation/references/*`
 - `orbcafe-pivot-ainav/references/*`
+- `orbcafe-pad-workflow/references/*`
 - `orbcafe-agentui-chat/references/*`

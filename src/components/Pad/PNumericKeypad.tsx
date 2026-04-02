@@ -15,11 +15,10 @@ interface KeypadButtonProps {
 }
 
 const KeypadButton = ({ label, onPress, emphasis = 'default' }: KeypadButtonProps) => (
-  <Paper
+  <Box
     component="button"
     type="button"
     onClick={onPress}
-    elevation={0}
     sx={(theme) => ({
       minHeight: 72,
       borderRadius: 3,
@@ -39,13 +38,17 @@ const KeypadButton = ({ label, onPress, emphasis = 'default' }: KeypadButtonProp
       fontSize: '1.25rem',
       fontWeight: 800,
       transition: 'transform 120ms ease, box-shadow 160ms ease, background-color 160ms ease',
+      cursor: 'pointer',
+      appearance: 'none',
+      WebkitAppearance: 'none',
+      WebkitTapHighlightColor: 'transparent',
       '&:active': {
         transform: 'scale(0.98)',
       },
     })}
   >
     {label}
-  </Paper>
+  </Box>
 );
 
 export const PNumericKeypad = ({
@@ -181,32 +184,34 @@ export const PNumericKeypad = ({
         </Box>
 
         <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 1.25 }}>
-          <Paper
+          <Box
             component="button"
             type="button"
             onClick={handleBackspace}
-            elevation={0}
             sx={{
               minHeight: 64,
               borderRadius: 3,
               border: '1px solid',
               borderColor: 'divider',
               background: 'background.paper',
+              cursor: 'pointer',
+              appearance: 'none',
+              WebkitAppearance: 'none',
+              WebkitTapHighlightColor: 'transparent',
             }}
           >
             <Stack direction="row" spacing={1} justifyContent="center" alignItems="center">
               <BackspaceRoundedIcon />
               <Typography sx={{ fontWeight: 700 }}>{backspaceLabel || 'DEL'}</Typography>
             </Stack>
-          </Paper>
+          </Box>
 
           <KeypadButton label={String(clearLabel || 'CLR')} onPress={handleClear} emphasis="danger" />
 
-          <Paper
+          <Box
             component="button"
             type="button"
             onClick={handleSubmit}
-            elevation={0}
             sx={(theme) => ({
               minHeight: 64,
               borderRadius: 3,
@@ -214,13 +219,17 @@ export const PNumericKeypad = ({
               borderColor: 'primary.main',
               background: theme.palette.primary.main,
               color: '#fff',
+              cursor: 'pointer',
+              appearance: 'none',
+              WebkitAppearance: 'none',
+              WebkitTapHighlightColor: 'transparent',
             })}
           >
             <Stack direction="row" spacing={1} justifyContent="center" alignItems="center">
               <CheckRoundedIcon />
               <Typography sx={{ fontWeight: 800 }}>{confirmLabel || t('common.ok')}</Typography>
             </Stack>
-          </Paper>
+          </Box>
         </Box>
       </Stack>
     </Paper>

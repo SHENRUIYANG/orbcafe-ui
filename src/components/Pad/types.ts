@@ -2,6 +2,7 @@ import type { HTMLAttributes, ReactNode } from 'react';
 import type { SxProps, Theme } from '@mui/material/styles';
 import type { TreeMenuItem } from '../Navigation-Island/tree-menu';
 import type { CTableProps } from '../StdReport/Hooks/CTable/types';
+import type { CSmartFilterProps } from '../StdReport/CSmartFilter';
 import type { CAppHeaderUser } from '../PageLayout/types';
 
 export type POrientation = 'auto' | 'portrait' | 'landscape';
@@ -60,6 +61,29 @@ export interface PNumericKeypadProps {
   sx?: SxProps<Theme>;
 }
 
+export interface PBarcodeScannerDetectedValue {
+  rawValue: string;
+  format?: string;
+}
+
+export interface PBarcodeScannerProps {
+  open: boolean;
+  onClose: () => void;
+  title?: ReactNode;
+  subtitle?: ReactNode;
+  formats?: string[];
+  facingMode?: 'environment' | 'user';
+  manualEntry?: boolean;
+  autoCloseOnDetect?: boolean;
+  scanIntervalMs?: number;
+  confirmLabel?: ReactNode;
+  cancelLabel?: ReactNode;
+  manualPlaceholder?: string;
+  onDetected?: (value: PBarcodeScannerDetectedValue) => void;
+  onError?: (message: string) => void;
+  sx?: SxProps<Theme>;
+}
+
 export interface PWorkloadNavItem {
   id: string;
   title: string;
@@ -94,6 +118,11 @@ export interface PNavIslandProps {
   onItemSelect?: (item: TreeMenuItem) => void;
 }
 
+export interface PSmartFilterProps extends CSmartFilterProps {
+  touchMode?: 'comfortable' | 'expanded';
+  sx?: SxProps<Theme>;
+}
+
 export interface PTableProps extends CTableProps {
   orientation?: POrientation;
   cardTitleField?: string;
@@ -111,6 +140,7 @@ export interface PAppPageLayoutProps {
   children: ReactNode;
   menuData?: TreeMenuItem[];
   workloadItems?: PWorkloadNavItem[];
+  workloadSelectedId?: string;
   showNavigation?: boolean;
   showWorkloadNav?: boolean;
   orientation?: POrientation;

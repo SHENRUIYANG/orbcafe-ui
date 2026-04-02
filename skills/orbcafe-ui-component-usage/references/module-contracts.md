@@ -205,7 +205,49 @@ Use it before reading a module README in detail.
   - coupling to internal renderers
   - resize observer overwriting shell resize state
 
-## 7. Shared Rules For AI
+## 7. Pad Workflow
+
+- Public entry:
+  - `PAppPageLayout`
+  - `PNavIsland`
+  - `PWorkloadNav`
+  - `PSmartFilter`
+  - `PTable`
+  - `PNumericKeypad`
+  - `PBarcodeScanner`
+  - `PTouchCard`
+  - `usePadLayout`
+  - `usePadRecordEditor`
+- Preferred pattern:
+  - `PAppPageLayout + PTable + PSmartFilter + PNumericKeypad` with hook-first state
+- Hooks:
+  - Public hooks exist:
+    - `usePadLayout`
+    - `usePadRecordEditor`
+- Minimal state contract:
+  - orientation + nav open
+  - workload selected id
+  - filter values + variant/layout identity
+  - selected row + editable numeric value
+  - scanner dialog open + scan result callback
+- Canonical example:
+  - `examples/app/_components/PadExampleClient.tsx`
+  - `examples/app/pad/page.tsx`
+- Verify:
+  - orientation switch keeps interactions alive
+  - nav/workload cards are clickable
+  - PTable toolbar/actions keep expected alignment
+  - variant/layout save/load works
+  - keypad submit writes back row value
+  - barcode scan callback updates business state
+- Common failure modes:
+  - hidden drawer/modal layer intercepting clicks
+  - hydration mismatch from orientation-dependent first render
+  - rendering React nodes inside typography paragraph wrappers
+  - keypad only updates local input but not data source
+  - camera stream not released after dialog close
+
+## 8. Shared Rules For AI
 
 - Import only from `orbcafe-ui`.
 - Prefer the canonical example before inventing a new composition.
