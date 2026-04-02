@@ -14,6 +14,8 @@ export default defineConfig({
     '@mui/material',
     '@mui/icons-material',
     '@mui/x-date-pickers',
+    'framer-motion',
+    'ogl',
   ], // 告诉打包工具：这些包由使用者的项目提供，不要打包进去
   treeshake: true,
   // 关键：保留你的 "use client" 指令，这对于 Next.js 使用者非常重要

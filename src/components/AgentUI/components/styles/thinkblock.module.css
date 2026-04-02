@@ -1,0 +1,23 @@
+@keyframes thinkingPulse {
+  0%, 70%, 100% { 
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  35% { 
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+@keyframes cursorBlink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+.thinkingPulse {
+  animation: thinkingPulse 1.5s infinite;
+}
+
+.cursorBlink {
+  animation: cursorBlink 1s infinite;
+}

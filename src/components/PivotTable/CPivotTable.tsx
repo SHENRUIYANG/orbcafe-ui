@@ -2,9 +2,15 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  Button,
   Box,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   Divider,
   FormControl,
+  IconButton,
   MenuItem,
   Paper,
   Portal,
@@ -17,8 +23,14 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  TextField,
+  Tooltip,
   Typography,
 } from '@mui/material';
+import SaveIcon from '@mui/icons-material/Save';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import {
   DndContext,
   DragOverlay,
@@ -30,8 +42,8 @@ import {
   useSensors,
 } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
-import type { CPivotTableProps, PivotAggregation } from './types';
-import type { AxisZone, PivotPreview, PivotTreeNode, PivotZone, ValueZoneItem } from './pivotModel';
+import type { CPivotTableProps, PivotAggregation, PivotChartType, PivotTablePreset } from './types';
+import type { AxisZone, PivotColumnTreeNode, PivotPreview, PivotTreeNode, PivotZone, ValueZoneItem } from './pivotModel';
 import { AGGREGATION_LABEL, EMPTY_VALUE_LABEL, GRAND_TOTAL_LABEL, ROW_RESULT_LABEL } from './pivotConstants';
 import {
   aggregateRows,
@@ -50,22 +62,129 @@ import {
 import { DimensionFilterSelect } from './components/DimensionFilterSelect';
 import { FieldPaletteTokenUI } from './components/FieldPaletteToken';
 import { PivotConfiguratorPanel } from './components/PivotConfiguratorPanel';
+import { PivotSectionCard } from './components/PivotSectionCard';
+import { PivotChartPanel } from './PivotChart';
 import { PivotRowRenderer } from './components/PivotRowRenderer';
 import { SortableZoneTokenUI } from './components/SortableZoneToken';
 import { useOrbcafeI18n } from '../../i18n';
+
+const getDefaultChartDimensionFieldId = (
+  rowFields: string[],
+  columnFields: string[],
+  preferred?: string,
+): string => {
+  const options = [...rowFields, ...columnFields];
+  if (preferred && options.includes(preferred)) {
+    return preferred;
+  }
+  return options[0] ?? '';
+};
+
+const getDefaultPrimaryValueFieldId = (valueFields: ValueZoneItem[], preferred?: string): string => {
+  if (preferred && valueFields.some((item) => item.fieldId === preferred)) {
+    return preferred;
+  }
+  return valueFields[0]?.fieldId ?? '';
+};
+
+const getDefaultSecondaryValueFieldId = (
+  valueFields: ValueZoneItem[],
+  primaryValueFieldId: string,
+  preferred?: string,
+): string => {
+  if (preferred === '') {
+    return '';
+  }
+  if (
+    preferred &&
+    preferred !== primaryValueFieldId &&
+    valueFields.some((item) => item.fieldId === preferred)
+  ) {
+    return preferred;
+  }
+  return valueFields.find((item) => item.fieldId !== primaryValueFieldId)?.fieldId ?? '';
+};
+
+interface VisiblePivotColumn {
+  id: string;
+  label: string;
+  leafColumnIds: string[];
+  valueItem: ValueZoneItem;
+}
+
+interface ColumnHeaderCell {
+  key: string;
+  label: string;
+  colSpan: number;
+  rowSpan: number;
+  expandable: boolean;
+  expanded: boolean;
+}
+
+const collectExpandableNodeKeys = <T extends { key: string; children: T[] }>(nodes: T[]): Set<string> => {
+  const keys = new Set<string>();
+  const visit = (items: T[]) => {
+    items.forEach((item) => {
+      if (item.children.length > 0) {
+        keys.add(item.key);
+        visit(item.children);
+      }
+    });
+  };
+  visit(nodes);
+  return keys;
+};
+
+const getVisibleColumnTreeDepth = (nodes: PivotColumnTreeNode[], expandedKeys: Set<string>, depth = 0): number => {
+  if (nodes.length === 0) {
+    return depth;
+  }
+
+  return nodes.reduce((maxDepth, node) => {
+    if (node.children.length === 0 || !expandedKeys.has(node.key)) {
+      return Math.max(maxDepth, depth + 1);
+    }
+    return Math.max(maxDepth, getVisibleColumnTreeDepth(node.children, expandedKeys, depth + 1));
+  }, depth);
+};
+
+const collectVisibleColumnGroups = (nodes: PivotColumnTreeNode[], expandedKeys: Set<string>): PivotColumnTreeNode[] => {
+  const groups: PivotColumnTreeNode[] = [];
+  const visit = (items: PivotColumnTreeNode[]) => {
+    items.forEach((item) => {
+      if (item.children.length > 0 && expandedKeys.has(item.key)) {
+        visit(item.children);
+        return;
+      }
+      groups.push(item);
+    });
+  };
+  visit(nodes);
+  return groups;
+};
 
 export const CPivotTable: React.FC<CPivotTableProps> = ({
   title,
   rows,
   fields,
   initialLayout,
+  initialChart,
   emptyText,
   maxPreviewHeight = 520,
+  initialChartCollapsed = false,
+  initialTableCollapsed = false,
   model,
+  enablePresetManagement = false,
+  presets,
+  defaultPresets,
+  onPresetsChange,
+  initialPresetId,
+  onPresetApplied,
 }) => {
   const { t } = useOrbcafeI18n();
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
   const tokenCounterRef = useRef(0);
+  const initialPresetAppliedRef = useRef(false);
   const resolvedTitle = title ?? t('pivot.title.default');
   const resolvedEmptyText = emptyText ?? t('pivot.empty');
 
@@ -117,8 +236,44 @@ export const CPivotTable: React.FC<CPivotTableProps> = ({
   const [internalFilterSelections, setInternalFilterSelections] = useState<Record<string, string[]>>({});
   const [internalShowGrandTotal, setInternalShowGrandTotal] = useState<boolean>(true);
   const [internalIsConfiguratorCollapsed, setInternalIsConfiguratorCollapsed] = useState<boolean>(false);
+  const [internalChartDimensionFieldId, setInternalChartDimensionFieldId] = useState<string>(() =>
+    getDefaultChartDimensionFieldId(
+      sanitizeAxisFields(initialLayout?.rows, validFieldSet),
+      sanitizeAxisFields(initialLayout?.columns, validFieldSet),
+      initialChart?.dimensionFieldId,
+    ),
+  );
+  const [internalChartPrimaryValueFieldId, setInternalChartPrimaryValueFieldId] = useState<string>(() => {
+    const initialValueItems = (initialLayout?.values ?? [])
+      .filter((item, index, source) => validFieldSet.has(item.fieldId) && source.findIndex((entry) => entry.fieldId === item.fieldId) === index)
+      .map((item) => ({
+        tokenId: item.fieldId,
+        fieldId: item.fieldId,
+        aggregation: normalizeAggregation(item.aggregation, fieldMap.get(item.fieldId)),
+      }));
+    return getDefaultPrimaryValueFieldId(initialValueItems, initialChart?.primaryValueFieldId);
+  });
+  const [internalChartSecondaryValueFieldId, setInternalChartSecondaryValueFieldId] = useState<string>(() => {
+    const initialValueItems = (initialLayout?.values ?? [])
+      .filter((item, index, source) => validFieldSet.has(item.fieldId) && source.findIndex((entry) => entry.fieldId === item.fieldId) === index)
+      .map((item) => ({
+        tokenId: item.fieldId,
+        fieldId: item.fieldId,
+        aggregation: normalizeAggregation(item.aggregation, fieldMap.get(item.fieldId)),
+      }));
+    const primaryValueFieldId = getDefaultPrimaryValueFieldId(initialValueItems, initialChart?.primaryValueFieldId);
+    return getDefaultSecondaryValueFieldId(initialValueItems, primaryValueFieldId, initialChart?.secondaryValueFieldId);
+  });
+  const [internalChartType, setInternalChartType] = useState<PivotChartType>(initialChart?.chartType ?? 'bar-vertical');
+  const [internalIsChartCollapsed, setInternalIsChartCollapsed] = useState<boolean>(initialChartCollapsed);
+  const [internalIsTableCollapsed, setInternalIsTableCollapsed] = useState<boolean>(initialTableCollapsed);
+  const [internalPresets, setInternalPresets] = useState<PivotTablePreset[]>(() => defaultPresets ?? []);
+  const [activePresetId, setActivePresetId] = useState<string>('');
+  const [isSavePresetDialogOpen, setIsSavePresetDialogOpen] = useState(false);
+  const [presetNameDraft, setPresetNameDraft] = useState('');
   const [activeDragId, setActiveDragId] = useState<string | null>(null);
-  const [expandedKeys, setExpandedKeys] = useState<Set<string>>(new Set(['__grand_total__']));
+  const [expandedRowKeys, setExpandedRowKeys] = useState<Set<string>>(new Set(['__grand_total__']));
+  const [expandedColumnKeys, setExpandedColumnKeys] = useState<Set<string>>(new Set());
 
   const rowFields = model?.rowFields ?? internalRowFields;
   const columnFields = model?.columnFields ?? internalColumnFields;
@@ -127,6 +282,14 @@ export const CPivotTable: React.FC<CPivotTableProps> = ({
   const filterSelections = model?.filterSelections ?? internalFilterSelections;
   const showGrandTotal = model?.showGrandTotal ?? internalShowGrandTotal;
   const isConfiguratorCollapsed = model?.isConfiguratorCollapsed ?? internalIsConfiguratorCollapsed;
+  const chartDimensionFieldId = model?.chartDimensionFieldId ?? internalChartDimensionFieldId;
+  const chartPrimaryValueFieldId = model?.chartPrimaryValueFieldId ?? internalChartPrimaryValueFieldId;
+  const chartSecondaryValueFieldId = model?.chartSecondaryValueFieldId ?? internalChartSecondaryValueFieldId;
+  const chartType = model?.chartType ?? internalChartType;
+  const isChartCollapsed = model?.isChartCollapsed ?? internalIsChartCollapsed;
+  const isTableCollapsed = model?.isTableCollapsed ?? internalIsTableCollapsed;
+  const presetList = presets ?? internalPresets;
+  const shouldRenderPresetToolbar = enablePresetManagement || presetList.length > 0 || Boolean(onPresetsChange);
 
   const setRowFields: React.Dispatch<React.SetStateAction<string[]>> = useCallback(
     (updater) => {
@@ -205,6 +368,83 @@ export const CPivotTable: React.FC<CPivotTableProps> = ({
     [model],
   );
 
+  const setChartDimensionFieldId: React.Dispatch<React.SetStateAction<string>> = useCallback(
+    (updater) => {
+      if (model?.setChartDimensionFieldId) {
+        model.setChartDimensionFieldId(updater);
+        return;
+      }
+      setInternalChartDimensionFieldId(updater);
+    },
+    [model],
+  );
+
+  const setChartPrimaryValueFieldId: React.Dispatch<React.SetStateAction<string>> = useCallback(
+    (updater) => {
+      if (model?.setChartPrimaryValueFieldId) {
+        model.setChartPrimaryValueFieldId(updater);
+        return;
+      }
+      setInternalChartPrimaryValueFieldId(updater);
+    },
+    [model],
+  );
+
+  const setChartSecondaryValueFieldId: React.Dispatch<React.SetStateAction<string>> = useCallback(
+    (updater) => {
+      if (model?.setChartSecondaryValueFieldId) {
+        model.setChartSecondaryValueFieldId(updater);
+        return;
+      }
+      setInternalChartSecondaryValueFieldId(updater);
+    },
+    [model],
+  );
+
+  const setChartType: React.Dispatch<React.SetStateAction<PivotChartType>> = useCallback(
+    (updater) => {
+      if (model?.setChartType) {
+        model.setChartType(updater);
+        return;
+      }
+      setInternalChartType(updater);
+    },
+    [model],
+  );
+
+  const setIsChartCollapsed: React.Dispatch<React.SetStateAction<boolean>> = useCallback(
+    (updater) => {
+      if (model?.setIsChartCollapsed) {
+        model.setIsChartCollapsed(updater);
+        return;
+      }
+      setInternalIsChartCollapsed(updater);
+    },
+    [model],
+  );
+
+  const setIsTableCollapsed: React.Dispatch<React.SetStateAction<boolean>> = useCallback(
+    (updater) => {
+      if (model?.setIsTableCollapsed) {
+        model.setIsTableCollapsed(updater);
+        return;
+      }
+      setInternalIsTableCollapsed(updater);
+    },
+    [model],
+  );
+
+  const setPresetList: React.Dispatch<React.SetStateAction<PivotTablePreset[]>> = useCallback(
+    (updater) => {
+      const nextPresets = typeof updater === 'function' ? updater(presetList) : updater;
+      if (!presets) {
+        setInternalPresets(nextPresets);
+      }
+      onPresetsChange?.(nextPresets);
+    },
+    [onPresetsChange, presetList, presets],
+  );
+
   const usedDimensionSet = useMemo(() => new Set([...rowFields, ...columnFields, ...filterFields]), [
     rowFields,
     columnFields,
@@ -277,6 +517,18 @@ export const CPivotTable: React.FC<CPivotTableProps> = ({
     });
   }, [activeFilterFields, filterOptions]);
 
+  useEffect(() => {
+    setChartDimensionFieldId((prev) => getDefaultChartDimensionFieldId(rowFields, columnFields, prev));
+  }, [columnFields, rowFields, setChartDimensionFieldId]);
+
+  useEffect(() => {
+    setChartPrimaryValueFieldId((prev) => getDefaultPrimaryValueFieldId(valueFields, prev));
+  }, [setChartPrimaryValueFieldId, valueFields]);
+
+  useEffect(() => {
+    setChartSecondaryValueFieldId((prev) => getDefaultSecondaryValueFieldId(valueFields, chartPrimaryValueFieldId, prev));
+  }, [chartPrimaryValueFieldId, setChartSecondaryValueFieldId, valueFields]);
+
   const filteredRows = useMemo(() => {
     return rows.filter((row) => {
       return activeFilterFields.every((fieldId) => {
@@ -326,6 +578,41 @@ export const CPivotTable: React.FC<CPivotTableProps> = ({
         };
       }),
     );
+
+    const columnTree: PivotColumnTreeNode[] = [];
+
+    if (columnFields.length > 0) {
+      orderedColumns.forEach(([colKey, colTuple]) => {
+        const leafColumns = dataColumns.filter((column) => column.colKey === colKey);
+        let currentLevel = columnTree;
+        const keySegments: string[] = [];
+
+        colTuple.forEach((segment, depth) => {
+          keySegments.push(`d${depth}:${segment}`);
+          const nodeKey = `col::${encodeTupleKey(keySegments)}`;
+          let node = currentLevel.find((entry) => entry.key === nodeKey);
+          if (!node) {
+            node = {
+              key: nodeKey,
+              label: segment,
+              children: [],
+              leafColumnIds: [],
+              path: colTuple.slice(0, depth + 1),
+              depth,
+            };
+            currentLevel.push(node);
+          }
+
+          leafColumns.forEach((column) => {
+            if (!node.leafColumnIds.includes(column.id)) {
+              node.leafColumnIds.push(column.id);
+            }
+          });
+
+          currentLevel = node.children;
+        });
+      });
+    }
 
     const calculateValues = (bucket: Record<string, unknown>[]) => {
       const values: Record<string, number> = {};
@@ -388,7 +675,7 @@ export const CPivotTable: React.FC<CPivotTableProps> = ({
       rootNodes.push(...buildTree(filteredRows, 0, []));
     }
 
-    return { dataColumns, rowTree: rootNodes };
+    return { dataColumns, columnTree, rowTree: rootNodes };
   }, [columnFields, fieldMap, filteredRows, getAggregationLabel, rowFields, t, valueFields]);
 
   const createValueItem = useCallback(
@@ -594,10 +881,25 @@ export const CPivotTable: React.FC<CPivotTableProps> = ({
   }, []);
 
   const handleToggleRow = useCallback((key: string) => {
-    setExpandedKeys((prev) => {
+    setExpandedRowKeys((prev) => {
       const next = new Set(prev);
-      if (next.has(key)) next.delete(key);
-      else next.add(key);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
+      return next;
+    });
+  }, []);
+
+  const handleToggleColumn = useCallback((key: string) => {
+    setExpandedColumnKeys((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
       return next;
     });
   }, []);
@@ -662,6 +964,178 @@ export const CPivotTable: React.FC<CPivotTableProps> = ({
     [filterOptions, filterSelections, setFilterSelection],
   );
 
+  const createPresetId = useCallback(() => `pivot-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, []);
+
+  const buildCurrentPresetSnapshot = useCallback((): Omit<PivotTablePreset, 'id' | 'name'> => {
+    const filterSelectionSnapshot: Record<string, string[]> = {};
+    const snapshotFields = new Set<string>([...activeFilterFields, ...Object.keys(filterSelections)]);
+    snapshotFields.forEach((fieldId) => {
+      if (!validFieldSet.has(fieldId)) {
+        return;
+      }
+      const values = filterSelections[fieldId] ?? [];
+      filterSelectionSnapshot[fieldId] = [...values];
+    });
+
+    return {
+      layout: {
+        rows: [...rowFields],
+        columns: [...columnFields],
+        filters: [...filterFields],
+        values: valueFields.map((item) => ({
+          fieldId: item.fieldId,
+          aggregation: item.aggregation,
+        })),
+      },
+      filterSelections: filterSelectionSnapshot,
+      showGrandTotal,
+      chart: {
+        dimensionFieldId: chartDimensionFieldId,
+        primaryValueFieldId: chartPrimaryValueFieldId,
+        secondaryValueFieldId: chartSecondaryValueFieldId,
+        chartType,
+      },
+    };
+  }, [
+    activeFilterFields,
+    chartDimensionFieldId,
+    chartPrimaryValueFieldId,
+    chartSecondaryValueFieldId,
+    chartType,
+    columnFields,
+    filterFields,
+    filterSelections,
+    rowFields,
+    showGrandTotal,
+    validFieldSet,
+    valueFields,
+  ]);
+
+  const applyPreset = useCallback(
+    (preset: PivotTablePreset) => {
+      const nextRows = sanitizeAxisFields(preset.layout.rows, validFieldSet);
+      const nextColumns = sanitizeAxisFields(preset.layout.columns, validFieldSet);
+      const nextFilters = sanitizeAxisFields(preset.layout.filters, validFieldSet);
+      const seen = new Set<string>();
+      const nextValues = (preset.layout.values ?? [])
+        .filter((item) => {
+          if (!validFieldSet.has(item.fieldId) || seen.has(item.fieldId)) {
+            return false;
+          }
+          seen.add(item.fieldId);
+          return true;
+        })
+        .map((item) => createValueItem(item.fieldId, item.aggregation));
+
+      const nextFilterSelections: Record<string, string[]> = {};
+      Object.entries(preset.filterSelections ?? {}).forEach(([fieldId, selections]) => {
+        if (!validFieldSet.has(fieldId) || !Array.isArray(selections)) {
+          return;
+        }
+        nextFilterSelections[fieldId] = Array.from(new Set(selections.map((entry) => String(entry))));
+      });
+
+      setRowFields(nextRows);
+      setColumnFields(nextColumns);
+      setFilterFields(nextFilters);
+      setValueFields(nextValues);
+      setFilterSelections(nextFilterSelections);
+      if (typeof preset.showGrandTotal === 'boolean') {
+        setShowGrandTotal(preset.showGrandTotal);
+      }
+      setChartDimensionFieldId(getDefaultChartDimensionFieldId(nextRows, nextColumns, preset.chart?.dimensionFieldId));
+      const nextPrimaryValueFieldId = getDefaultPrimaryValueFieldId(nextValues, preset.chart?.primaryValueFieldId);
+      setChartPrimaryValueFieldId(nextPrimaryValueFieldId);
+      setChartSecondaryValueFieldId(
+        getDefaultSecondaryValueFieldId(nextValues, nextPrimaryValueFieldId, preset.chart?.secondaryValueFieldId),
+      );
+      setChartType(preset.chart?.chartType ?? 'bar-vertical');
+      setActivePresetId(preset.id);
+      onPresetApplied?.(preset);
+    },
+    [
+      createValueItem,
+      onPresetApplied,
+      setChartDimensionFieldId,
+      setChartPrimaryValueFieldId,
+      setChartSecondaryValueFieldId,
+      setChartType,
+      setColumnFields,
+      setFilterFields,
+      setFilterSelections,
+      setRowFields,
+      setShowGrandTotal,
+      setValueFields,
+      validFieldSet,
+    ],
+  );
+
+  const handlePresetChange = useCallback(
+    (presetId: string) => {
+      if (!presetId) {
+        setActivePresetId('');
+        return;
+      }
+      const selectedPreset = presetList.find((preset) => preset.id === presetId);
+      if (!selectedPreset) {
+        setActivePresetId('');
+        return;
+      }
+      applyPreset(selectedPreset);
+    },
+    [applyPreset, presetList],
+  );
+
+  const handleOpenSavePresetDialog = useCallback(() => {
+    const defaultPresetName = t('pivot.preset.defaultName', { index: presetList.length + 1 });
+    setPresetNameDraft(defaultPresetName);
+    setIsSavePresetDialogOpen(true);
+  }, [presetList.length, t]);
+
+  const handleSavePreset = useCallback(() => {
+    const trimmedName = presetNameDraft.trim();
+    if (!trimmedName) {
+      return;
+    }
+    const nextPreset: PivotTablePreset = {
+      id: createPresetId(),
+      name: trimmedName,
+      ...buildCurrentPresetSnapshot(),
+    };
+    setPresetList((prev) => [...prev, nextPreset]);
+    setActivePresetId(nextPreset.id);
+    setIsSavePresetDialogOpen(false);
+  }, [buildCurrentPresetSnapshot, createPresetId, presetNameDraft, setPresetList]);
+
+  const handleDeletePreset = useCallback(() => {
+    if (!activePresetId) {
+      return;
+    }
+    setPresetList((prev) => prev.filter((preset) => preset.id !== activePresetId));
+    setActivePresetId('');
+  }, [activePresetId, setPresetList]);
+
+  useEffect(() => {
+    if (!initialPresetId || initialPresetAppliedRef.current) {
+      return;
+    }
+    const initialPreset = presetList.find((preset) => preset.id === initialPresetId);
+    if (!initialPreset) {
+      return;
+    }
+    initialPresetAppliedRef.current = true;
+    applyPreset(initialPreset);
+  }, [applyPreset, initialPresetId, presetList]);
+
+  useEffect(() => {
+    if (!activePresetId) {
+      return;
+    }
+    if (!presetList.some((preset) => preset.id === activePresetId)) {
+      setActivePresetId('');
+    }
+  }, [activePresetId, presetList]);
+
   const grandTotalNode = useMemo(() => {
     if (!showGrandTotal || !pivotPreview || !rowFields.length) return null;
     const values: Record<string, number> = {};
@@ -686,6 +1160,231 @@ export const CPivotTable: React.FC<CPivotTableProps> = ({
       depth: -1,
     } as PivotTreeNode;
   }, [showGrandTotal, pivotPreview, filteredRows, columnFields, rowFields.length, t]);
+
+  const expandableRowKeys = useMemo(() => collectExpandableNodeKeys(pivotPreview?.rowTree ?? []), [pivotPreview]);
+  const expandableColumnKeys = useMemo(() => collectExpandableNodeKeys(pivotPreview?.columnTree ?? []), [pivotPreview]);
+
+  useEffect(() => {
+    setExpandedRowKeys((prev) => {
+      const next = new Set<string>();
+      if (prev.has('__grand_total__')) {
+        next.add('__grand_total__');
+      }
+      expandableRowKeys.forEach((key) => {
+        if (prev.has(key)) {
+          next.add(key);
+        }
+      });
+      return next;
+    });
+  }, [expandableRowKeys]);
+
+  useEffect(() => {
+    setExpandedColumnKeys((prev) => {
+      const next = new Set<string>();
+      expandableColumnKeys.forEach((key) => {
+        if (prev.has(key)) {
+          next.add(key);
+        }
+      });
+      return next;
+    });
+  }, [expandableColumnKeys]);
+
+  const handleExpandAllRows = useCallback(() => {
+    setExpandedRowKeys((prev) => {
+      const next = new Set(prev);
+      expandableRowKeys.forEach((key) => next.add(key));
+      return next;
+    });
+  }, [expandableRowKeys]);
+
+  const handleCollapseAllRows = useCallback(() => {
+    setExpandedRowKeys((prev) => {
+      const next = new Set<string>();
+      if (prev.has('__grand_total__')) {
+        next.add('__grand_total__');
+      }
+      return next;
+    });
+  }, []);
+
+  const handleExpandAllColumns = useCallback(() => {
+    setExpandedColumnKeys(new Set(expandableColumnKeys));
+  }, [expandableColumnKeys]);
+
+  const handleCollapseAllColumns = useCallback(() => {
+    setExpandedColumnKeys(new Set());
+  }, []);
+
+  const visibleColumnGroups = useMemo(() => {
+    if (!pivotPreview || columnFields.length === 0) {
+      return [];
+    }
+    return collectVisibleColumnGroups(pivotPreview.columnTree, expandedColumnKeys);
+  }, [columnFields.length, expandedColumnKeys, pivotPreview]);
+
+  const visibleColumns = useMemo<VisiblePivotColumn[]>(() => {
+    if (!pivotPreview) {
+      return [];
+    }
+
+    if (columnFields.length === 0) {
+      return pivotPreview.dataColumns.map((column) => ({
+        id: column.id,
+        label: column.label,
+        leafColumnIds: [column.id],
+        valueItem: column.valueItem,
+      }));
+    }
+
+    const dataColumnMap = new Map(pivotPreview.dataColumns.map((column) => [column.id, column]));
+
+    return visibleColumnGroups.flatMap((group) => {
+      const groupedByValue = new Map<string, VisiblePivotColumn>();
+
+      group.leafColumnIds.forEach((leafColumnId) => {
+        const leafColumn = dataColumnMap.get(leafColumnId);
+        if (!leafColumn) {
+          return;
+        }
+        const tokenId = leafColumn.valueItem.tokenId;
+        const valueFieldLabel = `${getAggregationLabel(leafColumn.valueItem.aggregation)} ${fieldMap.get(leafColumn.valueItem.fieldId)?.label ?? leafColumn.valueItem.fieldId}`;
+        const existing = groupedByValue.get(tokenId);
+        if (existing) {
+          existing.leafColumnIds.push(leafColumnId);
+          return;
+        }
+        groupedByValue.set(tokenId, {
+          id: `${group.key}::${tokenId}`,
+          label: valueFields.length > 1 ? valueFieldLabel : group.label,
+          leafColumnIds: [leafColumnId],
+          valueItem: leafColumn.valueItem,
+        });
+      });
+
+      return Array.from(groupedByValue.values());
+    });
+  }, [columnFields.length, fieldMap, getAggregationLabel, pivotPreview, valueFields.length, visibleColumnGroups]);
+
+  const visibleColumnMap = useMemo(() => new Map(visibleColumns.map((column) => [column.id, column])), [visibleColumns]);
+  const renderedDataColumns = useMemo(
+    () =>
+      visibleColumns.map((column) => ({
+        id: column.id,
+        colKey: column.id,
+        valueItem: column.valueItem,
+        label: column.label,
+      })),
+    [visibleColumns],
+  );
+
+  const columnHeaderRows = useMemo<ColumnHeaderCell[][]>(() => {
+    if (!pivotPreview || columnFields.length === 0) {
+      return [];
+    }
+
+    const rowsForHeader: ColumnHeaderCell[][] = [];
+    const visibleDepth = getVisibleColumnTreeDepth(pivotPreview.columnTree, expandedColumnKeys);
+    const totalDepth = visibleDepth + (valueFields.length > 1 ? 1 : 0);
+
+    const appendCells = (nodes: PivotColumnTreeNode[], depth: number) => {
+      rowsForHeader[depth] ??= [];
+      nodes.forEach((node) => {
+        const isExpanded = node.children.length > 0 && expandedColumnKeys.has(node.key);
+        const colSpan = visibleColumns.filter((column) => node.leafColumnIds.some((leafId) => column.leafColumnIds.includes(leafId))).length;
+        const rowSpan = isExpanded || valueFields.length > 1 ? 1 : totalDepth - depth;
+
+        rowsForHeader[depth].push({
+          key: node.key,
+          label: node.label,
+          colSpan,
+          rowSpan,
+          expandable: node.children.length > 0,
+          expanded: isExpanded,
+        });
+
+        if (isExpanded) {
+          appendCells(node.children, depth + 1);
+        }
+      });
+    };
+
+    appendCells(pivotPreview.columnTree, 0);
+
+    if (valueFields.length > 1) {
+      rowsForHeader[visibleDepth] = visibleColumns.map((column) => ({
+        key: column.id,
+        label: column.label,
+        colSpan: 1,
+        rowSpan: 1,
+        expandable: false,
+        expanded: false,
+      }));
+    }
+
+    return rowsForHeader;
+  }, [columnFields.length, expandedColumnKeys, pivotPreview, valueFields.length, visibleColumns]);
+
+  const getNodeValueForColumn = useCallback(
+    (node: PivotTreeNode, column: VisiblePivotColumn) =>
+      column.leafColumnIds.reduce((sum, leafColumnId) => sum + (node.aggregatedValues[leafColumnId] ?? 0), 0),
+    [],
+  );
+
+  const tableHeaderActions = useMemo(
+    () => (
+      <>
+        <Button
+          size="small"
+          variant="text"
+          onClick={handleExpandAllRows}
+          disabled={expandableRowKeys.size === 0}
+          sx={{ minWidth: 'auto', px: 0.8, fontSize: '0.72rem' }}
+        >
+          {t('pivot.table.expandRowsAll')}
+        </Button>
+        <Button
+          size="small"
+          variant="text"
+          onClick={handleCollapseAllRows}
+          disabled={expandableRowKeys.size === 0}
+          sx={{ minWidth: 'auto', px: 0.8, fontSize: '0.72rem' }}
+        >
+          {t('pivot.table.collapseRowsAll')}
+        </Button>
+        <Divider orientation="vertical" flexItem />
+        <Button
+          size="small"
+          variant="text"
+          onClick={handleExpandAllColumns}
+          disabled={expandableColumnKeys.size === 0}
+          sx={{ minWidth: 'auto', px: 0.8, fontSize: '0.72rem' }}
+        >
+          {t('pivot.table.expandColumnsAll')}
+        </Button>
+        <Button
+          size="small"
+          variant="text"
+          onClick={handleCollapseAllColumns}
+          disabled={columnFields.length === 0}
+          sx={{ minWidth: 'auto', px: 0.8, fontSize: '0.72rem' }}
+        >
+          {t('pivot.table.collapseColumnsAll')}
+        </Button>
+      </>
+    ),
+    [
+      columnFields.length,
+      expandableColumnKeys.size,
+      expandableRowKeys.size,
+      handleCollapseAllColumns,
+      handleCollapseAllRows,
+      handleExpandAllColumns,
+      handleExpandAllRows,
+      t,
+    ],
+  );
 
   const renderDragOverlayContent = () => {
     if (!activeDragId) return null;
@@ -733,6 +1432,49 @@ export const CPivotTable: React.FC<CPivotTableProps> = ({
         </Box>
 
         <Stack direction="row" spacing={1.5} alignItems="center">
+          {shouldRenderPresetToolbar && (
+            <>
+              <FormControl size="small" sx={{ minWidth: 200 }}>
+                <Select
+                  value={activePresetId}
+                  displayEmpty
+                  onChange={(event) => handlePresetChange(String(event.target.value))}
+                  sx={{ fontSize: '0.75rem', height: 32 }}
+                >
+                  <MenuItem value="" sx={{ fontSize: '0.75rem', color: 'text.secondary' }}>
+                    {t('pivot.preset.selectPlaceholder')}
+                  </MenuItem>
+                  {presetList.map((preset) => (
+                    <MenuItem key={preset.id} value={preset.id} sx={{ fontSize: '0.75rem' }}>
+                      {preset.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              <Tooltip title={t('pivot.preset.save')}>
+                <IconButton size="small" onClick={handleOpenSavePresetDialog} aria-label={t('pivot.preset.save')}>
+                  <SaveIcon sx={{ fontSize: 18 }} />
+                </IconButton>
+              </Tooltip>
+
+              <Tooltip title={t('pivot.preset.delete')}>
+                <span>
+                  <IconButton
+                    size="small"
+                    onClick={handleDeletePreset}
+                    disabled={!activePresetId}
+                    aria-label={t('pivot.preset.delete')}
+                  >
+                    <DeleteOutlineIcon sx={{ fontSize: 18 }} />
+                  </IconButton>
+                </span>
+              </Tooltip>
+
+              <Divider flexItem orientation="vertical" />
+            </>
+          )}
+
           <Typography sx={{ fontSize: '0.74rem', color: 'text.secondary' }}>
             {t('pivot.records')}: <strong>{rows.length.toLocaleString()}</strong> / {t('pivot.afterFilter')}:{' '}
             <strong>{filteredRows.length.toLocaleString()}</strong>
@@ -777,54 +1519,106 @@ export const CPivotTable: React.FC<CPivotTableProps> = ({
         </Portal>
       </DndContext>
 
-      <Paper
-        sx={(theme) => ({
-          borderRadius: 3,
-          border: `1px solid ${theme.palette.divider}`,
-          overflow: 'hidden',
-          bgcolor: 'background.paper',
-          flex: 1,
-          minHeight: 0,
-        })}
+      <PivotChartPanel
+        rows={filteredRows}
+        fieldMap={fieldMap}
+        rowFields={rowFields}
+        columnFields={columnFields}
+        valueFields={valueFields}
+        chartDimensionFieldId={chartDimensionFieldId}
+        chartPrimaryValueFieldId={chartPrimaryValueFieldId}
+        chartSecondaryValueFieldId={chartSecondaryValueFieldId}
+        chartType={chartType}
+        isCollapsed={isChartCollapsed}
+        onChartDimensionFieldIdChange={(fieldId) => setChartDimensionFieldId(fieldId)}
+        onChartPrimaryValueFieldIdChange={(fieldId) => setChartPrimaryValueFieldId(fieldId)}
+        onChartSecondaryValueFieldIdChange={(fieldId) => setChartSecondaryValueFieldId(fieldId)}
+        onChartTypeChange={(nextChartType) => setChartType(nextChartType)}
+        onToggleCollapse={() => setIsChartCollapsed((prev) => !prev)}
+        getAggregationLabel={getAggregationLabel}
+      />
+
+      <PivotSectionCard
+        title={t('pivot.table.sectionTitle')}
+        subtitle={rowFields.length > 0 ? rowFields.map((id) => fieldMap.get(id)?.label ?? id).join(' > ') : t('pivot.table.dimensions')}
+        collapsed={isTableCollapsed}
+        onToggleCollapse={() => setIsTableCollapsed((prev) => !prev)}
+        expandAriaLabel={t('pivot.table.collapse.ariaExpand')}
+        collapseAriaLabel={t('pivot.table.collapse.ariaCollapse')}
+        bodySx={{ p: 0 }}
+        headerActions={tableHeaderActions}
       >
         {pivotPreview === null ? (
-          <Box sx={{ py: 5, textAlign: 'center' }}>
+          <Box sx={{ py: 5, px: { xs: 1.2, md: 1.6 }, textAlign: 'center' }}>
             <Typography sx={{ fontSize: '0.86rem', color: 'text.secondary' }}>{resolvedEmptyText}</Typography>
           </Box>
         ) : (
           <TableContainer sx={{ maxHeight: maxPreviewHeight }}>
             <Table size="small" stickyHeader>
               <TableHead>
-                <TableRow>
-                  <TableCell
-                    sx={(theme) => ({
-                      fontWeight: 800,
-                      fontSize: '0.76rem',
-                      color: 'text.primary',
-                      bgcolor: theme.palette.mode === 'dark' ? '#000000' : '#f5f5f5',
-                      borderBottom: `1px solid ${theme.palette.divider}`,
-                      pl: 2,
-                    })}
-                  >
-                    {rowFields.length > 0 ? rowFields.map((id) => fieldMap.get(id)?.label).join(' > ') : t('pivot.table.dimensions')}
-                  </TableCell>
-                  {pivotPreview.dataColumns.map((column) => (
-                    <TableCell
-                      key={column.id}
-                      align="right"
-                      sx={(theme) => ({
-                        fontWeight: 800,
-                        fontSize: '0.75rem',
-                        color: 'text.primary',
-                        bgcolor: theme.palette.mode === 'dark' ? '#000000' : '#f5f5f5',
-                        borderBottom: `1px solid ${theme.palette.divider}`,
-                        minWidth: 148,
-                      })}
-                    >
-                      {column.label}
-                    </TableCell>
-                  ))}
-                </TableRow>
+                {(columnHeaderRows.length > 0 ? columnHeaderRows : [[]]).map((headerRow, rowIndex) => (
+                  <TableRow key={`pivot-header-row-${rowIndex}`}>
+                    {rowIndex === 0 && (
+                      <TableCell
+                        rowSpan={Math.max(columnHeaderRows.length, 1)}
+                        sx={(theme) => ({
+                          fontWeight: 800,
+                          fontSize: '0.76rem',
+                          color: 'text.primary',
+                          bgcolor: theme.palette.mode === 'dark' ? '#000000' : '#f5f5f5',
+                          borderBottom: `1px solid ${theme.palette.divider}`,
+                          pl: 2,
+                          minWidth: 220,
+                          verticalAlign: 'middle',
+                        })}
+                      >
+                        {rowFields.length > 0 ? rowFields.map((id) => fieldMap.get(id)?.label).join(' > ') : t('pivot.table.dimensions')}
+                      </TableCell>
+                    )}
+
+                    {(headerRow.length > 0 ? headerRow : visibleColumns.map((column) => ({
+                      key: column.id,
+                      label: column.label,
+                      colSpan: 1,
+                      rowSpan: 1,
+                      expandable: false,
+                      expanded: false,
+                    }))).map((cell) => (
+                      <TableCell
+                        key={cell.key}
+                        align="center"
+                        colSpan={cell.colSpan}
+                        rowSpan={cell.rowSpan}
+                        sx={(theme) => ({
+                          fontWeight: 800,
+                          fontSize: '0.75rem',
+                          color: 'text.primary',
+                          bgcolor: theme.palette.mode === 'dark' ? '#000000' : '#f5f5f5',
+                          borderBottom: `1px solid ${theme.palette.divider}`,
+                          minWidth: 148,
+                          verticalAlign: 'middle',
+                        })}
+                      >
+                        <Box sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 0.4 }}>
+                          {cell.expandable && (
+                            <IconButton
+                              size="small"
+                              onClick={() => handleToggleColumn(cell.key)}
+                              sx={{ p: 0.1, ml: -0.3 }}
+                            >
+                              {cell.expanded ? (
+                                <KeyboardArrowDownIcon sx={{ fontSize: 16 }} />
+                              ) : (
+                                <KeyboardArrowRightIcon sx={{ fontSize: 16 }} />
+                              )}
+                            </IconButton>
+                          )}
+                          <Box component="span">{cell.label}</Box>
+                        </Box>
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
               </TableHead>
 
               <TableBody>
@@ -832,29 +1626,63 @@ export const CPivotTable: React.FC<CPivotTableProps> = ({
                   <PivotRowRenderer
                     key={node.key}
                     node={node}
-                    dataColumns={pivotPreview.dataColumns}
+                    dataColumns={renderedDataColumns}
                     fieldMap={fieldMap}
                     level={0}
-                    expandedKeys={expandedKeys}
+                    expandedKeys={expandedRowKeys}
                     onToggle={handleToggleRow}
+                    getValue={(targetNode, columnId) => {
+                      const visibleColumn = visibleColumnMap.get(columnId);
+                      return visibleColumn ? getNodeValueForColumn(targetNode, visibleColumn) : 0;
+                    }}
                   />
                 ))}
 
                 {grandTotalNode && (
                   <PivotRowRenderer
                     node={grandTotalNode}
-                    dataColumns={pivotPreview.dataColumns}
+                    dataColumns={renderedDataColumns}
                     fieldMap={fieldMap}
                     level={0}
-                    expandedKeys={expandedKeys}
+                    expandedKeys={expandedRowKeys}
                     onToggle={handleToggleRow}
+                    getValue={(targetNode, columnId) => {
+                      const visibleColumn = visibleColumnMap.get(columnId);
+                      return visibleColumn ? getNodeValueForColumn(targetNode, visibleColumn) : 0;
+                    }}
                   />
                 )}
               </TableBody>
             </Table>
           </TableContainer>
         )}
-      </Paper>
+      </PivotSectionCard>
+
+      <Dialog open={isSavePresetDialogOpen} onClose={() => setIsSavePresetDialogOpen(false)} maxWidth="xs" fullWidth>
+        <DialogTitle>{t('pivot.preset.saveDialogTitle')}</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            fullWidth
+            margin="dense"
+            label={t('pivot.preset.nameLabel')}
+            value={presetNameDraft}
+            onChange={(event) => setPresetNameDraft(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') {
+                event.preventDefault();
+                handleSavePreset();
+              }
+            }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setIsSavePresetDialogOpen(false)}>{t('common.cancel')}</Button>
+          <Button variant="contained" onClick={handleSavePreset} disabled={!presetNameDraft.trim()}>
+            {t('common.save')}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Paper>
   );
 };

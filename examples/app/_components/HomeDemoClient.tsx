@@ -9,6 +9,10 @@ import {
   Bell,
   LayoutDashboard,
   Table2,
+  Mic,
+  MessageSquare,
+  Bot,
+  PanelRight,
 } from 'lucide-react';
 
 export default function DemoPage() {
@@ -19,6 +23,24 @@ export default function DemoPage() {
       title: 'Dashboard',
       icon: <LayoutDashboard className="w-4 h-4" />,
       href: '/',
+    },
+    {
+      id: 'chat-example',
+      title: 'Chat App',
+      icon: <MessageSquare className="w-4 h-4" />,
+      href: '/chat',
+    },
+    {
+      id: 'copilot-example',
+      title: 'Copilot',
+      icon: <Bot className="w-4 h-4" />,
+      href: '/copilot',
+    },
+    {
+      id: 'aipanel-example',
+      title: 'AI Panel',
+      icon: <PanelRight className="w-4 h-4" />,
+      href: '/aipanel',
     },
     {
       id: 'messages',
@@ -36,6 +58,12 @@ export default function DemoPage() {
       href: '/std-report',
     },
     {
+      id: 'kanban',
+      title: 'Kanban',
+      icon: <LayoutDashboard className="w-4 h-4" />,
+      href: '/kanban',
+    },
+    {
       id: 'pivot-table',
       title: 'Pivot Table',
       icon: <Table2 className="w-4 h-4" />,
@@ -46,6 +74,12 @@ export default function DemoPage() {
       title: 'Detail Info',
       icon: <LayoutDashboard className="w-4 h-4" />,
       href: '/detail-info/ID-1',
+    },
+    {
+      id: 'ai-nav',
+      title: 'AI Nav',
+      icon: <Mic className="w-4 h-4" />,
+      href: '/ai-nav',
     },
     {
       id: 'settings',

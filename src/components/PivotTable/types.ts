@@ -1,6 +1,7 @@
 import type React from 'react';
 
 export type PivotAggregation = 'sum' | 'count' | 'avg' | 'min' | 'max';
+export type PivotChartType = 'bar-vertical' | 'bar-horizontal' | 'line' | 'scatter';
 
 export type PivotFieldType = 'string' | 'number' | 'date' | 'boolean';
 
@@ -32,6 +33,22 @@ export interface PivotLayoutConfig {
 
 export type PivotFilterSelections = Record<string, string[]>;
 
+export interface PivotChartConfig {
+  dimensionFieldId?: string;
+  primaryValueFieldId?: string;
+  secondaryValueFieldId?: string;
+  chartType?: PivotChartType;
+}
+
+export interface PivotTablePreset {
+  id: string;
+  name: string;
+  layout: PivotLayoutConfig;
+  filterSelections?: PivotFilterSelections;
+  showGrandTotal?: boolean;
+  chart?: PivotChartConfig;
+}
+
 export interface PivotTableModel {
   rowFields: string[];
   setRowFields: React.Dispatch<React.SetStateAction<string[]>>;
@@ -47,6 +64,18 @@ export interface PivotTableModel {
   setShowGrandTotal: React.Dispatch<React.SetStateAction<boolean>>;
   isConfiguratorCollapsed: boolean;
   setIsConfiguratorCollapsed: React.Dispatch<React.SetStateAction<boolean>>;
+  chartDimensionFieldId: string;
+  setChartDimensionFieldId: React.Dispatch<React.SetStateAction<string>>;
+  chartPrimaryValueFieldId: string;
+  setChartPrimaryValueFieldId: React.Dispatch<React.SetStateAction<string>>;
+  chartSecondaryValueFieldId: string;
+  setChartSecondaryValueFieldId: React.Dispatch<React.SetStateAction<string>>;
+  chartType: PivotChartType;
+  setChartType: React.Dispatch<React.SetStateAction<PivotChartType>>;
+  isChartCollapsed: boolean;
+  setIsChartCollapsed: React.Dispatch<React.SetStateAction<boolean>>;
+  isTableCollapsed: boolean;
+  setIsTableCollapsed: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export interface CPivotTableProps {
@@ -54,7 +83,16 @@ export interface CPivotTableProps {
   rows: Record<string, unknown>[];
   fields: PivotFieldDefinition[];
   initialLayout?: PivotLayoutConfig;
+  initialChart?: PivotChartConfig;
   emptyText?: string;
   maxPreviewHeight?: number | string;
+  initialChartCollapsed?: boolean;
+  initialTableCollapsed?: boolean;
   model?: PivotTableModel;
+  enablePresetManagement?: boolean;
+  presets?: PivotTablePreset[];
+  defaultPresets?: PivotTablePreset[];
+  onPresetsChange?: (presets: PivotTablePreset[]) => void;
+  initialPresetId?: string;
+  onPresetApplied?: (preset: PivotTablePreset) => void;
 }

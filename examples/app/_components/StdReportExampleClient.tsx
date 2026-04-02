@@ -5,7 +5,7 @@ import { CAppPageLayout, CPageTransition, CStandardPage, useStandardReport, type
 import { Box, Chip } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import Link from 'next/link';
-import { LayoutDashboard, Settings, Mail, Table2 } from 'lucide-react';
+import { LayoutDashboard, Settings, Mail, Mic, Table2 } from 'lucide-react';
 
 // --- Metadata Definition ---
 
@@ -422,8 +422,10 @@ export default function StdReportExample() {
     const menuData: TreeMenuItem[] = useMemo(() => [
         { id: 'dashboard', title: i18nText.dashboard, href: '/', icon: <LayoutDashboard className="w-4 h-4" /> },
         { id: 'std-report', title: i18nText.stdReport, href: '/std-report', icon: <LayoutDashboard className="w-4 h-4" /> },
+        { id: 'kanban', title: 'Kanban', href: '/kanban', icon: <LayoutDashboard className="w-4 h-4" /> },
         { id: 'pivot-table', title: 'Pivot Table', href: '/pivot-table', icon: <Table2 className="w-4 h-4" /> },
         { id: 'detail-info', title: 'Detail Info', href: '/detail-info/ID-1', icon: <LayoutDashboard className="w-4 h-4" /> },
+        { id: 'ai-nav', title: 'AI Nav', href: '/ai-nav', icon: <Mic className="w-4 h-4" /> },
         { id: 'messages', title: i18nText.messages, href: '/messages', icon: <Mail className="w-4 h-4" /> },
         { id: 'settings', title: i18nText.settings, href: '/settings', icon: <Settings className="w-4 h-4" /> },
     ], [i18nText]);
@@ -440,7 +442,7 @@ export default function StdReportExample() {
         >
             <CPageTransition transitionKey="std-report" variant="fade" durationMs={180}>
                 <Box sx={{ height: 'calc(100vh - 120px)' }}>
-                    <CStandardPage {...pagePropsWithCustomAction} id="std-report-example-page" mode="integrated">
+                    <CStandardPage {...pagePropsWithCustomAction} id="std-report-example-page">
                         {/* Optional children for dialogs etc. */}
                     </CStandardPage>
                 </Box>

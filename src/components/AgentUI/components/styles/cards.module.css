@@ -1,0 +1,281 @@
+/**
+ * NewChat Cards 样式
+ * 
+ * 作用：为NewChat系统的各种卡片组件提供统一样式
+ * 版本：V1.0.0
+ * 日期：2025-01-19
+ */
+
+/* 卡片基础样式 */
+.card-base {
+  border-radius: 8px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  transition: all 0.2s ease-in-out;
+}
+
+.card-base:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* 错误卡片特定样式 */
+.error-card {
+  @apply card-base;
+}
+
+.error-card .error-icon {
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-2px); }
+  75% { transform: translateX(2px); }
+}
+
+/* 警告卡片特定样式 */
+.warning-card {
+  @apply card-base;
+}
+
+.warning-card .warning-icon {
+  animation: pulse 2s infinite;
+}
+
+/* 建议卡片特定样式 */
+.suggestions-card {
+  @apply card-base;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(99, 102, 241, 0.05) 100%);
+}
+
+.dark .suggestions-card {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(99, 102, 241, 0.1) 100%);
+}
+
+.suggestions-card .suggestion-item {
+  transition: all 0.2s ease-in-out;
+  position: relative;
+  overflow: hidden;
+}
+
+.suggestions-card .suggestion-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1), transparent);
+  transition: left 0.5s ease-in-out;
+}
+
+.suggestions-card .suggestion-item:hover::before {
+  left: 100%;
+}
+
+/* 工具结果卡片特定样式 */
+.tool-result-card {
+  @apply card-base;
+  position: relative;
+}
+
+.tool-result-card .loading-indicator {
+  animation: spin 1s linear infinite;
+}
+
+.tool-result-card .success-indicator {
+  animation: bounce-in 0.5s ease-out;
+}
+
+.tool-result-card .error-indicator {
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes bounce-in {
+  0% { transform: scale(0); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* 代码块卡片样式 */
+.code-card {
+  @apply card-base;
+  font-family: 'JetBrains Mono', 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+}
+
+.code-card .copy-button {
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.code-card:hover .copy-button {
+  opacity: 1;
+}
+
+/* Think块卡片样式 */
+.think-card {
+  @apply card-base;
+  border-left: 4px solid #8b5cf6;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(168, 85, 247, 0.05) 100%);
+}
+
+.dark .think-card {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%);
+}
+
+.think-card .expand-icon {
+  transition: transform 0.2s ease-in-out;
+}
+
+.think-card.expanded .expand-icon {
+  transform: rotate(90deg);
+}
+
+/* 媒体卡片样式 */
+.media-card {
+  @apply card-base;
+}
+
+.media-card .media-preview {
+  border-radius: 4px;
+  overflow: hidden;
+  transition: transform 0.2s ease-in-out;
+}
+
+.media-card .media-preview:hover {
+  transform: scale(1.02);
+}
+
+/* 引用块卡片样式 */
+.quote-card {
+  @apply card-base;
+  position: relative;
+}
+
+.quote-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(180deg, #3b82f6, #1d4ed8);
+  border-radius: 2px;
+}
+
+.quote-card .quote-icon {
+  font-size: 2rem;
+  opacity: 0.3;
+  line-height: 1;
+}
+
+/* Mermaid卡片样式 */
+.mermaid-card {
+  @apply card-base;
+  text-align: center;
+}
+
+.mermaid-card .mermaid-content {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.mermaid-card svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* 数学公式卡片样式 */
+.math-card {
+  @apply card-base;
+  text-align: center;
+}
+
+.math-card .katex-display {
+  margin: 1em 0;
+}
+
+.math-card .katex {
+  font-size: inherit;
+}
+
+/* 表格卡片样式 */
+.table-card {
+  @apply card-base;
+}
+
+.table-card .table-container {
+  max-height: 400px;
+  overflow: auto;
+}
+
+.table-card .sort-header {
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.table-card .sort-header:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.dark .table-card .sort-header:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .card-base {
+    border-radius: 6px;
+    margin: 0.5rem 0;
+  }
+  
+  .suggestions-card .suggestion-item {
+    padding: 0.75rem;
+  }
+  
+  .tool-result-card .parameters,
+  .tool-result-card .result {
+    font-size: 0.75rem;
+  }
+}
+
+/* 动画效果 */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.card-base {
+  animation: fade-in 0.3s ease-out;
+}
+
+/* 无障碍样式 */
+.card-base:focus-within {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* 打印样式 */
+@media print {
+  .card-base {
+    box-shadow: none;
+    border: 1px solid #ccc;
+    break-inside: avoid;
+  }
+  
+  .suggestions-card,
+  .tool-result-card {
+    background: white !important;
+  }
+}

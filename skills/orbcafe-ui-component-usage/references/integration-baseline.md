@@ -4,6 +4,9 @@
 
 - Import path:
   - `import { ... } from 'orbcafe-ui'`
+- Contract path:
+  - classify with `skill-routing-map.md`
+  - confirm module contract in `module-contracts.md`
 - Next.js App Router:
   - unwrap dynamic `params` in Server Page, then pass plain props to Client Component.
 - Hydration safety:
@@ -18,3 +21,4 @@
 - `useStandardReport` default rows-per-page is `20` and includes `-1` (`ALL`).
 - `CAppPageLayout` supports `locale`, `localeOptions`, `onLocaleChange`.
 - `CTable` includes `quickCreate` config.
+- `AgentUI` is exported from package entry and should be consumed via `AgentPanel` / `StdChat` / `CopilotChat`, not internal renderers.

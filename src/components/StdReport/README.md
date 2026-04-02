@@ -26,8 +26,8 @@ const { pageProps } = useStandardReport({
 });
 
 export default function Page() {
-  // mode="integrated" 确保 Filter 和 Table 联动更紧密
-  return <CStandardPage {...pageProps} mode="integrated" />;
+  // `useStandardReport` 默认返回 integrated pageProps
+  return <CStandardPage {...pageProps} />;
 }
 ```
 
@@ -50,6 +50,7 @@ export default function Page() {
 ### 2.2 联动模式 (Integrated Mode)
 
 `CStandardPage` 提供 `mode="integrated"` 属性（推荐使用）。
+当你使用 `useStandardReport` 时，默认已经返回 `mode="integrated"`。
 
 - **Separated (默认)**: Filter 和 Table 独立渲染，通过 props 传递状态。
 - **Integrated (推荐)**: Filter 配置直接透传给 Table，由 Table 统一管理 Variant 加载和 Layout 应用，解决“变式加载时 Filter 变了但 Layout 没变”的问题。
@@ -57,7 +58,7 @@ export default function Page() {
 ```tsx
 <CStandardPage
   id="order-list-page"
-  mode="integrated" // 开启联动
+  mode="integrated" // 手动指定时依然可用
   {...pageProps}
 />
 ```

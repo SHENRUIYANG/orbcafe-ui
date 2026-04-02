@@ -26,8 +26,10 @@ npm run dev
 
 - `http://localhost:3000/`
 - `http://localhost:3000/std-report`
-- `http://localhost:3000/pivot-table`
+- `http://localhost:3000/kanban`
+- `http://localhost:3000/pivot-table`（内置 Preset 官方样板：支持保存/加载/删除 rows/columns/filters/values 组合）
 - `http://localhost:3000/detail-info/ID-1`
+- `http://localhost:3000/ai-nav`
 
 ## 质量检查（建议提交前执行）
 

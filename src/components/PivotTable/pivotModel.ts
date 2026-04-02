@@ -24,6 +24,15 @@ export interface PivotDataColumn {
   label: string;
 }
 
+export interface PivotColumnTreeNode {
+  key: string;
+  label: string;
+  children: PivotColumnTreeNode[];
+  leafColumnIds: string[];
+  path: string[];
+  depth: number;
+}
+
 export interface PivotTreeNode {
   key: string;
   value: string;
@@ -38,5 +47,6 @@ export interface PivotTreeNode {
 
 export interface PivotPreview {
   dataColumns: PivotDataColumn[];
+  columnTree: PivotColumnTreeNode[];
   rowTree: PivotTreeNode[];
 }

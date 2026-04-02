@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import { CTableProps } from './types';
+import { resolveVariantLayout } from '../../Utils/variantUtils';
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
     if (b[orderBy] < a[orderBy]) {
@@ -74,6 +75,7 @@ export const useCTable = (props: CTableProps) => {
     const [contextMenu, setContextMenu] = useState<{ mouseX: number; mouseY: number } | null>(null);
     const [graphReportOpen, setGraphReportOpen] = useState(false);
     const [currentLayoutId, setCurrentLayoutId] = useState<string>('');
+    const [layoutIdToLoad, setLayoutIdToLoad] = useState<string>('');
 
     // Sync props
     useEffect(() => {
@@ -509,16 +511,24 @@ export const useCTable = (props: CTableProps) => {
 
     // Variant Load
     const handleVariantLoad = (variant: any) => {
-        // Apply variant filters is handled by SmartFilter
-        // Here we handle layout if present
-        if (variant.layout) {
-            if (variant.layout.visibleColumns) setVisibleColumns(variant.layout.visibleColumns);
-            if (variant.layout.order) setOrder(variant.layout.order);
-            if (variant.layout.orderBy) setOrderBy(variant.layout.orderBy);
-            if (variant.layout.grouping) setGrouping(variant.layout.grouping);
-            if (variant.layout.columnWidths) setColumnWidths(variant.layout.columnWidths);
-            if (variant.layout.showSummary !== undefined) setShowSummary(Boolean(variant.layout.showSummary));
-            if (Array.isArray(variant.layout.summaryColumns)) setSummaryColumns(variant.layout.summaryColumns);
+        const { layout, layoutId } = resolveVariantLayout(variant, props.tableKey || 'default');
+
+        if (layoutId) {
+            setLayoutIdToLoad(layoutId);
+            setCurrentLayoutId(layoutId);
+        } else {
+            setLayoutIdToLoad('');
+            setCurrentLayoutId('');
+        }
+
+        if (layout) {
+            if (layout.visibleColumns) setVisibleColumns(layout.visibleColumns);
+            if (layout.order) setOrder(layout.order);
+            if (layout.orderBy) setOrderBy(layout.orderBy);
+            if (layout.grouping) setGrouping(layout.grouping);
+            if (layout.columnWidths) setColumnWidths(layout.columnWidths);
+            if (layout.showSummary !== undefined) setShowSummary(Boolean(layout.showSummary));
+            if (Array.isArray(layout.summaryColumns)) setSummaryColumns(layout.summaryColumns);
         }
     };
 
@@ -537,6 +547,7 @@ export const useCTable = (props: CTableProps) => {
         if (layoutMeta?.id) {
             setCurrentLayoutId(layoutMeta.id);
         }
+        setLayoutIdToLoad('');
     };
 
     // Sync Layout Prop
@@ -690,7 +701,7 @@ export const useCTable = (props: CTableProps) => {
             summaryColumns,
         },
         currentLayoutId,
-        layoutIdToLoad: '',
+        layoutIdToLoad,
         onPageChange: handleChangePage,
         onRowsPerPageChange: handleChangeRowsPerPage,
         graphReportOpen,

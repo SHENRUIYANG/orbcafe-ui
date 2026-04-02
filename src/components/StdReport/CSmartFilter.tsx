@@ -676,7 +676,7 @@ export const CSmartFilter = ({
                         size="small" 
                         onClick={onSearch}
                         disabled={loading}
-                        sx={{ minWidth: '40px', fontWeight: 'bold', fontSize: FONT_SIZE_SMALL }}
+                        sx={{ minWidth: '52px', fontWeight: 'bold', fontSize: FONT_SIZE_SMALL }}
                     >
                         {loading ? t('common.loading') : t('smartFilter.go')}
                     </Button>

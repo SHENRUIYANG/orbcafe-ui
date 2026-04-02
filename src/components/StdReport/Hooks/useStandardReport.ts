@@ -3,6 +3,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { CStandardPageProps } from '../CStandardPage';
 import type { GraphReportConfig } from '../../GraphReport/types';
 import { useOrbcafeI18n } from '../../../i18n';
+import type { IVariantService } from '../CVariantManager';
+import { resolveVariantFilters, resolveVariantLayout } from '../Utils/variantUtils';
 
 export interface ReportColumn {
     id: string;
@@ -45,6 +47,10 @@ export interface UseStandardReportOptions {
     fetchData?: (params: any) => Promise<any>; // Optional override for data fetching
     initialRowsPerPage?: number;
     rowsPerPageOptions?: number[];
+    tableKey?: string;
+    mode?: CStandardPageProps['mode'];
+    serviceUrl?: string;
+    variantService?: IVariantService;
 }
 
 export const useStandardReport = ({
@@ -52,6 +58,10 @@ export const useStandardReport = ({
     fetchData,
     initialRowsPerPage = 20,
     rowsPerPageOptions = [20, 50, 100, -1],
+    tableKey = 'default',
+    mode = 'integrated',
+    serviceUrl,
+    variantService,
 }: UseStandardReportOptions) => {
     const { t } = useOrbcafeI18n();
     const [loading, setLoading] = useState(false);
@@ -59,6 +69,7 @@ export const useStandardReport = ({
     const [filters, setFilters] = useState<Record<string, any>>({});
     const [variants, setVariants] = useState<any[]>(metadata.variants || []);
     const [currentLayout, setCurrentLayout] = useState<any>(metadata.layout || null);
+    const [currentVariantId, setCurrentVariantId] = useState<string>('');
     const [total, setTotal] = useState(0);
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(initialRowsPerPage);
@@ -142,18 +153,19 @@ export const useStandardReport = ({
     };
 
     const handleLoadVariant = (variant: any) => {
-        if (variant.filters) {
-             // Logic to extract filters for this scope
-             // Simplified for now
-             const scopeFilters = variant.filters.find((f: any) => f.scope === 'default' || f.scope === metadata.id);
-             if (scopeFilters) {
-                 setFilters(scopeFilters.filters);
-                 // Optionally trigger search
-                 handleFetchData(scopeFilters.filters, 0, rowsPerPage);
-             }
+        setCurrentVariantId(variant?.id || '');
+
+        const resolvedFilters = resolveVariantFilters(variant, tableKey);
+        if (resolvedFilters) {
+            const nextFilters = resolvedFilters.values ?? resolvedFilters;
+            setFilters(nextFilters);
+            handleFetchData(nextFilters, 0, rowsPerPage, order, orderBy);
+            setPage(0);
         }
-        if (variant.layout) {
-            setCurrentLayout(variant.layout);
+
+        const { layout } = resolveVariantLayout(variant, tableKey);
+        if (layout) {
+            setCurrentLayout(layout);
         }
     };
 
@@ -175,8 +187,10 @@ export const useStandardReport = ({
     const pageProps: CStandardPageProps = {
         id: metadata.id, // Use metadata.id as the page ID
         title: metadata.title,
+        mode,
         filterConfig: {
             appId: metadata.id, // Ensure appId is passed to CSmartFilter
+            tableKey,
             fields: metadata.filters,
             filters: filters,
             onFilterChange: handleFilterChange,
@@ -191,9 +205,13 @@ export const useStandardReport = ({
                 })));
             },
             variants: variants,
+            currentVariantId,
+            variantService,
+            serviceUrl,
         },
         tableProps: {
             appId: metadata.id, // Ensure appId is passed to CTable for Layout Manager
+            tableKey,
             columns: metadata.columns,
             rows: rows,
             loading: loading,
@@ -213,6 +231,7 @@ export const useStandardReport = ({
             showSummary: true,
             order: order,
             orderBy: orderBy,
+            serviceUrl,
             onSortChange: handleSortChange,
             graphReport: metadata.graphReport || { enabled: true, title: `${metadata.title} ${t('graph.reportTitle')}` }
         }

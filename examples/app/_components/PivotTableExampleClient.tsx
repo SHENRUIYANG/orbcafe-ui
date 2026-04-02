@@ -1,10 +1,18 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Box } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-import { LayoutDashboard, Mail, Settings, Table2 } from 'lucide-react';
-import { CAppPageLayout, CPivotTable, CPageTransition, type OrbcafeLocale, type PivotFieldDefinition, type TreeMenuItem } from 'orbcafe-ui';
+import { LayoutDashboard, Mail, Mic, Settings, Table2 } from 'lucide-react';
+import {
+  CAppPageLayout,
+  CPivotTable,
+  CPageTransition,
+  type OrbcafeLocale,
+  type PivotFieldDefinition,
+  type PivotTablePreset,
+  type TreeMenuItem,
+} from 'orbcafe-ui';
 
 const HeaderBrandLogo = () => {
   const theme = useTheme();
@@ -26,6 +34,39 @@ const CHANNELS = ['Direct', 'Partner'];
 const QUARTERS = ['Q1', 'Q2', 'Q3', 'Q4'];
 const YEARS = [2025, 2026];
 const MANAGERS = ['Alice', 'Ben', 'Carmen', 'Diego', 'Eva', 'Frank'];
+const PIVOT_PRESET_STORAGE_KEY = 'orbcafe:examples:pivot-presets';
+
+const DEFAULT_PIVOT_PRESETS: PivotTablePreset[] = [
+  {
+    id: 'preset-revenue-overview',
+    name: 'Revenue Overview',
+    layout: {
+      rows: ['region', 'category'],
+      columns: ['quarter'],
+      filters: ['year', 'channel'],
+      values: [
+        { fieldId: 'revenue', aggregation: 'sum' },
+        { fieldId: 'profit', aggregation: 'sum' },
+        { fieldId: 'marginRate', aggregation: 'avg' },
+      ],
+    },
+    showGrandTotal: true,
+  },
+  {
+    id: 'preset-manager-efficiency',
+    name: 'Manager Efficiency',
+    layout: {
+      rows: ['manager'],
+      columns: ['quarter'],
+      filters: ['year', 'region'],
+      values: [
+        { fieldId: 'orderCount', aggregation: 'sum' },
+        { fieldId: 'marginRate', aggregation: 'avg' },
+      ],
+    },
+    showGrandTotal: true,
+  },
+];
 
 const EXAMPLE_TEXT: Record<
   OrbcafeLocale,
@@ -153,6 +194,24 @@ const percentageFormatter = (value: number) =>
 
 export default function PivotTableExampleClient() {
   const [locale, setLocale] = useState<OrbcafeLocale>('en');
+  const [pivotPresets, setPivotPresets] = useState<PivotTablePreset[]>(() => {
+    if (typeof window === 'undefined') {
+      return DEFAULT_PIVOT_PRESETS;
+    }
+    const raw = window.localStorage.getItem(PIVOT_PRESET_STORAGE_KEY);
+    if (!raw) {
+      return DEFAULT_PIVOT_PRESETS;
+    }
+    try {
+      const parsed = JSON.parse(raw) as PivotTablePreset[];
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
+      }
+    } catch {
+      // Ignore malformed local storage payload and fallback to defaults.
+    }
+    return DEFAULT_PIVOT_PRESETS;
+  });
   const i18nText = EXAMPLE_TEXT[locale];
   const pivotRows = useMemo(() => buildPivotDemoRows(), []);
 
@@ -177,13 +236,22 @@ export default function PivotTableExampleClient() {
     () => [
       { id: 'dashboard', title: i18nText.dashboard, href: '/', icon: <LayoutDashboard className="w-4 h-4" /> },
       { id: 'std-report', title: i18nText.stdReport, href: '/std-report', icon: <LayoutDashboard className="w-4 h-4" /> },
+      { id: 'kanban', title: 'Kanban', href: '/kanban', icon: <LayoutDashboard className="w-4 h-4" /> },
       { id: 'pivot-table', title: i18nText.pivotTable, href: '/pivot-table', icon: <Table2 className="w-4 h-4" /> },
       { id: 'detail-info', title: i18nText.detailInfo, href: '/detail-info/ID-1', icon: <LayoutDashboard className="w-4 h-4" /> },
+      { id: 'ai-nav', title: 'AI Nav', href: '/ai-nav', icon: <Mic className="w-4 h-4" /> },
       { id: 'messages', title: i18nText.messages, href: '/messages', icon: <Mail className="w-4 h-4" /> },
       { id: 'settings', title: i18nText.settings, href: '/settings', icon: <Settings className="w-4 h-4" /> },
     ],
     [i18nText],
   );
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+    window.localStorage.setItem(PIVOT_PRESET_STORAGE_KEY, JSON.stringify(pivotPresets));
+  }, [pivotPresets]);
 
   return (
     <CAppPageLayout
@@ -211,6 +279,9 @@ export default function PivotTableExampleClient() {
               ],
             }}
             maxPreviewHeight={520}
+            enablePresetManagement
+            presets={pivotPresets}
+            onPresetsChange={setPivotPresets}
           />
         </Box>
       </CPageTransition>

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type {
   PivotAggregation,
+  PivotChartType,
   PivotFieldDefinition,
   PivotFilterSelections,
   PivotLayoutConfig,
@@ -16,6 +17,14 @@ export interface UsePivotTableOptions {
   initialFilterSelections?: PivotFilterSelections;
   initialShowGrandTotal?: boolean;
   initialConfiguratorCollapsed?: boolean;
+  initialChart?: {
+    dimensionFieldId?: string;
+    primaryValueFieldId?: string;
+    secondaryValueFieldId?: string;
+    chartType?: PivotChartType;
+  };
+  initialChartCollapsed?: boolean;
+  initialTableCollapsed?: boolean;
 }
 
 interface UsePivotTableActions {
@@ -31,6 +40,12 @@ interface UsePivotTableActions {
   resetFilterSelections: () => void;
   toggleGrandTotal: () => void;
   toggleConfigurator: () => void;
+  setChartDimension: (fieldId: string) => void;
+  setChartPrimaryValue: (fieldId: string) => void;
+  setChartSecondaryValue: (fieldId: string) => void;
+  setChartType: (chartType: PivotChartType) => void;
+  toggleChart: () => void;
+  toggleTable: () => void;
 }
 
 export interface UsePivotTableResult {
@@ -38,12 +53,55 @@ export interface UsePivotTableResult {
   actions: UsePivotTableActions;
 }
 
+const getDefaultChartDimensionFieldId = (
+  rowFields: string[],
+  columnFields: string[],
+  preferred?: string,
+): string => {
+  const dimensionOptions = [...rowFields, ...columnFields];
+  if (preferred && dimensionOptions.includes(preferred)) {
+    return preferred;
+  }
+  return dimensionOptions[0] ?? '';
+};
+
+const getDefaultPrimaryValueFieldId = (
+  valueFields: PivotValueFieldState[],
+  preferred?: string,
+): string => {
+  if (preferred && valueFields.some((item) => item.fieldId === preferred)) {
+    return preferred;
+  }
+  return valueFields[0]?.fieldId ?? '';
+};
+
+const getDefaultSecondaryValueFieldId = (
+  valueFields: PivotValueFieldState[],
+  primaryValueFieldId: string,
+  preferred?: string,
+): string => {
+  if (preferred === '') {
+    return '';
+  }
+  if (
+    preferred &&
+    preferred !== primaryValueFieldId &&
+    valueFields.some((item) => item.fieldId === preferred)
+  ) {
+    return preferred;
+  }
+  return valueFields.find((item) => item.fieldId !== primaryValueFieldId)?.fieldId ?? '';
+};
+
 export const usePivotTable = ({
   fields,
   initialLayout,
   initialFilterSelections = {},
   initialShowGrandTotal = true,
   initialConfiguratorCollapsed = false,
+  initialChart,
+  initialChartCollapsed = false,
+  initialTableCollapsed = false,
 }: UsePivotTableOptions): UsePivotTableResult => {
   const tokenCounterRef = useRef(0);
   const validFieldSet = useMemo(() => new Set(fields.map((field) => field.id)), [fields]);
@@ -76,6 +134,61 @@ export const usePivotTable = ({
   const [filterSelections, setFilterSelections] = useState<PivotFilterSelections>(initialFilterSelections);
   const [showGrandTotal, setShowGrandTotal] = useState<boolean>(initialShowGrandTotal);
   const [isConfiguratorCollapsed, setIsConfiguratorCollapsed] = useState<boolean>(initialConfiguratorCollapsed);
+  const [chartDimensionFieldId, setChartDimensionFieldId] = useState<string>(() =>
+    getDefaultChartDimensionFieldId(
+      sanitizeAxisFields(initialLayout?.rows, validFieldSet),
+      sanitizeAxisFields(initialLayout?.columns, validFieldSet),
+      initialChart?.dimensionFieldId,
+    ),
+  );
+  const [chartPrimaryValueFieldId, setChartPrimaryValueFieldId] = useState<string>(() => {
+    const initialValueFields = (() => {
+      const sourceValues = initialLayout?.values ?? [];
+      const seen = new Set<string>();
+      const result: PivotValueFieldState[] = [];
+
+      sourceValues.forEach((valueField) => {
+        if (!validFieldSet.has(valueField.fieldId) || seen.has(valueField.fieldId)) {
+          return;
+        }
+        seen.add(valueField.fieldId);
+        result.push({
+          tokenId: valueField.fieldId,
+          fieldId: valueField.fieldId,
+          aggregation: normalizeAggregation(valueField.aggregation, fieldMap.get(valueField.fieldId)),
+        });
+      });
+      return result;
+    })();
+
+    return getDefaultPrimaryValueFieldId(initialValueFields, initialChart?.primaryValueFieldId);
+  });
+  const [chartSecondaryValueFieldId, setChartSecondaryValueFieldId] = useState<string>(() => {
+    const initialValueFields = (() => {
+      const sourceValues = initialLayout?.values ?? [];
+      const seen = new Set<string>();
+      const result: PivotValueFieldState[] = [];
+
+      sourceValues.forEach((valueField) => {
+        if (!validFieldSet.has(valueField.fieldId) || seen.has(valueField.fieldId)) {
+          return;
+        }
+        seen.add(valueField.fieldId);
+        result.push({
+          tokenId: valueField.fieldId,
+          fieldId: valueField.fieldId,
+          aggregation: normalizeAggregation(valueField.aggregation, fieldMap.get(valueField.fieldId)),
+        });
+      });
+      return result;
+    })();
+
+    const primaryValueFieldId = getDefaultPrimaryValueFieldId(initialValueFields, initialChart?.primaryValueFieldId);
+    return getDefaultSecondaryValueFieldId(initialValueFields, primaryValueFieldId, initialChart?.secondaryValueFieldId);
+  });
+  const [chartType, setChartType] = useState<PivotChartType>(initialChart?.chartType ?? 'bar-vertical');
+  const [isChartCollapsed, setIsChartCollapsed] = useState<boolean>(initialChartCollapsed);
+  const [isTableCollapsed, setIsTableCollapsed] = useState<boolean>(initialTableCollapsed);
 
   useEffect(() => {
     setRowFields((prev) => {
@@ -100,6 +213,18 @@ export const usePivotTable = ({
       return valueItemsEqual(prev, next) ? prev : next;
     });
   }, [fieldMap, validFieldSet]);
+
+  useEffect(() => {
+    setChartDimensionFieldId((prev) => getDefaultChartDimensionFieldId(rowFields, columnFields, prev));
+  }, [columnFields, rowFields]);
+
+  useEffect(() => {
+    setChartPrimaryValueFieldId((prev) => getDefaultPrimaryValueFieldId(valueFields, prev));
+  }, [valueFields]);
+
+  useEffect(() => {
+    setChartSecondaryValueFieldId((prev) => getDefaultSecondaryValueFieldId(valueFields, chartPrimaryValueFieldId, prev));
+  }, [chartPrimaryValueFieldId, valueFields]);
 
   const setRows = useCallback(
     (rows: string[]) => {
@@ -210,6 +335,26 @@ export const usePivotTable = ({
     setIsConfiguratorCollapsed((prev) => !prev);
   }, []);
 
+  const setChartDimension = useCallback((fieldId: string) => {
+    setChartDimensionFieldId(fieldId);
+  }, []);
+
+  const setChartPrimaryValue = useCallback((fieldId: string) => {
+    setChartPrimaryValueFieldId(fieldId);
+  }, []);
+
+  const setChartSecondaryValue = useCallback((fieldId: string) => {
+    setChartSecondaryValueFieldId(fieldId);
+  }, []);
+
+  const toggleChart = useCallback(() => {
+    setIsChartCollapsed((prev) => !prev);
+  }, []);
+
+  const toggleTable = useCallback(() => {
+    setIsTableCollapsed((prev) => !prev);
+  }, []);
+
   const model = useMemo<PivotTableModel>(
     () => ({
       rowFields,
@@ -226,12 +371,30 @@ export const usePivotTable = ({
       setShowGrandTotal,
       isConfiguratorCollapsed,
       setIsConfiguratorCollapsed,
+      chartDimensionFieldId,
+      setChartDimensionFieldId,
+      chartPrimaryValueFieldId,
+      setChartPrimaryValueFieldId,
+      chartSecondaryValueFieldId,
+      setChartSecondaryValueFieldId,
+      chartType,
+      setChartType,
+      isChartCollapsed,
+      setIsChartCollapsed,
+      isTableCollapsed,
+      setIsTableCollapsed,
     }),
     [
+      chartDimensionFieldId,
+      chartPrimaryValueFieldId,
+      chartSecondaryValueFieldId,
+      chartType,
       columnFields,
       filterFields,
       filterSelections,
+      isChartCollapsed,
       isConfiguratorCollapsed,
+      isTableCollapsed,
       rowFields,
       showGrandTotal,
       valueFields,
@@ -253,6 +416,12 @@ export const usePivotTable = ({
       resetFilterSelections,
       toggleGrandTotal,
       toggleConfigurator,
+      setChartDimension,
+      setChartPrimaryValue,
+      setChartSecondaryValue,
+      setChartType,
+      toggleChart,
+      toggleTable,
     },
   };
 };

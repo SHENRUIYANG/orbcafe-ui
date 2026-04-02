@@ -6,7 +6,7 @@
 
 - 组件可直接通过 NPM 安装并使用。
 - 组件 API 稳定、类型完整、目录结构一致。
-- 组件内部逻辑可复用（通过 Hooks），文档可追踪（README 规范化）。
+- 组件公共 API、类型契约与回调契约稳定，文档与 examples 可追踪。
 
 ---
 
@@ -23,13 +23,15 @@
 | `GraphReport` | 图形报表弹窗（KPI、图表、联动、AI 输入区） | `src/components/GraphReport` | `src/components/GraphReport/README.md` |
 | `CustomizeAgent` | AI 参数与 Prompt 模板设置弹窗 | `src/components/CustomizeAgent` | `src/components/CustomizeAgent/README.md` |
 | `DetailInfo` | 标准详情页容器（信息块 + Tabs + 底部表格 + AI/搜索） | `src/components/DetailInfo` | `src/components/DetailInfo/README.md` |
+| `Kanban` | 标准看板模块（Bucket + Card + Drag/Drop + Detail 跳转） | `src/components/Kanban` | `src/components/Kanban/README.md` |
 | `PageLayout` | 页面壳层（Header + Navigation + Content） | `src/components/PageLayout` | `src/components/PageLayout/README.md` |
+| `AgentUI` | 聊天 UI 与 Copilot UI（StdChat / CopilotChat / AgentPanel） | `src/components/AgentUI` | `src/components/AgentUI/README.md` |
 
 ### 文档查阅顺序（推荐）
 
 1. 先看模块根 README：了解能力边界、最小接入示例。  
-2. 再看模块 `Hooks/README.md`：确认状态管理、参数、返回值与联动方式。  
-3. 最后看模块详细设计文档（如 `graphreport.md`）：理解内部结构与扩展点。  
+2. 如果该模块公开导出 hooks，再看模块 `Hooks/README.md`：确认状态管理、参数、返回值与联动方式。  
+3. 最后看模块详细设计文档或 AI 契约索引：理解内部结构、标准案例与扩展点。  
 
 ### 常用文档索引
 
@@ -38,6 +40,79 @@
 - `StdReport Hooks`：`src/components/StdReport/Hooks/README.md`
 - `PageLayout Hooks`：`src/components/PageLayout/Hooks/README.md`
 - `DetailInfo` 模块文档：`src/components/DetailInfo/README.md`
+- `Kanban` 模块文档：`src/components/Kanban/README.md`
+- `Kanban Hooks`：`src/components/Kanban/Hooks/README.md`
+- `Kanban Tools`：`src/components/Kanban/Utils/README.md`
+- `AgentUI` 模块文档：`src/components/AgentUI/README.md`
+- `AI 模块契约索引`：`skills/orbcafe-ui-component-usage/references/module-contracts.md`
+
+---
+
+## AgentUI（聊天与 Copilot）
+
+`AgentUI` 是库里负责聊天类交互的标准模块，当前建议直接使用以下公共 API：
+
+- `AgentPanel`: 带头部的标准聊天容器。
+- `StdChat`: 适合整页、弹窗、工作台内嵌聊天。
+- `CopilotChat`: 适合右下角 Copilot 浮窗内容层。
+- `AgentUICardHooks` / `AgentUICardHookEvent`: 卡片交互事件回调类型。
+
+### Import
+
+```tsx
+import {
+  AgentPanel,
+  StdChat,
+  CopilotChat,
+  type ChatMessage,
+  type AgentUICardHooks
+} from 'orbcafe-ui'
+```
+
+### 使用约定
+
+- `AgentUI` 当前没有独立导出的自定义 hooks，对外稳定接口是组件 props 和回调契约。
+- 标准消息状态以 `messages + isResponding` 为主。
+- 卡片交互统一通过 `cardHooks.onCardEvent` 承接。
+- `StdChat` 负责标准聊天布局，`CopilotChat` 只负责 Copilot 面板内容层，不负责浮窗壳、拖拽和缩放。
+
+详细接入方式、example 拆解和封装边界说明见 `src/components/AgentUI/README.md`。
+
+---
+
+## AI-First Integration
+
+如果目标是让 AI 在 vibe coding 场景里稳定使用 ORBCAFE UI，推荐遵循这条顺序：
+
+1. 先用 `skills/orbcafe-ui-component-usage` 判定目标模块。
+2. 再看 `skills/orbcafe-ui-component-usage/references/module-contracts.md`，确认：
+   - 公共导出入口
+   - 推荐标准组件
+   - 是否公开 hooks
+   - 最小状态结构
+   - 标准 example
+   - 验证与排障清单
+3. 最后才看具体模块 README 和官方 examples。
+
+### 当前标准化原则
+
+- 只使用 `src/index.ts` 可达的公共导出。
+- 优先走 canonical example，不从内部组件自由拼装。
+- 每个模块都要回答 5 个问题：
+  - 用哪个公共入口组件或 hook
+  - 最小状态是什么
+  - 必须回调有哪些
+  - 标准 example 是哪个
+  - 怎么验证“真的生效了”
+
+### 关于 Hooks
+
+不是所有模块都以 hooks 为主入口。
+
+- `StdReport`、`DetailInfo`、`Kanban`、`PivotTable`、`AINav`、`PageLayout` 明确公开了 hooks。
+- `AgentUI` 当前不公开自定义 hook，稳定入口是组件 props 和回调契约。
+
+这条规则对 AI 很重要，因为它决定了应该生成“hook 驱动代码”还是“组件 + callbacks 驱动代码”。
 
 ---
 
@@ -186,13 +261,22 @@ Hydration mismatch 常见来源：
 提交前建议至少执行：
 
 ```bash
-# 1) 构建组件库
+# 1) 校验 AI 契约与公开导出一致
+npm run check:ai-contracts
+
+# 2) 构建组件库
 npm run build
 
-# 2) 校验 examples
+# 3) 校验 examples
 cd examples
 npm run lint
 npx tsc --noEmit
+```
+
+如果要做一轮更完整的发布前检查：
+
+```bash
+npm run release:check
 ```
 
 如果只想快速看运行效果：
@@ -201,6 +285,16 @@ npx tsc --noEmit
 cd examples
 npm run dev
 ```
+
+### 发布前 AI 契约清单
+
+每次发布前至少确认：
+
+1. `src/index.ts` 的公共导出与 skill 文档一致。
+2. `skills/orbcafe-ui-component-usage/references/module-contracts.md` 和 `.json` 已同步更新。
+3. 新模块已声明 `Hook-first` / `Component-first`。
+4. 每个模块至少有一个 canonical example。
+5. router skill 已能把新模块正确分流。
 
 ---
 

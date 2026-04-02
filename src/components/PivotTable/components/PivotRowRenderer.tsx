@@ -13,6 +13,7 @@ interface PivotRowRendererProps {
   level: number;
   expandedKeys: Set<string>;
   onToggle: (key: string) => void;
+  getValue?: (node: PivotTreeNode, columnId: string) => number;
 }
 
 export const PivotRowRenderer: React.FC<PivotRowRendererProps> = ({
@@ -22,6 +23,7 @@ export const PivotRowRenderer: React.FC<PivotRowRendererProps> = ({
   level,
   expandedKeys,
   onToggle,
+  getValue,
 }) => {
   const isExpanded = expandedKeys.has(node.key);
   const hasChildren = node.children.length > 0;
@@ -81,7 +83,7 @@ export const PivotRowRenderer: React.FC<PivotRowRendererProps> = ({
               whiteSpace: 'nowrap',
             }}
           >
-            {formatAggregatedValue(node.aggregatedValues[column.id] ?? 0, column.valueItem, fieldMap)}
+            {formatAggregatedValue(getValue ? getValue(node, column.id) : (node.aggregatedValues[column.id] ?? 0), column.valueItem, fieldMap)}
           </TableCell>
         ))}
       </TableRow>
@@ -96,6 +98,7 @@ export const PivotRowRenderer: React.FC<PivotRowRendererProps> = ({
             level={level + 1}
             expandedKeys={expandedKeys}
             onToggle={onToggle}
+            getValue={getValue}
           />
         ))}
     </>

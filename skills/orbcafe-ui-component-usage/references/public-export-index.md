@@ -11,9 +11,19 @@ Use only exports reachable from `src/index.ts`.
   - `GraphReport/*`
   - `CustomizeAgent/*`
   - `DetailInfo/*`
+  - `Kanban/*`
   - `PageLayout/*`
   - `PivotTable/*`
   - `AINav/*`
+  - `AgentUI/*`:
+    - `AgentPanel`
+    - `StdChat`
+    - `CopilotChat`
+    - `type ChatMessage`
+    - `type AgentUICardHooks`
+    - `type AgentUICardHookEvent`
+    - `type AgentUICardAction`
+    - `type AgentUICardType`
 - Shared:
   - `i18n/*`
   - `MarkdownRenderer` family from `lib/renderer/md_renderer`
