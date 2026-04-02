@@ -25,6 +25,9 @@
 | `DetailInfo` | 标准详情页容器（信息块 + Tabs + 底部表格 + AI/搜索） | `src/components/DetailInfo` | `src/components/DetailInfo/README.md` |
 | `Kanban` | 标准看板模块（Bucket + Card + Drag/Drop + Detail 跳转） | `src/components/Kanban` | `src/components/Kanban/README.md` |
 | `PageLayout` | 页面壳层（Header + Navigation + Content） | `src/components/PageLayout` | `src/components/PageLayout/README.md` |
+| `PivotTable` | 透视分析（拖拽维度/度量、图表联动、preset） | `src/components/PivotTable` | `src/components/PivotTable/README.md` |
+| `AINav` | 语音导航与命令输入能力 | `src/components/AINav` | `src/components/AINav/README.md` |
+| `Pad` | 平板触摸场景 UI（壳层、触摸表格、数字键盘、扫码） | `src/components/Pad` | `src/components/Pad/README.md` |
 | `AgentUI` | 聊天 UI 与 Copilot UI（StdChat / CopilotChat / AgentPanel） | `src/components/AgentUI` | `src/components/AgentUI/README.md` |
 
 ### 文档查阅顺序（推荐）
@@ -39,12 +42,15 @@
 - `GraphReport Hooks`：`src/components/GraphReport/Hooks/README.md`
 - `StdReport Hooks`：`src/components/StdReport/Hooks/README.md`
 - `PageLayout Hooks`：`src/components/PageLayout/Hooks/README.md`
+- `Pad` 模块文档：`src/components/Pad/README.md`
+- `Pad Hooks`：`src/components/Pad/Hooks/README.md`
 - `DetailInfo` 模块文档：`src/components/DetailInfo/README.md`
 - `Kanban` 模块文档：`src/components/Kanban/README.md`
 - `Kanban Hooks`：`src/components/Kanban/Hooks/README.md`
 - `Kanban Tools`：`src/components/Kanban/Utils/README.md`
 - `AgentUI` 模块文档：`src/components/AgentUI/README.md`
 - `AI 模块契约索引`：`skills/orbcafe-ui-component-usage/references/module-contracts.md`
+- `Pad skill`：`skills/orbcafe-pad-workflow/SKILL.md`
 
 ---
 
@@ -80,6 +86,24 @@ import {
 
 ---
 
+## Pad（平板触摸场景）
+
+`Pad` 模块用于 iPad/平板仓储场景，核心是“保留标准报表能力 + 触摸友好交互”：
+
+- `PAppPageLayout`: 平板壳层布局（顶部栏 + 导航 + workload）
+- `PTable`: 触摸卡片式表格，兼容 layout/variant/分页/分组/汇总/quick actions
+- `PSmartFilter`: 触摸友好筛选包装
+- `PNumericKeypad`: 数字录入键盘
+- `PBarcodeScanner`: 摄像头扫码弹窗，优先 `BarcodeDetector`，支持手动回退
+- `usePadLayout` / `usePadRecordEditor`: 平板方向与记录编辑 hook
+
+参考：
+- `src/components/Pad/README.md`
+- `examples/app/_components/PadExampleClient.tsx`
+- `examples/app/pad/page.tsx`
+
+---
+
 ## AI-First Integration
 
 如果目标是让 AI 在 vibe coding 场景里稳定使用 ORBCAFE UI，推荐遵循这条顺序：
@@ -109,7 +133,7 @@ import {
 
 不是所有模块都以 hooks 为主入口。
 
-- `StdReport`、`DetailInfo`、`Kanban`、`PivotTable`、`AINav`、`PageLayout` 明确公开了 hooks。
+- `StdReport`、`DetailInfo`、`Kanban`、`PivotTable`、`AINav`、`PageLayout`、`Pad` 明确公开了 hooks。
 - `AgentUI` 当前不公开自定义 hook，稳定入口是组件 props 和回调契约。
 
 这条规则对 AI 很重要，因为它决定了应该生成“hook 驱动代码”还是“组件 + callbacks 驱动代码”。
@@ -208,7 +232,7 @@ export default function HomeClientPage() {
 
 ## Next.js 16 兼容性说明（务必阅读）
 
-官方 example 已按 Next.js `16.1.6` 调整，接入时请遵循以下规则：
+官方 example 已按 Next.js `16.2.0` 调整，接入时请遵循以下规则：
 
 ### 1. 动态路由参数必须在 Server Page 解包
 
