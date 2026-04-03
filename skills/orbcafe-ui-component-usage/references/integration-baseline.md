@@ -15,6 +15,9 @@
   - include `./node_modules/orbcafe-ui/dist/**/*.{js,mjs}`.
 - i18n:
   - use `OrbcafeI18nProvider` or `CAppPageLayout.locale`.
+  - for library text, use `useOrbcafeI18n().t()`.
+  - keep option `value` stable, localize `label` only.
+  - locale resources source: `src/i18n/messages.ts`.
 
 ## Version-sensitive notes (>= 1.0.6)
 

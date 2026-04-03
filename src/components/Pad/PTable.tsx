@@ -18,7 +18,7 @@ import {
   Typography,
   useMediaQuery,
 } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
+import { alpha, useTheme } from '@mui/material/styles';
 import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded';
 import ChevronRightRoundedIcon from '@mui/icons-material/ChevronRightRounded';
 import type { PTableProps } from './types';
@@ -479,11 +479,12 @@ export const PTable: React.FC<PTableProps> = (props) => {
     </>
   );
 
-  const renderRowCard = (row: Record<string, any>, rowId: string | number) => {
+  const renderRowCard = (row: Record<string, any>, rowId: string | number, rowIndex: number) => {
     const isSelected = selected.includes(rowId);
     const detailGridColumns =
       resolvedOrientation === 'portrait' ? 'repeat(2, minmax(0, 1fr))' : 'repeat(auto-fit, minmax(140px, 1fr))';
-
+    const rowTone = rowIndex % 2 === 0 ? alpha(theme.palette.primary.main, 0.04) : alpha(theme.palette.primary.main, 0.022);
+    const subtleBorder = alpha(theme.palette.divider, 0.22);
     return (
       <Paper
         key={rowId}
@@ -495,11 +496,33 @@ export const PTable: React.FC<PTableProps> = (props) => {
         sx={{
           p: rowHeight === 'compact' ? 1.25 : 1.5,
           borderRadius: 4,
-          border: '1px solid',
-          borderColor: isSelected ? 'primary.main' : 'divider',
-          boxShadow: isSelected ? '0 12px 36px rgba(37, 99, 235, 0.14)' : 'none',
+          border: '0.5px solid',
+          borderColor: isSelected ? alpha(theme.palette.primary.main, 0.38) : subtleBorder,
+          background: isSelected
+            ? `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.13)}, ${alpha(theme.palette.primary.main, 0.06)})`
+            : `linear-gradient(135deg, ${rowTone}, ${alpha(theme.palette.primary.main, 0.015)})`,
+          boxShadow: isSelected ? `0 12px 30px ${alpha(theme.palette.primary.main, 0.2)}` : `0 3px 10px ${alpha(theme.palette.common.black, 0.045)}`,
           cursor: 'pointer',
-          transition: 'border-color 160ms ease, box-shadow 160ms ease, transform 120ms ease',
+          position: 'relative',
+          overflow: 'hidden',
+          transition: 'border-color 160ms ease, box-shadow 160ms ease, transform 120ms ease, background 160ms ease',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            bottom: 0,
+            width: 4,
+            background: isSelected
+              ? theme.palette.primary.main
+              : rowIndex % 2 === 0
+                ? alpha(theme.palette.primary.main, 0.26)
+                : alpha(theme.palette.text.primary, 0.16),
+          },
+          '&:hover': {
+            boxShadow: `0 10px 20px ${alpha(theme.palette.primary.main, 0.12)}`,
+            transform: 'translateY(-1px)',
+          },
           '&:active': {
             transform: 'scale(0.995)',
           },
@@ -556,9 +579,9 @@ export const PTable: React.FC<PTableProps> = (props) => {
                   sx={{
                     p: 1,
                     borderRadius: 3,
-                    bgcolor: 'action.hover',
-                    border: '1px solid',
-                    borderColor: 'divider',
+                    bgcolor: alpha(theme.palette.background.paper, 0.8),
+                    border: '0.1px solid',
+                    borderColor: alpha(theme.palette.divider, 0.24),
                   }}
                 >
                   <Typography sx={{ fontSize: '0.72rem', color: 'text.secondary' }}>{column.label}</Typography>
@@ -818,7 +841,7 @@ export const PTable: React.FC<PTableProps> = (props) => {
 
               const row = item.data || item;
               const rowId = item.id || row[rowKeyField] || index;
-              return renderRowCard(row, rowId);
+              return renderRowCard(row, rowId, index);
             })}
 
             {showSummary ? (

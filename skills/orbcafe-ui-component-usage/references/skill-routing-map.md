@@ -27,6 +27,8 @@
   - Kanban+Detail skill
 - `导航`, `壳层`, `header`, `menu`, `locale`, `主题切换`, `markdown`, `transition`:
   - Layout+Navigation skill
+- `tabelle`, `filterleiste`, `standardbericht`, `navigationsbereich`, `detailseite`, `sprache wechseln`, `barcode scanner`, `tablet`:
+  - Use glossary mapping first, then route by matched canonical API
 - `透视表`, `pivot`, `拖拽维度`, `preset`, `语音导航`, `space 长按`:
   - Pivot+AINav skill
 - `pad`, `平板`, `触摸`, `横竖屏`, `小键盘`, `扫码`, `camera`, `barcode`, `PTable`, `PSmartFilter`, `PAppPageLayout`, `Navigation Island`:

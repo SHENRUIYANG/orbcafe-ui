@@ -51,6 +51,24 @@
 - `AgentUI` 模块文档：`src/components/AgentUI/README.md`
 - `AI 模块契约索引`：`skills/orbcafe-ui-component-usage/references/module-contracts.md`
 - `Pad skill`：`skills/orbcafe-pad-workflow/SKILL.md`
+- `组件通俗名映射（多语言）`：`skills/orbcafe-ui-component-usage/references/component-glossary-i18n.md`
+
+### 组件通俗名（Natural Name）对照
+
+用于“用户自然语言 -> 组件 canonical API”映射，避免只有英文技术名才可路由。
+
+| Canonical API | English natural name | 中文通俗名 | German cues |
+| --- | --- | --- | --- |
+| `CTable` | Desktop table | 电脑端表格 | Desktop Tabelle |
+| `CSmartFilter` | Smart filter bar | 智能筛选条 | Filterleiste |
+| `PTable` | Pad/touch table | 平板触摸表格 | Tablet Tabelle |
+| `PSmartFilter` | Pad filter bar | 平板筛选条 | Tablet Filter |
+| `PBarcodeScanner` | Camera barcode scanner | 摄像头扫码控件 | Barcode Scanner |
+| `PNumericKeypad` | On-screen numeric keypad | 屏幕数字小键盘 | Ziffernblock |
+| `CAppPageLayout` | App shell layout | 应用壳层布局 | App Layout |
+| `CDetailInfoPage` | Detail page | 详情页 | Detailseite |
+| `CPivotTable` | Pivot table | 透视表 | Pivot Tabelle |
+| `AgentPanel` | Agent chat panel | 智能体聊天面板 | Agent Chat Panel |
 
 ---
 
@@ -108,15 +126,16 @@ import {
 
 如果目标是让 AI 在 vibe coding 场景里稳定使用 ORBCAFE UI，推荐遵循这条顺序：
 
-1. 先用 `skills/orbcafe-ui-component-usage` 判定目标模块。
-2. 再看 `skills/orbcafe-ui-component-usage/references/module-contracts.md`，确认：
+1. 先看 `skills/orbcafe-ui-component-usage/references/component-glossary-i18n.md`，把自然语言组件名映射到 canonical API。
+2. 再用 `skills/orbcafe-ui-component-usage` 判定目标模块。
+3. 再看 `skills/orbcafe-ui-component-usage/references/module-contracts.md`，确认：
    - 公共导出入口
    - 推荐标准组件
    - 是否公开 hooks
    - 最小状态结构
    - 标准 example
    - 验证与排障清单
-3. 最后才看具体模块 README 和官方 examples。
+4. 最后才看具体模块 README 和官方 examples。
 
 ### 当前标准化原则
 

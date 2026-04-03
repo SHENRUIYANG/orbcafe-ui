@@ -16,6 +16,9 @@ export const PSmartFilter = ({ touchMode = 'comfortable', sx, ...props }: PSmart
         '& .MuiAutocomplete-root': {
           minWidth: { xs: '100%', md: 260 },
         },
+        '& .MuiAutocomplete-root .MuiInputBase-root': {
+          backgroundColor: 'transparent !important',
+        },
         '& .MuiInputBase-root': {
           minHeight: expanded ? 56 : 50,
           borderRadius: 3,

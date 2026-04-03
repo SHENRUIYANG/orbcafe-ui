@@ -8,12 +8,13 @@ description: Route ORBCAFE UI requests to the correct module skill and enforce o
 ## Workflow
 
 1. 执行安装与接入基线（必须）。
-2. 使用 `references/skill-routing-map.md` 判定目标模块 skill。
-3. 使用 `references/module-contracts.md` 先确认目标模块的公共入口、hook 策略、标准 example 与验证方式。
-4. 只加载目标模块所需 references，不加载无关内容。
-5. 使用 `references/public-export-index.md` 约束导入边界。
-6. 使用 `references/integration-baseline.md` 执行 Next.js 与 hydration 检查。
-7. 输出模块决策、最小可运行代码、验收步骤、排障步骤。
+2. 使用 `references/component-glossary-i18n.md` 先把用户自然语言（可多语言）映射到组件 canonical 名称。
+3. 使用 `references/skill-routing-map.md` 判定目标模块 skill。
+4. 使用 `references/module-contracts.md` 先确认目标模块的公共入口、hook 策略、标准 example 与验证方式。
+5. 只加载目标模块所需 references，不加载无关内容。
+6. 使用 `references/public-export-index.md` 约束导入边界。
+7. 使用 `references/integration-baseline.md` 执行 Next.js / hydration / i18n 检查。
+8. 输出模块决策、最小可运行代码、验收步骤、排障步骤。
 
 ## Installation Baseline (Mandatory)
 
@@ -47,10 +48,11 @@ content: ["./node_modules/orbcafe-ui/dist/**/*.{js,mjs}"]
 Always provide:
 
 1. `Decision`: 选择哪个模块 skill，并说明依据。
-2. `Paste-ready code`: 仅从 `orbcafe-ui` 入口导入。
-3. `Data shape`: 最小必需字段结构。
-4. `Verify`: 至少 3 条可执行验收步骤（启动、交互、持久化/回调）。
-5. `Troubleshooting`: 至少 3 条“没效果”排查点。
+2. `Name mapping`: 用户自然语言名称 -> canonical API 名称（至少 1 组）。
+3. `Paste-ready code`: 仅从 `orbcafe-ui` 入口导入。
+4. `Data shape`: 最小必需字段结构。
+5. `Verify`: 至少 3 条可执行验收步骤（启动、交互、持久化/回调）。
+6. `Troubleshooting`: 至少 3 条“没效果”排查点。
 
 Before writing code, explicitly state one of:
 
