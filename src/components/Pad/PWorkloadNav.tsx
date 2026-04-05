@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { Box, Paper, Stack, Typography, useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { useRouter } from 'next/navigation';
@@ -17,10 +18,17 @@ const navigateItem = (router: ReturnType<typeof useRouter>, item: PWorkloadNavIt
 
 export const PWorkloadNav = ({ items, selectedId, orientation = 'auto', onItemSelect, sx }: PWorkloadNavProps) => {
   const theme = useTheme();
-  const isPortraitViewport = useMediaQuery('(orientation: portrait)');
-  const isCompactViewport = useMediaQuery(theme.breakpoints.down('md'));
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isPortraitViewport = useMediaQuery('(orientation: portrait)', { noSsr: true });
+  const isCompactViewport = useMediaQuery(theme.breakpoints.down('md'), { noSsr: true });
   const resolvedOrientation =
     orientation === 'auto' ? (isPortraitViewport || isCompactViewport ? 'portrait' : 'landscape') : orientation;
+
   const router = useRouter();
 
   return (
@@ -28,7 +36,7 @@ export const PWorkloadNav = ({ items, selectedId, orientation = 'auto', onItemSe
       sx={{
         display: 'grid',
         gridTemplateColumns:
-          resolvedOrientation === 'portrait'
+          !mounted || resolvedOrientation === 'portrait'
             ? 'repeat(2, minmax(0, 1fr))'
             : 'repeat(auto-fit, minmax(180px, 1fr))',
         gap: 1.5,

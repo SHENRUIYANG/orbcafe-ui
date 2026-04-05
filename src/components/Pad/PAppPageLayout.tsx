@@ -52,9 +52,14 @@ export const PAppPageLayout = ({
   const modeStorageKey = 'orbcafe:page-layout-mode';
   const [mode, setMode] = useState<'light' | 'dark' | 'system'>('system');
   const [systemMode, setSystemMode] = useState<'light' | 'dark'>('light');
+  const [mounted, setMounted] = useState(false);
   const [hydrated, setHydrated] = useState(false);
   const effectiveMode: 'light' | 'dark' =
     mode === 'system' ? (hydrated ? systemMode : 'light') : mode;
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     try {
@@ -106,10 +111,10 @@ export const PAppPageLayout = ({
     [effectiveMode],
   );
 
-  const isPortraitViewport = useMediaQuery('(orientation: portrait)', { noSsr: true });
-  const isCompactViewport = useMediaQuery(theme.breakpoints.down('md'), { noSsr: true });
+  const isPortraitViewport = useMediaQuery('(orientation: portrait)');
+  const isCompactViewport = useMediaQuery(theme.breakpoints.down('md'));
   const resolvedOrientation =
-    orientation === 'auto' ? (isPortraitViewport || isCompactViewport ? 'portrait' : 'landscape') : orientation;
+    orientation === 'auto' ? (!mounted || isPortraitViewport || isCompactViewport ? 'portrait' : 'landscape') : orientation;
 
   const [navState, setNavState] = useState({
     landscape: defaultNavigationOpen ?? true,
@@ -128,7 +133,7 @@ export const PAppPageLayout = ({
 
   const headerLeftSlot = (
     <Stack direction="row" spacing={1} alignItems="center">
-      {showNavigation && resolvedOrientation === 'portrait' ? (
+      {(!mounted || (showNavigation && resolvedOrientation === 'portrait')) ? (
         <IconButton onClick={() => updateNavigationOpen(!navigationOpen)} sx={{ bgcolor: 'action.hover' }}>
           <MenuRoundedIcon />
         </IconButton>
@@ -199,11 +204,11 @@ export const PAppPageLayout = ({
           ) : null}
 
           <Box sx={{ flex: 1, minHeight: 0, display: 'flex', position: 'relative' }}>
-            {showNavigation && resolvedOrientation === 'landscape' ? (
+            {mounted && showNavigation && resolvedOrientation === 'landscape' ? (
               <Box sx={{ p: 1.5, pr: 0, flexShrink: 0 }}>{navContent}</Box>
             ) : null}
 
-            {showNavigation && resolvedOrientation === 'portrait' ? (
+            {(!mounted || (showNavigation && resolvedOrientation === 'portrait')) ? (
               <Drawer
                 open={navigationOpen}
                 onClose={() => updateNavigationOpen(false)}
