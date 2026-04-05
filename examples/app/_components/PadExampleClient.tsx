@@ -464,7 +464,7 @@ export default function PadExampleClient() {
 
               <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr 1fr', xl: 'repeat(4, minmax(0, 1fr))' }, gap: 1.2 }}>
                 {summaryCards.map((item) => (
-                  <Paper key={item.label} sx={{ p: 1.35, borderRadius: 3, border: '1px solid', borderColor: 'divider' }}>
+                  <Paper key={item.label} sx={{ p: 1.35, borderRadius: 3, border: '1px solid', borderColor: 'divider', bgcolor: 'background.paper' }}>
                     <Typography sx={{ fontSize: '0.76rem', color: 'text.secondary', textTransform: 'uppercase', letterSpacing: 0.35 }}>
                       {item.label}
                     </Typography>

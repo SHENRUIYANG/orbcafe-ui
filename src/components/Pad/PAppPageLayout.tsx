@@ -112,38 +112,33 @@ export const PAppPageLayout = ({
   const resolvedOrientation =
     orientation === 'auto' ? (isPortraitViewport || isCompactViewport ? 'portrait' : 'landscape') : orientation;
 
-  const [internalNavOpen, setInternalNavOpen] = useState(defaultNavigationOpen ?? false);
   const [mounted, setMounted] = useState(false);
+  const [navState, setNavState] = useState({
+    landscape: defaultNavigationOpen ?? true,
+    portrait: false,
+  });
+
+  const internalNavOpen = navState[resolvedOrientation];
   const navigationOpen = navOpen ?? internalNavOpen;
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  useEffect(() => {
-    if (navOpen !== undefined) return;
-    setInternalNavOpen(resolvedOrientation === 'landscape');
-  }, [navOpen, resolvedOrientation]);
-
   const updateNavigationOpen = (next: boolean) => {
     if (navOpen === undefined) {
-      setInternalNavOpen(next);
+      setNavState((prev) => ({ ...prev, [resolvedOrientation]: next }));
     }
     onNavOpenChange?.(next);
   };
 
   const headerLeftSlot = (
     <Stack direction="row" spacing={1} alignItems="center">
-      {showNavigation && (
+      {showNavigation && resolvedOrientation === 'portrait' && (
         <IconButton onClick={() => updateNavigationOpen(!navigationOpen)} sx={{ bgcolor: 'action.hover', mr: 1 }}>
           <MenuRoundedIcon />
         </IconButton>
       )}
-      <Box sx={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-        <Typography sx={{ fontSize: '0.78rem', color: 'text.secondary', lineHeight: 1.2 }}>
-          {!mounted ? 'Pad workspace' : resolvedOrientation === 'portrait' ? 'Pad portrait workspace' : 'Pad landscape workspace'}
-        </Typography>
-      </Box>
       {leftHeaderSlot}
     </Stack>
   );

@@ -130,7 +130,7 @@ export const PNumericKeypad = ({
         borderRadius: 4,
         border: '1px solid',
         borderColor: 'divider',
-        background: 'background.paper',
+        bgcolor: 'background.paper',
         ...sx,
       }}
     >
@@ -193,7 +193,7 @@ export const PNumericKeypad = ({
               borderRadius: 3,
               border: '1px solid',
               borderColor: 'divider',
-              background: 'background.paper',
+              bgcolor: 'background.paper',
               cursor: 'pointer',
               appearance: 'none',
               WebkitAppearance: 'none',
