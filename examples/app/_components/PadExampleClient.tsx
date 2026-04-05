@@ -572,9 +572,9 @@ export default function PadExampleClient() {
               )}
               renderCardFooter={(row) => (
                 <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
-                  <Chip size="small" variant="outlined" label={`Truck ${row.truck}`} />
-                  <Chip size="small" variant="outlined" label={`Ship ${row.shipDate}`} />
-                  <Chip size="small" variant="outlined" label={row.customer} />
+                  <Chip size="small" variant="outlined" label={`Truck ${row.truck}`} sx={{ color: 'text.primary' }} />
+                  <Chip size="small" variant="outlined" label={`Ship ${row.shipDate}`} sx={{ color: 'text.primary' }} />
+                  <Chip size="small" variant="outlined" label={row.customer} sx={{ color: 'text.primary' }} />
                 </Stack>
               )}
               onRowClick={handleSelectTask}
@@ -589,8 +589,9 @@ export default function PadExampleClient() {
                   borderColor: 'divider',
                   background:
                     theme.palette.mode === 'dark'
-                      ? 'linear-gradient(135deg, rgba(15,23,42,0.92), rgba(30,41,59,0.92))'
+                      ? 'linear-gradient(135deg, rgba(30,41,59,0.92), rgba(15,23,42,0.92))'
                       : 'linear-gradient(135deg, rgba(239,246,255,1), rgba(224,242,254,0.86))',
+                  color: 'text.primary',
                 })}
               >
                 <Stack spacing={1.25}>
@@ -626,7 +627,7 @@ export default function PadExampleClient() {
                 </Stack>
               </Paper>
 
-              <Paper sx={{ p: 2, borderRadius: 4, border: '1px solid', borderColor: 'divider' }}>
+              <Paper sx={{ p: 2, borderRadius: 4, border: '1px solid', borderColor: 'divider', bgcolor: 'background.paper', color: 'text.primary' }}>
                 <Stack spacing={1.25}>
                   <Box>
                     <Typography sx={{ fontSize: '1rem', fontWeight: 900 }}>Selected task keypad</Typography>
@@ -636,12 +637,12 @@ export default function PadExampleClient() {
                   </Box>
 
                   {selectedTask ? (
-                    <Paper elevation={0} sx={{ p: 1.25, borderRadius: 3, bgcolor: 'action.hover', border: '1px solid', borderColor: 'divider' }}>
+                    <Paper elevation={0} sx={{ p: 1.25, borderRadius: 3, bgcolor: 'action.hover', border: '1px solid', borderColor: 'divider', color: 'text.primary' }}>
                       <Typography sx={{ fontSize: '0.76rem', color: 'text.secondary' }}>{selectedTask.taskId}</Typography>
                       <Typography sx={{ mt: 0.3, fontSize: '0.96rem', fontWeight: 900 }}>{selectedTask.title}</Typography>
                       <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" sx={{ mt: 1 }}>
-                        <Chip size="small" label={`Zone ${selectedTask.zone}`} />
-                        <Chip size="small" label={`Planned ${selectedTask.plannedQty}`} />
+                        <Chip size="small" label={`Zone ${selectedTask.zone}`} sx={{ color: 'text.primary' }} />
+                        <Chip size="small" label={`Planned ${selectedTask.plannedQty}`} sx={{ color: 'text.primary' }} />
                         <Chip size="small" label={`Current ${selectedTask.confirmedQty}`} color="primary" variant="outlined" />
                       </Stack>
                     </Paper>
@@ -657,7 +658,7 @@ export default function PadExampleClient() {
                 </Stack>
               </Paper>
 
-              <Paper sx={{ p: 2, borderRadius: 4, border: '1px solid', borderColor: 'divider' }}>
+              <Paper sx={{ p: 2, borderRadius: 4, border: '1px solid', borderColor: 'divider', bgcolor: 'background.paper', color: 'text.primary' }}>
                 <Stack spacing={1}>
                   <Typography sx={{ fontSize: '0.96rem', fontWeight: 900 }}>What this page demonstrates</Typography>
                   <Typography sx={{ fontSize: '0.84rem', color: 'text.secondary', lineHeight: 1.6 }}>
