@@ -63,6 +63,18 @@ export const CAppPageLayout = ({
       // ignore storage access failures
     }
   }, [hydrated, mode]);
+
+  // Sync effectiveMode to document for Tailwind dark variant and native scrollbars
+  useEffect(() => {
+    if (effectiveMode === 'dark') {
+      document.documentElement.classList.add('dark');
+      document.documentElement.style.colorScheme = 'dark';
+    } else {
+      document.documentElement.classList.remove('dark');
+      document.documentElement.style.colorScheme = 'light';
+    }
+  }, [effectiveMode]);
+
   const theme = useMemo(
     () =>
       createTheme({

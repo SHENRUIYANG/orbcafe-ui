@@ -1,53 +1,38 @@
 ---
-name: orbcafe-pad-workflow
-description: Build ORBCAFE touch-first pad experiences with PAppPageLayout, PNavIsland, PWorkloadNav, PTable, PSmartFilter, PNumericKeypad, PBarcodeScanner, PTouchCard, usePadLayout, and usePadRecordEditor using official examples patterns. Use for iPad/平板交互、横竖屏适配、触摸卡片表格、数字键盘录入和摄像头扫码，尤其适用于“UI显示正常但点不动/交互无效”的排查与修复。
+name: "orbcafe-pad-workflow"
+description: "Build ORBCAFE touch-first pad experiences with PAppPageLayout, PNavIsland, PWorkloadNav, PTable, PNumericKeypad, PBarcodeScanner. Use for iPad/平板端, 触控交互, 扫码录入."
 ---
 
-# ORBCAFE Pad Workflow
+# Pad Workflow Skill
 
-## Workflow
+This skill guides the creation of touch-first, iPad-optimized applications using `orbcafe-ui`'s Pad components. The Pad framework focuses on large tap targets, card-based lists, and hardware integrations (camera scanner, numpad).
 
-1. 对照 `skills/orbcafe-ui-component-usage/references/module-contracts.md`，确认此任务属于 Pad 触摸模块。
-2. 执行安装与本仓库联调启动（必须）。
-3. 先复用 `examples/app/_components/PadExampleClient.tsx` 结构，再做业务字段替换。
-4. 用 `references/patterns.md` 选组合模式（layout-first / table+keypad / touch-card）。
-5. 用 `references/guardrails.md` 检查横竖屏、点击命中、hydration、过滤/布局持久化。
-6. 输出可运行代码、验收步骤、排障步骤。
+## Core Components & Layout Strategy
 
-## Installation and Bootstrapping (Mandatory)
+A standard Pad page uses a specific component hierarchy. Do not use desktop layouts (`CAppPageLayout`, `CTable`) for Pad routes.
 
-```bash
-npm install orbcafe-ui @mui/material@^7.3.9 @mui/icons-material@^7.3.9 @mui/x-date-pickers@^8.27.2 @emotion/react@^11.14.0 @emotion/styled@^11.14.1 dayjs@^1.11.20 lucide-react@^0.575.0 tailwind-merge@^3.5.0 clsx@^2.1.1 class-variance-authority@^0.7.1 @radix-ui/react-slot@^1.2.4
-```
+1. **`PAppPageLayout`**: The root layout wrapper for Pad pages. It handles the responsive shell, safe areas, and background.
+   - Props: `navigation` (usually `PNavIsland`), `workloads` (usually `PWorkloadNav`), `header` (brand logo/title).
+2. **`PNavIsland`**: The left-side vertical navigation bar. Designed for thumb reachability.
+   - Props: `items` (TreeMenuItem[]), `activeId`, `onItemClick`, `collapsed` (optional).
+3. **`PWorkloadNav`**: The top horizontal tab/card navigation for switching between major workflows (e.g., Receiving, Picking, Packing).
+   - Props: `items` (PWorkloadNavItem[]), `activeId`, `onItemClick`.
+4. **`PTable`**: The touch-friendly alternative to `CTable`. It renders rows as large `PTouchCard` elements instead of a data grid, but shares the same powerful features (variants, smart filters, quick operations).
+   - Key Props: `cardTitleField`, `cardSubtitleFields`, `renderCardFooter`, `cardActionSlot`.
+5. **`PNumericKeypad`**: An on-screen numpad for quick quantity/data entry without invoking the OS keyboard.
+6. **`PBarcodeScanner`**: A dialog component that uses the device camera to scan barcodes/QR codes (uses `html5-qrcode` under the hood).
 
-本仓库联调：
+## Integration Requirements (Must Check)
 
-```bash
-npm run build
-cd examples
-npm install
-npm run dev
-```
+1. **Tailwind CSS Compilation**: `orbcafe-ui` Pad components heavily rely on Tailwind utility classes (e.g., `rounded-2xl`, `backdrop-blur`). The host project must configure Tailwind to scan the library:
+   - Tailwind v4 (`globals.css`): `@source "../../node_modules/orbcafe-ui/dist";`
+   - Tailwind v3 (`tailwind.config.js`): `content: ["./node_modules/orbcafe-ui/dist/**/*.{js,mjs}"]`
+2. **Provider Baseline**: Ensure `ThemeProvider`, `CssBaseline`, and `LocalizationProvider` (MUI) are wrapped at the root level.
+3. **Dependencies**:
+   ```bash
+   npm install orbcafe-ui @mui/material@^7.3.9 @mui/icons-material@^7.3.9 lucide-react@^0.575.0
+   ```
 
-参考实现：
-- `examples/app/_components/PadExampleClient.tsx`
-- `examples/app/pad/page.tsx`
-- `src/components/Pad/README.md`
-- `src/components/Pad/Hooks/README.md`
-
-## Output Contract
-
-0. `Mode`: `Hook-first`（优先 `usePadLayout` / `usePadRecordEditor`）。
-1. `Composition`: 明确使用哪些 Pad 组件（至少 layout/table/filter/keypad 中的相关项）。
-2. `Data contract`: 给出最小字段（`rowKey`, 可编辑数量字段, filter fields）。
-3. `Verify`: 至少包含 5 条（横竖屏切换、菜单点击、workload 切换、table 操作、keypad 写回）。
-4. `Troubleshooting`: 至少 5 条“看得到但点不动”排查项。
-
-## Examples-Based Experience Summary
-
-- `PTable` 目标是保持 `CTable` 功能等价（分页/分组/汇总/布局/变体/quick actions）但交互改为触摸友好行卡片。
-- `PSmartFilter` 是 `CSmartFilter` 的触摸包装，不应裁剪原有变体与布局能力。
-- 竖屏下优先保证工具按钮和关键动作可点击、右对齐和可见，不追求单屏塞满。
-- `PAppPageLayout` 的菜单状态和方向状态必须统一管理，避免 SSR/CSR 首帧方向不一致导致点击层异常。
-- 小键盘必须直连业务写回（`onSubmit`），不能只做展示。
-- 摄像头扫码优先使用原生 `BarcodeDetector`，但必须保留手动录入回退，否则在 Safari/旧设备上会失效。
+## See Also
+- [Layout Patterns](./references/patterns.md) for concrete code templates and hierarchy.
+- [Guardrails](./references/guardrails.md) for mobile constraints and touch target rules.

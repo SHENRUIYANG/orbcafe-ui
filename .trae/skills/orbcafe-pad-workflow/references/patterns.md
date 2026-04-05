@@ -1,47 +1,105 @@
 # Pad Patterns
 
-## 1. Layout-first（推荐）
+## Pattern 1: Complete Pad App Layout
 
-适用：完整平板壳层页面。
+This is the standard, best-practice structure for a Pad application based on `PadExampleClient.tsx`.
 
-- 外层：`PAppPageLayout`
-- 顶部 workload：`PWorkloadNav`
-- 主体：`PTable + PSmartFilter`
-- 侧栏/底部输入：`PNumericKeypad`
-- 状态管理：`usePadLayout + usePadRecordEditor`
+```tsx
+import { useState } from 'react';
+import { PAppPageLayout, PNavIsland, PWorkloadNav, PTable, PNumericKeypad, PBarcodeScanner } from 'orbcafe-ui';
+import { PackageCheck, Truck } from 'lucide-react';
+import { Box, Paper, Stack } from '@mui/material';
 
-## 2. Touch Report（报表为主）
+export default function PadApp() {
+  const [activeMenu, setActiveMenu] = useState('dashboard');
+  const [activeWorkload, setActiveWorkload] = useState('picking');
+  const [scannerOpen, setScannerOpen] = useState(false);
 
-适用：需要保留 CTable 能力但改成触摸卡片行。
+  return (
+    <PAppPageLayout
+      navigation={
+        <PNavIsland
+          items={[{ id: 'dashboard', label: 'Dashboard', icon: <PackageCheck /> }]}
+          activeId={activeMenu}
+          onItemClick={setActiveMenu}
+        />
+      }
+      workloads={
+        <PWorkloadNav
+          items={[
+            { id: 'picking', title: 'Picking', description: 'Wave pick tasks', icon: <PackageCheck /> },
+            { id: 'dispatch', title: 'Dispatch', description: 'Load routes', icon: <Truck /> }
+          ]}
+          activeId={activeWorkload}
+          onItemClick={setActiveWorkload}
+        />
+      }
+      header={<Box component="img" src="/logo.png" sx={{ height: 40 }} />}
+    >
+      <Box sx={{ p: 2, height: '100%', display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+        <Box sx={{ flex: '1 1 600px', minWidth: 0, height: '100%' }}>
+          {/* Main content area (e.g., PTable) */}
+          <PTable
+             appId="pad-demo"
+             tableKey="tasks"
+             columns={[{ id: 'taskId', label: 'Task' }, { id: 'status', label: 'Status' }]}
+             rows={[]}
+             rowKey="id"
+             cardTitleField="title"
+             cardSubtitleFields={['taskId', 'status']}
+          />
+        </Box>
+        <Box sx={{ flex: '0 0 360px', width: 360 }}>
+          {/* Side panel for tools (Keypad, Scanner trigger) */}
+          <Stack spacing={2}>
+             <Paper sx={{ p: 2 }}>
+               <PNumericKeypad 
+                 title="Enter Quantity" 
+                 value="" 
+                 onChange={() => {}} 
+                 onSubmit={() => {}} 
+               />
+             </Paper>
+          </Stack>
+        </Box>
+      </Box>
 
-- 使用 `PTable` 替代 `CTable`
-- 保留 `filterConfig`, `quickCreate`, `quickEdit`, `quickDelete`
-- `cardTitleField / cardSubtitleFields / cardActionSlot` 控制触摸卡片密度与重点字段
+      {/* Global Dialogs */}
+      <PBarcodeScanner 
+        open={scannerOpen} 
+        onClose={() => setScannerOpen(false)} 
+        onDetected={(res) => console.log(res)} 
+      />
+    </PAppPageLayout>
+  );
+}
+```
 
-## 3. Touch Card Workflow（卡片流转）
+## Pattern 2: PTable Configuration
 
-适用：滑动动作、就地处理任务。
+`PTable` accepts the same data/columns format as `CTable` but renders rows as touch cards.
 
-- 使用 `PTouchCard`
-- 左/右动作分别绑定 `startAction` / `endAction`
-- 若需拖拽排序，配合外部 dnd 容器和 `dragHandleProps`
-
-## 4. Keypad Writeback（小键盘回写）
-
-适用：扫码后人工确认数量、温度、重量等数字字段。
-
-- 行点击触发 `selectRecord`
-- 小键盘 `onSubmit` 调用 `applyEditorValue(setRows)`
-- 回写完成后提示状态（toast/chip/message）
-
-## 5. Camera Scan Trigger（摄像头扫码）
-
-适用：现场扫 ASN、托盘码、箱码、任务单号。
-
-- 页面放一个显式触发按钮，不要默认占用摄像头
-- 使用 `PBarcodeScanner`
-- `onDetected` 把扫描结果写回：
-  - filter keyword
-  - 表单字段
-  - 当前任务上下文
-- 浏览器不支持 `BarcodeDetector` 时，保留手动录入回退
+```tsx
+<PTable
+  appId="pad-tasks"
+  tableKey="task-list"
+  columns={[
+    { id: 'id', label: 'ID' },
+    { id: 'title', label: 'Title' },
+    { id: 'zone', label: 'Zone' },
+    { id: 'qty', label: 'Qty', numeric: true },
+  ]}
+  rows={tasks}
+  rowKey="id"
+  // Pad specific mapping:
+  cardTitleField="title"
+  cardSubtitleFields={['id', 'zone']}
+  cardActionSlot={(row) => <Chip label={row.status} />}
+  renderCardFooter={(row) => <Typography>Planned: {row.qty}</Typography>}
+  
+  // Standard features still work:
+  selectionMode="multiple"
+  quickEdit={{ enabled: true, editableFields: ['qty'], primaryKeys: ['id'], onSubmit: handleEdit }}
+  filterConfig={{ /* ... */ }}
+/>
+```

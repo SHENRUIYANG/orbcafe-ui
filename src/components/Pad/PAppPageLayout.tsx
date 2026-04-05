@@ -1,24 +1,23 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
-  Avatar,
   Box,
   Divider,
   Drawer,
   IconButton,
   Paper,
   Stack,
-  TextField,
   Typography,
   useMediaQuery,
 } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
-import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 import type { PAppPageLayoutProps } from './types';
 import { PNavIsland } from './PNavIsland';
 import { PWorkloadNav } from './PWorkloadNav';
+import { CAppHeader } from '../PageLayout/Components/CAppHeader';
+import { OrbcafeI18nProvider } from '../../i18n';
 
 export const PAppPageLayout = ({
   appTitle,
@@ -41,15 +40,79 @@ export const PAppPageLayout = ({
   navOpen,
   onNavOpenChange,
   onWorkloadSelect,
+  locale = 'en',
+  localeLabel,
+  localeOptions,
+  onLocaleChange,
+  onUserSetting,
+  onUserLogout,
+  userMenuItems,
+  leftHeaderSlot,
+  rightHeaderSlot,
 }: PAppPageLayoutProps) => {
-  const theme = useTheme();
+  const modeStorageKey = 'orbcafe:page-layout-mode';
+  const [mode, setMode] = useState<'light' | 'dark' | 'system'>('system');
+  const [systemMode, setSystemMode] = useState<'light' | 'dark'>('light');
+  const [hydrated, setHydrated] = useState(false);
+  const effectiveMode: 'light' | 'dark' =
+    mode === 'system' ? (hydrated ? systemMode : 'light') : mode;
+
+  useEffect(() => {
+    try {
+      const savedMode = window.localStorage.getItem(modeStorageKey);
+      if (savedMode === 'light' || savedMode === 'dark' || savedMode === 'system') {
+        setMode(savedMode);
+      }
+    } catch {
+      // ignore storage access failures
+    }
+
+    setHydrated(true);
+    const media = window.matchMedia('(prefers-color-scheme: dark)');
+    const onChange = () => {
+      setSystemMode(media.matches ? 'dark' : 'light');
+    };
+    onChange();
+    media.addEventListener('change', onChange);
+    return () => media.removeEventListener('change', onChange);
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    try {
+      window.localStorage.setItem(modeStorageKey, mode);
+    } catch {
+      // ignore storage access failures
+    }
+  }, [hydrated, mode]);
+
+  // Sync effectiveMode to document for Tailwind dark variant and native scrollbars
+  useEffect(() => {
+    if (effectiveMode === 'dark') {
+      document.documentElement.classList.add('dark');
+      document.documentElement.style.colorScheme = 'dark';
+    } else {
+      document.documentElement.classList.remove('dark');
+      document.documentElement.style.colorScheme = 'light';
+    }
+  }, [effectiveMode]);
+
+  const theme = useMemo(
+    () =>
+      createTheme({
+        palette: {
+          mode: effectiveMode,
+        },
+      }),
+    [effectiveMode],
+  );
+
   const isPortraitViewport = useMediaQuery('(orientation: portrait)', { noSsr: true });
   const isCompactViewport = useMediaQuery(theme.breakpoints.down('md'), { noSsr: true });
   const resolvedOrientation =
     orientation === 'auto' ? (isPortraitViewport || isCompactViewport ? 'portrait' : 'landscape') : orientation;
 
   const [internalNavOpen, setInternalNavOpen] = useState(defaultNavigationOpen ?? false);
-  const [searchText, setSearchText] = useState('');
   const [mounted, setMounted] = useState(false);
   const navigationOpen = navOpen ?? internalNavOpen;
 
@@ -69,76 +132,27 @@ export const PAppPageLayout = ({
     onNavOpenChange?.(next);
   };
 
-  const header = (
-    <Paper
-      elevation={0}
-      sx={{
-        px: 2,
-        py: 1.25,
-        borderRadius: 0,
-        borderBottom: '1px solid',
-        borderColor: 'divider',
-        background:
-          theme.palette.mode === 'dark'
-            ? 'linear-gradient(180deg, rgba(15,23,42,0.96), rgba(17,24,39,0.92))'
-            : 'linear-gradient(180deg, rgba(255,255,255,0.96), rgba(248,250,252,0.94))',
-      }}
-    >
-      <Stack direction="row" spacing={1.5} alignItems="center">
-        {showNavigation ? (
-          <IconButton onClick={() => updateNavigationOpen(!navigationOpen)} sx={{ bgcolor: 'action.hover' }}>
-            <MenuRoundedIcon />
-          </IconButton>
-        ) : null}
+  const headerLeftSlot = (
+    <Stack direction="row" spacing={1} alignItems="center">
+      {showNavigation && (
+        <IconButton onClick={() => updateNavigationOpen(!navigationOpen)} sx={{ bgcolor: 'action.hover', mr: 1 }}>
+          <MenuRoundedIcon />
+        </IconButton>
+      )}
+      <Box sx={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+        <Typography sx={{ fontSize: '0.78rem', color: 'text.secondary', lineHeight: 1.2 }}>
+          {!mounted ? 'Pad workspace' : resolvedOrientation === 'portrait' ? 'Pad portrait workspace' : 'Pad landscape workspace'}
+        </Typography>
+      </Box>
+      {leftHeaderSlot}
+    </Stack>
+  );
 
-        {logo ? <Box sx={{ display: 'grid', placeItems: 'center' }}>{logo}</Box> : null}
-
-        <Box sx={{ minWidth: 0 }}>
-          <Typography sx={{ fontSize: '1.05rem', fontWeight: 900 }}>{appTitle}</Typography>
-          <Typography sx={{ fontSize: '0.78rem', color: 'text.secondary' }}>
-            {!mounted ? 'Pad workspace' : resolvedOrientation === 'portrait' ? 'Pad portrait workspace' : 'Pad landscape workspace'}
-          </Typography>
-        </Box>
-
-        <Box sx={{ flex: 1 }} />
-
-        {onSearch ? (
-          <TextField
-            value={searchText}
-            onChange={(event) => setSearchText(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter') {
-                onSearch(searchText);
-              }
-            }}
-            size="small"
-            placeholder="Search..."
-            sx={{ minWidth: { md: 240 }, display: { xs: 'none', sm: 'block' } }}
-            InputProps={{
-              startAdornment: <SearchRoundedIcon fontSize="small" color="action" />,
-            }}
-          />
-        ) : null}
-
-        {actionSlot}
-
-        {user ? (
-          <Stack direction="row" spacing={1} alignItems="center">
-            <Avatar src={user.avatarSrc} sx={{ width: 38, height: 38 }}>
-              {user.avatarText || user.name.slice(0, 1).toUpperCase()}
-            </Avatar>
-            <Box sx={{ display: { xs: 'none', md: 'block' } }}>
-              <Typography sx={{ fontSize: '0.86rem', fontWeight: 800 }}>{user.name}</Typography>
-              {user.subtitle ? (
-                <Typography sx={{ fontSize: '0.72rem', color: 'text.secondary' }}>{user.subtitle}</Typography>
-              ) : null}
-            </Box>
-          </Stack>
-        ) : null}
-      </Stack>
-
-      {headerSlot ? <Box sx={{ mt: 1.25 }}>{headerSlot}</Box> : null}
-    </Paper>
+  const headerRightSlot = (
+    <Stack direction="row" spacing={1} alignItems="center">
+      {actionSlot}
+      {rightHeaderSlot}
+    </Stack>
   );
 
   const navContent = (
@@ -147,27 +161,55 @@ export const PAppPageLayout = ({
       onToggle={() => updateNavigationOpen(!navigationOpen)}
       menuData={menuData}
       orientation={resolvedOrientation}
-      colorMode={theme.palette.mode}
+      colorMode={effectiveMode}
       maxHeight={resolvedOrientation === 'landscape' ? 900 : undefined}
     />
   );
 
   return (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        background:
-          theme.palette.mode === 'dark'
-            ? 'linear-gradient(180deg, #020617 0%, #0f172a 58%, #111827 100%)'
-            : 'linear-gradient(180deg, #f8fafc 0%, #eef2ff 58%, #e2e8f0 100%)',
-        ...containerSx,
-      }}
-    >
-      {header}
+    <ThemeProvider theme={theme}>
+      <OrbcafeI18nProvider locale={locale}>
+        <Box
+          sx={[
+            (t) => ({
+              minHeight: '100vh',
+              display: 'flex',
+              flexDirection: 'column',
+              background:
+                t.palette.mode === 'dark'
+                  ? 'linear-gradient(180deg, #0A0A0A 0%, #141414 55%, #1A1A1A 100%)'
+                  : t.palette.background.default,
+            }),
+            ...(Array.isArray(containerSx) ? containerSx : [containerSx]),
+          ]}
+        >
+          <CAppHeader
+            appTitle={appTitle}
+            logo={logo}
+            mode={mode}
+            onToggleMode={() =>
+              setMode((prev) => (prev === 'system' ? 'dark' : prev === 'dark' ? 'light' : 'system'))
+            }
+            locale={locale}
+            localeLabel={localeLabel}
+            localeOptions={localeOptions}
+            onLocaleChange={onLocaleChange}
+            user={user}
+            onUserSetting={onUserSetting}
+            onUserLogout={onUserLogout}
+            userMenuItems={userMenuItems}
+            onSearch={onSearch}
+            leftSlot={headerLeftSlot}
+            rightSlot={headerRightSlot}
+          />
 
-      <Box sx={{ flex: 1, minHeight: 0, display: 'flex' }}>
+          {headerSlot ? (
+            <Box sx={{ px: { xs: 2, md: 3 }, py: 1.5, borderBottom: '1px solid', borderColor: 'divider' }}>
+              {headerSlot}
+            </Box>
+          ) : null}
+
+          <Box sx={{ flex: 1, minHeight: 0, display: 'flex', position: 'relative' }}>
         {showNavigation && resolvedOrientation === 'landscape' ? (
           <Box sx={{ p: 1.5, pr: 0, flexShrink: 0 }}>{navContent}</Box>
         ) : null}
@@ -235,6 +277,8 @@ export const PAppPageLayout = ({
           <Box sx={{ p: 1.5 }}>{portraitBottomSlot}</Box>
         </>
       ) : null}
-    </Box>
+        </Box>
+      </OrbcafeI18nProvider>
+    </ThemeProvider>
   );
 };

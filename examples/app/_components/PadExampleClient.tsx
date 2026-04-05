@@ -65,7 +65,7 @@ const HeaderBrandLogo = () => {
       component="img"
       src={src}
       alt="ORBCAFE UI"
-      sx={{ width: 280, maxWidth: '32vw', height: 52, display: 'block', objectFit: 'contain', flexShrink: 0 }}
+      sx={{ width: 280, maxWidth: '32vw', height: 24, display: 'block', objectFit: 'contain', flexShrink: 0 }}
     />
   );
 };
@@ -425,6 +425,10 @@ export default function PadExampleClient() {
         setLastAction(`Switched workload to ${item.title}.`);
       }}
       onSearch={handleHeaderSearch}
+      locale={locale}
+      localeLabel={MENU_TEXT[locale].localeLabel}
+      localeOptions={['en', 'zh', 'fr', 'de', 'ja', 'ko']}
+      onLocaleChange={(newLocale) => setLocale(newLocale as OrbcafeLocale)}
       user={{ name: 'Pad Operator', subtitle: 'warehouse.touch@orbcafe.dev', avatarSrc: '/orbcafe.png' }}
       logo={<HeaderBrandLogo />}
       actionSlot={<Chip label={i18nText.localeLabel} color="primary" />}
