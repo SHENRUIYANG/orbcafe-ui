@@ -142,8 +142,9 @@ export const PTouchCard = ({
           borderColor: selected ? 'primary.main' : 'divider',
           background:
             theme.palette.mode === 'dark'
-              ? 'linear-gradient(180deg, rgba(17,24,39,0.96), rgba(15,23,42,0.92))'
+              ? 'linear-gradient(180deg, rgba(30,41,59,0.96), rgba(15,23,42,0.92))'
               : 'linear-gradient(180deg, #ffffff, #f8fafc)',
+          color: 'text.primary',
           boxShadow: selected
             ? '0 18px 42px rgba(37, 99, 235, 0.18)'
             : '0 12px 28px rgba(15, 23, 42, 0.08)',

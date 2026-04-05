@@ -647,6 +647,9 @@ export const PTable: React.FC<PTableProps> = (props) => {
           flexDirection: 'column',
           overflow: 'hidden',
           position: 'relative',
+          bgcolor: 'transparent',
+          backgroundImage: 'none',
+          boxShadow: 'none',
           '&::before': isBusy
             ? {
                 content: '""',
@@ -803,6 +806,7 @@ export const PTable: React.FC<PTableProps> = (props) => {
                         cursor: 'pointer',
                         appearance: 'none',
                         WebkitAppearance: 'none',
+                        color: 'text.primary',
                       }}
                     >
                       {isExpanded ? <ExpandMoreRoundedIcon /> : <ChevronRightRoundedIcon />}

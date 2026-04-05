@@ -54,6 +54,7 @@ export const CTableToolbar = (props: any) => {
                         fontSize: FONT_SIZE_SMALL,
                         '& .MuiInputBase-input': {
                             fontSize: FONT_SIZE_SMALL,
+                            color: 'text.primary',
                         },
                         '& .MuiInputBase-input::placeholder': {
                             fontSize: FONT_SIZE_SMALL,
@@ -82,8 +83,10 @@ export const CTableToolbar = (props: any) => {
                     sx={{
                         fontSize: FONT_SIZE_SMALL,
                         fontWeight: 600,
+                        color: 'text.primary',
                         minWidth: 64,
                         '& .MuiSelect-select': { py: 0.25, pr: '16px !important' },
+                        '& .MuiSvgIcon-root': { color: 'text.primary' },
                     }}
                 >
                     {rowsPerPageOptions.map((option: number) => (
@@ -97,18 +100,18 @@ export const CTableToolbar = (props: any) => {
                     size="small"
                     onClick={() => props.onPageChange?.(Math.max(currentPage - 1, 0))}
                     disabled={!canGoPrev}
-                    sx={{ p: 0.35 }}
+                    sx={{ p: 0.35, color: 'text.primary' }}
                 >
                     <KeyboardArrowLeftIcon fontSize="small" />
                 </IconButton>
-                <Typography sx={{ fontSize: FONT_SIZE_SMALL, fontWeight: 600, minWidth: 88, textAlign: 'center' }}>
+                <Typography sx={{ fontSize: FONT_SIZE_SMALL, fontWeight: 600, minWidth: 88, textAlign: 'center', color: 'text.primary' }}>
                     {t('table.toolbar.pageOf', { current: displayPage, total: totalPages })}
                 </Typography>
                 <IconButton
                     size="small"
                     onClick={() => props.onPageChange?.(Math.min(currentPage + 1, totalPages - 1))}
                     disabled={!canGoNext}
-                    sx={{ p: 0.35 }}
+                    sx={{ p: 0.35, color: 'text.primary' }}
                 >
                     <KeyboardArrowRightIcon fontSize="small" />
                 </IconButton>
@@ -136,7 +139,7 @@ export const CTableToolbar = (props: any) => {
 
                 {/* Grouping */}
                 <Tooltip title={t('table.toolbar.groupBy')}>
-                    <IconButton onClick={(e: React.MouseEvent<HTMLElement>) => props.setGroupAnchorEl(e.currentTarget)}>
+                    <IconButton sx={{ color: 'text.primary' }} onClick={(e: React.MouseEvent<HTMLElement>) => props.setGroupAnchorEl(e.currentTarget)}>
                         <Badge badgeContent={props.grouping?.length} color="primary">
                             <AccountTreeIcon />
                         </Badge>
@@ -146,8 +149,8 @@ export const CTableToolbar = (props: any) => {
                 {/* Summary */}
                 <Tooltip title={t('table.toolbar.summary')}>
                     <IconButton 
+                        sx={{ color: props.showSummary ? 'primary.main' : 'text.primary' }}
                         onClick={(e: React.MouseEvent<HTMLElement>) => props.setSummaryAnchorEl(e.currentTarget)}
-                        color={props.showSummary ? 'primary' : 'default'}
                     >
                         <FunctionsIcon />
                     </IconButton>
@@ -155,14 +158,14 @@ export const CTableToolbar = (props: any) => {
 
                 {/* Columns */}
                 <Tooltip title={t('table.toolbar.columns')}>
-                    <IconButton onClick={(e: React.MouseEvent<HTMLElement>) => props.setAnchorEl(e.currentTarget)}>
+                    <IconButton sx={{ color: 'text.primary' }} onClick={(e: React.MouseEvent<HTMLElement>) => props.setAnchorEl(e.currentTarget)}>
                         <ViewColumnIcon />
                     </IconButton>
                 </Tooltip>
 
                 {/* Export */}
                 <Tooltip title={t('table.toolbar.export')}>
-                    <IconButton onClick={props.handleExport}>
+                    <IconButton sx={{ color: 'text.primary' }} onClick={props.handleExport}>
                         <DownloadIcon />
                     </IconButton>
                 </Tooltip>
@@ -210,7 +213,7 @@ export const CTableToolbar = (props: any) => {
                 */}
                 {props.onOpenGraphReport && (
                     <Tooltip title={t('table.toolbar.graphicReport')}>
-                        <IconButton onClick={props.onOpenGraphReport}>
+                        <IconButton sx={{ color: 'text.primary' }} onClick={props.onOpenGraphReport}>
                             <InsightsIcon />
 
                         </IconButton>
@@ -219,7 +222,7 @@ export const CTableToolbar = (props: any) => {
 
                 {props.onLayoutSave && !props.layoutManager && (
                     <Tooltip title={t('table.toolbar.saveLayout')}>
-                        <IconButton onClick={(e: React.MouseEvent<HTMLElement>) => props.onLayoutSave(e)}>
+                        <IconButton sx={{ color: 'text.primary' }} onClick={(e: React.MouseEvent<HTMLElement>) => props.onLayoutSave(e)}>
                             <SaveIcon />
                         </IconButton>
                     </Tooltip>
