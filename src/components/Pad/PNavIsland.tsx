@@ -295,7 +295,7 @@ export const PNavIsland = ({
             }}
           />
 
-          {resolvedOrientation === 'landscape' ? (
+          {resolvedOrientation === 'landscape' && !collapsed ? (
             <IconButton onClick={onToggle} sx={{ bgcolor: 'action.hover' }}>
               <MenuOpenRoundedIcon />
             </IconButton>

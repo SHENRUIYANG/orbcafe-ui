@@ -8,7 +8,6 @@ import {
   IconButton,
   Paper,
   Stack,
-  Typography,
   useMediaQuery,
 } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
@@ -112,7 +111,6 @@ export const PAppPageLayout = ({
   const resolvedOrientation =
     orientation === 'auto' ? (isPortraitViewport || isCompactViewport ? 'portrait' : 'landscape') : orientation;
 
-  const [mounted, setMounted] = useState(false);
   const [navState, setNavState] = useState({
     landscape: defaultNavigationOpen ?? true,
     portrait: false,
@@ -120,10 +118,6 @@ export const PAppPageLayout = ({
 
   const internalNavOpen = navState[resolvedOrientation];
   const navigationOpen = navOpen ?? internalNavOpen;
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   const updateNavigationOpen = (next: boolean) => {
     if (navOpen === undefined) {
@@ -134,11 +128,11 @@ export const PAppPageLayout = ({
 
   const headerLeftSlot = (
     <Stack direction="row" spacing={1} alignItems="center">
-      {showNavigation && resolvedOrientation === 'portrait' && (
-        <IconButton onClick={() => updateNavigationOpen(!navigationOpen)} sx={{ bgcolor: 'action.hover', mr: 1 }}>
+      {showNavigation && resolvedOrientation === 'portrait' ? (
+        <IconButton onClick={() => updateNavigationOpen(!navigationOpen)} sx={{ bgcolor: 'action.hover' }}>
           <MenuRoundedIcon />
         </IconButton>
-      )}
+      ) : null}
       {leftHeaderSlot}
     </Stack>
   );
@@ -180,7 +174,7 @@ export const PAppPageLayout = ({
         >
           <CAppHeader
             appTitle={appTitle}
-            logo={logo}
+            logo={logo === undefined ? null : logo}
             mode={mode}
             onToggleMode={() =>
               setMode((prev) => (prev === 'system' ? 'dark' : prev === 'dark' ? 'light' : 'system'))

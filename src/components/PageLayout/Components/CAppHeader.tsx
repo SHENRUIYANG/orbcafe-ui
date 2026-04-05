@@ -145,7 +145,8 @@ export const CAppHeader = ({
     >
       <Toolbar sx={{ minHeight: `${HEADER_HEIGHT}px !important`, px: 2, gap: 2 }}>
         <Stack direction="row" alignItems="center" spacing={1.5} sx={{ minWidth: 220 }}>
-          {logo || (
+          {leftSlot}
+          {logo === null ? null : logo || (
             <Box
               component="img"
               src="/orbcafe.png"
@@ -164,7 +165,6 @@ export const CAppHeader = ({
               {appTitle}
             </Typography>
           )}
-          {leftSlot}
         </Stack>
 
         <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', minWidth: 0 }}>

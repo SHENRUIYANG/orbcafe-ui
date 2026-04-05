@@ -56,20 +56,6 @@ interface PadTaskRecord {
   customer: string;
 }
 
-const HeaderBrandLogo = () => {
-  const theme = useTheme();
-  const src = theme.palette.mode === 'dark' ? '/LOGO3.png' : '/LOGO2.png';
-
-  return (
-    <Box
-      component="img"
-      src={src}
-      alt="ORBCAFE UI"
-      sx={{ width: 280, maxWidth: '32vw', height: 24, display: 'block', objectFit: 'contain', flexShrink: 0 }}
-    />
-  );
-};
-
 const MENU_TEXT: Record<OrbcafeLocale, { localeLabel: string; dashboard: string; stdReport: string; padDemo: string; pivotTable: string; kanban: string; detailInfo: string; aiNav: string; messages: string; settings: string; }> = {
   en: {
     localeLabel: 'EN',
@@ -430,7 +416,6 @@ export default function PadExampleClient() {
       localeOptions={['en', 'zh', 'fr', 'de', 'ja', 'ko']}
       onLocaleChange={(newLocale) => setLocale(newLocale as OrbcafeLocale)}
       user={{ name: 'Pad Operator', subtitle: 'warehouse.touch@orbcafe.dev', avatarSrc: '/orbcafe.png' }}
-      logo={<HeaderBrandLogo />}
       actionSlot={<Chip label={i18nText.localeLabel} color="primary" />}
       portraitBottomSlot={
         <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
