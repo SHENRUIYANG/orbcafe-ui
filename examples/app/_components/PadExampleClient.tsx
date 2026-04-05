@@ -449,7 +449,17 @@ export default function PadExampleClient() {
 
               <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr 1fr', xl: 'repeat(4, minmax(0, 1fr))' }, gap: 1.2 }}>
                 {summaryCards.map((item) => (
-                  <Paper key={item.label} sx={{ p: 1.35, borderRadius: 3, border: '1px solid', borderColor: 'divider', bgcolor: 'background.paper', color: 'text.primary' }}>
+                  <Paper
+                    key={item.label}
+                    sx={(theme) => ({
+                      p: 1.35,
+                      borderRadius: 3,
+                      border: '1px solid',
+                      borderColor: 'divider',
+                      bgcolor: theme.palette.mode === 'dark' ? 'rgba(30,41,59,0.6)' : 'background.paper',
+                      color: 'text.primary',
+                    })}
+                  >
                     <Typography sx={{ fontSize: '0.76rem', color: 'text.secondary', textTransform: 'uppercase', letterSpacing: 0.35 }}>
                       {item.label}
                     </Typography>
@@ -627,7 +637,16 @@ export default function PadExampleClient() {
                 </Stack>
               </Paper>
 
-              <Paper sx={{ p: 2, borderRadius: 4, border: '1px solid', borderColor: 'divider', bgcolor: 'background.paper', color: 'text.primary' }}>
+              <Paper
+                sx={(theme) => ({
+                  p: 2,
+                  borderRadius: 4,
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  bgcolor: theme.palette.mode === 'dark' ? 'rgba(30,41,59,0.6)' : 'background.paper',
+                  color: 'text.primary',
+                })}
+              >
                 <Stack spacing={1.25}>
                   <Box>
                     <Typography sx={{ fontSize: '1rem', fontWeight: 900 }}>Selected task keypad</Typography>
@@ -637,7 +656,17 @@ export default function PadExampleClient() {
                   </Box>
 
                   {selectedTask ? (
-                    <Paper elevation={0} sx={{ p: 1.25, borderRadius: 3, bgcolor: 'action.hover', border: '1px solid', borderColor: 'divider', color: 'text.primary' }}>
+                    <Paper
+                      elevation={0}
+                      sx={(theme) => ({
+                        p: 1.25,
+                        borderRadius: 3,
+                        bgcolor: theme.palette.mode === 'dark' ? 'rgba(15,23,42,0.6)' : 'action.hover',
+                        border: '1px solid',
+                        borderColor: 'divider',
+                        color: 'text.primary',
+                      })}
+                    >
                       <Typography sx={{ fontSize: '0.76rem', color: 'text.secondary' }}>{selectedTask.taskId}</Typography>
                       <Typography sx={{ mt: 0.3, fontSize: '0.96rem', fontWeight: 900 }}>{selectedTask.title}</Typography>
                       <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" sx={{ mt: 1 }}>
@@ -658,7 +687,16 @@ export default function PadExampleClient() {
                 </Stack>
               </Paper>
 
-              <Paper sx={{ p: 2, borderRadius: 4, border: '1px solid', borderColor: 'divider', bgcolor: 'background.paper', color: 'text.primary' }}>
+              <Paper
+                sx={(theme) => ({
+                  p: 2,
+                  borderRadius: 4,
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  bgcolor: theme.palette.mode === 'dark' ? 'rgba(30,41,59,0.6)' : 'background.paper',
+                  color: 'text.primary',
+                })}
+              >
                 <Stack spacing={1}>
                   <Typography sx={{ fontSize: '0.96rem', fontWeight: 900 }}>What this page demonstrates</Typography>
                   <Typography sx={{ fontSize: '0.84rem', color: 'text.secondary', lineHeight: 1.6 }}>
