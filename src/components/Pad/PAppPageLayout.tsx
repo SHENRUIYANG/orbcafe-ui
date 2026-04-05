@@ -199,73 +199,73 @@ export const PAppPageLayout = ({
           ) : null}
 
           <Box sx={{ flex: 1, minHeight: 0, display: 'flex', position: 'relative' }}>
-        {showNavigation && resolvedOrientation === 'landscape' ? (
-          <Box sx={{ p: 1.5, pr: 0, flexShrink: 0 }}>{navContent}</Box>
-        ) : null}
-
-        {showNavigation && resolvedOrientation === 'portrait' ? (
-          <Drawer
-            open={navigationOpen}
-            onClose={() => updateNavigationOpen(false)}
-            PaperProps={{
-              sx: {
-                width: 'min(88vw, 360px)',
-                p: 1.25,
-                bgcolor: 'transparent',
-                boxShadow: 'none',
-              },
-            }}
-          >
-            {navContent}
-          </Drawer>
-        ) : null}
-
-        <Box
-          sx={{
-            flex: 1,
-            minWidth: 0,
-            minHeight: 0,
-            overflow: 'auto',
-            p: 1.5,
-            ...contentSx,
-          }}
-        >
-          <Stack spacing={1.5}>
-            {showWorkloadNav && workloadItems.length > 0 ? (
-              <PWorkloadNav
-                items={workloadItems}
-                selectedId={workloadSelectedId}
-                orientation={resolvedOrientation}
-                onItemSelect={onWorkloadSelect}
-              />
+            {showNavigation && resolvedOrientation === 'landscape' ? (
+              <Box sx={{ p: 1.5, pr: 0, flexShrink: 0 }}>{navContent}</Box>
             ) : null}
 
-            <Paper
-              elevation={0}
+            {showNavigation && resolvedOrientation === 'portrait' ? (
+              <Drawer
+                open={navigationOpen}
+                onClose={() => updateNavigationOpen(false)}
+                PaperProps={{
+                  sx: {
+                    width: 'min(88vw, 360px)',
+                    p: 1.25,
+                    bgcolor: 'transparent',
+                    boxShadow: 'none',
+                  },
+                }}
+              >
+                {navContent}
+              </Drawer>
+            ) : null}
+
+            <Box
               sx={{
                 flex: 1,
-                minHeight: resolvedOrientation === 'portrait' ? 420 : 560,
-                p: { xs: 1.25, md: 1.5 },
-                borderRadius: 5,
-                border: '1px solid',
-                borderColor: 'divider',
-                bgcolor:
-                  theme.palette.mode === 'dark' ? 'rgba(15,23,42,0.72)' : 'rgba(255,255,255,0.72)',
-                backdropFilter: 'blur(12px)',
+                minWidth: 0,
+                minHeight: 0,
+                overflow: 'auto',
+                p: 1.5,
+                ...contentSx,
               }}
             >
-              {children}
-            </Paper>
-          </Stack>
-        </Box>
-      </Box>
+              <Stack spacing={1.5}>
+                {showWorkloadNav && workloadItems.length > 0 ? (
+                  <PWorkloadNav
+                    items={workloadItems}
+                    selectedId={workloadSelectedId}
+                    orientation={resolvedOrientation}
+                    onItemSelect={onWorkloadSelect}
+                  />
+                ) : null}
 
-      {resolvedOrientation === 'portrait' && portraitBottomSlot ? (
-        <>
-          <Divider />
-          <Box sx={{ p: 1.5 }}>{portraitBottomSlot}</Box>
-        </>
-      ) : null}
+                <Paper
+                  elevation={0}
+                  sx={{
+                    flex: 1,
+                    minHeight: resolvedOrientation === 'portrait' ? 420 : 560,
+                    p: { xs: 1.25, md: 1.5 },
+                    borderRadius: 5,
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    bgcolor:
+                      theme.palette.mode === 'dark' ? 'rgba(15,23,42,0.72)' : 'rgba(255,255,255,0.72)',
+                    backdropFilter: 'blur(12px)',
+                  }}
+                >
+                  {children}
+                </Paper>
+              </Stack>
+            </Box>
+          </Box>
+
+          {resolvedOrientation === 'portrait' && portraitBottomSlot ? (
+            <>
+              <Divider />
+              <Box sx={{ p: 1.5 }}>{portraitBottomSlot}</Box>
+            </>
+          ) : null}
         </Box>
       </OrbcafeI18nProvider>
     </ThemeProvider>

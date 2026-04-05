@@ -49,6 +49,7 @@ export const PWorkloadNav = ({ items, selectedId, orientation = 'auto', onItemSe
               border: '1px solid',
               borderColor: selected ? 'primary.main' : 'divider',
               boxShadow: selected ? '0 18px 40px rgba(37, 99, 235, 0.16)' : 'none',
+              bgcolor: theme.palette.mode === 'dark' ? 'rgba(30,41,59,0.6)' : 'background.paper',
             }}
           >
             <Box
@@ -68,6 +69,7 @@ export const PWorkloadNav = ({ items, selectedId, orientation = 'auto', onItemSe
                 appearance: 'none',
                 WebkitAppearance: 'none',
                 WebkitTapHighlightColor: 'transparent',
+                color: 'text.primary',
               }}
             >
               <Stack spacing={1.5} sx={{ height: '100%' }}>

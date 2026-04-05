@@ -195,7 +195,7 @@ export const PTouchCard = ({
                   key={index}
                   label={badge}
                   size="small"
-                  sx={{ borderRadius: 999, fontWeight: 700, bgcolor: 'action.hover' }}
+                  sx={{ borderRadius: 999, fontWeight: 700, bgcolor: 'action.hover', color: 'text.primary' }}
                 />
               ))}
             </Stack>
@@ -219,6 +219,7 @@ export const PTouchCard = ({
                     bgcolor: 'action.hover',
                     border: '1px solid',
                     borderColor: 'divider',
+                    color: 'text.primary',
                   }}
                 >
                   <Typography sx={{ fontSize: '0.72rem', color: 'text.secondary' }}>{metric.label}</Typography>
