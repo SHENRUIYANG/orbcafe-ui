@@ -5,6 +5,36 @@
 ## Project Goal
 
 - 组件可直接通过 NPM 安装并使用。
+
+### 安装依赖
+
+为了确保与 `orbcafe-ui` 的最佳兼容性，请使用以下命令安装精确版本的相关依赖（避免 `latest` 带来的破坏性更新）：
+
+```bash
+npm install orbcafe-ui @mui/material@^7.3.9 @mui/icons-material@^7.3.9 @mui/x-date-pickers@^8.27.2 @emotion/react@^11.14.0 @emotion/styled@^11.14.1 dayjs@^1.11.20 lucide-react@^0.575.0 tailwind-merge@^3.5.0 clsx@^2.1.1 class-variance-authority@^0.7.1 @radix-ui/react-slot@^1.2.4
+```
+
+### 运行时环境与集成基线（重要）
+
+1. **Tailwind CSS 编译要求**  
+   本组件库严重依赖 Tailwind 实用类（utility classes，如 Glassmorphism 的 `backdrop-blur-xl` 等）。**发布在 NPM 的 `dist/index.css` 并不包含完整的样式！** 必须让宿主项目在构建时扫描并编译 `orbcafe-ui`。
+   - **如果你使用的是 Tailwind v3**，在 `tailwind.config.js` 中增加：
+     ```js
+     content: ["./node_modules/orbcafe-ui/dist/**/*.{js,mjs}"]
+     ```
+   - **如果你使用的是 Tailwind v4 + Next.js**（如我们的官方 examples），在 `globals.css` 中声明：
+     ```css
+     @import "tailwindcss";
+     @source "../../node_modules/orbcafe-ui/dist";
+     ```
+
+2. **Provider 注入要求**  
+   部分组件（如通知、日期筛选、主题色）依赖 MUI 和内部的 Context。你的应用入口（如 `layout.tsx` 或 `_app.tsx`）必须提供以下 Provider 矩阵：
+   - `ThemeProvider` (MUI)
+   - `CssBaseline` (MUI)
+   - `LocalizationProvider` (MUI X)
+   - `GlobalMessage` (orbcafe-ui 导出)
+
 - 组件 API 稳定、类型完整、目录结构一致。
 - 组件公共 API、类型契约与回调契约稳定，文档与 examples 可追踪。
 
