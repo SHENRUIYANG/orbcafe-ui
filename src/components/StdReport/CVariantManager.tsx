@@ -137,6 +137,7 @@ export const CVariantManager: React.FC<CVariantManagerProps> = ({
         let id = Date.now().toString();
         let variantToSave!: VariantMetadata;
         try {
+            const scope = metadata.scope || 'Both';
             // Check for existing variant to merge with (for multi-table support)
             const existingVariant = variants.find(v => v.name === metadata.name);
             id = existingVariant ? existingVariant.id : Date.now().toString();
@@ -153,7 +154,7 @@ export const CVariantManager: React.FC<CVariantManagerProps> = ({
                 }
             }
             // 2. Update/Append current
-            if (metadata.scope === 'Search' || metadata.scope === 'Both') {
+            if (scope === 'Search' || scope === 'Both') {
                 const currentFiltersData = Array.isArray(currentFilters) ? currentFilters : currentFilters;
                 
                 if (currentFiltersData) {
@@ -183,7 +184,7 @@ export const CVariantManager: React.FC<CVariantManagerProps> = ({
                 layoutRefsToSave = [...existingVariant.layoutRefs];
             }
             
-            if (metadata.scope === 'Layout' || metadata.scope === 'Both') {
+            if (scope === 'Layout' || scope === 'Both') {
                 // If explicit refs passed
                 if (layoutRefs && layoutRefs.length > 0) {
                      layoutRefs.forEach(ref => {
@@ -204,6 +205,7 @@ export const CVariantManager: React.FC<CVariantManagerProps> = ({
                 appId, // Required by backend
                 tableKey, // Required by backend
                 ...metadata,
+                scope,
                 id: id,
                 createdAt: new Date().toISOString(),
                 filters: filtersToSave,

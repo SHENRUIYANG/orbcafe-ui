@@ -267,7 +267,7 @@ const [status, setStatus] = useState<AgentPanelStatus>('idle')
 
 `StdChat` 是标准聊天主容器，负责两件事：
 
-1. 上半区消息列表滚动与自动滚到底部。
+1. 上半区消息列表滚动；仅在新增消息时自动滚到底部。
 2. 下半区固定输入区布局。
 
 它不负责页面标题、浮窗外壳、拖拽、缩放。这些能力应该由外层页面或 `AgentPanel` 提供。

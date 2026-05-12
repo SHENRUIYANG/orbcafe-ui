@@ -1,5 +1,4 @@
 interface:
   display_name: "ORBCAFE Pad Workflow"
-  short_description: "Implement touch-first tablet UI with Pad components and hooks"
-  default_prompt: "Use $orbcafe-pad-workflow to implement this tablet touch workflow with ORBCAFE Pad components."
-
+  short_description: "Implement touch-first tablet UI from Next examples"
+  default_prompt: "Use $orbcafe-pad-workflow to implement this tablet touch workflow with the official Next.js examples baseline and ORBCAFE Pad components."

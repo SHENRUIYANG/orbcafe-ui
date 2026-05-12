@@ -5,7 +5,7 @@ description: "Build ORBCAFE touch-first pad experiences with PAppPageLayout, PNa
 
 # Pad Workflow Skill
 
-This skill guides the creation of touch-first, iPad-optimized applications using `orbcafe-ui`'s Pad components. The Pad framework focuses on large tap targets, card-based lists, and hardware integrations (camera scanner, numpad).
+This skill guides the creation of touch-first, iPad-optimized applications using `orbcafe-ui`'s Pad components. The canonical ORBCAFE route is Next.js App Router plus the official examples app; do not silently translate Pad patterns into Vite/CRA unless the user explicitly accepts a non-canonical workaround. The Pad framework focuses on large tap targets, card-based lists, and hardware integrations (camera scanner, numpad).
 
 ## Core Components & Layout Strategy
 
@@ -25,10 +25,11 @@ A standard Pad page uses a specific component hierarchy. Do not use desktop layo
 ## Integration Requirements (Must Check)
 
 1. **Tailwind CSS Compilation**: `orbcafe-ui` Pad components heavily rely on Tailwind utility classes (e.g., `rounded-2xl`, `backdrop-blur`). The host project must configure Tailwind to scan the library:
-   - Tailwind v4 (`globals.css`): `@source "../../node_modules/orbcafe-ui/dist";`
-   - Tailwind v3 (`tailwind.config.js`): `content: ["./node_modules/orbcafe-ui/dist/**/*.{js,mjs}"]`
+   - Canonical Tailwind v4 (`globals.css`): use CSS `@source` with the correct relative path to `node_modules/orbcafe-ui/dist`.
+   - Tailwind v3 (`tailwind.config.js`) is legacy fallback only: `content: ["./node_modules/orbcafe-ui/dist/**/*.{js,mjs}"]`
 2. **Provider Baseline**: Ensure `ThemeProvider`, `CssBaseline`, and `LocalizationProvider` (MUI) are wrapped at the root level.
-3. **Dependencies**:
+3. **Examples source**: Official examples are not shipped in the npm package. If the consuming project has no `examples/`, inspect the ORBCAFE GitHub repository or a local ORBCAFE checkout.
+4. **Dependencies**: Check `package.json` first. Install only when missing or incompatible.
    ```bash
    npm install orbcafe-ui @mui/material@^7.3.9 @mui/icons-material@^7.3.9 lucide-react@^0.575.0
    ```

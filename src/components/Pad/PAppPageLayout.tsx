@@ -104,8 +104,49 @@ export const PAppPageLayout = ({
   const theme = useMemo(
     () =>
       createTheme({
-        palette: {
-          mode: effectiveMode,
+        palette:
+          effectiveMode === 'dark'
+            ? {
+                mode: 'dark',
+                primary: {
+                  main: '#93c5fd',
+                },
+                background: {
+                  default: '#060913',
+                  paper: '#101826',
+                },
+                text: {
+                  primary: '#f8fafc',
+                  secondary: 'rgba(226,232,240,0.74)',
+                },
+                divider: 'rgba(148,163,184,0.18)',
+                action: {
+                  hover: 'rgba(148,163,184,0.10)',
+                  selected: 'rgba(59,130,246,0.18)',
+                },
+              }
+            : {
+                mode: 'light',
+                background: {
+                  default: '#eef3f8',
+                  paper: '#ffffff',
+                },
+              },
+        components: {
+          MuiCssBaseline: {
+            styleOverrides: {
+              body: {
+                backgroundColor: effectiveMode === 'dark' ? '#060913' : '#eef3f8',
+              },
+            },
+          },
+          MuiPaper: {
+            styleOverrides: {
+              root: {
+                backgroundImage: 'none',
+              },
+            },
+          },
         },
       }),
     [effectiveMode],
@@ -257,6 +298,7 @@ export const PAppPageLayout = ({
                     bgcolor:
                       theme.palette.mode === 'dark' ? 'rgba(15,23,42,0.72)' : 'rgba(255,255,255,0.72)',
                     backdropFilter: 'blur(12px)',
+                    color: 'text.primary',
                   }}
                 >
                   {children}

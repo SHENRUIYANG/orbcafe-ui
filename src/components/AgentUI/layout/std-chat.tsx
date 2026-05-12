@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useRef, useEffect } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { ChatMessage, type ChatMessage as ChatMessageType, type AssistantActionContext } from '../components/core/ChatMessage'
 import { InputArea } from '../components/core/InputArea'
 import { cn } from '../lib/utils'
@@ -36,10 +36,17 @@ export const StdChat: React.FC<StdChatProps> = ({
   showInput = true
 }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const prevMessageCountRef = useRef(messages.length)
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages, isResponding])
+    const hasNewMessage = messages.length > prevMessageCountRef.current
+
+    if (hasNewMessage) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }
+
+    prevMessageCountRef.current = messages.length
+  }, [messages])
 
   return (
     <div className={cn("flex flex-col h-full w-full relative", className)}>

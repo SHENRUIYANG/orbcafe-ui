@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import dayjs from 'dayjs';
 import { Box, Button, Chip, Paper, Stack, Typography } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
+import { alpha, type Theme } from '@mui/material/styles';
 import {
   CPageTransition,
   PAppPageLayout,
@@ -166,6 +166,25 @@ const createEmptyFilters = (): Record<string, FilterValueShape> => ({
   status: { value: [], operator: 'anyOf' },
   shipDate: { value: [null, null], operator: 'between' },
   plannedQty: { value: '', operator: '>=' },
+});
+
+const getPanelSurfaceSx = (theme: Theme) => ({
+  border: '1px solid',
+  borderColor: alpha(theme.palette.divider, theme.palette.mode === 'dark' ? 0.95 : 1),
+  bgcolor:
+    theme.palette.mode === 'dark'
+      ? alpha(theme.palette.background.paper, 0.84)
+      : theme.palette.background.paper,
+  color: theme.palette.text.primary,
+});
+
+const getMutedChipSx = (theme: Theme) => ({
+  color: theme.palette.text.primary,
+  borderColor: alpha(theme.palette.divider, theme.palette.mode === 'dark' ? 0.5 : 0.28),
+  bgcolor:
+    theme.palette.mode === 'dark'
+      ? alpha(theme.palette.common.white, 0.06)
+      : alpha(theme.palette.background.paper, 0.92),
 });
 
 const compareNumber = (sourceValue: number, operator: string, filterValue: any) => {
@@ -430,6 +449,7 @@ export default function PadExampleClient() {
               p: { xs: 1.5, md: 2 },
               borderRadius: 4,
               border: `1px solid ${theme.palette.divider}`,
+              color: theme.palette.text.primary,
               background:
                 theme.palette.mode === 'dark'
                   ? 'linear-gradient(135deg, rgba(37,99,235,0.18), rgba(15,118,110,0.16))'
@@ -454,10 +474,7 @@ export default function PadExampleClient() {
                     sx={(theme) => ({
                       p: 1.35,
                       borderRadius: 3,
-                      border: '1px solid',
-                      borderColor: 'divider',
-                      bgcolor: theme.palette.mode === 'dark' ? 'rgba(30,41,59,0.6)' : 'background.paper',
-                      color: 'text.primary',
+                      ...getPanelSurfaceSx(theme),
                     })}
                   >
                     <Typography sx={{ fontSize: '0.76rem', color: 'text.secondary', textTransform: 'uppercase', letterSpacing: 0.35 }}>
@@ -582,9 +599,9 @@ export default function PadExampleClient() {
               )}
               renderCardFooter={(row) => (
                 <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
-                  <Chip size="small" variant="outlined" label={`Truck ${row.truck}`} sx={{ color: 'text.primary' }} />
-                  <Chip size="small" variant="outlined" label={`Ship ${row.shipDate}`} sx={{ color: 'text.primary' }} />
-                  <Chip size="small" variant="outlined" label={row.customer} sx={{ color: 'text.primary' }} />
+                  <Chip size="small" variant="outlined" label={`Truck ${row.truck}`} sx={(theme) => getMutedChipSx(theme)} />
+                  <Chip size="small" variant="outlined" label={`Ship ${row.shipDate}`} sx={(theme) => getMutedChipSx(theme)} />
+                  <Chip size="small" variant="outlined" label={row.customer} sx={(theme) => getMutedChipSx(theme)} />
                 </Stack>
               )}
               onRowClick={handleSelectTask}
@@ -595,13 +612,11 @@ export default function PadExampleClient() {
                 sx={(theme) => ({
                   p: 2,
                   borderRadius: 4,
-                  border: '1px solid',
-                  borderColor: 'divider',
+                  ...getPanelSurfaceSx(theme),
                   background:
                     theme.palette.mode === 'dark'
                       ? 'linear-gradient(135deg, rgba(30,41,59,0.92), rgba(15,23,42,0.92))'
                       : 'linear-gradient(135deg, rgba(239,246,255,1), rgba(224,242,254,0.86))',
-                  color: 'text.primary',
                 })}
               >
                 <Stack spacing={1.25}>
@@ -631,7 +646,11 @@ export default function PadExampleClient() {
                   {lastScannedCode ? (
                     <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
                       <Chip color="success" variant="filled" label={`Last scan: ${lastScannedCode}`} />
-                      <Chip variant="outlined" label={`Keyword filter: ${String(filters.keyword?.value || '')}`} />
+                      <Chip
+                        variant="outlined"
+                        label={`Keyword filter: ${String(filters.keyword?.value || '')}`}
+                        sx={(theme) => getMutedChipSx(theme)}
+                      />
                     </Stack>
                   ) : null}
                 </Stack>
@@ -641,10 +660,7 @@ export default function PadExampleClient() {
                 sx={(theme) => ({
                   p: 2,
                   borderRadius: 4,
-                  border: '1px solid',
-                  borderColor: 'divider',
-                  bgcolor: theme.palette.mode === 'dark' ? 'rgba(30,41,59,0.6)' : 'background.paper',
-                  color: 'text.primary',
+                  ...getPanelSurfaceSx(theme),
                 })}
               >
                 <Stack spacing={1.25}>
@@ -663,15 +679,15 @@ export default function PadExampleClient() {
                         borderRadius: 3,
                         bgcolor: theme.palette.mode === 'dark' ? 'rgba(15,23,42,0.6)' : 'action.hover',
                         border: '1px solid',
-                        borderColor: 'divider',
-                        color: 'text.primary',
+                        borderColor: alpha(theme.palette.divider, theme.palette.mode === 'dark' ? 0.8 : 1),
+                        color: theme.palette.text.primary,
                       })}
                     >
                       <Typography sx={{ fontSize: '0.76rem', color: 'text.secondary' }}>{selectedTask.taskId}</Typography>
                       <Typography sx={{ mt: 0.3, fontSize: '0.96rem', fontWeight: 900 }}>{selectedTask.title}</Typography>
                       <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" sx={{ mt: 1 }}>
-                        <Chip size="small" label={`Zone ${selectedTask.zone}`} sx={{ color: 'text.primary' }} />
-                        <Chip size="small" label={`Planned ${selectedTask.plannedQty}`} sx={{ color: 'text.primary' }} />
+                        <Chip size="small" label={`Zone ${selectedTask.zone}`} sx={(theme) => getMutedChipSx(theme)} />
+                        <Chip size="small" label={`Planned ${selectedTask.plannedQty}`} sx={(theme) => getMutedChipSx(theme)} />
                         <Chip size="small" label={`Current ${selectedTask.confirmedQty}`} color="primary" variant="outlined" />
                       </Stack>
                     </Paper>
@@ -691,10 +707,7 @@ export default function PadExampleClient() {
                 sx={(theme) => ({
                   p: 2,
                   borderRadius: 4,
-                  border: '1px solid',
-                  borderColor: 'divider',
-                  bgcolor: theme.palette.mode === 'dark' ? 'rgba(30,41,59,0.6)' : 'background.paper',
-                  color: 'text.primary',
+                  ...getPanelSurfaceSx(theme),
                 })}
               >
                 <Stack spacing={1}>

@@ -1,6 +1,6 @@
 ---
 name: orbcafe-agentui-chat
-description: Build ORBCAFE chat and copilot experiences with AgentPanel, StdChat, CopilotChat, ChatMessage typing flow, and AgentUICardHooks using official examples patterns. Use for full-page chat, floating copilot, streaming replies, markdown/cards rendering, and when chat UI appears but send, stream, card actions, drag, or resize behavior has no effect.
+description: Build ORBCAFE chat and copilot experiences with AgentPanel, StdChat, CopilotChat, ChatMessage typing flow, and AgentUICardHooks using official Next.js examples patterns. Use for full-page chat, floating copilot, streaming replies, markdown/cards rendering, and when chat UI appears but send, stream, card actions, drag, or resize behavior has no effect.
 ---
 
 # ORBCAFE AgentUI Chat
@@ -30,13 +30,18 @@ description: Build ORBCAFE chat and copilot experiences with AgentPanel, StdChat
 2. 读取 `references/component-selection.md`，先选组件再写代码。
 3. 参考 `references/recipes.md` 输出最小可运行代码，只用 `orbcafe-ui` 公共 API。
 4. 参考 `references/guardrails.md` 检查状态契约与边界（streaming、card hooks、copilot 外壳、AgentPanel 视觉状态）。
-5. 给出验收步骤和“没效果”排障。
+5. 执行 `skills/orbcafe-ui-component-usage/references/integration-baseline.md`：默认按 Next.js App Router + 官方 examples 接入；非 Next 项目先标记为偏离基线，不要静默改成 Vite/CRA 范式。
+6. 给出验收步骤和“没效果”排障。
 
-## Installation and Bootstrapping (Mandatory)
+## Canonical Setup
+
+先检查宿主 `package.json`，缺失或版本不兼容时才安装：
 
 ```bash
 npm install orbcafe-ui @mui/material@^7.3.9 @mui/icons-material@^7.3.9 @mui/x-date-pickers@^8.27.2 @emotion/react@^11.14.0 @emotion/styled@^11.14.1 dayjs@^1.11.20 lucide-react@^0.575.0 tailwind-merge@^3.5.0 clsx@^2.1.1 class-variance-authority@^0.7.1 @radix-ui/react-slot@^1.2.4
 ```
+
+官方 examples 不随 npm 包发布。消费项目没有 `examples/` 时，到 ORBCAFE GitHub 仓库或本地 ORBCAFE 源码仓库对照。
 
 本仓库联调：
 

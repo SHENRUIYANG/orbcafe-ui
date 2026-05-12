@@ -1,6 +1,6 @@
 ---
 name: orbcafe-layout-navigation
-description: Build ORBCAFE application shell and navigation with CAppPageLayout, NavigationIsland, useNavigationIsland, i18n, markdown renderer, and CPageTransition using official examples patterns. Use for app frame, user menu, locale switching, navigation tree, and route transition UX, especially when UI renders but behavior looks inactive.
+description: Build ORBCAFE application shell and navigation with CAppPageLayout, NavigationIsland, useNavigationIsland, i18n, markdown renderer, and CPageTransition using the official Next.js examples patterns. Use for app frame, user menu, locale switching, navigation tree, and route transition UX, especially when UI renders but behavior looks inactive.
 ---
 
 # ORBCAFE Layout + Navigation
@@ -8,16 +8,20 @@ description: Build ORBCAFE application shell and navigation with CAppPageLayout,
 ## Workflow
 
 1. 先对照 `skills/orbcafe-ui-component-usage/references/module-contracts.md`，确认这是 `Hook-first` 模块。
-2. 执行安装与基础壳层接入。
+2. 执行 `skills/orbcafe-ui-component-usage/references/integration-baseline.md`：默认按 Next.js App Router + 官方 examples 接入。
 3. 用 `references/patterns.md` 选择 full shell 或 nav-only。
 4. 用 `references/guardrails.md` 逐条检查 locale、hydration、菜单动作和动效。
-5. 以官方 examples 的 layout/providers/page 骨架产出代码。
+5. 以官方 Next examples 的 layout/providers/page 骨架产出代码；非 Next 项目先标记为偏离基线，不要静默改成 Vite/CRA 范式。
 
-## Installation and Bootstrapping (Mandatory)
+## Canonical Setup
+
+先检查宿主 `package.json`，缺失或版本不兼容时才安装：
 
 ```bash
 npm install orbcafe-ui @mui/material@^7.3.9 @mui/icons-material@^7.3.9 @mui/x-date-pickers@^8.27.2 @emotion/react@^11.14.0 @emotion/styled@^11.14.1 dayjs@^1.11.20 lucide-react@^0.575.0 tailwind-merge@^3.5.0 clsx@^2.1.1 class-variance-authority@^0.7.1 @radix-ui/react-slot@^1.2.4
 ```
+
+官方 examples 不随 npm 包发布。消费项目没有 `examples/` 时，到 ORBCAFE GitHub 仓库或本地 ORBCAFE 源码仓库对照。
 
 本仓库联调：
 

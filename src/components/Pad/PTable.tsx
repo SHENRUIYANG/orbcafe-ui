@@ -218,6 +218,33 @@ export const PTable: React.FC<PTableProps> = (props) => {
   const graphInteractionEnabled = graphReportEnabled && (graphReport?.interaction?.enabled ?? true);
   const graphInteraction = useGraphInteraction();
   const rowKeyField = rowKey || 'id';
+  const subtleChipSx = React.useMemo(
+    () => ({
+      borderRadius: 999,
+      fontWeight: 700,
+      borderColor: alpha(theme.palette.divider, theme.palette.mode === 'dark' ? 0.55 : 0.3),
+      bgcolor:
+        theme.palette.mode === 'dark'
+          ? alpha(theme.palette.common.white, 0.06)
+          : alpha(theme.palette.background.paper, 0.92),
+      color: theme.palette.text.primary,
+      '& .MuiChip-label': {
+        px: 1.05,
+      },
+    }),
+    [theme],
+  );
+  const groupActionChipSx = React.useMemo(
+    () => ({
+      ...subtleChipSx,
+      borderColor: alpha(theme.palette.primary.main, theme.palette.mode === 'dark' ? 0.42 : 0.24),
+      bgcolor:
+        theme.palette.mode === 'dark'
+          ? alpha(theme.palette.primary.main, 0.16)
+          : alpha(theme.palette.primary.main, 0.08),
+    }),
+    [subtleChipSx, theme],
+  );
 
   const selectedRows = React.useMemo(() => {
     const selectedSet = new Set(selected as any[]);
@@ -483,7 +510,10 @@ export const PTable: React.FC<PTableProps> = (props) => {
     const isSelected = selected.includes(rowId);
     const detailGridColumns =
       resolvedOrientation === 'portrait' ? 'repeat(2, minmax(0, 1fr))' : 'repeat(auto-fit, minmax(140px, 1fr))';
-    const rowTone = rowIndex % 2 === 0 ? alpha(theme.palette.primary.main, 0.04) : alpha(theme.palette.primary.main, 0.022);
+    const rowTone =
+      rowIndex % 2 === 0
+        ? alpha(theme.palette.primary.main, theme.palette.mode === 'dark' ? 0.09 : 0.04)
+        : alpha(theme.palette.primary.main, theme.palette.mode === 'dark' ? 0.05 : 0.022);
     const subtleBorder = alpha(theme.palette.divider, 0.22);
     return (
       <Paper
@@ -554,7 +584,7 @@ export const PTable: React.FC<PTableProps> = (props) => {
                       label={`${column.label}: ${getCellText(column, row)}`}
                       size="small"
                       variant="outlined"
-                      sx={{ borderRadius: 999, fontWeight: 600 }}
+                      sx={subtleChipSx}
                     />
                   ))}
                 </Stack>
@@ -579,7 +609,10 @@ export const PTable: React.FC<PTableProps> = (props) => {
                   sx={{
                     p: 1,
                     borderRadius: 3,
-                    bgcolor: alpha(theme.palette.background.paper, 0.8),
+                    bgcolor:
+                      theme.palette.mode === 'dark'
+                        ? alpha(theme.palette.background.default, 0.7)
+                        : alpha(theme.palette.background.paper, 0.92),
                     border: '0.1px solid',
                     borderColor: alpha(theme.palette.divider, 0.24),
                   }}
@@ -827,6 +860,7 @@ export const PTable: React.FC<PTableProps> = (props) => {
                               event.stopPropagation();
                               handleExpandGroupRecursively(item.id);
                             }}
+                            sx={groupActionChipSx}
                           />
                           <Chip
                             size="small"
@@ -835,6 +869,7 @@ export const PTable: React.FC<PTableProps> = (props) => {
                               event.stopPropagation();
                               handleCollapseGroupRecursively(item.id);
                             }}
+                            sx={groupActionChipSx}
                           />
                         </Stack>
                       ) : null}

@@ -379,7 +379,20 @@ export default function StdReportExample() {
         ],
         variants: [
             { id: 'v1', name: i18nText.defaultView, isDefault: true, scope: 'Both', filters: [], layout: {} },
-            { id: 'v2', name: i18nText.activeItems, scope: 'Search', filters: [{ scope: 'default', filters: { status: 'active' } }] }
+            {
+                id: 'v2',
+                name: i18nText.activeItems,
+                scope: 'Search',
+                filters: [
+                    {
+                        scope: 'default',
+                        filters: {
+                            values: { status: { value: 'active', operator: 'equals' } },
+                            visibleFields: ['keyword', 'status', 'dateRange', 'category'],
+                        },
+                    },
+                ],
+            },
         ]
     }), [categoryLabelMap, i18nText, statusLabelMap]);
 

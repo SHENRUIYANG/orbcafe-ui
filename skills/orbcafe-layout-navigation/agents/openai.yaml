@@ -1,4 +1,4 @@
 interface:
   display_name: "ORBCAFE Layout + Navigation"
-  short_description: "Implement app shell, navigation, locale, and transitions"
-  default_prompt: "Use $orbcafe-layout-navigation to build this app frame/navigation flow with ORBCAFE UI."
+  short_description: "Implement app shell and navigation from Next examples"
+  default_prompt: "Use $orbcafe-layout-navigation to build this app frame/navigation flow with the official Next.js examples baseline and ORBCAFE UI."

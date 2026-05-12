@@ -1,6 +1,6 @@
 ---
 name: orbcafe-kanban-detail
-description: Build ORBCAFE Kanban boards with CKanbanBoard/CKanbanBucket/CKanbanCard/useKanbanBoard and wire card clicks into DetailInfo using official examples patterns. Use for bucket-card styling, drag-drop workflow boards, controlled board state, and Kanban-to-detail navigation, especially when UI renders but drag or click behavior has no effect.
+description: Build ORBCAFE Kanban boards with CKanbanBoard/CKanbanBucket/CKanbanCard/useKanbanBoard and wire card clicks into DetailInfo using official Next.js examples patterns. Use for bucket-card styling, drag-drop workflow boards, controlled board state, and Kanban-to-detail navigation, especially when UI renders but drag or click behavior has no effect.
 ---
 
 # ORBCAFE Kanban + Detail
@@ -8,16 +8,20 @@ description: Build ORBCAFE Kanban boards with CKanbanBoard/CKanbanBucket/CKanban
 ## Workflow
 
 1. 先对照 `skills/orbcafe-ui-component-usage/references/module-contracts.md`，确认这是 `Hook-first` 模块。
-2. 执行安装与最小可运行接入。
+2. 执行 `skills/orbcafe-ui-component-usage/references/integration-baseline.md`，按 Next.js App Router + 官方 examples 做最小可运行接入。
 3. 用 `references/recipes.md` 输出实现骨架。
 4. 用 `references/guardrails.md` 检查受控状态、拖拽移动、空 bucket 接收和 DetailInfo 路由。
-5. 输出验收步骤与“没效果”排障。
+5. 输出验收步骤与“没效果”排障；非 Next 项目先标记为偏离基线，不要静默改成 Vite/CRA 范式。
 
-## Installation and Bootstrapping (Mandatory)
+## Canonical Setup
+
+先检查宿主 `package.json`，缺失或版本不兼容时才安装：
 
 ```bash
 npm install orbcafe-ui @mui/material@^7.3.9 @mui/icons-material@^7.3.9 @mui/x-date-pickers@^8.27.2 @emotion/react@^11.14.0 @emotion/styled@^11.14.1 dayjs@^1.11.20 lucide-react@^0.575.0 tailwind-merge@^3.5.0 clsx@^2.1.1 class-variance-authority@^0.7.1 @radix-ui/react-slot@^1.2.4
 ```
+
+官方 examples 不随 npm 包发布。消费项目没有 `examples/` 时，到 ORBCAFE GitHub 仓库或本地 ORBCAFE 源码仓库对照。
 
 本仓库联调：
 

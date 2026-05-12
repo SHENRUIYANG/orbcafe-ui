@@ -1,30 +1,32 @@
 ---
 name: orbcafe-ui-component-usage
-description: Route ORBCAFE UI requests to the correct module skill and enforce official examples-based integration baseline. Use when requests are ambiguous, cross-module, or when prior attempts had "no effect"; classify to StdReport, Graph+Detail+Agent, Kanban+Detail, Layout+Navigation, Pivot+AINav, Pad Workflow, or AgentUI Chat and require install/startup/verification steps.
+description: Route ORBCAFE UI requests to the correct module skill and enforce the official Next.js examples-based integration baseline. Use when requests are ambiguous, cross-module, or when prior attempts had "no effect"; classify to StdReport, Graph+Detail+Agent, Kanban+Detail, Layout+Navigation, Pivot+AINav, Pad Workflow, or AgentUI Chat and require canonical Next/examples, dependency, startup, and verification checks.
 ---
 
 # ORBCAFE UI Router
 
 ## Workflow
 
-1. 执行安装与接入基线（必须）。
+1. 执行 `references/integration-baseline.md` 的规范基线检查：默认路线是 Next.js App Router + 官方 examples 效果。
 2. 使用 `references/component-glossary-i18n.md` 先把用户自然语言（可多语言）映射到组件 canonical 名称。
 3. 使用 `references/skill-routing-map.md` 判定目标模块 skill。
 4. 使用 `references/module-contracts.md` 先确认目标模块的公共入口、hook 策略、标准 example 与验证方式。
 5. 只加载目标模块所需 references，不加载无关内容。
 6. 使用 `references/public-export-index.md` 约束导入边界。
-7. 使用 `references/integration-baseline.md` 执行 Next.js / hydration / i18n 检查。
+7. 如果当前项目不是 Next.js，不要顺手按 Vite/CRA 改写范式；先指出它偏离 ORBCAFE 标准路线，并建议对齐 Next examples。
 8. 输出模块决策、最小可运行代码、验收步骤、排障步骤。
 
-## Installation Baseline (Mandatory)
+## Canonical Baseline (Required)
 
-每次都先给出可执行安装方式，不允许省略：
+先检查宿主 `package.json`。仅当缺失或版本不兼容时，才执行安装：
 
 ```bash
 npm install orbcafe-ui @mui/material@^7.3.9 @mui/icons-material@^7.3.9 @mui/x-date-pickers@^8.27.2 @emotion/react@^11.14.0 @emotion/styled@^11.14.1 dayjs@^1.11.20 lucide-react@^0.575.0 tailwind-merge@^3.5.0 clsx@^2.1.1 class-variance-authority@^0.7.1 @radix-ui/react-slot@^1.2.4
 ```
 
-如果是本仓库联调（以 `examples` 为准）：
+官方 examples 是效果基准，但不随 npm 包发布。消费项目没有 `examples/` 时，去 ORBCAFE GitHub 仓库或本地 ORBCAFE checkout 对照 `examples/app/*`，不要因为消费项目缺少 `examples/` 就跳过基线。
+
+本仓库联调时，严格以 examples app 验证：
 
 ```bash
 # repo root
@@ -39,18 +41,16 @@ npm run dev
 ## Integration Requirements (Must Check)
 
 1. **Tailwind 编译要求**: `orbcafe-ui` 的组件（尤其是 `NavigationIsland`、`AgentPanel` 等）依赖大量的 Tailwind utility classes（如 `backdrop-blur-xl` 等）。NPM 发布的 `dist/index.css` **不包含** 这些样式，因此**宿主项目必须配置 Tailwind 扫描并编译 UI 库的源码**。
-   
-   Tailwind v3 必须包含：
-   ```js
-   // tailwind.config.js
-   content: ["./node_modules/orbcafe-ui/dist/**/*.{js,mjs}"]
-   ```
-   Tailwind v4 (如官方 examples 采用的 Next 15/16 + Tailwind v4 + @source) 必须包含：
+
+   官方基线是 Tailwind v4 + CSS `@source`。在 Next examples 中是：
    ```css
-   /* globals.css */
+   /* examples/app/globals.css */
    @import "tailwindcss";
-   @source "../../node_modules/orbcafe-ui/dist";
+   @source "../node_modules/orbcafe-ui/dist";
+   @source "../../src";
    ```
+
+   消费项目按自己的全局 CSS 位置调整相对路径。Tailwind v3 `tailwind.config.js content` 只能作为旧项目 fallback，不是 ORBCAFE 默认范式。
 
 2. **Provider 基线要求**: `orbcafe-ui` 组件的正常渲染（特别是弹窗、日期、主题切换和全局消息）强依赖以下 Provider 的包裹。宿主应用的 Root Layout 必须注入：
    - `ThemeProvider` (MUI)
@@ -76,7 +76,8 @@ Before writing code, explicitly state one of:
 
 ## Examples-First Rules
 
-- 先复用官方 examples 的骨架，再做业务改造。
+- 先复用官方 Next examples 的骨架，再做业务改造。
+- `examples/` 不在 npm 包内；消费项目没有该目录时，到 ORBCAFE GitHub 仓库或本地 ORBCAFE 源码仓库查。
 - 优先参考：
   - `examples/README.md`
 - `examples/app/layout.tsx`

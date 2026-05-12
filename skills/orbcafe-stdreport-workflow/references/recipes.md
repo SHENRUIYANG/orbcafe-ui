@@ -5,6 +5,8 @@
 ```tsx
 import { CStandardPage, useStandardReport, OrbcafeI18nProvider } from 'orbcafe-ui';
 
+const tableKey = 'default';
+
 const metadata = {
   id: 'orders-report',
   title: 'Orders',
@@ -25,12 +27,37 @@ const metadata = {
       ],
     },
   ],
+  variants: [
+    {
+      id: 'default-orders',
+      name: 'Default',
+      isDefault: true,
+      scope: 'Both',
+      filters: [
+        {
+          scope: tableKey,
+          filters: {
+            values: {},
+            visibleFields: ['keyword', 'status'],
+          },
+        },
+      ],
+      layoutRefs: [{ tableKey, layoutId: null }],
+    },
+  ],
 };
 
 export default function OrdersPage() {
   const { pageProps } = useStandardReport({
     metadata,
-    fetchData: async ({ page, pageSize, filters }) => {
+    tableKey,
+    fetchData: async ({ page, limit, sort, order, ...filters }) => {
+      const normalizedLimit = limit === -1 ? 10000 : limit;
+      void normalizedLimit;
+      void sort;
+      void order;
+      void filters;
+
       return {
         rows: [{ id: '1', customer: 'ACME', amount: 1200, status: 'active' }],
         total: 1,
@@ -45,6 +72,13 @@ export default function OrdersPage() {
   );
 }
 ```
+
+Persistence notes for Recipe 1:
+
+- Keep `metadata.id`, `CStandardPage.id`, SmartFilter `appId`, and CTable `appId` aligned. With `useStandardReport`, `metadata.id` is propagated for you.
+- Use `integrated` mode. `useStandardReport` defaults to it, so `<CStandardPage {...pageProps} />` is enough.
+- To save a full user view: save table Layout first, then save SmartFilter Variant. The variant stores `layoutRefs` pointing to the saved layout id.
+- Add `serviceUrl` or `variantService` to `useStandardReport` only when backend persistence is required. Without it, variants/layouts persist in localStorage.
 
 ## Recipe 2: Table-only (Controlled Pagination) + quick operations + graph entry
 
@@ -62,13 +96,14 @@ import { CTable } from 'orbcafe-ui';
   rows={rows}
   rowKey="id"
   selectionMode="multiple"
-  pagination={{
-    enabled: true,
-    page: 0,           // 当前页码 (0-based)
-    pageSize: 20,      // 每页条数
-    total: 100,        // 总条数 (必须提供才能计算总页数)
-    onPageChange: (newPage) => fetchPage(newPage),
-    onPageSizeChange: (newPageSize) => fetchSize(newPageSize)
+  page={page}
+  rowsPerPage={rowsPerPage}
+  rowsPerPageOptions={[20, 50, 100, -1]}
+  count={total}
+  onPageChange={(nextPage) => setPage(nextPage)}
+  onRowsPerPageChange={(nextRowsPerPage) => {
+    setPage(0);
+    setRowsPerPage(nextRowsPerPage);
   }}
   graphReport={{ enabled: true, interaction: { enabled: true } }}
   quickCreate={{
@@ -86,3 +121,9 @@ import { CTable } from 'orbcafe-ui';
   }}
 />;
 ```
+
+Table-only persistence notes:
+
+- `CTable` can save/load layout when `appId` is present.
+- Table-only mode does not give you SmartFilter variants. If the page needs filter variants plus table layouts, use Recipe 1 unless there is a hard custom layout requirement.
+- If you manually combine `CSmartFilter + CTable`, you own the same linkage that integrated mode handles: pass one `appId`, one `tableKey`, current layout id, layout refs, variant load, and layout load/save behavior.
