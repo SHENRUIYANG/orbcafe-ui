@@ -1,0 +1,57 @@
+import type { ReactNode } from 'react';
+import type { SxProps, Theme } from '@mui/material/styles';
+
+export type PlanningGanttScale = 'hour' | 'day' | 'week' | 'month';
+export type PlanningTaskStatus = 'not-started' | 'planned' | 'in-progress' | 'blocked' | 'done' | string;
+
+export interface PlanningTaskOwner {
+  name: string;
+  avatarSrc?: string;
+  initials?: string;
+}
+
+export interface PlanningTaskRecord {
+  id: string;
+  title: string;
+  code?: string;
+  startDate: string;
+  endDate: string;
+  progress?: number;
+  status?: PlanningTaskStatus;
+  owner?: PlanningTaskOwner;
+  project?: string;
+  workCenter?: string;
+  priority?: 'low' | 'medium' | 'high' | 'critical';
+  dependencyIds?: string[];
+  color?: string;
+  children?: PlanningTaskRecord[];
+}
+
+export interface PlanningGanttColumn {
+  id: 'code' | 'title' | 'project' | 'workCenter' | 'owner' | 'status' | 'progress' | string;
+  label: string;
+  width?: number;
+  render?: (task: PlanningTaskRecord) => ReactNode;
+}
+
+export interface PlanningGanttSummaryItem {
+  label: string;
+  value: ReactNode;
+  tone?: 'default' | 'success' | 'warning' | 'error' | 'info';
+}
+
+export interface CPlanningGanttProps {
+  title?: string;
+  subtitle?: string;
+  tasks: PlanningTaskRecord[];
+  columns?: PlanningGanttColumn[];
+  scale?: PlanningGanttScale;
+  onScaleChange?: (scale: PlanningGanttScale) => void;
+  timelineStart?: string;
+  timelineEnd?: string;
+  selectedTaskId?: string;
+  onTaskSelect?: (task: PlanningTaskRecord) => void;
+  summaryItems?: PlanningGanttSummaryItem[];
+  emptyLabel?: string;
+  sx?: SxProps<Theme>;
+}

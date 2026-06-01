@@ -1,0 +1,4 @@
+interface:
+  display_name: "ORBCAFE Planning Gantt"
+  short_description: "Implement production planning table plus Gantt timeline"
+  default_prompt: "Use $orbcafe-planning-gantt to implement this ORBCAFE planning table and Gantt timeline with the official examples baseline."

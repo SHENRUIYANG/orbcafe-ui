@@ -436,6 +436,7 @@ export default function StdReportExample() {
         { id: 'dashboard', title: i18nText.dashboard, href: '/', icon: <LayoutDashboard className="w-4 h-4" /> },
         { id: 'std-report', title: i18nText.stdReport, href: '/std-report', icon: <LayoutDashboard className="w-4 h-4" /> },
         { id: 'kanban', title: 'Kanban', href: '/kanban', icon: <LayoutDashboard className="w-4 h-4" /> },
+        { id: 'planning', title: 'Planning Gantt', href: '/planning', icon: <Table2 className="w-4 h-4" /> },
         { id: 'pivot-table', title: 'Pivot Table', href: '/pivot-table', icon: <Table2 className="w-4 h-4" /> },
         { id: 'detail-info', title: 'Detail Info', href: '/detail-info/ID-1', icon: <LayoutDashboard className="w-4 h-4" /> },
         { id: 'ai-nav', title: 'AI Nav', href: '/ai-nav', icon: <Mic className="w-4 h-4" /> },

@@ -65,6 +65,12 @@ export default function DemoPage() {
       href: '/kanban',
     },
     {
+      id: 'planning',
+      title: 'Planning Gantt',
+      icon: <Table2 className="w-4 h-4" />,
+      href: '/planning',
+    },
+    {
       id: 'pad',
       title: 'Pad Demo',
       icon: <TabletSmartphone className="w-4 h-4" />,

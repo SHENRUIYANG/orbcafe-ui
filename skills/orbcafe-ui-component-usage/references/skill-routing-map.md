@@ -16,6 +16,10 @@
   - `orbcafe-pad-workflow`
 - Build chat page, assistant panel, or floating copilot:
   - `orbcafe-agentui-chat`
+- Build login, registration, or forgot password:
+  - `orbcafe-auth-workflow`
+- Build project planning, production planning, table + Gantt, timeline scale, or planning SmartFilter:
+  - `orbcafe-planning-gantt`
 
 ## Route by keywords
 
@@ -35,6 +39,10 @@
   - Pad Workflow skill
 - `聊天`, `chat`, `copilot`, `assistant`, `streaming`, `卡片消息`, `AgentUI`, `StdChat`, `CopilotChat`, `AgentPanel`:
   - AgentUI Chat skill
+- `登录`, `登陆`, `注册`, `忘记密码`, `login`, `register`, `forgot password`:
+  - Auth Workflow skill
+- `甘特图`, `gantt`, `计划表`, `项目计划`, `生产计划`, `project plan`, `production plan`:
+  - Planning Gantt skill
 
 ## Cross-skill composition
 
@@ -44,3 +52,5 @@
 - App shell + any page module: apply Layout+Navigation skill first for frame, then attach module skill.
 - Pad shell + touch report/keypad: apply Pad Workflow skill first, then attach StdReport or Layout skill when needed.
 - AgentUI + app shell: apply Layout+Navigation skill first for frame, then attach AgentUI Chat skill.
+- Auth + app shell: Auth usually owns the examples root page; attach Layout+Navigation only when embedding inside an authenticated shell.
+- Planning Gantt + StdReport controls: choose Planning Gantt skill first, then reuse StdReport CSmartFilter/CTable contracts where needed.

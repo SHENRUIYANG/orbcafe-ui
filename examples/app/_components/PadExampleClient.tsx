@@ -312,6 +312,7 @@ export default function PadExampleClient() {
         icon: <ReceiptText className="w-4 h-4" />,
         children: [
           { id: 'kanban', title: i18nText.kanban, href: '/kanban' },
+          { id: 'planning', title: 'Planning Gantt', href: '/planning' },
           { id: 'pivot-table', title: i18nText.pivotTable, href: '/pivot-table' },
           { id: 'detail-info', title: i18nText.detailInfo, href: '/detail-info/ID-1' },
         ],

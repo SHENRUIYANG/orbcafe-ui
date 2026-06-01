@@ -247,7 +247,68 @@ Use it before reading a module README in detail.
   - keypad only updates local input but not data source
   - camera stream not released after dialog close
 
-## 8. Shared Rules For AI
+## 8. Auth
+
+- Public entry:
+  - `CAuthPage`
+  - `useAuthPage`
+  - `type AuthPageMode`
+  - `type AuthLoginPayload`
+  - `type AuthRegisterPayload`
+  - `type AuthForgotPasswordPayload`
+- Preferred pattern:
+  - login entry page: `useAuthPage + CAuthPage` at `examples/app/page.tsx`
+- Hooks:
+  - Public hook exists:
+    - `useAuthPage`
+- Minimal state contract:
+  - mode: login/register/forgot
+  - login username/password/remember
+  - register name/email/password/confirmPassword/acceptedTerms
+  - forgot email
+- Canonical example:
+  - `examples/app/_components/AuthExampleClient.tsx`
+  - `examples/app/page.tsx`
+- Verify:
+  - login fake submit shows success
+  - register fake submit shows success
+  - forgot password fake submit shows success
+- Common failure modes:
+  - treating demo callbacks as real authentication
+  - not wrapping app with MUI providers
+  - importing from internal component paths
+
+## 9. Planning
+
+- Public entry:
+  - `CPlanningGantt`
+  - `usePlanningGantt`
+  - `type PlanningTaskRecord`
+  - `type PlanningGanttColumn`
+  - `type PlanningGanttScale`
+- Preferred pattern:
+  - `usePlanningGantt + CSmartFilter + CPlanningGantt` with controlled `scale` and `selectedTaskId`
+- Hooks:
+  - Public hook exists:
+    - `usePlanningGantt`
+- Minimal state contract:
+  - tasks with id/title/startDate/endDate/progress/status/owner
+  - scale hour/day/week/month
+  - selected task id
+- Canonical example:
+  - `examples/app/_components/PlanningExampleClient.tsx`
+  - `examples/app/planning/page.tsx`
+- Verify:
+  - table rows align with Gantt bars
+  - scale switch changes timeline density
+  - row/bar click updates selected task
+  - SmartFilter search/filter changes both table rows and Gantt rows
+- Common failure modes:
+  - invalid date strings
+  - endDate before startDate
+  - missing app shell menu route
+
+## 10. Shared Rules For AI
 
 - Import only from `orbcafe-ui`.
 - Prefer the canonical example before inventing a new composition.

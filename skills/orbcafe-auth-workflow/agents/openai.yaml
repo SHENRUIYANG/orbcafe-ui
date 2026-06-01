@@ -1,0 +1,4 @@
+interface:
+  display_name: "ORBCAFE Auth Workflow"
+  short_description: "Implement login, registration, and forgot-password pages"
+  default_prompt: "Use $orbcafe-auth-workflow to implement this ORBCAFE authentication page with the official examples baseline."

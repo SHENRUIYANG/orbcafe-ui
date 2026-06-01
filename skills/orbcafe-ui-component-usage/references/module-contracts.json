@@ -79,6 +79,28 @@
       "minimal_state": ["orientation + nav open", "workload selected id", "filters + variant/layout identity", "selected row + editable numeric value", "scanner dialog open + scan result callback"],
       "verify": ["orientation switch keeps interactions alive", "nav/workload cards are clickable", "PTable toolbar/actions keep expected alignment", "variant/layout save/load works", "keypad submit writes back row value", "barcode scan callback updates business state"],
       "common_failure_modes": ["hidden drawer/modal layer intercepting clicks", "hydration mismatch from orientation-dependent first render", "rendering React nodes inside paragraph wrappers", "keypad updates input only but not data source", "camera stream not released after dialog close"]
+    },
+    {
+      "name": "Auth",
+      "mode": "hook-first",
+      "public_entries": ["CAuthPage", "useAuthPage", "AuthPageMode", "AuthLoginPayload", "AuthRegisterPayload", "AuthForgotPasswordPayload"],
+      "preferred_pattern": "useAuthPage + CAuthPage at examples/app/page.tsx for login entry",
+      "public_hooks": ["useAuthPage"],
+      "canonical_examples": ["examples/app/_components/AuthExampleClient.tsx", "examples/app/page.tsx"],
+      "minimal_state": ["mode login/register/forgot", "login username/password/remember", "register name/email/password/confirmPassword/acceptedTerms", "forgot email"],
+      "verify": ["fake login submit succeeds", "fake register submit succeeds", "fake forgot-password submit succeeds"],
+      "common_failure_modes": ["treating demo callbacks as real authentication", "provider stack missing", "wrong import path"]
+    },
+    {
+      "name": "Planning",
+      "mode": "hook-first",
+      "public_entries": ["CPlanningGantt", "usePlanningGantt", "PlanningTaskRecord", "PlanningGanttColumn", "PlanningGanttScale"],
+      "preferred_pattern": "usePlanningGantt + CSmartFilter + CPlanningGantt with controlled scale and selectedTaskId",
+      "public_hooks": ["usePlanningGantt"],
+      "canonical_examples": ["examples/app/_components/PlanningExampleClient.tsx", "examples/app/planning/page.tsx"],
+      "minimal_state": ["tasks id/title/startDate/endDate/progress/status/owner", "scale hour/day/week/month", "selectedTaskId", "SmartFilter filters"],
+      "verify": ["table rows align with Gantt bars", "scale switch changes timeline density", "row/bar click updates selected task", "SmartFilter changes table and Gantt rows"],
+      "common_failure_modes": ["invalid date strings", "endDate before startDate", "missing app shell route"]
     }
   ],
   "shared_rules": [

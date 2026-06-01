@@ -59,6 +59,8 @@ npm install orbcafe-ui @mui/material@^7.3.9 @mui/icons-material@^7.3.9 @mui/x-da
 | `AINav` | 语音导航与命令输入能力 | `src/components/AINav` | `src/components/AINav/README.md` |
 | `Pad` | 平板触摸场景 UI（壳层、触摸表格、数字键盘、扫码） | `src/components/Pad` | `src/components/Pad/README.md` |
 | `AgentUI` | 聊天 UI 与 Copilot UI（StdChat / CopilotChat / AgentPanel） | `src/components/AgentUI` | `src/components/AgentUI/README.md` |
+| `Auth` | 登录、用户注册、忘记密码的入口页 | `src/components/Auth` | `src/components/Auth/README.md` |
+| `Planning` | 项目管理/生产计划表格 + 甘特图 | `src/components/Planning` | `src/components/Planning/README.md` |
 
 ### 文档查阅顺序（推荐）
 
@@ -79,6 +81,8 @@ npm install orbcafe-ui @mui/material@^7.3.9 @mui/icons-material@^7.3.9 @mui/x-da
 - `Kanban Hooks`：`src/components/Kanban/Hooks/README.md`
 - `Kanban Tools`：`src/components/Kanban/Utils/README.md`
 - `AgentUI` 模块文档：`src/components/AgentUI/README.md`
+- `Auth` 模块文档：`src/components/Auth/README.md`
+- `Planning` 模块文档：`src/components/Planning/README.md`
 - `AI 模块契约索引`：`skills/orbcafe-ui-component-usage/references/module-contracts.md`
 - `Pad skill`：`skills/orbcafe-pad-workflow/SKILL.md`
 - `组件通俗名映射（多语言）`：`skills/orbcafe-ui-component-usage/references/component-glossary-i18n.md`

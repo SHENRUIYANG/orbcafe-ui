@@ -14,6 +14,8 @@ export * from './components/PivotTable';
 export * from './components/Pad';
 export * from './components/AINav';
 export * from './components/AgentUI';
+export * from './components/Auth';
+export * from './components/Planning';
 export * from './i18n';
 export * from './lib/renderer/md_renderer';
 export * from './lib/transitions';

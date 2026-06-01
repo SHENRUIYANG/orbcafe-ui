@@ -220,6 +220,7 @@ export default function KanbanExampleClient() {
       { id: 'dashboard', title: 'Dashboard', href: '/', icon: <LayoutDashboard className="w-4 h-4" /> },
       { id: 'std-report', title: 'Standard Report', href: '/std-report', icon: <LayoutDashboard className="w-4 h-4" /> },
       { id: 'kanban', title: 'Kanban', href: '/kanban', icon: <ViewKanbanOutlinedIcon fontSize="small" /> },
+      { id: 'planning', title: 'Planning Gantt', href: '/planning', icon: <Table2 className="w-4 h-4" /> },
       { id: 'pivot-table', title: 'Pivot Table', href: '/pivot-table', icon: <Table2 className="w-4 h-4" /> },
       { id: 'detail-info', title: 'Detail Info', href: '/detail-info/TASK-203?source=kanban&backHref=/kanban', icon: <LayoutDashboard className="w-4 h-4" /> },
       { id: 'ai-nav', title: 'AI Nav', href: '/ai-nav', icon: <Mic className="w-4 h-4" /> },

@@ -24,6 +24,19 @@ Use only exports reachable from `src/index.ts`.
     - `type AgentUICardHookEvent`
     - `type AgentUICardAction`
     - `type AgentUICardType`
+  - `Auth/*`:
+    - `CAuthPage`
+    - `useAuthPage`
+    - `type AuthPageMode`
+    - `type AuthLoginPayload`
+    - `type AuthRegisterPayload`
+    - `type AuthForgotPasswordPayload`
+  - `Planning/*`:
+    - `CPlanningGantt`
+    - `usePlanningGantt`
+    - `type PlanningTaskRecord`
+    - `type PlanningGanttColumn`
+    - `type PlanningGanttScale`
 - Shared:
   - `i18n/*`
   - `MarkdownRenderer` family from `lib/renderer/md_renderer`

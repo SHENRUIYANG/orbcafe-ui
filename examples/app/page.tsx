@@ -1,5 +1,5 @@
-import HomeDemoClient from './_components/HomeDemoClient';
+import AuthExampleClient from './_components/AuthExampleClient';
 
 export default function DemoPage() {
-  return <HomeDemoClient />;
+  return <AuthExampleClient />;
 }
