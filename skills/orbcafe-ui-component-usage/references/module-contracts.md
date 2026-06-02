@@ -281,20 +281,29 @@ Use it before reading a module README in detail.
 ## 9. Planning
 
 - Public entry:
+  - `CPlanningLayout`
   - `CPlanningGantt`
+  - `usePlanningLayout`
   - `usePlanningGantt`
   - `type PlanningTaskRecord`
   - `type PlanningGanttColumn`
   - `type PlanningGanttScale`
 - Preferred pattern:
-  - `usePlanningGantt + CSmartFilter + CPlanningGantt` with controlled `scale` and `selectedTaskId`
+  - `usePlanningLayout + CPlanningLayout` as default combo with controlled `scale` and `selectedTaskId`
+  - `usePlanningGantt + CSmartFilter + CPlanningGantt` for custom composition
+  - custom toolbar buttons use `extraTools` and render on the left of built-in planning controls
+  - task rows can be drag-reordered from either the table pane or the Gantt timeline pane; use `onTaskReorder` to persist order
+  - row drag-reordering is controlled globally by `enableRowReorder` and per task by `PlanningTaskRecord.reorderable`
 - Hooks:
   - Public hook exists:
+    - `usePlanningLayout`
     - `usePlanningGantt`
 - Minimal state contract:
   - tasks with id/title/startDate/endDate/progress/status/owner
   - scale hour/day/week/month
   - selected task id
+  - optional `enableRowReorder`
+  - optional task-level `reorderable`
 - Canonical example:
   - `examples/app/_components/PlanningExampleClient.tsx`
   - `examples/app/planning/page.tsx`
@@ -302,11 +311,17 @@ Use it before reading a module README in detail.
   - table rows align with Gantt bars
   - scale switch changes timeline density
   - row/bar click updates selected task
+  - row drag-reorder works from both table and Gantt panes and keeps both panes aligned
   - SmartFilter search/filter changes both table rows and Gantt rows
+  - custom toolbar buttons appear left of standard controls
 - Common failure modes:
   - invalid date strings
   - endDate before startDate
   - missing app shell menu route
+  - rendering `CPlanningGantt` alone and forgetting `CSmartFilter`
+  - replacing built-in controls instead of adding buttons through `extraTools`
+  - allowing group header rows to drag or reordering tasks across different groups
+  - ignoring `enableRowReorder={false}` or dragging rows with `reorderable: false`
 
 ## 10. Shared Rules For AI
 

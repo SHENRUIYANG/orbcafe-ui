@@ -24,6 +24,7 @@ export interface PlanningTaskRecord {
   priority?: 'low' | 'medium' | 'high' | 'critical';
   dependencyIds?: string[];
   color?: string;
+  reorderable?: boolean;
   children?: PlanningTaskRecord[];
 }
 
@@ -43,6 +44,8 @@ export interface PlanningGanttSummaryItem {
 export interface CPlanningGanttProps {
   title?: string;
   subtitle?: string;
+  extraTools?: ReactNode | ReactNode[];
+  bodyHeight?: number | string;
   tasks: PlanningTaskRecord[];
   columns?: PlanningGanttColumn[];
   scale?: PlanningGanttScale;
@@ -51,6 +54,11 @@ export interface CPlanningGanttProps {
   timelineEnd?: string;
   selectedTaskId?: string;
   onTaskSelect?: (task: PlanningTaskRecord) => void;
+  enableRowReorder?: boolean;
+  onTaskReorder?: (
+    orderedTasks: PlanningTaskRecord[],
+    context: { activeTask: PlanningTaskRecord; targetTask: PlanningTaskRecord },
+  ) => void;
   summaryItems?: PlanningGanttSummaryItem[];
   emptyLabel?: string;
   sx?: SxProps<Theme>;

@@ -1,11 +1,11 @@
 # Planning Gantt Recipes
 
-## Recipe 1: Hook-first planning page
+## Recipe 1: Default combo layout (recommended)
 
 ```tsx
 'use client';
 
-import { CPlanningGantt, CSmartFilter, usePlanningGantt, type PlanningTaskRecord } from 'orbcafe-ui';
+import { CPlanningLayout, usePlanningLayout, type PlanningTaskRecord } from 'orbcafe-ui';
 
 const tasks: PlanningTaskRecord[] = [
   {
@@ -19,21 +19,35 @@ const tasks: PlanningTaskRecord[] = [
     progress: 72,
     status: 'in-progress',
     owner: { name: 'Ruiyang Shen', initials: 'RS' },
+    reorderable: true,
+  },
+  {
+    id: 'P-LOCKED',
+    code: 'PP-LOCKED',
+    title: 'Released baseline order',
+    project: 'Q3 Product Launch',
+    workCenter: 'Planning',
+    startDate: '2026-06-02',
+    endDate: '2026-06-06',
+    progress: 100,
+    status: 'done',
+    reorderable: false,
   },
 ];
 
 export default function PlanningPage() {
-  const planning = usePlanningGantt({
+  const planning = usePlanningLayout({
     tasks,
     defaultScale: 'week',
     defaultSelectedTaskId: 'P-100',
+    enableRowReorder: true,
   });
 
   return (
-    <>
-      <CSmartFilter {...planning.smartFilterProps} />
-      <CPlanningGantt {...planning.planningGanttProps} />
-    </>
+    <CPlanningLayout
+      filterProps={planning.layoutProps.filterProps}
+      ganttProps={planning.layoutProps.ganttProps}
+    />
   );
 }
 ```
@@ -54,16 +68,63 @@ const planning = usePlanningGantt({ tasks, defaultScale: 'hour' });
 />;
 ```
 
-## Recipe 3: Controlled component without hook
+## Recipe 3: Custom composition without layout wrapper
 
 ```tsx
-import { CPlanningGantt } from 'orbcafe-ui';
+import { CPlanningGantt, CSmartFilter, usePlanningGantt } from 'orbcafe-ui';
+
+const planning = usePlanningGantt({ tasks });
 
 <CPlanningGantt
-  tasks={filteredTasks}
-  scale={scale}
-  onScaleChange={setScale}
-  selectedTaskId={selectedTaskId}
-  onTaskSelect={(task) => setSelectedTaskId(task.id)}
+  {...planning.planningGanttProps}
 />;
+<CSmartFilter {...planning.smartFilterProps} />;
+```
+
+## Recipe 4: Add custom tools to the left of standard controls
+
+```tsx
+import { Button } from '@mui/material';
+import MailOutlineIcon from '@mui/icons-material/MailOutline';
+
+<CPlanningGantt
+  {...planning.planningGanttProps}
+  extraTools={
+    <Button
+      size="small"
+      variant="outlined"
+      startIcon={<MailOutlineIcon fontSize="small" />}
+      onClick={() => sendPlanMail()}
+    >
+      Send email
+    </Button>
+  }
+/>;
+```
+
+## Recipe 5: Persist drag-reordered rows
+
+```tsx
+const planning = usePlanningLayout({
+  tasks,
+  enableRowReorder: true,
+  onTaskReorder: (orderedTasks, { activeTask, targetTask }) => {
+    savePlanningOrder(orderedTasks.map((task) => task.id));
+    auditMove(activeTask.id, targetTask.id);
+  },
+});
+
+<CPlanningLayout
+  filterProps={planning.layoutProps.filterProps}
+  ganttProps={planning.layoutProps.ganttProps}
+/>;
+```
+
+Disable row drag-reordering globally when the plan order must be read-only:
+
+```tsx
+const planning = usePlanningLayout({
+  tasks,
+  enableRowReorder: false,
+});
 ```

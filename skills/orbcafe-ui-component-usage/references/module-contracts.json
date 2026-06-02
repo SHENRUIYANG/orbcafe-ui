@@ -94,13 +94,13 @@
     {
       "name": "Planning",
       "mode": "hook-first",
-      "public_entries": ["CPlanningGantt", "usePlanningGantt", "PlanningTaskRecord", "PlanningGanttColumn", "PlanningGanttScale"],
-      "preferred_pattern": "usePlanningGantt + CSmartFilter + CPlanningGantt with controlled scale and selectedTaskId",
-      "public_hooks": ["usePlanningGantt"],
+      "public_entries": ["CPlanningLayout", "CPlanningGantt", "usePlanningLayout", "usePlanningGantt", "PlanningTaskRecord", "PlanningGanttColumn", "PlanningGanttScale"],
+      "preferred_pattern": "usePlanningLayout + CPlanningLayout as default combo; usePlanningGantt + CSmartFilter + CPlanningGantt for custom composition; extraTools on the left of standard controls; task rows drag-reorder from table or Gantt timeline and persist through onTaskReorder when needed; row drag-reordering is controlled globally by enableRowReorder and per task by PlanningTaskRecord.reorderable",
+      "public_hooks": ["usePlanningLayout", "usePlanningGantt"],
       "canonical_examples": ["examples/app/_components/PlanningExampleClient.tsx", "examples/app/planning/page.tsx"],
-      "minimal_state": ["tasks id/title/startDate/endDate/progress/status/owner", "scale hour/day/week/month", "selectedTaskId", "SmartFilter filters"],
-      "verify": ["table rows align with Gantt bars", "scale switch changes timeline density", "row/bar click updates selected task", "SmartFilter changes table and Gantt rows"],
-      "common_failure_modes": ["invalid date strings", "endDate before startDate", "missing app shell route"]
+      "minimal_state": ["tasks id/title/startDate/endDate/progress/status/owner", "optional task reorderable", "scale hour/day/week/month", "selectedTaskId", "SmartFilter filters", "extraTools", "optional enableRowReorder", "optional onTaskReorder"],
+      "verify": ["table rows align with Gantt bars", "scale switch changes timeline density", "row/bar click updates selected task", "row drag-reorder works from both table and Gantt panes", "SmartFilter changes table and Gantt rows", "custom buttons render left of standard controls"],
+      "common_failure_modes": ["invalid date strings", "endDate before startDate", "missing app shell route", "rendering CPlanningGantt alone and forgetting CSmartFilter", "replacing standard controls instead of adding extraTools", "allowing group header rows to drag or reordering tasks across different groups", "ignoring enableRowReorder false or dragging rows with reorderable false"]
     }
   ],
   "shared_rules": [

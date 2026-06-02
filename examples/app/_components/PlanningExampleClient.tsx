@@ -1,18 +1,19 @@
 'use client';
 
 import { useMemo } from 'react';
-import { Box, Stack, Typography } from '@mui/material';
+import { Box, Button, Stack, Typography } from '@mui/material';
 import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
+import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import { useTheme } from '@mui/material/styles';
 import { LayoutDashboard, Mail, Mic, Settings, Table2 } from 'lucide-react';
+import dayjs from 'dayjs';
 import {
   CAppPageLayout,
+  CPlanningLayout,
   CPageTransition,
-  CPlanningGantt,
-  CSmartFilter,
   type PlanningTaskRecord,
   type TreeMenuItem,
-  usePlanningGantt,
+  usePlanningLayout,
 } from 'orbcafe-ui';
 
 const HeaderBrandLogo = () => {
@@ -29,103 +30,90 @@ const HeaderBrandLogo = () => {
   );
 };
 
-const planningTasks: PlanningTaskRecord[] = [
-  {
-    id: 'P-100',
-    code: 'PP-100',
-    title: 'Finalize production demand plan',
-    project: 'Q3 Product Launch',
-    workCenter: 'Planning',
-    startDate: '2026-06-01',
-    endDate: '2026-06-08',
-    progress: 72,
-    status: 'in-progress',
-    priority: 'high',
-    owner: { name: 'Ruiyang Shen', initials: 'RS' },
-    color: '#2563eb',
-  },
-  {
-    id: 'P-110',
-    code: 'PP-110',
-    title: 'Reserve bottleneck machine capacity',
-    project: 'Q3 Product Launch',
-    workCenter: 'CNC-02',
-    startDate: '2026-06-05',
-    endDate: '2026-06-18',
-    progress: 44,
-    status: 'in-progress',
-    priority: 'critical',
-    owner: { name: 'Mina Zhang', initials: 'MZ' },
-    dependencyIds: ['P-100'],
-    color: '#0f766e',
-  },
-  {
-    id: 'P-120',
-    code: 'PP-120',
-    title: 'Supplier confirmation for long-lead material',
-    project: 'Material Readiness',
-    workCenter: 'Procurement',
-    startDate: '2026-06-10',
-    endDate: '2026-06-24',
-    progress: 18,
-    status: 'blocked',
-    priority: 'high',
-    owner: { name: 'Anna Keller', initials: 'AK' },
-    dependencyIds: ['P-100'],
-    color: '#dc2626',
-  },
-  {
-    id: 'P-130',
-    code: 'PP-130',
-    title: 'Warehouse staging and kitting',
-    project: 'Factory Ramp',
-    workCenter: 'WH-A',
-    startDate: '2026-06-19',
-    endDate: '2026-07-02',
-    progress: 8,
-    status: 'planned',
-    priority: 'medium',
-    owner: { name: 'Tom Becker', initials: 'TB' },
-    dependencyIds: ['P-110', 'P-120'],
-    color: '#7c3aed',
-  },
-  {
-    id: 'P-140',
-    code: 'PP-140',
-    title: 'Pilot manufacturing order run',
-    project: 'Factory Ramp',
-    workCenter: 'Line 4',
-    startDate: '2026-07-03',
-    endDate: '2026-07-14',
-    progress: 0,
-    status: 'not-started',
-    priority: 'medium',
-    owner: { name: 'Nora Weiss', initials: 'NW' },
-    dependencyIds: ['P-130'],
-    color: '#d97706',
-  },
-  {
-    id: 'P-150',
-    code: 'PP-150',
-    title: 'Quality gate and release checklist',
-    project: 'Factory Ramp',
-    workCenter: 'Quality',
-    startDate: '2026-07-12',
-    endDate: '2026-07-22',
-    progress: 0,
-    status: 'planned',
-    priority: 'high',
-    owner: { name: 'Ken Ito', initials: 'KI' },
-    dependencyIds: ['P-140'],
-    color: '#0891b2',
-  },
-];
+const OPERATION_TEMPLATES = [
+  { code: '0010', title: 'Steel Tube Cutting', workCenter: 'CUTTING', durationHours: 24 },
+  { code: '0020', title: 'Cleaning', workCenter: 'CLEANING', durationHours: 14 },
+  { code: '0030', title: 'Grooving', workCenter: 'GROOVING', durationHours: 22 },
+  { code: '0040', title: 'Welding', workCenter: 'WELDING', durationHours: 26 },
+  { code: '0050', title: 'Pre-Assembly', workCenter: 'PREASSEMBLY', durationHours: 20 },
+  { code: '0060', title: 'Painting', workCenter: 'PAINTING', durationHours: 10 },
+  { code: '0070', title: 'Silk Printing', workCenter: 'PRINT_GAS', durationHours: 18 },
+  { code: '0080', title: 'Nitrogen Charging', workCenter: 'FILLING', durationHours: 12 },
+  { code: '0090', title: 'Final Assembly and Packing', workCenter: 'FINAL_ASSEMBLY', durationHours: 25 },
+] as const;
+
+const ORDER_COLORS = ['#2563eb', '#0f766e', '#dc2626', '#7c3aed', '#d97706'] as const;
+
+const createPlanningTasks = (): PlanningTaskRecord[] => {
+  const tasks: PlanningTaskRecord[] = [];
+  const orderCount = 5;
+  const startAnchor = dayjs('2026-06-01T08:00:00');
+
+  for (let orderIndex = 0; orderIndex < orderCount; orderIndex += 1) {
+    const orderNo = `${orderIndex + 1}`.padStart(4, '0');
+    const orderCode = `5000000000${orderNo}`;
+    const productName = `Automotive Hood Gas Spring ${orderIndex + 1}50N ${150 + orderIndex * 20}/50`;
+    const fgCode = `FG-GS-HOOD-${150 + orderIndex * 20}-050-${250 + orderIndex * 10}N`;
+    const orderStart = startAnchor.add(orderIndex, 'hour');
+    let opCursor = orderStart;
+
+    const operationEnd = orderStart.add(
+      OPERATION_TEMPLATES.reduce((sum, step) => sum + step.durationHours, 0) + OPERATION_TEMPLATES.length,
+      'hour',
+    );
+
+    tasks.push({
+      id: `P-ORDER-${orderNo}`,
+      code: orderCode,
+      title: productName,
+      project: fgCode,
+      workCenter: 'PS1',
+      startDate: orderStart.toISOString(),
+      endDate: operationEnd.toISOString(),
+      progress: 30 + orderIndex * 8,
+      status: orderIndex === 3 ? 'in-progress' : 'planned',
+      priority: 'high',
+      owner: { name: `Planner ${orderIndex + 1}`, initials: `P${orderIndex + 1}` },
+      color: ORDER_COLORS[orderIndex % ORDER_COLORS.length],
+      reorderable: orderIndex !== 0,
+    });
+
+    OPERATION_TEMPLATES.forEach((step, stepIndex) => {
+      const opStart = opCursor;
+      const opEnd = opStart.add(step.durationHours, 'hour');
+      const sequenceNo = `${(stepIndex + 1) * 10}`.padStart(4, '0');
+      tasks.push({
+        id: `P-${orderNo}-${sequenceNo}`,
+        code: sequenceNo,
+        title: step.title,
+        project: productName,
+        workCenter: step.workCenter,
+        startDate: opStart.toISOString(),
+        endDate: opEnd.toISOString(),
+        progress: Math.max(5, 18 - orderIndex * 2),
+        status: orderIndex === 1 && stepIndex === 4 ? 'blocked' : orderIndex <= 1 ? 'in-progress' : 'planned',
+        priority: stepIndex === 4 ? 'critical' : 'medium',
+        owner: { name: step.workCenter, initials: step.workCenter.slice(0, 2) },
+        color: ORDER_COLORS[(orderIndex + stepIndex) % ORDER_COLORS.length],
+        reorderable: step.code !== '0090',
+      });
+      opCursor = opEnd.add(1, 'hour');
+    });
+  }
+
+  return tasks;
+};
+
+const planningTasks: PlanningTaskRecord[] = createPlanningTasks();
 
 export default function PlanningExampleClient() {
-  const planning = usePlanningGantt({
+  const planning = usePlanningLayout({
     tasks: planningTasks,
     defaultScale: 'week',
-    defaultSelectedTaskId: 'P-110',
+    defaultSelectedTaskId: planningTasks[0]?.id,
+    filterAppId: 'planning-gantt-filter',
+    filterTableKey: 'planning',
+    enableRowReorder: true,
   });
 
   const menuData: TreeMenuItem[] = useMemo(
@@ -153,17 +141,30 @@ export default function PlanningExampleClient() {
       logo={<HeaderBrandLogo />}
     >
       <CPageTransition transitionKey="planning-demo" variant="fade" durationMs={180}>
-        <Box sx={{ height: 'calc(100vh - 120px)', overflow: 'auto', px: { xs: 1, md: 2 }, pb: 2 }}>
-          <Stack spacing={2}>
-            <CSmartFilter
-              {...planning.smartFilterProps}
-            />
-
-            <CPlanningGantt
-              title="Production Plan"
-              subtitle="Project management and production planning table with Gantt timeline"
-              {...planning.planningGanttProps}
-            />
+        <Box sx={{ height: 'calc(100vh - 120px)', overflow: 'hidden', px: { xs: 1, md: 2 }, pb: 0 }}>
+          <Stack spacing={2} sx={{ height: '100%' }}>
+            <Box sx={{ flex: 1, minHeight: 0 }}>
+              <CPlanningLayout
+                filterProps={planning.layoutProps.filterProps}
+                ganttProps={{
+                  ...planning.layoutProps.ganttProps,
+                  title: 'Production Plan',
+                  subtitle: 'Project management and production planning table with Gantt timeline',
+                  extraTools: (
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      startIcon={<MailOutlineIcon fontSize="small" />}
+                      onClick={() => console.log('Send planning email')}
+                      sx={{ minWidth: 132, height: 36 }}
+                    >
+                      Send email
+                    </Button>
+                  ),
+                }}
+                sx={{ height: '100%' }}
+              />
+            </Box>
           </Stack>
         </Box>
       </CPageTransition>

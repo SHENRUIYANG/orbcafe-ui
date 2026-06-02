@@ -32,7 +32,9 @@ Use only exports reachable from `src/index.ts`.
     - `type AuthRegisterPayload`
     - `type AuthForgotPasswordPayload`
   - `Planning/*`:
+    - `CPlanningLayout`
     - `CPlanningGantt`
+    - `usePlanningLayout`
     - `usePlanningGantt`
     - `type PlanningTaskRecord`
     - `type PlanningGanttColumn`

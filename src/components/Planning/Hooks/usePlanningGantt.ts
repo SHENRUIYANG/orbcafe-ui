@@ -10,6 +10,13 @@ export interface UsePlanningGanttOptions {
   defaultScale?: PlanningGanttScale;
   defaultSelectedTaskId?: string;
   initialFilters?: Record<string, FilterValue>;
+  filterFields?: FilterField[];
+  filterAppId?: string;
+  filterTableKey?: string;
+  onFilterSearch?: () => void;
+  onFilterVariantLoad?: CSmartFilterProps['onVariantLoad'];
+  enableRowReorder?: CPlanningGanttProps['enableRowReorder'];
+  onTaskReorder?: CPlanningGanttProps['onTaskReorder'];
 }
 
 export interface UsePlanningGanttResult {
@@ -21,7 +28,10 @@ export interface UsePlanningGanttResult {
   setFilters: (filters: Record<string, FilterValue>) => void;
   filteredTasks: PlanningTaskRecord[];
   smartFilterProps: Pick<CSmartFilterProps, 'fields' | 'filters' | 'onFilterChange' | 'onVariantLoad' | 'onSearch' | 'appId' | 'tableKey'>;
-  planningGanttProps: Pick<CPlanningGanttProps, 'tasks' | 'scale' | 'onScaleChange' | 'selectedTaskId' | 'onTaskSelect'>;
+  planningGanttProps: Pick<
+    CPlanningGanttProps,
+    'tasks' | 'scale' | 'onScaleChange' | 'selectedTaskId' | 'onTaskSelect' | 'enableRowReorder' | 'onTaskReorder'
+  >;
 }
 
 const DEFAULT_FILTERS: Record<string, FilterValue> = {
@@ -54,6 +64,13 @@ export const usePlanningGantt = ({
   defaultScale = 'week',
   defaultSelectedTaskId,
   initialFilters,
+  filterFields,
+  filterAppId = 'planning-gantt-filter',
+  filterTableKey = 'planning',
+  onFilterSearch,
+  onFilterVariantLoad,
+  enableRowReorder,
+  onTaskReorder,
 }: UsePlanningGanttOptions): UsePlanningGanttResult => {
   const [scale, setScale] = useState<PlanningGanttScale>(defaultScale);
   const [selectedTaskId, setSelectedTaskId] = useState(defaultSelectedTaskId ?? tasks[0]?.id ?? '');
@@ -107,15 +124,15 @@ export const usePlanningGantt = ({
 
   const smartFilterProps = useMemo<UsePlanningGanttResult['smartFilterProps']>(
     () => ({
-      appId: 'planning-gantt-filter',
-      tableKey: 'planning',
-      fields: DEFAULT_FILTER_FIELDS,
+      appId: filterAppId,
+      tableKey: filterTableKey,
+      fields: filterFields ?? DEFAULT_FILTER_FIELDS,
       filters,
       onFilterChange: setFilters,
-      onVariantLoad: () => {},
-      onSearch: () => {},
+      onVariantLoad: onFilterVariantLoad ?? (() => {}),
+      onSearch: onFilterSearch ?? (() => {}),
     }),
-    [filters],
+    [filterAppId, filterFields, filterTableKey, filters, onFilterSearch, onFilterVariantLoad],
   );
 
   const planningGanttProps = useMemo<UsePlanningGanttResult['planningGanttProps']>(
@@ -125,8 +142,10 @@ export const usePlanningGantt = ({
       onScaleChange: setScale,
       selectedTaskId,
       onTaskSelect,
+      enableRowReorder,
+      onTaskReorder,
     }),
-    [filteredTasks, onTaskSelect, scale, selectedTaskId],
+    [enableRowReorder, filteredTasks, onTaskReorder, onTaskSelect, scale, selectedTaskId],
   );
 
   return {

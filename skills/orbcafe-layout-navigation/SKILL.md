@@ -15,10 +15,24 @@ description: Build ORBCAFE application shell and navigation with CAppPageLayout,
 
 ## Canonical Setup
 
-先检查宿主 `package.json`，缺失或版本不兼容时才安装：
+先检查宿主 `package.json`，缺失或版本不兼容时才安装。  
+`NavigationIsland` / `TreeMenu` / `button` 相关依赖建议完整满足：
+- `lucide-react`
+- `tailwind-merge`
+- `clsx`
+- `class-variance-authority`
+- `@radix-ui/react-slot`
+
+标准安装命令：
 
 ```bash
 npm install orbcafe-ui @mui/material@^7.3.9 @mui/icons-material@^7.3.9 @mui/x-date-pickers@^8.27.2 @emotion/react@^11.14.0 @emotion/styled@^11.14.1 dayjs@^1.11.20 lucide-react@^0.575.0 tailwind-merge@^3.5.0 clsx@^2.1.1 class-variance-authority@^0.7.1 @radix-ui/react-slot@^1.2.4
+```
+
+安装后建议做一次依赖验证：
+
+```bash
+npm ls lucide-react tailwind-merge clsx class-variance-authority @radix-ui/react-slot
 ```
 
 官方 examples 不随 npm 包发布。消费项目没有 `examples/` 时，到 ORBCAFE GitHub 仓库或本地 ORBCAFE 源码仓库对照。
@@ -42,10 +56,11 @@ npm run dev
 
 0. `Mode`: `Hook-first`.
 1. `Layout decision`: full shell vs nav-only.
-2. `Code snippet`: app frame with minimal props.
-3. `Runtime safety`: locale、hydration、route 高亮安全策略。
-4. `Verify`: 菜单跳转、locale 切换、用户菜单动作、过渡动画。
-5. `Troubleshooting`: 至少包含 3 条“页面看起来没反应”排查项。
+2. `Dependency check`: include recommended Navigation Island dependencies and `npm ls ...` check command.
+3. `Code snippet`: app frame with minimal props.
+4. `Runtime safety`: locale、hydration、route 高亮安全策略。
+5. `Verify`: 菜单跳转、locale 切换、用户菜单动作、过渡动画。
+6. `Troubleshooting`: 至少包含 3 条“页面看起来没反应”排查项。
 
 ## Examples-Based Experience Summary
 
@@ -54,3 +69,4 @@ npm run dev
 - `CAppPageLayout` 内部负责壳层，业务页只注入 menu/user/logo/children，避免重复造壳。
 - `CPageTransition` 持续使用 `160-260ms`，仅用 transform/opacity 变换，性能更稳。
 - `Providers` 层集中挂载 `ThemeProvider + LocalizationProvider + GlobalMessage`，避免每页重复配置。
+- 如无明确需求，建议不改全局样式文件（如 `app/globals.css`、`styles.css`、tailwind 主题变量）；优先通过组件 props、`sx`、现有 theme 扩展完成调整。
