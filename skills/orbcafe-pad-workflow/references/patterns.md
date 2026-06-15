@@ -103,3 +103,55 @@ export default function PadApp() {
   filterConfig={{ /* ... */ }}
 />
 ```
+
+## Pattern 3: PTable SmartFilter with Value Help
+
+`PTable` uses `PSmartFilter`, so the same `CValueHelp` field contract works on Pad pages. Keep it for business-object lookup such as material, bin, customer, work center, or route.
+
+```tsx
+<PTable
+  appId="pad-picking"
+  tableKey="pick-list"
+  columns={[
+    { id: 'taskId', label: 'Task' },
+    { id: 'materialId', label: 'Material' },
+    { id: 'bin', label: 'Bin' },
+  ]}
+  rows={tasks}
+  rowKey="id"
+  cardTitleField="taskId"
+  cardSubtitleFields={['materialId', 'bin']}
+  filterConfig={{
+    appId: 'pad-picking',
+    tableKey: 'pick-list',
+    fields: [
+      {
+        id: 'materialId',
+        label: 'Material',
+        type: 'value-help',
+        valueHelp: {
+          dialogTitle: 'Material Value Help',
+          items: materials,
+          columns: [
+            { field: 'materialId', label: 'Material', minWidth: 140 },
+            { field: 'description', label: 'Description', minWidth: 240 },
+            { field: 'plant', label: 'Plant', minWidth: 100 },
+          ],
+          getOptionValue: (item) => item.materialId,
+          getOptionLabel: (item) => item.description,
+          getOptionDescription: (item) => item.plant,
+        },
+      },
+    ],
+    filters,
+    onFilterChange: setFilters,
+    onVariantLoad: handleVariantLoad,
+  }}
+/>
+```
+
+Pad Value Help notes:
+
+- Use stable keys as selected values; the card display can use localized descriptions.
+- The popup remains MUI dialog based, so keep labels short and columns few enough for touch use.
+- Prefer `PBarcodeScanner` for barcode capture and `CValueHelp` for searchable master-data lookup; do not merge both concerns into one custom input.

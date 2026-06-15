@@ -1,4 +1,4 @@
 interface:
   display_name: "ORBCAFE UI Router"
-  short_description: "Route requests to ORBCAFE skills with the Next examples baseline"
-  default_prompt: "Use $orbcafe-ui-component-usage first to choose the right ORBCAFE module skill, enforce the official Next.js examples baseline, then generate minimal runnable code with public APIs only."
+  short_description: "Route ORBCAFE requests, including value help, to the right skill"
+  default_prompt: "Use $orbcafe-ui-component-usage first to choose the right ORBCAFE module skill, apply the shared CValueHelp/F4 contract when lookup fields are involved, enforce the official Next.js examples baseline, then generate minimal runnable code with public APIs only."

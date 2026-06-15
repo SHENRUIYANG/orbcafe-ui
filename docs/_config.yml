@@ -1,0 +1,8 @@
+title: ORBCAFE UI
+description: React and Next.js enterprise UI components, examples, and AI coding skills.
+theme: jekyll-theme-minimal
+plugins:
+  - jekyll-relative-links
+relative_links:
+  enabled: true
+  collections: true

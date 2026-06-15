@@ -88,6 +88,10 @@ export function Providers({ children }: { children: any }) {
     [effectiveMode],
   );
 
+  if (!hydrated) {
+    return null;
+  }
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />

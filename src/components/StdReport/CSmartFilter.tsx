@@ -70,12 +70,14 @@ import ArrowRightAltIcon from '@mui/icons-material/ArrowRightAlt';
 import { CVariantManagement, type VariantMetadata } from './Components/CVariantManagement';
 import { CVariantManager, type IVariantService } from './CVariantManager';
 import { CDateRangePicker } from '../Molecules/CDateRangePicker';
+import { CValueHelp } from '../Molecules/CValueHelp';
+import type { CValueHelpProps, CValueHelpRecord } from '../Molecules/CValueHelp';
 import dayjs, { type Dayjs } from 'dayjs';
 import { useOrbcafeI18n } from '../../i18n';
 
 // --- Types ---
 
-export type FilterType = 'text' | 'number' | 'date' | 'select' | 'multi-select';
+export type FilterType = 'text' | 'number' | 'date' | 'select' | 'multi-select' | 'value-help';
 
 export type TextOperator = 'equals' | 'contains' | 'notContains' | 'wildcard';
 export type NumberOperator = '=' | '!=' | '>' | '<' | '>=' | '<=' | 'between';
@@ -97,6 +99,8 @@ export interface FilterField {
     hidden?: boolean;
     hasSearchIcon?: boolean;
     options?: { label: string; value: any }[]; // For select type
+    isValueHelp?: boolean;
+    valueHelp?: Omit<CValueHelpProps<CValueHelpRecord>, 'label' | 'onChange' | 'value'>;
 }
 
 export interface CSmartFilterProps {
@@ -364,7 +368,27 @@ const FilterInput = ({
         );
     }
 
-    // 3. Select Input
+    // 3. Value Help Input
+    if (field.isValueHelp || type === 'value-help') {
+        const valueHelpMode = field.valueHelp?.mode || 'single';
+
+        return (
+            <CValueHelp
+                {...commonTextFieldProps}
+                {...field.valueHelp}
+                label={field.label}
+                placeholder={field.placeholder || field.valueHelp?.placeholder}
+                value={currentValue ?? (valueHelpMode === 'multiple' ? [] : null)}
+                mode={valueHelpMode}
+                onChange={(newValue) => onChange({
+                    value: newValue,
+                    operator: valueHelpMode === 'multiple' ? 'anyOf' : 'equals'
+                })}
+            />
+        );
+    }
+
+    // 4. Select Input
     if (type === 'select') {
         return (
             <TextField
@@ -386,7 +410,7 @@ const FilterInput = ({
         );
     }
 
-    // 4. Multi-Select Input
+    // 5. Multi-Select Input
     if (type === 'multi-select') {
         const selectedValues = Array.isArray(currentValue) ? currentValue : [];
         
@@ -462,7 +486,7 @@ const FilterInput = ({
         );
     }
 
-    // 5. Standard Text/Number Input
+    // 6. Standard Text/Number Input
     const operators = type === 'number' ? NUMBER_OPERATORS : TEXT_OPERATORS;
     
     const showAdornment = focused || (currentValue !== undefined && currentValue !== '' && currentValue !== null) || Boolean(anchorEl);

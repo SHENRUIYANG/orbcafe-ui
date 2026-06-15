@@ -3,7 +3,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Box } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-import { LayoutDashboard, Mail, Mic, Settings, Table2 } from 'lucide-react';
 import {
   CAppPageLayout,
   CPivotTable,
@@ -11,8 +10,8 @@ import {
   type OrbcafeLocale,
   type PivotFieldDefinition,
   type PivotTablePreset,
-  type TreeMenuItem,
 } from 'orbcafe-ui';
+import { EXAMPLE_MENU } from './exampleNavigation';
 
 const HeaderBrandLogo = () => {
   const theme = useTheme();
@@ -232,20 +231,7 @@ export default function PivotTableExampleClient() {
     [],
   );
 
-  const menuData: TreeMenuItem[] = useMemo(
-    () => [
-      { id: 'dashboard', title: i18nText.dashboard, href: '/', icon: <LayoutDashboard className="w-4 h-4" /> },
-      { id: 'std-report', title: i18nText.stdReport, href: '/std-report', icon: <LayoutDashboard className="w-4 h-4" /> },
-      { id: 'kanban', title: 'Kanban', href: '/kanban', icon: <LayoutDashboard className="w-4 h-4" /> },
-      { id: 'planning', title: 'Planning Gantt', href: '/planning', icon: <Table2 className="w-4 h-4" /> },
-      { id: 'pivot-table', title: i18nText.pivotTable, href: '/pivot-table', icon: <Table2 className="w-4 h-4" /> },
-      { id: 'detail-info', title: i18nText.detailInfo, href: '/detail-info/ID-1', icon: <LayoutDashboard className="w-4 h-4" /> },
-      { id: 'ai-nav', title: 'AI Nav', href: '/ai-nav', icon: <Mic className="w-4 h-4" /> },
-      { id: 'messages', title: i18nText.messages, href: '/messages', icon: <Mail className="w-4 h-4" /> },
-      { id: 'settings', title: i18nText.settings, href: '/settings', icon: <Settings className="w-4 h-4" /> },
-    ],
-    [i18nText],
-  );
+  const menuData = EXAMPLE_MENU;
 
   useEffect(() => {
     if (typeof window === 'undefined') {

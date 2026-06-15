@@ -1,11 +1,11 @@
 'use client';
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { CAppPageLayout, CPageTransition, CStandardPage, useStandardReport, type OrbcafeLocale, type ReportMetadata, type TreeMenuItem } from 'orbcafe-ui';
+import { CAppPageLayout, CPageTransition, CStandardPage, useStandardReport, type OrbcafeLocale, type ReportMetadata } from 'orbcafe-ui';
 import { Box, Chip } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import Link from 'next/link';
-import { LayoutDashboard, Settings, Mail, Mic, Table2 } from 'lucide-react';
+import { EXAMPLE_MENU } from './exampleNavigation';
 
 // --- Metadata Definition ---
 
@@ -13,25 +13,58 @@ import { LayoutDashboard, Settings, Mail, Mic, Table2 } from 'lucide-react';
 type StatusValue = 'active' | 'pending' | 'inactive';
 type CategoryValue = 'electronics' | 'furniture';
 
+interface CustomerHelpRecord extends Record<string, unknown> {
+    customerId: string;
+    customerName: string;
+    country: string;
+    segment: string;
+    creditGroup: string;
+}
+
 interface ExampleRow {
     id: string;
     index: number;
     name: string;
+    customerId: string;
+    customerName: string;
     status: StatusValue;
     date: string;
     amount: string;
     category: CategoryValue;
 }
 
-const BASE_ROWS: ExampleRow[] = Array.from({ length: 100 }).map((_, i) => ({
-    id: `ID-${i + 1}`,
-    index: i + 1,
-    name: `Item Name ${i + 1}`,
-    status: i % 3 === 0 ? 'active' : i % 3 === 1 ? 'pending' : 'inactive',
-    date: '2025-01-01',
-    amount: ((i * 123.45) % 1000).toFixed(2),
-    category: i % 2 === 0 ? 'electronics' : 'furniture',
-}));
+const CUSTOMER_VALUE_HELP: CustomerHelpRecord[] = [
+    { customerId: 'C1000', customerName: 'Acme Industries', country: 'DE', segment: 'Enterprise', creditGroup: 'A' },
+    { customerId: 'C1100', customerName: 'Northwind Trading', country: 'US', segment: 'Wholesale', creditGroup: 'B' },
+    { customerId: 'C1200', customerName: 'Sakura Retail', country: 'JP', segment: 'Retail', creditGroup: 'A' },
+    { customerId: 'C1300', customerName: 'Lyon Office Supply', country: 'FR', segment: 'SMB', creditGroup: 'C' },
+    { customerId: 'C1400', customerName: 'Seoul Manufacturing', country: 'KR', segment: 'Industrial', creditGroup: 'B' },
+    { customerId: 'C1500', customerName: 'Shanghai Logistics', country: 'CN', segment: 'Logistics', creditGroup: 'A' },
+];
+
+const BASE_ROWS: ExampleRow[] = Array.from({ length: 100 }).map((_, i) => {
+    const customer = CUSTOMER_VALUE_HELP[i % CUSTOMER_VALUE_HELP.length];
+
+    return {
+        id: `ID-${i + 1}`,
+        index: i + 1,
+        name: `Item Name ${i + 1}`,
+        customerId: customer.customerId,
+        customerName: customer.customerName,
+        status: i % 3 === 0 ? 'active' : i % 3 === 1 ? 'pending' : 'inactive',
+        date: '2025-01-01',
+        amount: ((i * 123.45) % 1000).toFixed(2),
+        category: i % 2 === 0 ? 'electronics' : 'furniture',
+    };
+});
+
+const resolveFilterValue = (params: Record<string, unknown>, key: string): unknown => {
+    const rawValue = params[key];
+    if (rawValue && typeof rawValue === 'object' && 'value' in rawValue) {
+        return (rawValue as { value: unknown }).value;
+    }
+    return rawValue;
+};
 
 const EXAMPLE_TEXT: Record<OrbcafeLocale, {
     localeLabel: string;
@@ -41,12 +74,16 @@ const EXAMPLE_TEXT: Record<OrbcafeLocale, {
     messages: string;
     settings: string;
     filterSearch: string;
+    filterCustomer: string;
     filterStatus: string;
     filterDateRange: string;
     filterCategory: string;
+    customerValueHelpTitle: string;
+    customerValueHelpSearch: string;
     searchItemsPlaceholder: string;
     itemNamePrefix: string;
     columnName: string;
+    columnCustomer: string;
     columnDate: string;
     columnAmount: string;
     statusActive: string;
@@ -69,12 +106,16 @@ const EXAMPLE_TEXT: Record<OrbcafeLocale, {
         messages: 'Messages',
         settings: 'Settings',
         filterSearch: 'Search',
+        filterCustomer: 'Customer',
         filterStatus: 'Status',
         filterDateRange: 'Date Range',
         filterCategory: 'Category',
+        customerValueHelpTitle: 'Customer Value Help',
+        customerValueHelpSearch: 'Search by customer, country, or segment...',
         searchItemsPlaceholder: 'Search items...',
         itemNamePrefix: 'Item Name',
         columnName: 'Name',
+        columnCustomer: 'Customer',
         columnDate: 'Date',
         columnAmount: 'Amount',
         statusActive: 'Active',
@@ -97,12 +138,16 @@ const EXAMPLE_TEXT: Record<OrbcafeLocale, {
         messages: '消息',
         settings: '设置',
         filterSearch: '搜索',
+        filterCustomer: '客户',
         filterStatus: '状态',
         filterDateRange: '日期范围',
         filterCategory: '类别',
+        customerValueHelpTitle: '客户值帮助',
+        customerValueHelpSearch: '按客户、国家或细分搜索...',
         searchItemsPlaceholder: '搜索条目...',
         itemNamePrefix: '条目',
         columnName: '名称',
+        columnCustomer: '客户',
         columnDate: '日期',
         columnAmount: '金额',
         statusActive: '启用',
@@ -125,12 +170,16 @@ const EXAMPLE_TEXT: Record<OrbcafeLocale, {
         messages: 'Messages',
         settings: 'Paramètres',
         filterSearch: 'Recherche',
+        filterCustomer: 'Client',
         filterStatus: 'Statut',
         filterDateRange: 'Plage de dates',
         filterCategory: 'Catégorie',
+        customerValueHelpTitle: 'Aide valeur client',
+        customerValueHelpSearch: 'Rechercher par client, pays ou segment...',
         searchItemsPlaceholder: 'Rechercher des éléments...',
         itemNamePrefix: 'Élément',
         columnName: 'Nom',
+        columnCustomer: 'Client',
         columnDate: 'Date',
         columnAmount: 'Montant',
         statusActive: 'Actif',
@@ -153,12 +202,16 @@ const EXAMPLE_TEXT: Record<OrbcafeLocale, {
         messages: 'Nachrichten',
         settings: 'Einstellungen',
         filterSearch: 'Suche',
+        filterCustomer: 'Kunde',
         filterStatus: 'Status',
         filterDateRange: 'Datumsbereich',
         filterCategory: 'Kategorie',
+        customerValueHelpTitle: 'Kunden-Wertehilfe',
+        customerValueHelpSearch: 'Nach Kunde, Land oder Segment suchen...',
         searchItemsPlaceholder: 'Einträge suchen...',
         itemNamePrefix: 'Eintrag',
         columnName: 'Name',
+        columnCustomer: 'Kunde',
         columnDate: 'Datum',
         columnAmount: 'Betrag',
         statusActive: 'Aktiv',
@@ -181,12 +234,16 @@ const EXAMPLE_TEXT: Record<OrbcafeLocale, {
         messages: 'メッセージ',
         settings: '設定',
         filterSearch: '検索',
+        filterCustomer: '得意先',
         filterStatus: '状態',
         filterDateRange: '日付範囲',
         filterCategory: 'カテゴリ',
+        customerValueHelpTitle: '得意先入力ヘルプ',
+        customerValueHelpSearch: '得意先、国、セグメントで検索...',
         searchItemsPlaceholder: '項目を検索...',
         itemNamePrefix: '項目',
         columnName: '名称',
+        columnCustomer: '得意先',
         columnDate: '日付',
         columnAmount: '金額',
         statusActive: '有効',
@@ -209,12 +266,16 @@ const EXAMPLE_TEXT: Record<OrbcafeLocale, {
         messages: '메시지',
         settings: '설정',
         filterSearch: '검색',
+        filterCustomer: '고객',
         filterStatus: '상태',
         filterDateRange: '날짜 범위',
         filterCategory: '카테고리',
+        customerValueHelpTitle: '고객 값 도움말',
+        customerValueHelpSearch: '고객, 국가 또는 세그먼트 검색...',
         searchItemsPlaceholder: '항목 검색...',
         itemNamePrefix: '항목',
         columnName: '이름',
+        columnCustomer: '고객',
         columnDate: '날짜',
         columnAmount: '금액',
         statusActive: '활성',
@@ -267,25 +328,36 @@ export default function StdReportExample() {
         }));
     }, [i18nText]);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const fetchReportData = useCallback(async (params: any) => {
+    const fetchReportData = useCallback(async (params: Record<string, unknown>) => {
         console.log('Fetching report data with params:', params);
 
         await new Promise((resolve) => setTimeout(resolve, 500));
 
         let filteredRows = [...localizedRows];
 
-        if (params.search) {
-            const q = String(params.search).toLowerCase();
+        const search = resolveFilterValue(params, 'search');
+        const customer = resolveFilterValue(params, 'customer');
+        const status = resolveFilterValue(params, 'status');
+        const category = resolveFilterValue(params, 'category');
+
+        if (search) {
+            const q = String(search).toLowerCase();
             filteredRows = filteredRows.filter((row) =>
-                row.name.toLowerCase().includes(q) || row.id.toLowerCase().includes(q)
+                row.name.toLowerCase().includes(q) ||
+                row.id.toLowerCase().includes(q) ||
+                row.customerId.toLowerCase().includes(q) ||
+                row.customerName.toLowerCase().includes(q)
             );
         }
-        if (params.status) {
-            filteredRows = filteredRows.filter((row) => row.status === params.status);
+        if (customer) {
+            const selectedCustomers = Array.isArray(customer) ? customer.map(String) : [String(customer)];
+            filteredRows = filteredRows.filter((row) => selectedCustomers.includes(row.customerId));
         }
-        if (params.category) {
-            filteredRows = filteredRows.filter((row) => row.category === params.category);
+        if (status) {
+            filteredRows = filteredRows.filter((row) => row.status === status);
+        }
+        if (category) {
+            filteredRows = filteredRows.filter((row) => row.category === category);
         }
 
         if (params.sort && params.order) {
@@ -299,7 +371,7 @@ export default function StdReportExample() {
             });
         }
 
-        const page = params.page || 1;
+        const page = Number(params.page) || 1;
         const limit = Number(params.limit) || 10;
         let paginatedRows = filteredRows;
         if (limit > 0) {
@@ -329,6 +401,12 @@ export default function StdReportExample() {
                 ),
             },
             { id: 'name', label: i18nText.columnName, minWidth: 150 },
+            {
+                id: 'customerName',
+                label: i18nText.columnCustomer,
+                minWidth: 190,
+                render: (_value: string, row: ExampleRow) => `${row.customerId} - ${row.customerName}`,
+            },
             { 
                 id: 'status', 
                 label: i18nText.filterStatus, 
@@ -356,6 +434,29 @@ export default function StdReportExample() {
         ],
         filters: [
             { id: 'search', label: i18nText.filterSearch, type: 'text', placeholder: i18nText.searchItemsPlaceholder },
+            {
+                id: 'customer',
+                label: i18nText.filterCustomer,
+                type: 'text',
+                isValueHelp: true,
+                placeholder: i18nText.filterCustomer,
+                valueHelp: {
+                    dialogTitle: i18nText.customerValueHelpTitle,
+                    searchPlaceholder: i18nText.customerValueHelpSearch,
+                    valueHelpLabel: i18nText.customerValueHelpTitle,
+                    items: CUSTOMER_VALUE_HELP,
+                    columns: [
+                        { field: 'customerId', label: 'Customer', minWidth: 110 },
+                        { field: 'customerName', label: i18nText.columnName, minWidth: 190 },
+                        { field: 'country', label: 'Country', minWidth: 90 },
+                        { field: 'segment', label: 'Segment', minWidth: 120 },
+                        { field: 'creditGroup', label: 'Credit', minWidth: 80 },
+                    ],
+                    getOptionValue: (item: CustomerHelpRecord) => item.customerId,
+                    getOptionLabel: (item: CustomerHelpRecord) => item.customerName,
+                    getOptionDescription: (item: CustomerHelpRecord) => `${item.country} - ${item.segment}`,
+                },
+            },
             { 
                 id: 'status', 
                 label: i18nText.filterStatus, 
@@ -388,7 +489,7 @@ export default function StdReportExample() {
                         scope: 'default',
                         filters: {
                             values: { status: { value: 'active', operator: 'equals' } },
-                            visibleFields: ['keyword', 'status', 'dateRange', 'category'],
+                            visibleFields: ['search', 'customer', 'status', 'dateRange', 'category'],
                         },
                     },
                 ],
@@ -432,17 +533,7 @@ export default function StdReportExample() {
         },
     };
 
-    const menuData: TreeMenuItem[] = useMemo(() => [
-        { id: 'dashboard', title: i18nText.dashboard, href: '/', icon: <LayoutDashboard className="w-4 h-4" /> },
-        { id: 'std-report', title: i18nText.stdReport, href: '/std-report', icon: <LayoutDashboard className="w-4 h-4" /> },
-        { id: 'kanban', title: 'Kanban', href: '/kanban', icon: <LayoutDashboard className="w-4 h-4" /> },
-        { id: 'planning', title: 'Planning Gantt', href: '/planning', icon: <Table2 className="w-4 h-4" /> },
-        { id: 'pivot-table', title: 'Pivot Table', href: '/pivot-table', icon: <Table2 className="w-4 h-4" /> },
-        { id: 'detail-info', title: 'Detail Info', href: '/detail-info/ID-1', icon: <LayoutDashboard className="w-4 h-4" /> },
-        { id: 'ai-nav', title: 'AI Nav', href: '/ai-nav', icon: <Mic className="w-4 h-4" /> },
-        { id: 'messages', title: i18nText.messages, href: '/messages', icon: <Mail className="w-4 h-4" /> },
-        { id: 'settings', title: i18nText.settings, href: '/settings', icon: <Settings className="w-4 h-4" /> },
-    ], [i18nText]);
+    const menuData = EXAMPLE_MENU;
 
     return (
         <CAppPageLayout

@@ -1,6 +1,6 @@
 {
   "name": "orbcafe-ui",
-  "version": "1.2.8",
+  "version": "1.3.6",
   "description": "Awesome UI components with Glassmorphism",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",

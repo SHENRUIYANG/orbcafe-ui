@@ -1,6 +1,11 @@
 # ORBCAFE UI Official Examples
 
-本目录是 `orbcafe-ui` 的官方示例工程（Next.js App Router）。
+本目录是 `orbcafe-ui` 的官方示例工程（Next.js App Router），也是组件库和 AI skills 的视觉/交互基准。
+
+更多图文说明见仓库根目录：
+
+- `../docs/EXAMPLES.md`
+- `../docs/VIBE_CODING.md`
 
 ## 环境要求
 
@@ -25,12 +30,34 @@ npm run dev
 默认访问：
 
 - `http://localhost:3000/`
-- `http://localhost:3000/std-report`
+- `http://localhost:3000/login`
+- `http://localhost:3000/std-report`（包含 `CValueHelp` 客户字段：点击搜索按钮或按 F4 打开值帮助弹窗）
+- `http://localhost:3000/planning`（多列生产计划表格 + 甘特图；支持每页条目数、50/50 分屏切换和手工拖动）
 - `http://localhost:3000/kanban`
-- `http://localhost:3000/planning`
 - `http://localhost:3000/pivot-table`（内置 Preset 官方样板：支持保存/加载/删除 rows/columns/filters/values 组合）
 - `http://localhost:3000/detail-info/ID-1`
+- `http://localhost:3000/pad`
+- `http://localhost:3000/chat`
+- `http://localhost:3000/copilot`
+- `http://localhost:3000/aipanel`
 - `http://localhost:3000/ai-nav`
+
+## 示例覆盖范围
+
+| Route | 覆盖组件 |
+| --- | --- |
+| `/` | `CAppPageLayout`, `NavigationIsland`, dashboard overview |
+| `/login` | `CAuthPage`, `useAuthPage` |
+| `/std-report` | `CAppPageLayout`, `CStandardPage`, `CSmartFilter`, `CTable`, `CValueHelp`, `useStandardReport` |
+| `/planning` | `CPlanningLayout`, `CPlanningGantt`, `usePlanningLayout` |
+| `/kanban` | `CKanbanBoard`, `useKanbanBoard`, DetailInfo 跳转 |
+| `/pivot-table` | `CPivotTable`, preset 持久化, pivot chart companion views |
+| `/detail-info/ID-1` | `CDetailInfoPage`, sections, tabs, related table, AI fallback |
+| `/pad` | `PAppPageLayout`, `PTable`, `PSmartFilter`, `PNumericKeypad`, `PBarcodeScanner` |
+| `/chat` | `StdChat`, markdown/math/code/Mermaid/dynamic cards |
+| `/copilot` | `CopilotChat` + app-owned floating drag/resize shell |
+| `/aipanel` | `AgentPanel`, agent status states |
+| `/ai-nav` | `CAINavProvider`, `useAINav` |
 
 ## 质量检查（建议提交前执行）
 

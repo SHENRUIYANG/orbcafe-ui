@@ -13,6 +13,13 @@ export interface UsePlanningGanttOptions {
   filterFields?: FilterField[];
   filterAppId?: string;
   filterTableKey?: string;
+  columns?: CPlanningGanttProps['columns'];
+  page?: CPlanningGanttProps['page'];
+  rowsPerPage?: CPlanningGanttProps['rowsPerPage'];
+  rowsPerPageOptions?: CPlanningGanttProps['rowsPerPageOptions'];
+  count?: CPlanningGanttProps['count'];
+  onPageChange?: CPlanningGanttProps['onPageChange'];
+  onRowsPerPageChange?: CPlanningGanttProps['onRowsPerPageChange'];
   onFilterSearch?: () => void;
   onFilterVariantLoad?: CSmartFilterProps['onVariantLoad'];
   enableRowReorder?: CPlanningGanttProps['enableRowReorder'];
@@ -30,7 +37,20 @@ export interface UsePlanningGanttResult {
   smartFilterProps: Pick<CSmartFilterProps, 'fields' | 'filters' | 'onFilterChange' | 'onVariantLoad' | 'onSearch' | 'appId' | 'tableKey'>;
   planningGanttProps: Pick<
     CPlanningGanttProps,
-    'tasks' | 'scale' | 'onScaleChange' | 'selectedTaskId' | 'onTaskSelect' | 'enableRowReorder' | 'onTaskReorder'
+    | 'tasks'
+    | 'columns'
+    | 'scale'
+    | 'onScaleChange'
+    | 'page'
+    | 'rowsPerPage'
+    | 'rowsPerPageOptions'
+    | 'count'
+    | 'onPageChange'
+    | 'onRowsPerPageChange'
+    | 'selectedTaskId'
+    | 'onTaskSelect'
+    | 'enableRowReorder'
+    | 'onTaskReorder'
   >;
 }
 
@@ -67,6 +87,13 @@ export const usePlanningGantt = ({
   filterFields,
   filterAppId = 'planning-gantt-filter',
   filterTableKey = 'planning',
+  columns,
+  page,
+  rowsPerPage,
+  rowsPerPageOptions,
+  count,
+  onPageChange,
+  onRowsPerPageChange,
   onFilterSearch,
   onFilterVariantLoad,
   enableRowReorder,
@@ -138,14 +165,35 @@ export const usePlanningGantt = ({
   const planningGanttProps = useMemo<UsePlanningGanttResult['planningGanttProps']>(
     () => ({
       tasks: filteredTasks,
+      columns,
       scale,
       onScaleChange: setScale,
+      page,
+      rowsPerPage,
+      rowsPerPageOptions,
+      count,
+      onPageChange,
+      onRowsPerPageChange,
       selectedTaskId,
       onTaskSelect,
       enableRowReorder,
       onTaskReorder,
     }),
-    [enableRowReorder, filteredTasks, onTaskReorder, onTaskSelect, scale, selectedTaskId],
+    [
+      columns,
+      count,
+      enableRowReorder,
+      filteredTasks,
+      onPageChange,
+      onRowsPerPageChange,
+      onTaskReorder,
+      onTaskSelect,
+      page,
+      rowsPerPage,
+      rowsPerPageOptions,
+      scale,
+      selectedTaskId,
+    ],
   );
 
   return {

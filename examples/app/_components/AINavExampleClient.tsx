@@ -3,8 +3,8 @@
 import React, { useMemo, useState } from 'react';
 import { Alert, Box, Button, Chip, Paper, Stack, TextField, Typography } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-import { LayoutDashboard, Mail, Mic, Settings, Table2 } from 'lucide-react';
-import { CAINavProvider, CAppPageLayout, CPageTransition, useAINav, type TreeMenuItem } from 'orbcafe-ui';
+import { CAINavProvider, CAppPageLayout, CPageTransition, useAINav } from 'orbcafe-ui';
+import { EXAMPLE_MENU } from './exampleNavigation';
 
 const HeaderBrandLogo = () => {
   const theme = useTheme();
@@ -59,20 +59,7 @@ export default function AINavExampleClient() {
   const [errorText, setErrorText] = useState('');
   const [lastEvent, setLastEvent] = useState('');
 
-  const menuData: TreeMenuItem[] = useMemo(
-    () => [
-      { id: 'dashboard', title: 'Dashboard', href: '/', icon: <LayoutDashboard className="w-4 h-4" /> },
-      { id: 'std-report', title: 'Standard Report', href: '/std-report', icon: <LayoutDashboard className="w-4 h-4" /> },
-      { id: 'kanban', title: 'Kanban', href: '/kanban', icon: <LayoutDashboard className="w-4 h-4" /> },
-      { id: 'planning', title: 'Planning Gantt', href: '/planning', icon: <Table2 className="w-4 h-4" /> },
-      { id: 'pivot-table', title: 'Pivot Table', href: '/pivot-table', icon: <Table2 className="w-4 h-4" /> },
-      { id: 'detail-info', title: 'Detail Info', href: '/detail-info/ID-1', icon: <LayoutDashboard className="w-4 h-4" /> },
-      { id: 'ai-nav', title: 'AI Nav', href: '/ai-nav', icon: <Mic className="w-4 h-4" /> },
-      { id: 'messages', title: 'Messages', href: '/messages', icon: <Mail className="w-4 h-4" /> },
-      { id: 'settings', title: 'Settings', href: '/settings', icon: <Settings className="w-4 h-4" /> },
-    ],
-    [],
-  );
+  const menuData = EXAMPLE_MENU;
 
   return (
     <CAINavProvider

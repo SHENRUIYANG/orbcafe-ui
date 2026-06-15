@@ -4,6 +4,7 @@ export * from './components/Navigation-Island/tree-menu';
 export * from './components/Navigation-Island/button';
 export * from './components/Navigation-Island/Hooks/use-navigation-island';
 export * from './components/Molecules/CMessageBox';
+export * from './components/Molecules/CValueHelp';
 export * from './components/StdReport';
 export * from './components/GraphReport';
 export * from './components/CustomizeAgent';

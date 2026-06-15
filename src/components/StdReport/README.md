@@ -87,6 +87,33 @@ import { OrbcafeI18nProvider, CStandardPage } from 'orbcafe-ui';
 
 这样可以避免“筛选逻辑用英文值，界面显示其他语言”导致的混搭。
 
+### Value Help 字段
+
+普通 `CSmartFilter` 字段可以通过 `isValueHelp: true` 切换为 SAP Search Help / F4 Help 风格的 `CValueHelp`：
+
+```tsx
+{
+  id: 'customer',
+  label: 'Customer',
+  type: 'value-help',
+  valueHelp: {
+    dialogTitle: 'Customer Value Help',
+    items: customers,
+    columns: [
+      { field: 'customerId', label: 'Customer' },
+      { field: 'customerName', label: 'Name' },
+      { field: 'country', label: 'Country' },
+    ],
+    getOptionValue: (item) => item.customerId,
+    getOptionLabel: (item) => item.customerName,
+  },
+}
+```
+
+也可以保留 `type: 'text'` 并设置 `isValueHelp: true`。二者都会渲染 `CValueHelp`。单选字段保存 `{ value, operator: 'equals' }`，多选字段保存 `{ value: [...], operator: 'anyOf' }`，因此后端筛选逻辑应按稳定 key 处理，不要依赖本地化 label。
+
+`CValueHelp` 同样会通过 `PSmartFilter` 在 Pad 端生效；在 Planning 中，通过 `usePlanningLayout({ filterFields })` 或 `usePlanningGantt({ filterFields })` 传入同样的字段配置即可。
+
 ---
 
 ## 4. 直接使用 C-Table（灵活模式）

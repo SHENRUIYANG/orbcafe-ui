@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect, useCallback } from 'react';
+import type { DragEndEvent } from '@dnd-kit/core';
 import { CTableProps } from './types';
 import { resolveVariantLayout } from '../../Utils/variantUtils';
 
@@ -50,10 +51,14 @@ export const useCTable = (props: CTableProps) => {
     const [filterText, setFilterText] = useState('');
     const [order, setOrder] = useState<'asc' | 'desc'>(props.order || 'asc');
     const [orderBy, setOrderBy] = useState<string>(props.orderBy || '');
+    const [sortBy, setSortBy] = useState<Array<{ field: string; direction: 'asc' | 'desc' }>>([]);
     const [page, setPage] = useState(props.page || 0);
     const [rowsPerPage, setRowsPerPage] = useState(props.rowsPerPage || 20);
     const [selected, setSelected] = useState<any[]>(props.selected || []);
     const [visibleColumns, setVisibleColumns] = useState<string[]>(
+        props.columns ? props.columns.map((c: any) => c.id) : []
+    );
+    const [columnOrder, setColumnOrder] = useState<string[]>(
         props.columns ? props.columns.map((c: any) => c.id) : []
     );
     const [showSummary, setShowSummary] = useState(props.showSummary || false);
@@ -128,6 +133,43 @@ export const useCTable = (props: CTableProps) => {
         });
     }, [props.columns, getDefaultColumnWidth]);
 
+    // Keep columnOrder in sync with the columns prop: append new ids, drop removed ids.
+    useEffect(() => {
+        setColumnOrder((prev) => {
+            const incomingIds = (props.columns || []).map((c: any) => c.id);
+            const incomingSet = new Set(incomingIds);
+            const kept = prev.filter((id) => incomingSet.has(id));
+            const keptSet = new Set(kept);
+            const appended = incomingIds.filter((id: string) => !keptSet.has(id));
+            const next = [...kept, ...appended];
+            if (next.length === prev.length && next.every((id, idx) => id === prev[idx])) {
+                return prev;
+            }
+            return next;
+        });
+    }, [props.columns]);
+
+    // Memoised columns reordered according to columnOrder. Unknown ids fall back to
+    // the prop order so consumers always see every defined column.
+    const orderedColumns = useMemo(() => {
+        const cols = props.columns || [];
+        if (columnOrder.length === 0) return cols;
+        const byId = new Map(cols.map((c: any) => [c.id, c]));
+        const ordered: any[] = [];
+        const seen = new Set<string>();
+        columnOrder.forEach((id) => {
+            const col = byId.get(id);
+            if (col) {
+                ordered.push(col);
+                seen.add(id);
+            }
+        });
+        cols.forEach((col: any) => {
+            if (!seen.has(col.id)) ordered.push(col);
+        });
+        return ordered;
+    }, [props.columns, columnOrder]);
+
     // Filter Logic
     const filteredRows = useMemo(() => {
         let rows = props.rows || [];
@@ -141,12 +183,28 @@ export const useCTable = (props: CTableProps) => {
         return rows;
     }, [props.rows, filterText]);
 
-    // Sort Logic
+    // Sort Logic — multi-column sort (sortBy) takes precedence over single-column sort.
     const sortedRows = useMemo(() => {
         if (props.onSortChange) return filteredRows;
+        if (sortBy.length > 0) {
+            const arr = [...filteredRows];
+            arr.sort((a, b) => {
+                for (const rule of sortBy) {
+                    const av = a?.[rule.field];
+                    const bv = b?.[rule.field];
+                    if (av == null && bv == null) continue;
+                    if (av == null) return rule.direction === 'asc' ? -1 : 1;
+                    if (bv == null) return rule.direction === 'asc' ? 1 : -1;
+                    if (av < bv) return rule.direction === 'asc' ? -1 : 1;
+                    if (av > bv) return rule.direction === 'asc' ? 1 : -1;
+                }
+                return 0;
+            });
+            return arr;
+        }
         if (!orderBy) return filteredRows;
         return stableSort(filteredRows, getComparator(order, orderBy));
-    }, [filteredRows, order, orderBy, props.onSortChange]);
+    }, [filteredRows, order, orderBy, sortBy, props.onSortChange]);
 
     // Grouping Helper
     const getGroupedRows = useCallback((rows: any[]) => {
@@ -381,6 +439,10 @@ export const useCTable = (props: CTableProps) => {
     };
 
     const handleRequestSort = (property: string) => {
+        // When user single-clicks a header for single-column sort, drop multi-sort rules
+        // so the click is the source of truth.
+        if (sortBy.length > 0) setSortBy([]);
+
         const isAsc = orderBy === property && order === 'asc';
         const isDesc = orderBy === property && order === 'desc';
 
@@ -405,6 +467,20 @@ export const useCTable = (props: CTableProps) => {
             setOrder('asc');
             setOrderBy(property);
         }
+    };
+
+    // Apply a multi-column sort definition. Single-column primitives are cleared so
+    // there is one source of truth for downstream logic and serialised layouts.
+    const applyMultiSort = (rules: Array<{ field: string; direction: 'asc' | 'desc' }>) => {
+        const cleaned = rules.filter((rule) => rule && rule.field);
+        setSortBy(cleaned);
+        if (cleaned.length > 0) {
+            setOrderBy('');
+        }
+    };
+
+    const clearMultiSort = () => {
+        setSortBy([]);
     };
 
     const handleColumnResize = (columnId: string, width: number) => {
@@ -494,13 +570,37 @@ export const useCTable = (props: CTableProps) => {
         });
     };
 
+    const handleColumnReorder = (activeId: string, overId: string) => {
+        if (!activeId || !overId || activeId === overId) return;
+        setColumnOrder((prev) => {
+            const oldIndex = prev.indexOf(activeId);
+            const newIndex = prev.indexOf(overId);
+            if (oldIndex === -1 || newIndex === -1) return prev;
+            const next = [...prev];
+            next.splice(oldIndex, 1);
+            next.splice(newIndex, 0, activeId);
+            return next;
+        });
+    };
+
+    // dnd-kit DragEndEvent handler — adapter that delegates to handleColumnReorder.
+    const handleDndDragEnd = (event: DragEndEvent) => {
+        const activeId = event?.active?.id;
+        const overId = event?.over?.id;
+        if (typeof activeId === 'string' && typeof overId === 'string') {
+            handleColumnReorder(activeId, overId);
+        }
+    };
+
     // Layout Save
     const handleLayoutSave = (_e: any) => {
         if (props.onLayoutSave) {
             props.onLayoutSave({
                 visibleColumns,
+                columnOrder,
                 order,
                 orderBy,
+                sortBy,
                 grouping,
                 columnWidths,
                 showSummary,
@@ -523,8 +623,10 @@ export const useCTable = (props: CTableProps) => {
 
         if (layout) {
             if (layout.visibleColumns) setVisibleColumns(layout.visibleColumns);
+            if (Array.isArray(layout.columnOrder)) setColumnOrder(layout.columnOrder);
             if (layout.order) setOrder(layout.order);
             if (layout.orderBy) setOrderBy(layout.orderBy);
+            if (Array.isArray(layout.sortBy)) setSortBy(layout.sortBy);
             if (layout.grouping) setGrouping(layout.grouping);
             if (layout.columnWidths) setColumnWidths(layout.columnWidths);
             if (layout.showSummary !== undefined) setShowSummary(Boolean(layout.showSummary));
@@ -535,8 +637,10 @@ export const useCTable = (props: CTableProps) => {
     const handleLayoutLoad = (layoutMeta: any) => {
         const layout = layoutMeta?.layoutData || layoutMeta?.layout || layoutMeta || {};
         if (layout.visibleColumns) setVisibleColumns(layout.visibleColumns);
+        if (Array.isArray(layout.columnOrder)) setColumnOrder(layout.columnOrder);
         if (layout.order) setOrder(layout.order);
         if (layout.orderBy !== undefined) setOrderBy(layout.orderBy);
+        if (Array.isArray(layout.sortBy)) setSortBy(layout.sortBy);
         if (layout.grouping) setGrouping(layout.grouping);
         if (layout.columnWidths) setColumnWidths(layout.columnWidths);
         if (layout.showSummary !== undefined) setShowSummary(Boolean(layout.showSummary));
@@ -635,11 +739,17 @@ export const useCTable = (props: CTableProps) => {
 
     return {
         isMobile: false,
-        columns: props.columns,
+        columns: orderedColumns,
         order,
         setOrder,
         orderBy,
         setOrderBy,
+        sortBy,
+        setSortBy,
+        applyMultiSort,
+        clearMultiSort,
+        columnOrder,
+        setColumnOrder,
         filterText,
         setFilterText,
         visibleColumns,
@@ -678,7 +788,8 @@ export const useCTable = (props: CTableProps) => {
         handleSelectAllClick,
         handleClick,
         toggleSummaryColumn,
-        handleDragEnd: () => {},
+        handleDragEnd: handleDndDragEnd,
+        handleColumnReorder,
         handleExport,
         handleContextMenu,
         handleCloseContextMenu,
@@ -697,6 +808,8 @@ export const useCTable = (props: CTableProps) => {
             visibleColumns,
             order,
             orderBy,
+            sortBy,
+            columnOrder,
             grouping,
             columnWidths,
             showSummary,

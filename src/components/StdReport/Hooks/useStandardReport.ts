@@ -20,10 +20,11 @@ export interface ReportColumn {
 export interface ReportFilter {
     id: string;
     label: string;
-    type: 'text' | 'select' | 'date' | 'number' | 'multi-select';
+    type: 'text' | 'select' | 'date' | 'number' | 'multi-select' | 'value-help';
     options?: { label: string; value: any }[];
     placeholder?: string;
     defaultValue?: any;
+    isValueHelp?: boolean;
     [key: string]: any;
 }
 

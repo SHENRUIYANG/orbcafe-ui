@@ -29,7 +29,7 @@ export default function AuthExampleClient() {
 
   const handleLogin = async (payload: AuthLoginPayload) => {
     console.log('Demo login payload', payload);
-    router.push('/std-report');
+    router.push('/');
   };
 
   const handleRegister = async (payload: AuthRegisterPayload) => {

@@ -12,23 +12,19 @@ import {
   PTable,
   type OrbcafeLocale,
   type PWorkloadNavItem,
-  type TreeMenuItem,
 } from 'orbcafe-ui';
 import {
   ClipboardList,
-  LayoutDashboard,
-  Mail,
-  Mic,
   PackageCheck,
   PackageSearch,
   ReceiptText,
   ScanLine,
-  Settings,
   ShieldCheck,
   TabletSmartphone,
   Truck,
   Warehouse,
 } from 'lucide-react';
+import { EXAMPLE_MENU } from './exampleNavigation';
 
 type WorkloadId = 'receiving' | 'picking' | 'packing' | 'dispatch';
 type TaskStatus = 'Queued' | 'Picking' | 'Ready' | 'Blocked';
@@ -300,29 +296,7 @@ export default function PadExampleClient() {
     }));
   }, [tasks]);
 
-  const menuData: TreeMenuItem[] = useMemo(
-    () => [
-      { id: 'dashboard', title: i18nText.dashboard, href: '/', icon: <LayoutDashboard className="w-4 h-4" /> },
-      { id: 'pad', title: i18nText.padDemo, href: '/pad', icon: <TabletSmartphone className="w-4 h-4" /> },
-      { id: 'std-report', title: i18nText.stdReport, href: '/std-report', icon: <ClipboardList className="w-4 h-4" /> },
-      {
-        id: 'operations',
-        title: 'Operations',
-        description: 'Other example routes',
-        icon: <ReceiptText className="w-4 h-4" />,
-        children: [
-          { id: 'kanban', title: i18nText.kanban, href: '/kanban' },
-          { id: 'planning', title: 'Planning Gantt', href: '/planning' },
-          { id: 'pivot-table', title: i18nText.pivotTable, href: '/pivot-table' },
-          { id: 'detail-info', title: i18nText.detailInfo, href: '/detail-info/ID-1' },
-        ],
-      },
-      { id: 'ai-nav', title: i18nText.aiNav, href: '/ai-nav', icon: <Mic className="w-4 h-4" /> },
-      { id: 'messages', title: i18nText.messages, href: '/chat', icon: <Mail className="w-4 h-4" /> },
-      { id: 'settings', title: i18nText.settings, href: '/copilot', icon: <Settings className="w-4 h-4" /> },
-    ],
-    [i18nText],
-  );
+  const menuData = EXAMPLE_MENU;
 
   const zoneOptions = useMemo(
     () => Array.from(new Set(tasks.map((task) => task.zone))).map((zone) => ({ label: zone, value: zone })),

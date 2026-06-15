@@ -38,6 +38,8 @@ It manages:
 - filtered task rows
 - paste-ready props for `CSmartFilter` and `CPlanningGantt`
 - optional `filterAppId`, `filterTableKey`, `filterFields`, `onFilterSearch`, `onFilterVariantLoad`
+- optional `columns` for business-defined table columns
+- optional CTable-style pagination props: `rowsPerPage`, `rowsPerPageOptions`, `page`, `count`, `onPageChange`, and `onRowsPerPageChange`
 - optional `enableRowReorder` to enable/disable visible row drag-reordering globally
 - optional `onTaskReorder` for persisting drag-reordered task rows
 

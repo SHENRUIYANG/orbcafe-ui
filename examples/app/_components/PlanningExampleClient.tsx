@@ -2,19 +2,30 @@
 
 import { useMemo } from 'react';
 import { Box, Button, Stack, Typography } from '@mui/material';
-import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
 import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import { useTheme } from '@mui/material/styles';
-import { LayoutDashboard, Mail, Mic, Settings, Table2 } from 'lucide-react';
 import dayjs from 'dayjs';
 import {
   CAppPageLayout,
   CPlanningLayout,
   CPageTransition,
+  type PlanningGanttColumn,
   type PlanningTaskRecord,
-  type TreeMenuItem,
   usePlanningLayout,
 } from 'orbcafe-ui';
+import { EXAMPLE_MENU } from './exampleNavigation';
+
+type DemoPlanningTaskRecord = PlanningTaskRecord & {
+  orderNo?: string;
+  operation?: string;
+  operationText?: string;
+  resourceGroup?: string;
+  workCenterLabel?: string;
+  capacity?: string;
+  load?: string;
+  quantity?: string;
+  product?: string;
+};
 
 const HeaderBrandLogo = () => {
   const theme = useTheme();
@@ -44,8 +55,8 @@ const OPERATION_TEMPLATES = [
 
 const ORDER_COLORS = ['#2563eb', '#0f766e', '#dc2626', '#7c3aed', '#d97706'] as const;
 
-const createPlanningTasks = (): PlanningTaskRecord[] => {
-  const tasks: PlanningTaskRecord[] = [];
+const createPlanningTasks = (): DemoPlanningTaskRecord[] => {
+  const tasks: DemoPlanningTaskRecord[] = [];
   const orderCount = 5;
   const startAnchor = dayjs('2026-06-01T08:00:00');
 
@@ -65,6 +76,15 @@ const createPlanningTasks = (): PlanningTaskRecord[] => {
     tasks.push({
       id: `P-ORDER-${orderNo}`,
       code: orderCode,
+      orderNo: orderCode,
+      operation: '',
+      operationText: productName,
+      resourceGroup: 'PRODUCTION',
+      workCenterLabel: 'PS1 - Production Scheduling',
+      capacity: 'CAP-PS1',
+      load: 'Total order',
+      quantity: `${OPERATION_TEMPLATES.length * 240}/${OPERATION_TEMPLATES.length * 240}`,
+      product: productName,
       title: productName,
       project: fgCode,
       workCenter: 'PS1',
@@ -85,6 +105,15 @@ const createPlanningTasks = (): PlanningTaskRecord[] => {
       tasks.push({
         id: `P-${orderNo}-${sequenceNo}`,
         code: sequenceNo,
+        orderNo: orderCode,
+        operation: sequenceNo,
+        operationText: `${sequenceNo} ${step.title}`,
+        resourceGroup: step.workCenter,
+        workCenterLabel: `${step.workCenter.slice(0, 3)}-${String(stepIndex + 1).padStart(2, '0')} - ${step.title} Line 01`,
+        capacity: `CAP-${step.workCenter.slice(0, 3)}-${String(stepIndex + 1).padStart(2, '0')}`,
+        load: `${step.durationHours.toFixed(1)}h`,
+        quantity: '240/240',
+        product: productName,
         title: step.title,
         project: productName,
         workCenter: step.workCenter,
@@ -104,11 +133,27 @@ const createPlanningTasks = (): PlanningTaskRecord[] => {
   return tasks;
 };
 
-const planningTasks: PlanningTaskRecord[] = createPlanningTasks();
+const planningTasks: DemoPlanningTaskRecord[] = createPlanningTasks();
+
+const planningColumns: PlanningGanttColumn[] = [
+  { id: 'orderNo', label: 'Order', width: 150 },
+  { id: 'operation', label: 'Operation', width: 130 },
+  { id: 'operationText', label: 'Activity', width: 250 },
+  { id: 'resourceGroup', label: 'Resource Group', width: 160 },
+  { id: 'workCenterLabel', label: 'Work Center', width: 280 },
+  { id: 'capacity', label: 'Capacity', width: 150 },
+  { id: 'load', label: 'Load', width: 120 },
+  { id: 'quantity', label: 'Quantity', width: 130 },
+  { id: 'startDate', label: 'Start', width: 150 },
+  { id: 'endDate', label: 'End', width: 150 },
+  { id: 'status', label: 'Status', width: 140 },
+  { id: 'product', label: 'Product', width: 280 },
+];
 
 export default function PlanningExampleClient() {
   const planning = usePlanningLayout({
     tasks: planningTasks,
+    columns: planningColumns,
     defaultScale: 'week',
     defaultSelectedTaskId: planningTasks[0]?.id,
     filterAppId: 'planning-gantt-filter',
@@ -116,20 +161,7 @@ export default function PlanningExampleClient() {
     enableRowReorder: true,
   });
 
-  const menuData: TreeMenuItem[] = useMemo(
-    () => [
-      { id: 'dashboard', title: 'Login', href: '/', icon: <LayoutDashboard className="w-4 h-4" /> },
-      { id: 'std-report', title: 'Standard Report', href: '/std-report', icon: <LayoutDashboard className="w-4 h-4" /> },
-      { id: 'kanban', title: 'Kanban', href: '/kanban', icon: <LayoutDashboard className="w-4 h-4" /> },
-      { id: 'planning', title: 'Planning Gantt', href: '/planning', icon: <CalendarMonthOutlinedIcon fontSize="small" /> },
-      { id: 'pivot-table', title: 'Pivot Table', href: '/pivot-table', icon: <Table2 className="w-4 h-4" /> },
-      { id: 'detail-info', title: 'Detail Info', href: '/detail-info/ID-1', icon: <LayoutDashboard className="w-4 h-4" /> },
-      { id: 'ai-nav', title: 'AI Nav', href: '/ai-nav', icon: <Mic className="w-4 h-4" /> },
-      { id: 'messages', title: 'Messages', href: '/messages', icon: <Mail className="w-4 h-4" /> },
-      { id: 'settings', title: 'Settings', href: '/settings', icon: <Settings className="w-4 h-4" /> },
-    ],
-    [],
-  );
+  const menuData = EXAMPLE_MENU;
 
   return (
     <CAppPageLayout

@@ -8,8 +8,6 @@ import FactCheckOutlinedIcon from '@mui/icons-material/FactCheckOutlined';
 import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import RocketLaunchOutlinedIcon from '@mui/icons-material/RocketLaunchOutlined';
 import TaskAltOutlinedIcon from '@mui/icons-material/TaskAltOutlined';
-import ViewKanbanOutlinedIcon from '@mui/icons-material/ViewKanbanOutlined';
-import { LayoutDashboard, Mail, Mic, Settings, Table2 } from 'lucide-react';
 import {
   CAppPageLayout,
   CKanbanBoard,
@@ -17,8 +15,8 @@ import {
   useKanbanBoard,
   type KanbanBucketDefinition,
   type KanbanCardRecord,
-  type TreeMenuItem,
 } from 'orbcafe-ui';
+import { EXAMPLE_MENU } from './exampleNavigation';
 
 const bucketDefinitions: KanbanBucketDefinition[] = [
   {
@@ -215,20 +213,7 @@ export default function KanbanExampleClient() {
     [criticalCount, doneCount, reviewCount, totalCards],
   );
 
-  const menuData: TreeMenuItem[] = useMemo(
-    () => [
-      { id: 'dashboard', title: 'Dashboard', href: '/', icon: <LayoutDashboard className="w-4 h-4" /> },
-      { id: 'std-report', title: 'Standard Report', href: '/std-report', icon: <LayoutDashboard className="w-4 h-4" /> },
-      { id: 'kanban', title: 'Kanban', href: '/kanban', icon: <ViewKanbanOutlinedIcon fontSize="small" /> },
-      { id: 'planning', title: 'Planning Gantt', href: '/planning', icon: <Table2 className="w-4 h-4" /> },
-      { id: 'pivot-table', title: 'Pivot Table', href: '/pivot-table', icon: <Table2 className="w-4 h-4" /> },
-      { id: 'detail-info', title: 'Detail Info', href: '/detail-info/TASK-203?source=kanban&backHref=/kanban', icon: <LayoutDashboard className="w-4 h-4" /> },
-      { id: 'ai-nav', title: 'AI Nav', href: '/ai-nav', icon: <Mic className="w-4 h-4" /> },
-      { id: 'messages', title: 'Messages', href: '/messages', icon: <Mail className="w-4 h-4" /> },
-      { id: 'settings', title: 'Settings', href: '/settings', icon: <Settings className="w-4 h-4" /> },
-    ],
-    [],
-  );
+  const menuData = EXAMPLE_MENU;
 
   return (
     <CAppPageLayout

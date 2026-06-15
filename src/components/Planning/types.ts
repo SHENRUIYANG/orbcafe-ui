@@ -50,6 +50,12 @@ export interface CPlanningGanttProps {
   columns?: PlanningGanttColumn[];
   scale?: PlanningGanttScale;
   onScaleChange?: (scale: PlanningGanttScale) => void;
+  page?: number;
+  rowsPerPage?: number;
+  rowsPerPageOptions?: number[];
+  count?: number;
+  onPageChange?: (page: number) => void;
+  onRowsPerPageChange?: (rowsPerPage: number) => void;
   timelineStart?: string;
   timelineEnd?: string;
   selectedTaskId?: string;

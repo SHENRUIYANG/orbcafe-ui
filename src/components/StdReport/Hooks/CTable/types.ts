@@ -78,6 +78,7 @@ export interface CTableHeadProps {
     visibleColumns: string[];
     order: 'asc' | 'desc';
     orderBy: string;
+    sortBy?: Array<{ field: string; direction: 'asc' | 'desc' }>;
     onRequestSort: (property: string) => void;
     onContextMenu?: (event: React.MouseEvent, columnId: string) => void;
     selectionMode?: 'single' | 'multiple';
@@ -89,6 +90,7 @@ export interface CTableHeadProps {
     onSelectAllClick?: (event: React.ChangeEvent<HTMLInputElement>) => void;
     columnWidths?: Record<string, number>;
     onColumnResize?: (columnId: string, width: number) => void;
+    enableColumnReorder?: boolean;
 }
 
 export interface CTableBodyProps {
