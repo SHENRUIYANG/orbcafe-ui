@@ -124,6 +124,13 @@ export function TreeMenu({
       {items.map((item) => {
         const isExpanded = currentExpandedItems.has(item.id) || item.isExpanded
         const hasChildren = item.children && item.children.length > 0
+        const rootContentOffset = 56
+        const nestedContentOffset = rootContentOffset + Math.max(0, level - 1) * 8
+        const itemPaddingLeft = level === 0
+          ? 12
+          : hasChildren
+            ? nestedContentOffset - 24
+            : nestedContentOffset
         
         // 判断是否选中：
         // 1. 完全匹配 appurl 或 href
@@ -146,9 +153,15 @@ export function TreeMenu({
             <Button
               variant="ghost"
               className={cn(
-                'w-full justify-start gap-2 h-auto py-2 relative overflow-hidden group',
-                `ml-${level * 4}`,
-                isActive 
+                'w-full justify-start h-auto py-2 relative overflow-hidden group',
+                level > 0 ? 'gap-1' : 'gap-2',
+                hasChildren && isExpanded && !isActive
+                  ? (isDark
+                      ? 'bg-white/5 text-gray-100 hover:bg-white/8'
+                      : 'bg-slate-50/70 text-slate-800 hover:bg-slate-100/80')
+                  : '',
+                level >= 2 ? 'min-h-9 py-1.5 rounded-md' : level > 0 ? 'min-h-10 rounded-lg' : 'rounded-lg',
+                isActive
                   ? (isDark
                       ? 'bg-transparent text-[#90caf9] hover:bg-gray-800/35'
                       : 'bg-transparent text-[#1976d2] hover:bg-gray-100/60')
@@ -156,6 +169,10 @@ export function TreeMenu({
                       ? 'hover:bg-gray-800/50 text-gray-300'
                       : 'hover:bg-gray-100/50 text-gray-700')
               )}
+              style={{
+                paddingLeft: `${itemPaddingLeft}px`,
+                paddingRight: '10px',
+              }}
               onClick={() => handleItemClick(item)}
             >
               {hasChildren && (
@@ -172,13 +189,9 @@ export function TreeMenu({
                 </div>
               )}
               
-              {!hasChildren && (
-                <div className="w-4 h-4 flex-shrink-0" />
-              )}
-              
               {item.icon && (
                 <div className={cn(
-                  "flex-shrink-0 transition-colors duration-200",
+                  "flex h-4 w-4 flex-shrink-0 items-center justify-center transition-colors duration-200",
                   isActive
                     ? (isDark ? 'text-[#90caf9]' : 'text-[#1976d2]')
                     : (isDark
@@ -216,7 +229,7 @@ export function TreeMenu({
                   isExpanded ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
                 )}
               >
-                <div className="overflow-hidden">
+                <div className={cn("overflow-hidden", isExpanded && "pt-1")}>
                   <TreeMenu
                     items={item.children!}
                     onItemClick={onItemClick}

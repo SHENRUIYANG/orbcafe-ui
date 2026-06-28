@@ -3,12 +3,14 @@
 import type { TreeMenuItem } from 'orbcafe-ui';
 import {
   Bot,
+  ChartNoAxesCombined,
   ClipboardList,
   LayoutDashboard,
   MessageSquare,
   PanelRight,
   TabletSmartphone,
   Table2,
+  TreePine,
 } from 'lucide-react';
 
 export const buildExampleMenu = (detailInfoHref = '/detail-info/ID-1'): TreeMenuItem[] => [
@@ -27,8 +29,16 @@ export const buildExampleMenu = (detailInfoHref = '/detail-info/ID-1'): TreeMenu
     icon: <Table2 className="w-4 h-4" />,
     children: [
       { id: 'std-report', title: 'Standard Report', href: '/std-report' },
-      { id: 'pivot-table', title: 'Pivot Table', href: '/pivot-table' },
-      { id: 'detail-info', title: 'Detail Info', href: detailInfoHref },
+      { id: 'ctree', title: 'CTree', href: '/ctree', icon: <TreePine className="w-4 h-4" /> },
+      {
+        id: 'analytics',
+        title: 'Analytics',
+        icon: <ChartNoAxesCombined className="w-4 h-4" />,
+        children: [
+          { id: 'pivot-table', title: 'Pivot Table', href: '/pivot-table' },
+          { id: 'detail-info', title: 'Detail Info', href: detailInfoHref },
+        ],
+      },
     ],
   },
   {
