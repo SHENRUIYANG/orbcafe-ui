@@ -5,6 +5,8 @@
 - If using `CPlanningGantt` directly, pair it with `CSmartFilter` in the same page unless user explicitly requests no filter bar.
 - Keep SmartFilter outside the Gantt card and use it for search/filtering instead of a selected-task banner.
 - If Planning filters need business-object lookup (work center/resource/material/order/customer), configure the SmartFilter field with `type: 'value-help'` or `isValueHelp: true`; do not put lookup dialogs inside the Gantt header.
+- For Value Help fields, follow the shared F4 contract: mouse click and `F4` open the dialog, manual input validates by default, and selected keys must be stable IDs.
+- Use `selectedItems` or preload selected records when variants reload saved Value Help keys.
 - Use one `tasks: PlanningTaskRecord[]` array as the source for both the left table and right Gantt timeline; do not create separate table-only rows and timeline-only rows.
 - Validate every task's `id`, `title`, `startDate`, and `endDate`; bars cannot render or align predictably when dates are missing, invalid, or reversed.
 - Treat `startDate` and `endDate` as the Gantt positioning contract. They directly control each bar's start, end, and duration across `hour`, `day`, `week`, and `month` scales.
@@ -21,3 +23,6 @@
 - Do not rely on default table columns for business pages. Pass project `columns` explicitly so upgrades do not reintroduce fallback labels.
 - Remember that `columns` only controls left-table display. It does not create bars; bars come from task records with valid `startDate` and `endDate`.
 - Value Help selections are filter keys; keep them stable and compare them against task fields such as `workCenter`, `project`, `owner.name`, or custom fields in the hook's filtering layer.
+- Use `appId` and `tableKey` as the shared persistence namespace. Do not use deprecated `filterAppId` / `filterTableKey` in new code.
+- Confirm `smartFilterProps.layoutRefs` points to the current Gantt layout id; otherwise variant load can restore filters but not the table/Gantt layout.
+- For persistence testing, save table/Gantt Layout, then save SmartFilter Variant, then reload and apply the variant.

@@ -12,6 +12,8 @@
   - `orbcafe-kanban-detail`
 - Build app shell/header/navigation/i18n/layout transitions:
   - `orbcafe-layout-navigation`
+- Build Navigation Island pin/favorites, menu nesting, fixed/floating nav mode, or TreeMenu behavior:
+  - `orbcafe-layout-navigation`, and read `references/navigation-island.md` inside that skill.
 - Build pivot analytics or voice navigation:
   - `orbcafe-pivot-ainav`
 - Build iPad/pad touch workflow shell, touch table, keypad writeback, or orientation adaptation:
@@ -22,6 +24,8 @@
   - `orbcafe-auth-workflow`
 - Build project planning, production planning, table + Gantt, timeline scale, or planning SmartFilter:
   - `orbcafe-planning-gantt`
+- Build hierarchy tree, BOM/cost tree, organization tree, tree table, or split tree/detail page:
+  - Route through this router, then use `CTreeComp` directly with Layout/DetailInfo as needed. There is no separate Tree skill yet.
 
 ## Route by keywords
 
@@ -31,7 +35,7 @@
   - Graph+Detail+Agent skill
 - `kanban`, `bucket`, `board`, `泳道`, `拖拽卡片`, `卡片流转`, `看板`:
   - Kanban+Detail skill
-- `导航`, `壳层`, `header`, `menu`, `locale`, `主题切换`, `markdown`, `transition`:
+- `导航`, `壳层`, `header`, `menu`, `locale`, `主题切换`, `markdown`, `transition`, `navigation island`, `pin`, `favorites`, `收藏`, `置顶`, `floating nav`:
   - Layout+Navigation skill
 - `tabelle`, `filterleiste`, `standardbericht`, `navigationsbereich`, `detailseite`, `sprache wechseln`, `barcode scanner`, `tablet`:
   - Use glossary mapping first, then route by matched canonical API
@@ -45,6 +49,8 @@
   - Auth Workflow skill
 - `甘特图`, `gantt`, `计划表`, `项目计划`, `生产计划`, `project plan`, `production plan`:
   - Planning Gantt skill
+- `树`, `树表`, `层级`, `hierarchy`, `tree`, `BOM`, `cost tree`, `organization tree`, `CTreeComp`:
+  - Tree component contract in `module-contracts.md` and `ctree.md`; combine with Layout+Navigation for shell and DetailInfo for rich detail panes.
 
 ## Cross-skill composition
 
@@ -57,3 +63,4 @@
 - Auth + app shell: Auth usually owns the examples root page; attach Layout+Navigation only when embedding inside an authenticated shell.
 - Planning Gantt + StdReport controls: choose Planning Gantt skill first, then reuse StdReport CSmartFilter/CTable contracts where needed.
 - Value Help + StdReport/Planning/Pad: keep the target page skill primary, then apply `CValueHelp` through `CSmartFilter`/`PSmartFilter` field config instead of a standalone modal unless the user explicitly asks for an independent field.
+- Tree + DetailInfo: use `CTreeComp` for the hierarchy/split pane, then pass a `CDetailInfoPage` or custom detail node through the `detail` prop.

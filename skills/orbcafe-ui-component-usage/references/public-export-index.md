@@ -14,12 +14,26 @@ Use only exports reachable from `src/index.ts`.
   - `Kanban/*`
   - `PageLayout/*`
   - `PivotTable/*`
+  - `Pad/*`:
+    - `PAppPageLayout`
+    - `PNavIsland`
+    - `PWorkloadNav`
+    - `PSmartFilter`
+    - `PTable`
+    - `PNumericKeypad`
+    - `PBarcodeScanner`
+    - `PTouchCard`
+    - `usePadLayout`
+    - `usePadRecordEditor`
   - `AINav/*`
   - `AgentUI/*`:
     - `AgentPanel`
     - `StdChat`
     - `CopilotChat`
+    - `AIBrowserGlow`
     - `type ChatMessage`
+    - `type AgentPanelStatus`
+    - `type AIBrowserGlowColors`
     - `type AgentUICardHooks`
     - `type AgentUICardHookEvent`
     - `type AgentUICardAction`
@@ -39,6 +53,11 @@ Use only exports reachable from `src/index.ts`.
     - `type PlanningTaskRecord`
     - `type PlanningGanttColumn`
     - `type PlanningGanttScale`
+  - `Tree/*`:
+    - `CTreeComp`
+    - `type CTreeCompNode`
+    - `type CTreeCompColumn`
+    - `type CTreeCompPaneMode`
 - Shared:
   - `i18n/*`
   - `CValueHelp`
@@ -55,3 +74,4 @@ Use only exports reachable from `src/index.ts`.
 
 - Do not import from `src/components/...` in consumer apps.
 - Do not instruct usage of Atoms/Molecules internals unless they are exported via package entry.
+- Do not tell consumers to import `CTable`, `CValueHelp`, `CPlanningGantt`, `AgentPanel`, or `CTreeComp` from their source directories; all are package-entry APIs.

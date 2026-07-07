@@ -1,6 +1,6 @@
 ---
 name: orbcafe-ui-component-usage
-description: Route ORBCAFE UI requests to the correct module skill and enforce the official Next.js examples-based integration baseline. Use when requests are ambiguous, cross-module, mention CValueHelp/F4/value help/search help lookup, or when prior attempts had "no effect"; classify to StdReport, Graph+Detail+Agent, Kanban+Detail, Layout+Navigation, Pivot+AINav, Pad Workflow, or AgentUI Chat and require canonical Next/examples, dependency, startup, and verification checks.
+description: Route ORBCAFE UI requests to the correct module skill and teach developers the current public component contracts. Use when requests are ambiguous, cross-module, mention CValueHelp/F4/value help/search help lookup, CTreeComp hierarchy trees, Planning Gantt, Auth, AgentUI AIPanel/Glow, or when prior attempts had "no effect"; classify to StdReport, Graph+Detail+Agent, Kanban+Detail, Layout+Navigation, Pivot+AINav, Pad Workflow, AgentUI Chat, Auth, Planning, or Tree and require canonical Next/examples, dependency, startup, and verification checks.
 ---
 
 # ORBCAFE UI Router
@@ -14,8 +14,9 @@ description: Route ORBCAFE UI requests to the correct module skill and enforce t
 5. 只加载目标模块所需 references，不加载无关内容。
 6. 使用 `references/public-export-index.md` 约束导入边界。
 7. 如果请求涉及 F4/value help/search help/值帮助/主数据选择，读取 `references/value-help.md` 并把它作为 StdReport、Planning、Pad SmartFilter 的共享字段契约。
-8. 如果当前项目不是 Next.js，不要顺手按 Vite/CRA 改写范式；先指出它偏离 ORBCAFE 标准路线，并建议对齐 Next examples。
-9. 输出模块决策、最小可运行代码、验收步骤、排障步骤。
+8. 如果请求涉及层级结构、BOM、成本树、组织树、可展开树表或树+详情，读取 `references/ctree.md`，按 `CTreeComp` 契约处理，并对照 `examples/app/_components/CTreeExampleClient.tsx`。
+9. 如果当前项目不是 Next.js，不要顺手按 Vite/CRA 改写范式；先指出它偏离 ORBCAFE 标准路线，并建议对齐 Next examples。
+10. 输出模块决策、最小可运行代码、验收步骤、排障步骤。
 
 ## Canonical Baseline (Required)
 
@@ -74,6 +75,20 @@ Before writing code, explicitly state one of:
 
 - `Hook-first`: 该模块以公开 hook 为主入口。
 - `Component-first`: 该模块以公开组件 + callbacks 为主入口。
+
+## Developer Teaching Checklist
+
+When teaching a developer how to use ORBCAFE controls:
+
+1. Name the canonical component and the module skill before showing code.
+2. Import only from `orbcafe-ui`; never from `src/components/...` in a consuming app.
+3. Start from the official example path and state which file proves the pattern.
+4. Show the minimal data shape first, then the component usage.
+5. Explain the state owner:
+   - hook-first modules own state through public hooks such as `useStandardReport`, `usePlanningLayout`, or `usePadLayout`.
+   - component-first modules use public components plus callbacks, such as `AgentPanel`, `StdChat`, `CopilotChat`, or `CTreeComp`.
+6. Include verification for visible rendering, user interaction, and persistence/callbacks.
+7. Include the first three "no effect" checks: missing providers/Tailwind source, wrong import path, and skipped root `npm run build` in local ORBCAFE repo flows.
 
 ## Examples-First Rules
 

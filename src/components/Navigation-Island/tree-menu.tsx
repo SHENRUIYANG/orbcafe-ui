@@ -35,7 +35,7 @@
 
 import React, { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
-import { ChevronRight } from 'lucide-react'
+import { ChevronRight, Pin } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { Button } from './button'
 import { useOrbcafeI18n } from '../../i18n'
@@ -50,6 +50,7 @@ export interface TreeMenuItem {
   appurl?: string
   children?: TreeMenuItem[]
   isExpanded?: boolean
+  pinnable?: boolean
   data?: any
 }
 
@@ -61,6 +62,9 @@ interface TreeMenuProps {
   expandedIds?: Set<string>
   onToggleExpand?: (id: string) => void
   colorMode?: 'light' | 'dark'
+  enablePinning?: boolean
+  pinnedIds?: Set<string>
+  onTogglePin?: (item: TreeMenuItem) => void
 }
 
 export function TreeMenu({
@@ -71,6 +75,9 @@ export function TreeMenu({
   expandedIds,
   onToggleExpand,
   colorMode = 'light',
+  enablePinning = false,
+  pinnedIds,
+  onTogglePin,
 }: TreeMenuProps) {
   const { t } = useOrbcafeI18n()
   const isDark = colorMode === 'dark'
@@ -137,6 +144,8 @@ export function TreeMenu({
         // 2. 或者是当前路径的父路径 (可选，视需求而定，这里先做精确匹配)
         const targetUrl = item.appurl || item.href
         const isActive = mounted && targetUrl ? pathname === targetUrl : false
+        const isPinned = pinnedIds?.has(item.id) ?? false
+        const canPinItem = enablePinning && item.pinnable !== false && Boolean(targetUrl) && !hasChildren
         
         return (
           <div key={item.id} className="tree-menu-item relative">
@@ -171,7 +180,7 @@ export function TreeMenu({
               )}
               style={{
                 paddingLeft: `${itemPaddingLeft}px`,
-                paddingRight: '10px',
+                paddingRight: canPinItem ? '34px' : '10px',
               }}
               onClick={() => handleItemClick(item)}
             >
@@ -221,6 +230,32 @@ export function TreeMenu({
                 )}
               </div>
             </Button>
+
+            {canPinItem && onTogglePin && (
+              <button
+                type="button"
+                aria-label={isPinned ? t('navigation.pin.remove') : t('navigation.pin.add')}
+                aria-pressed={isPinned}
+                title={isPinned ? t('navigation.pin.remove') : t('navigation.pin.add')}
+                onClick={(event) => {
+                  event.preventDefault()
+                  event.stopPropagation()
+                  onTogglePin(item)
+                }}
+                className={cn(
+                  'absolute right-1 top-1/2 z-20 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-md transition-colors duration-150',
+                  isPinned
+                    ? (isDark
+                        ? 'bg-[#90caf9]/14 text-[#90caf9] hover:bg-[#90caf9]/22'
+                        : 'bg-[#1976d2]/10 text-[#1976d2] hover:bg-[#1976d2]/16')
+                    : (isDark
+                        ? 'text-gray-500 hover:bg-gray-800/70 hover:text-gray-200'
+                        : 'text-gray-400 hover:bg-gray-100 hover:text-gray-700')
+                )}
+              >
+                <Pin className={cn('h-3.5 w-3.5', isPinned && 'fill-current')} />
+              </button>
+            )}
             
             {hasChildren && (
               <div
@@ -237,6 +272,9 @@ export function TreeMenu({
                     expandedIds={expandedIds}
                     onToggleExpand={onToggleExpand}
                     colorMode={colorMode}
+                    enablePinning={enablePinning}
+                    pinnedIds={pinnedIds}
+                    onTogglePin={onTogglePin}
                   />
                 </div>
               </div>

@@ -153,6 +153,7 @@ export interface PAppPageLayoutProps {
   containerSx?: SxProps<Theme>;
   user?: CAppHeaderUser;
   onSearch?: (query: string) => void;
+  onSearchAdd?: () => void;
   defaultNavigationOpen?: boolean;
   navOpen?: boolean;
   onNavOpenChange?: (open: boolean) => void;

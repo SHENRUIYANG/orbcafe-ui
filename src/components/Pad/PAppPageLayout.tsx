@@ -35,6 +35,7 @@ export const PAppPageLayout = ({
   containerSx,
   user,
   onSearch,
+  onSearchAdd,
   defaultNavigationOpen,
   navOpen,
   onNavOpenChange,
@@ -234,6 +235,7 @@ export const PAppPageLayout = ({
             onUserLogout={onUserLogout}
             userMenuItems={userMenuItems}
             onSearch={onSearch}
+            onSearchAdd={onSearchAdd}
             leftSlot={headerLeftSlot}
             rightSlot={headerRightSlot}
           />

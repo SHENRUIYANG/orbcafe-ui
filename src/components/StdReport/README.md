@@ -110,7 +110,7 @@ import { OrbcafeI18nProvider, CStandardPage } from 'orbcafe-ui';
 }
 ```
 
-也可以保留 `type: 'text'` 并设置 `isValueHelp: true`。二者都会渲染 `CValueHelp`。单选字段保存 `{ value, operator: 'equals' }`，多选字段保存 `{ value: [...], operator: 'anyOf' }`，因此后端筛选逻辑应按稳定 key 处理，不要依赖本地化 label。
+也可以保留 `type: 'text'` 并设置 `isValueHelp: true`。二者都会渲染 `CValueHelp`。默认允许用户手工输入 key，并按当前 `items` / `selectedItems` 校验；不合法时显示错误且不会回写筛选值。如果业务必须强制选择候选项，在 `valueHelp` 中设置 `allowManualInput: false`。单选字段保存 `{ value, operator: 'equals' }`，多选字段保存 `{ value: [...], operator: 'anyOf' }`，因此后端筛选逻辑应按稳定 key 处理，不要依赖本地化 label。
 
 `CValueHelp` 同样会通过 `PSmartFilter` 在 Pad 端生效；在 Planning 中，通过 `usePlanningLayout({ filterFields })` 或 `usePlanningGantt({ filterFields })` 传入同样的字段配置即可。
 

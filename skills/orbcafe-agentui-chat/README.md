@@ -2,10 +2,11 @@
 
 ## 目标
 
-这个 skill 用于在 ORBCAFE 项目里快速、稳定地实现聊天相关 UI：
+这个 skill 用于在 ORBCAFE 项目里快速、稳定地实现 AgentUI / 聊天相关 UI。术语必须先对齐：`AIPanel` 是没有 chat input 的 AI 对话窗口；`Chat` 是包含输入区的聊天体验。
 
-- `AgentPanel`
-- `StdChat`
+- `AgentPanel`（`AIPanel`：无 chat input 的 AI 对话窗口）
+- `AIBrowserGlow`
+- `StdChat`（`Chat`：消息区 + 输入区）
 - `CopilotChat`
 - 消息 streaming
 - 卡片事件 hooks
@@ -19,18 +20,28 @@
 
 ## 场景到组件
 
-- 整页 agent 工作台：`AgentPanel`
-- 展示型面板（无输入框）：`AgentPanel`（默认 `showInput=false`）
-- 标准聊天页：`StdChat`
+- `AIPanel` / AI 对话窗口（无 chat input）：`AgentPanel`（默认 `showInput=false`）
+- 整页 agent 展示工作台：`AgentPanel`
+- `Chat` / 标准聊天页（包含输入区）：`StdChat`
+- `AgentPanel` 下方悬浮输入栏：这是外层组合模式，不要把输入栏算进 `AIPanel` 本体
 - 悬浮 copilot：`CopilotChat` + 自己的外壳
+- AI 工作时浏览器四周柔光：业务层渲染 `AIBrowserGlow`
 
 ## AgentPanel 状态化能力
 
 - `agentStatus`：`idle | running | success | error | pending`
 - 状态会联动：
   - header 状态点和文案
-  - 四边跑马灯边框
-  - 彩色光晕
+  - 面板状态视觉
+  - 需要浏览器边框柔光时，业务层单独渲染 `AIBrowserGlow`
+
+## AIBrowserGlow 边界
+
+- `AIBrowserGlow` 是独立基础组件，不属于 `AgentPanel` 内部效果。
+- 默认 RGB 三色柔光，可用 `colors={[a, b, c]}` 覆盖。
+- 默认 `zIndex` 很高；只有宿主 overlay 遮挡时才覆盖。
+- 只在 AI 工作时让 `active={true}`，结束或中断时改回 `false`。
+- 不要把浏览器四周柔光塞回 `AgentPanel`，避免展示型 panel 和全局 AI 运行态耦合。
 
 ## 推荐示例
 
@@ -40,7 +51,9 @@
 
 ## 常见“没效果”排查
 
-- 输入框没出现：检查是否传了 `showInput={false}`（AgentPanel 默认就是 false）。
+- 输入框没出现：如果场景是 `AIPanel`，这是预期；`AgentPanel` 默认就是 `showInput=false`。如果场景是 `Chat`，应使用 `StdChat` 或显式组合外部输入栏。
+- 浏览器柔光没出现：检查是否渲染了 `AIBrowserGlow active={isResponding}`，不要只改 `AgentPanel agentStatus`。
+- 浏览器柔光一直不消失：检查 success/error/cancel/stop 分支是否都把 `active` 状态改回 `false`。
 - stream 不动：检查 assistant message 是否设置了 `isStreaming: true`。
 - stream 结束状态没恢复：检查 `onMessageStreamingComplete` 是否回写。
 - 卡片点击无回调：检查是否正确传入 `cardHooks.onCardEvent`。

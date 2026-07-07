@@ -10,9 +10,9 @@
         "examples/app/_components/StdReportExampleClient.tsx",
         "examples/app/std-report/page.tsx"
       ],
-      "minimal_state": ["metadata.id/id/appId", "filters", "optional value-help field config", "pagination", "rows", "total"],
-      "verify": ["filter applies", "page changes", "variant/layout persists", "quick actions fire", "Value Help opens with mouse/F4 and selected key appears in filter params"],
-      "common_failure_modes": ["missing identity", "no npm run build in file dependency flow", "wrong import path", "Value Help implemented outside SmartFilter so variants do not persist selected keys"]
+      "minimal_state": ["metadata.id/id/appId", "filters", "optional value-help field config with stable keys/F4/manual validation/remote search", "pagination", "rows", "total"],
+      "verify": ["filter applies", "page changes", "variant/layout persists", "quick actions fire", "Value Help opens with mouse/F4", "legal manual input commits", "illegal manual input shows an error", "selected key appears in filter params"],
+      "common_failure_modes": ["missing identity", "no npm run build in file dependency flow", "wrong import path", "Value Help implemented outside SmartFilter so variants do not persist selected keys", "saved Value Help key has no selectedItems/items record and reloads as a raw key only"]
     },
     {
       "name": "GraphDetailAgent",
@@ -29,12 +29,12 @@
       "name": "LayoutNavigation",
       "mode": "hook-first",
       "public_entries": ["CAppPageLayout", "CAppHeader", "usePageLayout", "NavigationIsland", "TreeMenu", "useNavigationIsland", "CPageTransition"],
-      "preferred_pattern": "examples/app/layout.tsx + providers.tsx shell first",
+      "preferred_pattern": "examples/app/layout.tsx + providers.tsx shell first; use CAppPageLayout as the primary integration point for navigation pin/favorites and fixed/floating mode; use direct NavigationIsland + useNavigationIsland only for custom shells",
       "public_hooks": ["usePageLayout", "useNavigationIsland"],
-      "canonical_examples": ["examples/app/layout.tsx", "examples/app/providers.tsx"],
-      "minimal_state": ["menu data", "user/menu actions", "locale/theme mounted safety"],
-      "verify": ["nav works", "locale switches", "user menu works", "no hydration mismatch"],
-      "common_failure_modes": ["unsafe usePathname on first render", "provider stack missing", "wrong client/server boundary"]
+      "canonical_examples": ["examples/app/layout.tsx", "examples/app/providers.tsx", "examples/app/_components/exampleNavigation.tsx"],
+      "minimal_state": ["menu data", "stable TreeMenuItem ids for expansion and pinned-item persistence", "optional navigationMode/onNavigationModeChange", "optional pinnedNavigationItemIds/onPinnedNavigationItemIdsChange", "user/menu actions", "locale/theme mounted safety"],
+      "verify": ["nav works", "search and expand/collapse work", "leaf pin/unpin moves item into the top pinned section", "localStorage or controlled pinned state persists after reload/state update", "fixed/floating mode toggles through shell props", "locale switches", "user menu works", "no hydration mismatch"],
+      "common_failure_modes": ["unsafe usePathname on first render", "provider stack missing", "wrong client/server boundary", "trying to pin group nodes instead of leaf nodes with href or appurl", "changing menu ids and breaking pinned-item persistence", "implementing a page-local favorites list instead of using NavigationIsland"]
     },
     {
       "name": "PivotAINav",
@@ -61,13 +61,13 @@
     {
       "name": "AgentUI",
       "mode": "component-first",
-      "public_entries": ["AgentPanel", "StdChat", "CopilotChat", "ChatMessage", "AgentUICardHooks"],
-      "preferred_pattern": "AgentPanel/StdChat for embedded chat, CopilotChat inside custom floating shell",
+      "public_entries": ["AgentPanel", "StdChat", "CopilotChat", "AIBrowserGlow", "ChatMessage", "AgentPanelStatus", "AIBrowserGlowColors", "AgentUICardHooks"],
+      "preferred_pattern": "AgentPanel with showInput=false for AIPanel/no-input AI dialogue, StdChat for input-included chat, CopilotChat inside custom floating shell, AIBrowserGlow controlled by business AI running state",
       "public_hooks": [],
-      "canonical_examples": ["examples/app/chat/ChatExampleClient.tsx", "examples/app/copilot/CopilotExampleClient.tsx"],
-      "minimal_state": ["messages", "isResponding", "assistant isStreaming", "copilot isOpen/corner/panelSize/panelPosition"],
-      "verify": ["user send appends", "assistant streams", "streaming flag clears", "card hooks emit", "copilot shell interactions work"],
-      "common_failure_modes": ["treating CopilotChat as full floating system", "forgetting streaming lifecycle", "coupling to internal renderers", "resize observer overwriting shell state"]
+      "canonical_examples": ["examples/app/aipanel/AIPanelExampleClient.tsx", "examples/app/chat/ChatExampleClient.tsx", "examples/app/copilot/CopilotExampleClient.tsx"],
+      "minimal_state": ["messages", "isResponding", "assistant isStreaming", "agentStatus when using AgentPanel", "AIBrowserGlow active/colors/zIndex state", "copilot isOpen/corner/panelSize/panelPosition"],
+      "verify": ["user send appends", "assistant streams", "streaming flag clears", "card hooks emit", "AIBrowserGlow active toggles with AI running state", "AIBrowserGlow active turns off on success/error/cancel/stop", "copilot shell interactions work"],
+      "common_failure_modes": ["calling input-included chat AIPanel", "treating CopilotChat as full floating system", "forgetting streaming lifecycle", "coupling to internal renderers", "putting browser-edge glow inside AgentPanel instead of using AIBrowserGlow", "assuming AgentPanel.onHeaderPointerDown stores position instead of handing dragging to the outer shell", "resize observer overwriting shell state"]
     },
     {
       "name": "PadWorkflow",
@@ -87,20 +87,31 @@
       "preferred_pattern": "useAuthPage + CAuthPage at examples/app/page.tsx for login entry",
       "public_hooks": ["useAuthPage"],
       "canonical_examples": ["examples/app/_components/AuthExampleClient.tsx", "examples/app/page.tsx"],
-      "minimal_state": ["mode login/register/forgot", "login username/password/remember", "register name/email/password/confirmPassword/acceptedTerms", "forgot email"],
-      "verify": ["fake login submit succeeds", "fake register submit succeeds", "fake forgot-password submit succeeds"],
-      "common_failure_modes": ["treating demo callbacks as real authentication", "provider stack missing", "wrong import path"]
+      "minimal_state": ["mode login/register/forgot", "loading state from useAuthPage", "login username/password/remember", "register name/email/password/confirmPassword/acceptedTerms", "forgot email", "optional logo/copy"],
+      "verify": ["fake or real login submit succeeds", "register submit succeeds", "forgot-password submit succeeds", "mode switches", "callback promise toggles loading and clears it"],
+      "common_failure_modes": ["treating demo callbacks as real authentication", "claiming ORBCAFE UI owns tokens/sessions/cookies instead of the host auth service", "provider stack missing", "wrong import path"]
     },
     {
       "name": "Planning",
       "mode": "hook-first",
       "public_entries": ["CPlanningLayout", "CPlanningGantt", "usePlanningLayout", "usePlanningGantt", "PlanningTaskRecord", "PlanningGanttColumn", "PlanningGanttScale"],
-      "preferred_pattern": "usePlanningLayout + CPlanningLayout as default combo; usePlanningGantt + CSmartFilter + CPlanningGantt for custom composition; filterFields can use shared CValueHelp through type value-help/isValueHelp; extraTools on the left of standard controls; task rows drag-reorder from table or Gantt timeline and persist through onTaskReorder when needed; row drag-reordering is controlled globally by enableRowReorder and per task by PlanningTaskRecord.reorderable",
+      "preferred_pattern": "usePlanningLayout + CPlanningLayout as default combo; usePlanningGantt + CSmartFilter + CPlanningGantt for custom composition; appId/tableKey are the shared persistence identity; filterFields can use shared CValueHelp through type value-help/isValueHelp; extraTools on the left of standard controls; task rows drag-reorder from table or Gantt timeline and persist through onTaskReorder when needed; row drag-reordering is controlled globally by enableRowReorder and per task by PlanningTaskRecord.reorderable",
       "public_hooks": ["usePlanningLayout", "usePlanningGantt"],
       "canonical_examples": ["examples/app/_components/PlanningExampleClient.tsx", "examples/app/planning/page.tsx"],
-      "minimal_state": ["tasks id/title/startDate/endDate/progress/status/owner", "optional task reorderable", "scale hour/day/week/month", "selectedTaskId", "SmartFilter filters", "optional filterFields with value-help", "extraTools", "optional enableRowReorder", "optional onTaskReorder"],
-      "verify": ["table rows align with Gantt bars", "scale switch changes timeline density", "row/bar click updates selected task", "row drag-reorder works from both table and Gantt panes", "SmartFilter changes table and Gantt rows", "Value Help filters select stable keys and affect visible table/Gantt rows when configured", "custom buttons render left of standard controls"],
-      "common_failure_modes": ["invalid date strings", "endDate before startDate", "missing app shell route", "rendering CPlanningGantt alone and forgetting CSmartFilter", "replacing standard controls instead of adding extraTools", "allowing group header rows to drag or reordering tasks across different groups", "ignoring enableRowReorder false or dragging rows with reorderable false"]
+      "minimal_state": ["tasks id/title/startDate/endDate/progress/status/owner", "shared appId/tableKey for variants and layouts", "optional task reorderable", "scale hour/day/week/month", "selectedTaskId", "SmartFilter filters", "optional filterFields with value-help", "extraTools", "optional enableRowReorder", "optional onTaskReorder"],
+      "verify": ["table rows align with Gantt bars", "scale switch changes timeline density", "row/bar click updates selected task", "row drag-reorder works from both table and Gantt panes", "SmartFilter changes table and Gantt rows", "Value Help filters select stable keys and affect visible table/Gantt rows when configured", "layout save/load works through the same appId/tableKey", "custom buttons render left of standard controls"],
+      "common_failure_modes": ["invalid date strings", "endDate before startDate", "missing app shell route", "rendering CPlanningGantt alone and forgetting CSmartFilter", "replacing standard controls instead of adding extraTools", "allowing group header rows to drag or reordering tasks across different groups", "ignoring enableRowReorder false or dragging rows with reorderable false", "using deprecated filterAppId/filterTableKey for new code", "selected Value Help keys do not match task fields or filtering logic"]
+    },
+    {
+      "name": "Tree",
+      "mode": "component-first",
+      "public_entries": ["CTreeComp", "CTreeCompNode", "CTreeCompColumn", "CTreeCompPaneMode"],
+      "preferred_pattern": "CTreeComp for hierarchy tree/table surfaces with optional split detail pane; combine with CAppPageLayout for shell and CDetailInfoPage or custom detail renderers when the right pane needs rich business details",
+      "public_hooks": [],
+      "canonical_examples": ["examples/app/_components/CTreeExampleClient.tsx", "examples/app/ctree/page.tsx"],
+      "minimal_state": ["nodes with stable id/label/children", "columns", "selectedNodeId/onNodeSelect", "expandedNodeIds/onExpandedNodeIdsChange", "optional filterConfig/searchQuery/tableAppId/tableKey", "optional detail renderer"],
+      "verify": ["expand/collapse keeps child rows aligned", "row selection updates detail or callback", "search/filter changes visible tree rows", "split/tree/detail pane mode controls work", "filter/table identity is stable when configured"],
+      "common_failure_modes": ["duplicate node ids", "passing flat table data when children hierarchy is needed", "using a separate detail route when split tree/detail was requested", "forgetting min pane width constraints in dense pages", "importing from src/components/Tree/CTreeComp instead of orbcafe-ui"]
     }
   ],
   "shared_rules": [

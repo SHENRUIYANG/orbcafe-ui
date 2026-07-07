@@ -24,7 +24,7 @@ Use it before reading a module README in detail.
 - Minimal state contract:
   - report identity: `metadata.id` / `id` / `appId`
   - filters state
-  - optional Value Help field config (`type: 'value-help'` or `isValueHelp: true`)
+  - optional Value Help field config (`type: 'value-help'` or `isValueHelp: true`) with stable keys, F4 open, manual-input validation, and optional remote `onSearch`
   - pagination state
   - rows + total
 - Canonical example:
@@ -35,12 +35,13 @@ Use it before reading a module README in detail.
   - page changes
   - variant/layout persists
   - quick actions fire
-  - Value Help opens with mouse/F4 and selected key appears in filter params when configured
+  - Value Help opens with mouse/F4, legal manual input commits, illegal manual input shows an error, and selected key appears in filter params when configured
 - Common failure modes:
   - missing identity
   - no `npm run build` in local `file:..` flow
   - wrong import path
   - Value Help implemented outside SmartFilter so variants do not persist selected keys
+  - saved Value Help key has no `selectedItems`/`items` record and reloads as a raw key only
 
 ## 2. GraphReport / DetailInfo / CustomizeAgent
 
@@ -90,19 +91,29 @@ Use it before reading a module README in detail.
   - `CPageTransition`
 - Preferred pattern:
   - `examples/app/layout.tsx` + `providers.tsx` shell first
+  - use `CAppPageLayout` as the primary integration point for navigation pin/favorites and fixed/floating mode
+  - use direct `NavigationIsland + useNavigationIsland` only for custom shells
 - Hooks:
   - Public hooks exist:
     - `usePageLayout`
     - `useNavigationIsland`
 - Minimal state contract:
   - menu data
+  - stable `TreeMenuItem.id` values for expansion and pinned-item persistence
+  - optional `navigationMode` / `onNavigationModeChange`
+  - optional `pinnedNavigationItemIds` / `onPinnedNavigationItemIdsChange`
   - user/menu actions
   - locale/theme mounted safety
 - Canonical example:
   - `examples/app/layout.tsx`
   - `examples/app/providers.tsx`
+  - `examples/app/_components/exampleNavigation.tsx`
 - Verify:
   - nav works
+  - search and expand/collapse work
+  - leaf pin/unpin moves item into the top pinned section
+  - localStorage or controlled pinned state persists after reload/state update
+  - fixed/floating mode toggles through shell props
   - locale switches
   - user menu works
   - no hydration mismatch
@@ -110,6 +121,9 @@ Use it before reading a module README in detail.
   - `usePathname` used unsafely on first render
   - provider stack missing
   - client/server route boundary incorrect
+  - trying to pin group nodes instead of leaf nodes with `href` or `appurl`
+  - changing menu ids and breaking pinned-item persistence
+  - implementing a page-local favorites list instead of using `NavigationIsland`
 
 ## 4. PivotTable / AINav
 
@@ -181,10 +195,14 @@ Use it before reading a module README in detail.
   - `AgentPanel`
   - `StdChat`
   - `CopilotChat`
+  - `AIBrowserGlow`
   - `type ChatMessage`
+  - `type AgentPanelStatus`
+  - `type AIBrowserGlowColors`
   - `type AgentUICardHooks`
 - Preferred pattern:
-  - full page chat: `AgentPanel` or `StdChat`
+  - AIPanel / no-input AI dialogue window: `AgentPanel` with default `showInput=false`
+  - Chat / input-included chat surface: `StdChat`
   - floating helper: `CopilotChat` inside custom shell
 - Hooks:
   - No public custom hook
@@ -192,9 +210,12 @@ Use it before reading a module README in detail.
 - Minimal state contract:
   - `messages`
   - `isResponding`
+  - optional `agentStatus` for `AgentPanel`
+  - optional `AIBrowserGlow active/colors/zIndex`
   - assistant `isStreaming`
   - for copilot shell: `isOpen`, `corner`, `panelSize`, `panelPosition`
 - Canonical example:
+  - `examples/app/aipanel/AIPanelExampleClient.tsx`
   - `examples/app/chat/ChatExampleClient.tsx`
   - `examples/app/copilot/CopilotExampleClient.tsx`
 - Verify:
@@ -202,11 +223,16 @@ Use it before reading a module README in detail.
   - assistant streams
   - `onMessageStreamingComplete` clears streaming flag
   - card actions emit `cardHooks.onCardEvent`
+  - `AIBrowserGlow active` toggles with business AI running state
+  - `AIBrowserGlow active` turns off on success/error/cancel/stop
   - copilot open/close/drag/resize works when shell exists
 - Common failure modes:
+  - calling an input-included chat surface `AIPanel`
   - treating `CopilotChat` as full floating system
   - forgetting `isStreaming` lifecycle
   - coupling to internal renderers
+  - putting browser-edge glow inside `AgentPanel` instead of using `AIBrowserGlow`
+  - assuming `AgentPanel.onHeaderPointerDown` stores position instead of handing dragging to the outer shell
   - resize observer overwriting shell resize state
 
 ## 7. Pad Workflow
@@ -267,9 +293,11 @@ Use it before reading a module README in detail.
     - `useAuthPage`
 - Minimal state contract:
   - mode: login/register/forgot
+  - loading state from `useAuthPage`
   - login username/password/remember
   - register name/email/password/confirmPassword/acceptedTerms
   - forgot email
+  - optional `logo` and `copy`
 - Canonical example:
   - `examples/app/_components/AuthExampleClient.tsx`
   - `examples/app/page.tsx`
@@ -277,10 +305,12 @@ Use it before reading a module README in detail.
   - login fake submit shows success
   - register fake submit shows success
   - forgot password fake submit shows success
+  - callback promise toggles loading and clears it
 - Common failure modes:
   - treating demo callbacks as real authentication
   - not wrapping app with MUI providers
   - importing from internal component paths
+  - claiming ORBCAFE UI owns tokens/sessions/cookies instead of the host auth service
 
 ## 9. Planning
 
@@ -306,6 +336,7 @@ Use it before reading a module README in detail.
 - Minimal state contract:
   - tasks with id/title/startDate/endDate/progress/status/owner
   - optional `filterFields` for keyword/date/status/value-help filters
+  - shared `appId` / `tableKey` for SmartFilter variants and table/Gantt layouts
   - scale hour/day/week/month
   - selected task id
   - optional `enableRowReorder`
@@ -320,6 +351,7 @@ Use it before reading a module README in detail.
   - row drag-reorder works from both table and Gantt panes and keeps both panes aligned
   - SmartFilter search/filter changes both table rows and Gantt rows
   - Value Help filters select stable keys and affect the visible table/Gantt rows
+  - layout save/load works through the same `appId` / `tableKey`
   - custom toolbar buttons appear left of standard controls
 - Common failure modes:
   - invalid date strings
@@ -329,8 +361,45 @@ Use it before reading a module README in detail.
   - replacing built-in controls instead of adding buttons through `extraTools`
   - allowing group header rows to drag or reordering tasks across different groups
   - ignoring `enableRowReorder={false}` or dragging rows with `reorderable: false`
+  - using deprecated `filterAppId` / `filterTableKey` for new code
+  - selected Value Help keys do not match task fields or filtering logic
 
-## 10. Shared Rules For AI
+## 10. Tree
+
+- Public entry:
+  - `CTreeComp`
+  - `type CTreeCompNode`
+  - `type CTreeCompColumn`
+  - `type CTreeCompPaneMode`
+- Preferred pattern:
+  - `CTreeComp` for hierarchy tree/table surfaces with optional split detail pane.
+  - Use `CAppPageLayout` for shell and pass `CDetailInfoPage` or a custom detail renderer through `detail` when the right pane needs rich business details.
+- Hooks:
+  - No public custom hook
+  - Use controlled props + callbacks: `selectedNodeId`, `onNodeSelect`, `expandedNodeIds`, `onExpandedNodeIdsChange`
+- Minimal state contract:
+  - `nodes: CTreeCompNode[]` with stable `id`, `label`, optional `children`, and business fields
+  - optional `columns: CTreeCompColumn[]`
+  - optional selected id and expanded node ids for controlled mode
+  - optional `filterConfig`, `searchQuery`, `tableAppId`, and `tableKey` when the tree table needs SmartFilter/table identity
+  - optional `detail` node or render function for split mode
+- Canonical example:
+  - `examples/app/_components/CTreeExampleClient.tsx`
+  - `examples/app/ctree/page.tsx`
+- Verify:
+  - expand/collapse keeps child rows aligned
+  - row selection updates the detail pane or `onNodeSelect`
+  - search/filter changes visible tree rows
+  - split/tree/detail pane mode controls work
+  - persisted table/filter identity is stable when `filterConfig`/`tableAppId` are used
+- Common failure modes:
+  - duplicate node ids
+  - passing a flat table when `children` is needed for hierarchy
+  - rendering a separate detail route when the requested UX is a split tree/detail page
+  - forgetting `minTreePaneWidth` / `minDetailPaneWidth` constraints in dense business pages
+  - importing from `src/components/Tree/CTreeComp` instead of `orbcafe-ui`
+
+## 11. Shared Rules For AI
 
 - Import only from `orbcafe-ui`.
 - Prefer the canonical example before inventing a new composition.

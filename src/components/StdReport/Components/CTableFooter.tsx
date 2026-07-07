@@ -1,5 +1,6 @@
 
 import { TableFooter, TableRow, TableCell } from '@mui/material';
+import { tableGroupControlCellSx, tableSelectionCellSx } from './ctableControlSx';
 
 export const CTableFooter = (props: any) => {
     const { visibleColumns, summaryRow, selectionMode, grouping = [] } = props;
@@ -11,8 +12,8 @@ export const CTableFooter = (props: any) => {
     return (
         <TableFooter sx={{ position: 'sticky', bottom: 0, zIndex: props.zIndex, bgcolor: 'background.paper' }}>
             <TableRow>
-                {isSelectionEnabled && <TableCell padding="checkbox" sx={{ bgcolor: 'background.paper' }} />}
-                {hasGrouping && <TableCell padding="checkbox" sx={{ bgcolor: 'background.paper', width: 44 }} />}
+                {isSelectionEnabled && <TableCell padding="checkbox" sx={{ ...tableSelectionCellSx, bgcolor: 'background.paper' }} />}
+                {hasGrouping && <TableCell padding="checkbox" sx={{ ...tableGroupControlCellSx, bgcolor: 'background.paper' }} />}
                 {visibleColumns.map((colId: string) => (
                     <TableCell 
                         key={colId} 

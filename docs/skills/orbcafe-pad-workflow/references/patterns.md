@@ -52,23 +52,23 @@ export default function PadApp() {
         <Box sx={{ flex: '0 0 360px', width: 360 }}>
           {/* Side panel for tools (Keypad, Scanner trigger) */}
           <Stack spacing={2}>
-            <Paper sx={{ p: 2 }}>
-              <PNumericKeypad
-                title="Enter Quantity"
-                value=""
-                onChange={() => {}}
-                onSubmit={() => {}}
-              />
-            </Paper>
+             <Paper sx={{ p: 2 }}>
+               <PNumericKeypad 
+                 title="Enter Quantity" 
+                 value="" 
+                 onChange={() => {}} 
+                 onSubmit={() => {}} 
+               />
+             </Paper>
           </Stack>
         </Box>
       </Box>
 
       {/* Global Dialogs */}
-      <PBarcodeScanner
-        open={scannerOpen}
-        onClose={() => setScannerOpen(false)}
-        onDetected={(res) => console.log(res)}
+      <PBarcodeScanner 
+        open={scannerOpen} 
+        onClose={() => setScannerOpen(false)} 
+        onDetected={(res) => console.log(res)} 
       />
     </PAppPageLayout>
   );
@@ -96,7 +96,7 @@ export default function PadApp() {
   cardSubtitleFields={['id', 'zone']}
   cardActionSlot={(row) => <Chip label={row.status} />}
   renderCardFooter={(row) => <Typography>Planned: {row.qty}</Typography>}
-
+  
   // Standard features still work:
   selectionMode="multiple"
   quickEdit={{ enabled: true, editableFields: ['qty'], primaryKeys: ['id'], onSubmit: handleEdit }}

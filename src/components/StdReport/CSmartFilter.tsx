@@ -74,6 +74,7 @@ import { CValueHelp } from '../Molecules/CValueHelp';
 import type { CValueHelpProps, CValueHelpRecord } from '../Molecules/CValueHelp';
 import dayjs, { type Dayjs } from 'dayjs';
 import { useOrbcafeI18n } from '../../i18n';
+import { TABLE_CONTROL_BUTTON_SIZE, TABLE_CONTROL_ICON_SIZE } from './Components/ctableControlSx';
 
 // --- Types ---
 
@@ -772,14 +773,15 @@ export const CSmartFilter = ({
                         boxShadow: 2,
                         border: '1px solid',
                         borderColor: 'divider',
-                        width: 20,
-                        height: 20,
+                        width: TABLE_CONTROL_BUTTON_SIZE,
+                        height: TABLE_CONTROL_BUTTON_SIZE,
+                        minWidth: TABLE_CONTROL_BUTTON_SIZE,
                         minHeight: 0,
                         p: 0,
                         '&:hover': { bgcolor: 'background.paper' } 
                     }}
                 >
-                    {isExpanded ? <KeyboardArrowUpIcon sx={{ fontSize: 16 }} color="action" /> : <KeyboardArrowDownIcon sx={{ fontSize: 16 }} color="action" />}
+                    {isExpanded ? <KeyboardArrowUpIcon sx={{ fontSize: TABLE_CONTROL_ICON_SIZE }} color="action" /> : <KeyboardArrowDownIcon sx={{ fontSize: TABLE_CONTROL_ICON_SIZE }} color="action" />}
                 </IconButton>
             </Box>
         </Paper>

@@ -37,7 +37,9 @@ It manages:
 - `CSmartFilter` filter state
 - filtered task rows
 - paste-ready props for `CSmartFilter` and `CPlanningGantt`
-- optional `filterAppId`, `filterTableKey`, `filterFields`, `onFilterSearch`, `onFilterVariantLoad`
+- optional `appId` and `tableKey` so SmartFilter variants and table layouts share one persistence scope
+- optional `filterAppId` and `filterTableKey` for legacy SmartFilter-only callers
+- optional `filterFields`, `onFilterSearch`, `onFilterVariantLoad`
 - optional `columns` for business-defined table columns
 - optional CTable-style pagination props: `rowsPerPage`, `rowsPerPageOptions`, `page`, `count`, `onPageChange`, and `onRowsPerPageChange`
 - optional `enableRowReorder` to enable/disable visible row drag-reordering globally
@@ -52,6 +54,8 @@ import { CPlanningGantt, CSmartFilter, usePlanningGantt } from 'orbcafe-ui';
 
 const planning = usePlanningGantt({
   tasks,
+  appId: 'planning-gantt-demo',
+  tableKey: 'planning',
   defaultScale: 'week',
 });
 

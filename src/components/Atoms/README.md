@@ -4,8 +4,8 @@
 
 ## 使用方式
 
-- 从包入口直接引入：`import { ... } from 'orbcafe-ui'`
-- 原子组件应保持无业务状态，作为 Molecules/StdReport 等上层组件的拼装基础。
+- Atoms 是内部实现细节，**不从包入口（`orbcafe-ui`）导出**，不要指导消费方 `import { ... } from 'orbcafe-ui'` 来获取这里的组件。
+- 原子组件应保持无业务状态，仅作为 `Molecules`/`StdReport` 等上层组件内部的拼装基础；如果某个上层组件需要暴露某个 Atom 能力，应在上层组件的 `index.ts` 中显式重新导出，而不是让消费方直接依赖 `Atoms/*`。
 
 ## 说明
 

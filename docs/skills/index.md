@@ -17,6 +17,7 @@ Published AI-agent skills and reference files.
 
 ## orbcafe-stdreport-workflow
 
+- [README.md](orbcafe-stdreport-workflow/README.md)
 - [SKILL.md](orbcafe-stdreport-workflow/SKILL.md)
 - [references/component-selection.md](orbcafe-stdreport-workflow/references/component-selection.md)
 - [references/guardrails.md](orbcafe-stdreport-workflow/references/guardrails.md)
@@ -24,6 +25,7 @@ Published AI-agent skills and reference files.
 
 ## orbcafe-planning-gantt
 
+- [README.md](orbcafe-planning-gantt/README.md)
 - [SKILL.md](orbcafe-planning-gantt/SKILL.md)
 - [references/guardrails.md](orbcafe-planning-gantt/references/guardrails.md)
 - [references/recipes.md](orbcafe-planning-gantt/references/recipes.md)

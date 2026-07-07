@@ -60,6 +60,9 @@ export interface CValueHelpProps<TRecord extends CValueHelpRecord = CValueHelpRe
   noResultsText?: string;
   loading?: boolean;
   clearable?: boolean;
+  allowManualInput?: boolean;
+  validateManualInput?: boolean;
+  manualInputErrorText?: string;
   selectedItems?: TRecord[];
   displayValue?: string;
   getOptionValue?: (item: TRecord) => CValueHelpPrimitive;
@@ -117,6 +120,9 @@ export const CValueHelp = <TRecord extends CValueHelpRecord = CValueHelpRecord,>
   noResultsText = 'No matching values',
   loading = false,
   clearable = true,
+  allowManualInput = true,
+  validateManualInput = true,
+  manualInputErrorText = 'Enter a valid value.',
   selectedItems = [],
   displayValue,
   getOptionValue = defaultGetOptionValue,
@@ -126,15 +132,22 @@ export const CValueHelp = <TRecord extends CValueHelpRecord = CValueHelpRecord,>
   onSearch,
   disabled,
   InputProps,
+  onFocus,
+  onBlur,
   onKeyDown,
+  error,
+  helperText,
   ...textFieldProps
 }: CValueHelpProps<TRecord>) => {
   const isMultiple = mode === 'multiple';
   const [open, setOpen] = useState(false);
+  const [fieldFocused, setFieldFocused] = useState(false);
   const [query, setQuery] = useState('');
   const [remoteItems, setRemoteItems] = useState<TRecord[] | null>(null);
   const [internalLoading, setInternalLoading] = useState(false);
   const [pendingValues, setPendingValues] = useState<CValueHelpPrimitive[]>(() => normalizeValue(value));
+  const [manualInputValue, setManualInputValue] = useState('');
+  const [manualInputError, setManualInputError] = useState('');
 
   const tableColumns = useMemo<CValueHelpColumn<TRecord>[]>(() => {
     return columns && columns.length > 0 ? columns : (DEFAULT_COLUMNS as CValueHelpColumn<TRecord>[]);
@@ -152,12 +165,19 @@ export const CValueHelp = <TRecord extends CValueHelpRecord = CValueHelpRecord,>
   }, [getOptionValue, items, remoteItems, selectedItems]);
 
   const selectedValues = useMemo(() => normalizeValue(value), [value]);
+  const manualDisplayValue = useMemo(() => selectedValues.map(String).join(', '), [selectedValues]);
 
   useEffect(() => {
     if (!open) {
       setPendingValues(selectedValues);
     }
   }, [open, selectedValues]);
+
+  useEffect(() => {
+    if (!fieldFocused && !manualInputError) {
+      setManualInputValue(manualDisplayValue);
+    }
+  }, [fieldFocused, manualDisplayValue, manualInputError]);
 
   const locallyFilteredItems = useMemo(() => {
     const trimmed = query.trim().toLowerCase();
@@ -222,6 +242,8 @@ export const CValueHelp = <TRecord extends CValueHelpRecord = CValueHelpRecord,>
     const nextValue = isMultiple ? [] : null;
     onChange?.(nextValue, isMultiple ? [] : null);
     setPendingValues([]);
+    setManualInputValue('');
+    setManualInputError('');
   };
 
   const handleToggle = (item: TRecord) => {
@@ -249,6 +271,7 @@ export const CValueHelp = <TRecord extends CValueHelpRecord = CValueHelpRecord,>
     } else {
       onChange?.(pendingValues[0] ?? null, selection[0] ?? null);
     }
+    setManualInputError('');
     setOpen(false);
   };
 
@@ -258,22 +281,100 @@ export const CValueHelp = <TRecord extends CValueHelpRecord = CValueHelpRecord,>
       handleOpen();
       return;
     }
+    if (event.key === 'Enter' && allowManualInput) {
+      const valid = commitManualInput(manualInputValue, true);
+      if (!valid) {
+        event.preventDefault();
+        return;
+      }
+    }
     onKeyDown?.(event);
+  };
+
+  const validateManualValues = (nextValues: CValueHelpPrimitive[]) => {
+    if (!validateManualInput) return true;
+    return nextValues.every((nextValue) => knownItems.has(valueKey(nextValue)));
+  };
+
+  const commitManualInput = (nextInput: string, showError: boolean) => {
+    if (isMultiple) {
+      const nextValues = nextInput
+        .split(/[,;\n]/)
+        .map((item) => item.trim())
+        .filter(Boolean);
+      if (nextValues.length === 0) {
+        setManualInputError('');
+        onChange?.([], []);
+        return true;
+      }
+      if (!validateManualValues(nextValues)) {
+        if (showError) setManualInputError(manualInputErrorText);
+        return false;
+      }
+
+      setManualInputError('');
+      const selection = nextValues
+        .map((nextValue) => knownItems.get(valueKey(nextValue)))
+        .filter((item): item is TRecord => Boolean(item));
+      onChange?.(nextValues, selection);
+      return true;
+    }
+
+    const nextValue = nextInput.trim();
+    if (!nextValue) {
+      setManualInputError('');
+      onChange?.(null, null);
+      return true;
+    }
+    if (!validateManualValues([nextValue])) {
+      if (showError) setManualInputError(manualInputErrorText);
+      return false;
+    }
+
+    setManualInputError('');
+    onChange?.(nextValue, knownItems.get(valueKey(nextValue)) ?? null);
+    return true;
+  };
+
+  const handleManualInputChange: TextFieldProps['onChange'] = (event) => {
+    if (!allowManualInput) return;
+
+    const nextInput = event.target.value;
+    setManualInputValue(nextInput);
+    setManualInputError('');
+    commitManualInput(nextInput, false);
   };
 
   const busy = loading || internalLoading;
   const hasValue = selectedValues.length > 0;
+  const showManualDraft = allowManualInput && (fieldFocused || Boolean(manualInputError));
+  const fieldValue = showManualDraft ? manualInputValue : selectedDisplayValue;
 
   return (
     <>
       <TextField
         {...textFieldProps}
         disabled={disabled}
-        value={selectedDisplayValue}
+        value={fieldValue}
+        error={Boolean(manualInputError) || error}
+        helperText={manualInputError || helperText}
+        onChange={handleManualInputChange}
+        onFocus={(event) => {
+          setFieldFocused(true);
+          setManualInputValue(manualDisplayValue);
+          onFocus?.(event);
+        }}
+        onBlur={(event) => {
+          if (allowManualInput) {
+            commitManualInput(manualInputValue, true);
+          }
+          setFieldFocused(false);
+          onBlur?.(event);
+        }}
         onKeyDown={handleFieldKeyDown}
         InputProps={{
           ...InputProps,
-          readOnly: true,
+          readOnly: !allowManualInput,
           endAdornment: (
             <InputAdornment position="end">
               {busy ? <CircularProgress size={18} /> : null}

@@ -7,12 +7,23 @@ import type { CPlanningGanttProps, PlanningGanttScale, PlanningTaskRecord } from
 
 export interface UsePlanningGanttOptions {
   tasks: PlanningTaskRecord[];
+  appId?: string;
+  tableKey?: string;
   defaultScale?: PlanningGanttScale;
   defaultSelectedTaskId?: string;
   initialFilters?: Record<string, FilterValue>;
   filterFields?: FilterField[];
+  /**
+   * @deprecated Use appId so SmartFilter variants and table layouts share one persistence namespace.
+   */
   filterAppId?: string;
+  /**
+   * @deprecated Use tableKey so SmartFilter variants and table layouts share one persistence scope.
+   */
   filterTableKey?: string;
+  serviceUrl?: CSmartFilterProps['serviceUrl'];
+  variantService?: CSmartFilterProps['variantService'];
+  layout?: CPlanningGanttProps['layout'];
   columns?: CPlanningGanttProps['columns'];
   page?: CPlanningGanttProps['page'];
   rowsPerPage?: CPlanningGanttProps['rowsPerPage'];
@@ -24,6 +35,8 @@ export interface UsePlanningGanttOptions {
   onFilterVariantLoad?: CSmartFilterProps['onVariantLoad'];
   enableRowReorder?: CPlanningGanttProps['enableRowReorder'];
   onTaskReorder?: CPlanningGanttProps['onTaskReorder'];
+  onLayoutIdChange?: CPlanningGanttProps['onLayoutIdChange'];
+  onLayoutSave?: CPlanningGanttProps['onLayoutSave'];
 }
 
 export interface UsePlanningGanttResult {
@@ -34,9 +47,25 @@ export interface UsePlanningGanttResult {
   filters: Record<string, FilterValue>;
   setFilters: (filters: Record<string, FilterValue>) => void;
   filteredTasks: PlanningTaskRecord[];
-  smartFilterProps: Pick<CSmartFilterProps, 'fields' | 'filters' | 'onFilterChange' | 'onVariantLoad' | 'onSearch' | 'appId' | 'tableKey'>;
+  smartFilterProps: Pick<
+    CSmartFilterProps,
+    | 'fields'
+    | 'filters'
+    | 'onFilterChange'
+    | 'onVariantLoad'
+    | 'onSearch'
+    | 'appId'
+    | 'tableKey'
+    | 'currentLayoutId'
+    | 'layoutRefs'
+    | 'variantService'
+    | 'serviceUrl'
+  >;
   planningGanttProps: Pick<
     CPlanningGanttProps,
+    | 'appId'
+    | 'tableKey'
+    | 'serviceUrl'
     | 'tasks'
     | 'columns'
     | 'scale'
@@ -51,6 +80,11 @@ export interface UsePlanningGanttResult {
     | 'onTaskSelect'
     | 'enableRowReorder'
     | 'onTaskReorder'
+    | 'layout'
+    | 'layoutVariant'
+    | 'layoutVariantLoadKey'
+    | 'onLayoutIdChange'
+    | 'onLayoutSave'
   >;
 }
 
@@ -81,12 +115,17 @@ const DEFAULT_FILTER_FIELDS: FilterField[] = [
 
 export const usePlanningGantt = ({
   tasks,
+  appId,
+  tableKey,
   defaultScale = 'week',
   defaultSelectedTaskId,
   initialFilters,
   filterFields,
-  filterAppId = 'planning-gantt-filter',
-  filterTableKey = 'planning',
+  filterAppId,
+  filterTableKey,
+  serviceUrl,
+  variantService,
+  layout,
   columns,
   page,
   rowsPerPage,
@@ -98,9 +137,15 @@ export const usePlanningGantt = ({
   onFilterVariantLoad,
   enableRowReorder,
   onTaskReorder,
+  onLayoutIdChange,
+  onLayoutSave,
 }: UsePlanningGanttOptions): UsePlanningGanttResult => {
+  const resolvedAppId = appId ?? filterAppId ?? 'planning-gantt';
+  const resolvedTableKey = tableKey ?? filterTableKey ?? 'planning';
   const [scale, setScale] = useState<PlanningGanttScale>(defaultScale);
   const [selectedTaskId, setSelectedTaskId] = useState(defaultSelectedTaskId ?? tasks[0]?.id ?? '');
+  const [currentLayoutId, setCurrentLayoutId] = useState('');
+  const [layoutVariantLoadRequest, setLayoutVariantLoadRequest] = useState<{ key: number; variant: any } | null>(null);
   const [filters, setFilters] = useState<Record<string, FilterValue>>({
     ...DEFAULT_FILTERS,
     ...initialFilters,
@@ -149,21 +194,51 @@ export const usePlanningGantt = ({
     setSelectedTaskId(task.id);
   }, []);
 
+  const handleLayoutIdChange = useCallback((layoutId: string) => {
+    setCurrentLayoutId(layoutId);
+    onLayoutIdChange?.(layoutId);
+  }, [onLayoutIdChange]);
+
+  const handleFilterVariantLoad = useCallback<CSmartFilterProps['onVariantLoad']>((variant) => {
+    setLayoutVariantLoadRequest((current) => ({
+      key: (current?.key ?? 0) + 1,
+      variant,
+    }));
+    onFilterVariantLoad?.(variant);
+  }, [onFilterVariantLoad]);
+
   const smartFilterProps = useMemo<UsePlanningGanttResult['smartFilterProps']>(
     () => ({
-      appId: filterAppId,
-      tableKey: filterTableKey,
+      appId: resolvedAppId,
+      tableKey: resolvedTableKey,
       fields: filterFields ?? DEFAULT_FILTER_FIELDS,
       filters,
       onFilterChange: setFilters,
-      onVariantLoad: onFilterVariantLoad ?? (() => {}),
+      onVariantLoad: handleFilterVariantLoad,
       onSearch: onFilterSearch ?? (() => {}),
+      currentLayoutId,
+      layoutRefs: [{ tableKey: resolvedTableKey, layoutId: currentLayoutId || null }],
+      variantService,
+      serviceUrl,
     }),
-    [filterAppId, filterFields, filterTableKey, filters, onFilterSearch, onFilterVariantLoad],
+    [
+      currentLayoutId,
+      filterFields,
+      filters,
+      handleFilterVariantLoad,
+      onFilterSearch,
+      resolvedAppId,
+      resolvedTableKey,
+      serviceUrl,
+      variantService,
+    ],
   );
 
   const planningGanttProps = useMemo<UsePlanningGanttResult['planningGanttProps']>(
     () => ({
+      appId: resolvedAppId,
+      tableKey: resolvedTableKey,
+      serviceUrl,
       tasks: filteredTasks,
       columns,
       scale,
@@ -178,20 +253,33 @@ export const usePlanningGantt = ({
       onTaskSelect,
       enableRowReorder,
       onTaskReorder,
+      layout,
+      layoutVariant: layoutVariantLoadRequest?.variant,
+      layoutVariantLoadKey: layoutVariantLoadRequest?.key,
+      onLayoutIdChange: handleLayoutIdChange,
+      onLayoutSave,
     }),
     [
       columns,
       count,
       enableRowReorder,
       filteredTasks,
+      handleLayoutIdChange,
+      layout,
+      layoutVariantLoadRequest?.key,
+      layoutVariantLoadRequest?.variant,
       onPageChange,
       onRowsPerPageChange,
+      onLayoutSave,
       onTaskReorder,
       onTaskSelect,
       page,
+      resolvedAppId,
+      resolvedTableKey,
       rowsPerPage,
       rowsPerPageOptions,
       scale,
+      serviceUrl,
       selectedTaskId,
     ],
   );

@@ -145,14 +145,18 @@ export const CVariantManagement = ({
                         placeholder={t('variant.selectVariant')}
                     />
                 )}
-                renderOption={(props, option) => (
-                    <li {...props}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-                            <Typography sx={{ flex: 1, fontSize: FONT_SIZE_SMALL }}>{option.name}</Typography>
-                            {option.isDefault && <StarIcon fontSize="small" color="action" />}
-                        </Box>
-                    </li>
-                )}
+                renderOption={(props, option) => {
+                    const { key, ...optionProps } = props;
+
+                    return (
+                        <li key={key} {...optionProps}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                                <Typography sx={{ flex: 1, fontSize: FONT_SIZE_SMALL }}>{option.name}</Typography>
+                                {option.isDefault && <StarIcon fontSize="small" color="action" />}
+                            </Box>
+                        </li>
+                    );
+                }}
             />
             
             <Tooltip title={t('variant.saveView')}>

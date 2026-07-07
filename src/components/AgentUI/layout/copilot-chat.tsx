@@ -116,6 +116,7 @@ export const CopilotChat: React.FC<CopilotChatProps> = ({
           const isLastAssistant = msg.type === 'assistant' && index === messages.length - 1
           const assistantActions: AssistantActionContext | undefined = msg.type === 'assistant' ? {
             isLatestAssistant: isLastAssistant,
+            isResponding,
             onRegenerate: onRegenerate ? () => onRegenerate(msg.id) : undefined
           } : undefined
 

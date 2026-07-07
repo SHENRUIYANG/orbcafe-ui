@@ -1,4 +1,4 @@
 interface:
   display_name: "ORBCAFE Planning Gantt"
-  short_description: "Implement planning table, Gantt timeline, and lookup filters"
-  default_prompt: "Use $orbcafe-planning-gantt to implement this ORBCAFE planning table and Gantt timeline with the official examples baseline, including CValueHelp/F4 filters when business-object lookup is needed."
+  short_description: "Implement Planning Gantt, SmartFilter, F4 lookup, layout, and row reorder"
+  default_prompt: "Use $orbcafe-planning-gantt to implement this ORBCAFE planning table and Gantt timeline with usePlanningLayout/CPlanningLayout, shared appId/tableKey persistence, CValueHelp/F4 lookup filters, CTable-style layout controls, and drag-reorder behavior from the official examples baseline."

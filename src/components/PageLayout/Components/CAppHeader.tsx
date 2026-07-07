@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useState, type FormEvent } from 'react';
+import { Mic, MicOff, SendHorizontal } from 'lucide-react';
 import {
   AppBar,
   Avatar,
@@ -17,7 +18,8 @@ import {
   Typography,
   useTheme,
 } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
+import type { SxProps, Theme } from '@mui/material/styles';
+import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import LanguageIcon from '@mui/icons-material/Language';
 import DesktopWindowsIcon from '@mui/icons-material/DesktopWindows';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
@@ -27,6 +29,7 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import type { CAppHeaderProps, CAppHeaderUserMenuItem } from '../types';
 import { useOrbcafeI18n } from '../../../i18n';
 import type { OrbcafeLocale } from '../../../i18n';
+import { useVoiceInput } from '../../AINav/Hooks/useVoiceInput';
 
 const HEADER_HEIGHT = 64;
 const LIGHT_HEADER_BASE = '#E9EDF2';
@@ -41,6 +44,171 @@ const DEFAULT_LOCALE_LABELS: Record<OrbcafeLocale, string> = {
   ko: '한국어',
 };
 
+export interface CAppHeaderSearchProps {
+  searchPlaceholder?: string;
+  onSearch?: (query: string) => void;
+  onSearchAdd?: () => void;
+  maxWidth?: number | string;
+  sx?: SxProps<Theme>;
+}
+
+export const CAppHeaderSearch = ({
+  searchPlaceholder,
+  onSearch,
+  onSearchAdd,
+  maxWidth = 540,
+  sx,
+}: CAppHeaderSearchProps) => {
+  const { t } = useOrbcafeI18n();
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+  const [query, setQuery] = useState('');
+
+  const submitSearch = useCallback(
+    (rawQuery = query) => {
+      const trimmedQuery = rawQuery.trim();
+      if (trimmedQuery) {
+        setQuery('');
+        onSearch?.(trimmedQuery);
+      }
+    },
+    [onSearch, query],
+  );
+
+  const handleSearchSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    submitSearch();
+  };
+
+  const { isRecording, startRecording, stopRecording } = useVoiceInput({
+    onTextUpdate: setQuery,
+    onComplete: (text) => {
+      setQuery(text);
+      submitSearch(text);
+    },
+    onError: (error) => {
+      console.error('Header voice input error:', error);
+    },
+  });
+
+  const handleVoiceToggle = useCallback(async () => {
+    if (isRecording) {
+      stopRecording();
+      return;
+    }
+
+    await startRecording();
+  }, [isRecording, startRecording, stopRecording]);
+
+  const effectiveSearchPlaceholder = searchPlaceholder || t('header.searchPlaceholder');
+  const canSubmitSearch = query.trim().length > 0;
+  const searchIconButtonSx = {
+    width: 28,
+    height: 28,
+    p: 0,
+    color: isDark ? 'rgba(255,255,255,0.72)' : 'rgba(15,23,42,0.56)',
+    '&:hover': {
+      bgcolor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(15,23,42,0.06)',
+    },
+    '&.Mui-disabled': {
+      color: isDark ? 'rgba(255,255,255,0.28)' : 'rgba(15,23,42,0.24)',
+    },
+  } as const;
+
+  return (
+    <Box
+      component="form"
+      onSubmit={handleSearchSubmit}
+      sx={[
+        { width: '100%', maxWidth },
+        ...(Array.isArray(sx) ? sx : sx ? [sx] : []),
+      ]}
+    >
+      <TextField
+        size="small"
+        fullWidth
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder={effectiveSearchPlaceholder}
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start" sx={{ ml: 0.25, mr: 0.5 }}>
+              <IconButton
+                size="small"
+                type="button"
+                onClick={onSearchAdd}
+                aria-label={t('header.searchAddFeature')}
+                title={t('header.searchAddFeature')}
+                sx={searchIconButtonSx}
+              >
+                <AddRoundedIcon sx={{ fontSize: 20 }} />
+              </IconButton>
+            </InputAdornment>
+          ),
+          endAdornment: (
+            <InputAdornment position="end" sx={{ ml: 0.5, mr: 0.25 }}>
+              <Stack direction="row" alignItems="center" spacing={0.15}>
+                <IconButton
+                  size="small"
+                  type="button"
+                  onClick={() => void handleVoiceToggle()}
+                  aria-label={isRecording ? t('header.searchStopVoice') : t('header.searchStartVoice')}
+                  title={isRecording ? t('header.searchStopVoice') : t('header.searchStartVoice')}
+                  sx={{
+                    ...searchIconButtonSx,
+                    color: isRecording ? theme.palette.error.main : searchIconButtonSx.color,
+                    bgcolor: isRecording
+                      ? (isDark ? 'rgba(239,68,68,0.18)' : 'rgba(239,68,68,0.1)')
+                      : 'transparent',
+                  }}
+                >
+                  {isRecording ? <MicOff size={17} strokeWidth={2.35} /> : <Mic size={17} strokeWidth={2.35} />}
+                </IconButton>
+                <IconButton
+                  size="small"
+                  type="submit"
+                  disabled={!canSubmitSearch}
+                  aria-label={t('header.searchSend')}
+                  title={t('header.searchSend')}
+                  sx={{
+                    ...searchIconButtonSx,
+                    color: canSubmitSearch ? theme.palette.primary.main : searchIconButtonSx.color,
+                  }}
+                >
+                  <SendHorizontal size={17} strokeWidth={2.35} />
+                </IconButton>
+              </Stack>
+            </InputAdornment>
+          ),
+          sx: {
+            color: isDark ? 'common.white' : 'rgba(17,24,39,0.9)',
+            bgcolor: isDark ? 'rgba(255,255,255,0.08)' : '#ffffff',
+            borderRadius: 999,
+            pr: 0.5,
+            '& .MuiInputBase-input': {
+              py: 1.1,
+            },
+            '& .MuiOutlinedInput-notchedOutline': {
+              borderColor: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(15,23,42,0.2)',
+            },
+            '&:hover .MuiOutlinedInput-notchedOutline': {
+              borderColor: isDark ? 'rgba(255,255,255,0.35)' : 'rgba(15,23,42,0.35)',
+            },
+            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+              borderColor: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(15,23,42,0.55)',
+            },
+          },
+        }}
+        inputProps={{
+          style: {
+            color: isDark ? 'white' : '#111827',
+          },
+        }}
+      />
+    </Box>
+  );
+};
+
 export const CAppHeader = ({
   appTitle,
   logo,
@@ -51,7 +219,9 @@ export const CAppHeader = ({
   localeOptions,
   onLocaleChange,
   searchPlaceholder,
+  showSearch = false,
   onSearch,
+  onSearchAdd,
   user,
   onUserSetting,
   onUserLogout,
@@ -62,16 +232,8 @@ export const CAppHeader = ({
   const { t, locale } = useOrbcafeI18n();
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
-  const [query, setQuery] = useState('');
   const [localeMenuAnchor, setLocaleMenuAnchor] = useState<null | HTMLElement>(null);
   const [userMenuAnchor, setUserMenuAnchor] = useState<null | HTMLElement>(null);
-
-  const handleSearchSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (onSearch) {
-      onSearch(query.trim());
-    }
-  };
 
   const themeIcon =
     mode === 'system'
@@ -89,7 +251,6 @@ export const CAppHeader = ({
   const effectiveLocaleOptions = localeOptions && localeOptions.length > 0 ? localeOptions : DEFAULT_LOCALE_OPTIONS;
   const effectiveLocaleLabel = localeLabel || DEFAULT_LOCALE_LABELS[effectiveLocale] || effectiveLocale.toUpperCase();
   const localeMenuOpen = Boolean(localeMenuAnchor);
-  const effectiveSearchPlaceholder = searchPlaceholder || t('header.searchPlaceholder');
   const userMenuOpen = Boolean(userMenuAnchor);
   const defaultUserMenuItems: CAppHeaderUserMenuItem[] = [
     {
@@ -168,47 +329,13 @@ export const CAppHeader = ({
         </Stack>
 
         <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', minWidth: 0 }}>
-          <Box component="form" onSubmit={handleSearchSubmit} sx={{ width: '100%', maxWidth: 540 }}>
-            <TextField
-              size="small"
-              fullWidth
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder={effectiveSearchPlaceholder}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon
-                      sx={{
-                        color:
-                          isDark ? 'rgba(255,255,255,0.7)' : 'rgba(15,23,42,0.55)',
-                        fontSize: 18,
-                      }}
-                    />
-                  </InputAdornment>
-                ),
-                sx: {
-                  color: isDark ? 'common.white' : 'rgba(17,24,39,0.9)',
-                  bgcolor: isDark ? 'rgba(255,255,255,0.08)' : '#ffffff',
-                  borderRadius: 999,
-                  '& .MuiOutlinedInput-notchedOutline': {
-                    borderColor: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(15,23,42,0.2)',
-                  },
-                  '&:hover .MuiOutlinedInput-notchedOutline': {
-                    borderColor: isDark ? 'rgba(255,255,255,0.35)' : 'rgba(15,23,42,0.35)',
-                  },
-                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                    borderColor: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(15,23,42,0.55)',
-                  },
-                },
-              }}
-              inputProps={{
-                style: {
-                  color: isDark ? 'white' : '#111827',
-                },
-              }}
+          {showSearch && (
+            <CAppHeaderSearch
+              searchPlaceholder={searchPlaceholder}
+              onSearch={onSearch}
+              onSearchAdd={onSearchAdd}
             />
-          </Box>
+          )}
         </Box>
 
         <Stack direction="row" alignItems="center" spacing={1.5}>

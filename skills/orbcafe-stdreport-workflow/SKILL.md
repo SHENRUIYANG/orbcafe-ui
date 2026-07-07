@@ -11,8 +11,9 @@ description: Build ORBCAFE standard report/list pages with CStandardPage, CTable
 2. 先对照 `skills/orbcafe-ui-component-usage/references/module-contracts.md`，确认这是 `Hook-first` 模块。
 3. 用 `references/component-selection.md` 选择 `integrated` 或 table-only。
 4. 基于 `references/recipes.md` 生成最小可运行代码。
-5. 用 `references/guardrails.md` 强制检查 identity、分页、SmartFilter variant、CTable layout 持久化、i18n。
-6. 按官方 Next examples 补齐验收与排障步骤；非 Next 项目先标记为偏离基线，不要静默改成 Vite/CRA 范式。
+5. 用 `references/guardrails.md` 强制检查 identity、分页、SmartFilter variant、CTable layout 持久化、CValueHelp/F4、i18n。
+6. 如果涉及 F4/value help/search help/值帮助，必须同时读取 `skills/orbcafe-ui-component-usage/references/value-help.md`。
+7. 按官方 Next examples 补齐验收与排障步骤；非 Next 项目先标记为偏离基线，不要静默改成 Vite/CRA 范式。
 
 ## Canonical Setup
 
@@ -49,6 +50,7 @@ npm run dev
 - 对标准报表，不要手写分离的 `CSmartFilter + CTable` 联动；`integrated` 模式让 `CTable` 能把当前 layout 传给 SmartFilter variant 管理器。
 - `metadata.id`、`CStandardPage.id`、`filterConfig.appId`、`tableProps.appId` 必须保持同一个业务身份；除非多表页面要用不同 `tableKey` 做隔离。
 - 需要 SAP F4/Search Help 风格字段选择时，使用 `CSmartFilter` 字段的 `type: 'value-help'` 或 `isValueHelp: true` + `valueHelp` 配置；不要手写一个游离在 SmartFilter 外面的 lookup 弹窗。
+- `CValueHelp` 支持 `F4` 打开弹窗，默认允许手工输入并校验；非法值应显示错误但不写入筛选状态。
 - 始终从 `orbcafe-ui` 包入口导入，不导入私有 `src/components/*`。
 - 需要 locale 时优先用 `CAppPageLayout.locale` 或 `OrbcafeI18nProvider`。
 - `quickCreate/quickEdit/quickDelete` 开启时，始终给出 async 回调并写清 payload 结构。
@@ -70,6 +72,7 @@ npm run dev
 - 默认 variant 建议使用 `scope: 'Both'`，并按 tableKey 保存 scoped filters；不要只写根级 `{ status: 'active' }` 后期待多表页面也稳定。
 - 列渲染尽量只做展示转换，筛选值保持机器稳定值（例如 `active/pending/inactive`）。
 - Value Help 筛选字段保持机器稳定 key（例如 customerId/materialId/workCenter），只本地化 dialogTitle、列标题和 label。
+- 远程 Value Help 用 `onSearch(query)`，保存过的 key 需要通过 `selectedItems` 或预加载 `items` 恢复 key-description 显示。
 - 表格放在固定高度容器（例如 `calc(100vh - 120px)`）可避免页面整体滚动抖动。
 
 ## Output Contract
@@ -79,6 +82,7 @@ npm run dev
 2. `Code`: paste-ready, imports from `orbcafe-ui` only.
 3. `Data contract`: columns/filters/rows/fetchData shape.
 4. `Verify`: 启动页面、筛选生效、分页切换、quick 操作触发、刷新后配置保留。
+   - Value Help 必须验证鼠标点击和 `F4`、合法手工输入、非法输入报错、variant reload 后显示值恢复。
 5. `Troubleshooting`: 至少包含以下排查项：
    - 忘记 `metadata.id/id/appId` 导致变体/布局“没效果”
    - 分离渲染 `CSmartFilter` 和 `CTable` 导致 variant 只保存筛选、不知道当前 table layout

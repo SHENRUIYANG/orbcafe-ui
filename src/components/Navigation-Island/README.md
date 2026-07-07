@@ -18,6 +18,42 @@ import { NavigationIsland } from 'orbcafe-ui';
 />
 ```
 
+## Pin / 收藏夹
+
+`NavigationIsland` 默认开启 pin 功能。用户点击叶子菜单项右侧的图钉后，该功能会出现在菜单顶部的 `Pinned` 分组中，并通过 `localStorage` 持久化。
+
+```tsx
+<NavigationIsland
+  collapsed={false}
+  onToggle={() => {}}
+  menuData={menuData}
+  pinStorageKey="my-app:pinned-navigation-items"
+/>
+```
+
+需要由应用接管状态时，传入受控 ids：
+
+```tsx
+<NavigationIsland
+  collapsed={false}
+  onToggle={() => {}}
+  menuData={menuData}
+  pinnedItemIds={pinnedIds}
+  onPinnedItemIdsChange={setPinnedIds}
+/>
+```
+
+如需关闭：
+
+```tsx
+<NavigationIsland
+  collapsed={false}
+  onToggle={() => {}}
+  menuData={menuData}
+  enablePinning={false}
+/>
+```
+
 ## 推荐搭配
 
 - 状态管理：`Hooks/use-navigation-island.ts`

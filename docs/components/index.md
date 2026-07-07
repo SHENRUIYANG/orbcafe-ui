@@ -32,4 +32,5 @@ Published component and hook documentation collected from the source tree.
 | Auth Hooks | [Auth-Hooks.md](Auth-Hooks.md) | `src/components/Auth/Hooks/README.md` |
 | CustomizeAgent | [CustomizeAgent.md](CustomizeAgent.md) | `src/components/CustomizeAgent/README.md` |
 | AINav | [AINav.md](AINav.md) | `src/components/AINav/README.md` |
+| Tree | [Tree.md](Tree.md) | `src/components/Tree/README.md` |
 | Transitions | [Transitions.md](Transitions.md) | `src/lib/transitions/README.md` |

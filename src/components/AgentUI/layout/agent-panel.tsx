@@ -20,6 +20,7 @@ export interface AgentPanelProps extends StdChatProps {
   description?: string
   headerActions?: React.ReactNode
   agentStatus?: AgentPanelStatus
+  onHeaderPointerDown?: React.PointerEventHandler<HTMLDivElement>
 }
 
 export const AgentPanel: React.FC<AgentPanelProps> = ({
@@ -28,6 +29,7 @@ export const AgentPanel: React.FC<AgentPanelProps> = ({
   headerActions,
   className,
   agentStatus,
+  onHeaderPointerDown,
   showInput = false,
   ...chatProps
 }) => {
@@ -48,7 +50,13 @@ export const AgentPanel: React.FC<AgentPanelProps> = ({
       </div>
 
       <div className="relative z-10 flex h-full w-full flex-col rounded-xl border border-slate-200/70 bg-white shadow-sm overflow-hidden dark:border-slate-800 dark:bg-gray-950">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm z-20">
+        <div
+          className={cn(
+            "flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm z-20",
+            onHeaderPointerDown && "cursor-grab active:cursor-grabbing"
+          )}
+          onPointerDown={onHeaderPointerDown}
+        >
           <div>
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{title}</h2>
             {description && (

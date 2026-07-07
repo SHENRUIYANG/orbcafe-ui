@@ -1,6 +1,6 @@
 ---
 name: orbcafe-planning-gantt
-description: Build ORBCAFE project-management or production-planning pages with CPlanningLayout/usePlanningLayout (or custom CPlanningGantt/usePlanningGantt), CSmartFilter including CValueHelp/F4 lookup filters, CTable-style controls, resizable table/timeline panes, aligned Gantt rows, and drag-reorderable task rows.
+description: Build ORBCAFE project-management or production-planning pages with CPlanningLayout/usePlanningLayout (or custom CPlanningGantt/usePlanningGantt), CSmartFilter including CValueHelp/F4 lookup filters, unified appId/tableKey persistence, CTable-style layout controls, resizable table/timeline panes, aligned Gantt rows, and drag-reorderable task rows.
 ---
 
 # ORBCAFE Planning Gantt
@@ -10,8 +10,9 @@ description: Build ORBCAFE project-management or production-planning pages with 
 1. 先对照 `skills/orbcafe-ui-component-usage/references/module-contracts.md`，确认这是 `Hook-first` 模块。
 2. 执行 `skills/orbcafe-ui-component-usage/references/integration-baseline.md`，按 Next.js App Router + 官方 examples 做最小可运行接入。
 3. 用 `references/recipes.md` 输出实现骨架。
-4. 用 `references/guardrails.md` 检查 SmartFilter 必须在组合中启用、表格横向滚动、Gantt 对齐、分组行高度、行拖拽换序和折叠/拖拽分栏。
-5. 输出验收步骤与“没效果”排障；涉及分组时必须说明图表行与表格可见行同步，并检查自定义工具按钮位于标准按钮左侧。
+4. 如涉及 lookup/F4，读取 `skills/orbcafe-ui-component-usage/references/value-help.md` 并应用共享 CValueHelp 契约。
+5. 用 `references/guardrails.md` 检查 SmartFilter 必须在组合中启用、`appId/tableKey` 统一、表格横向滚动、Gantt 对齐、分组行高度、行拖拽换序和折叠/拖拽分栏。
+6. 输出验收步骤与“没效果”排障；涉及分组时必须说明图表行与表格可见行同步，并检查自定义工具按钮位于标准按钮左侧。
 
 ## Canonical Setup
 
@@ -42,7 +43,7 @@ npm run dev
 1. `Chosen module`: Planning Gantt and whether SmartFilter/CTable controls are required.
 2. `Minimal implementation`: `usePlanningLayout + CPlanningLayout` first. Use `usePlanningGantt + CSmartFilter + CPlanningGantt` only when custom composition is required.
 3. `Data model`: pass `tasks: PlanningTaskRecord[]`; every visible Gantt bar needs valid `id`, `title`, `startDate`, and `endDate`. `startDate`/`endDate` are ISO date/datetime strings and directly control the bar's horizontal position and duration. Pass `columns` explicitly for the left table schema.
-4. `Verify`: filtering, scale select, table horizontal scroll, pane resize/collapse, row/bar alignment, drag reorder from both table and timeline panes, grouping alignment when enabled.
+4. `Verify`: filtering, Value Help/F4 filters, scale select, table horizontal scroll, pane resize/collapse, layout save/load, row/bar alignment, drag reorder from both table and timeline panes, grouping alignment when enabled.
 5. `Troubleshooting`: at least 3 points covering date validity, width/overflow, row height mismatch, and wrong public imports.
 
 ## Data Contract
@@ -98,6 +99,9 @@ Left table columns:
 - `CPlanningGantt` owns the split table/timeline surface, timeline scale select, CTable-style column/sort/group controls, row-to-bar alignment, and visible task row drag-reordering.
 - For production pages, pass `columns` explicitly; internal fallback columns are for empty-config fallback only and should not be treated as project schema.
 - For production/work-center/material/order filters, use `filterFields` with `type: 'value-help'` or `isValueHelp: true` so Planning reuses the shared `CValueHelp` + `CSmartFilter` contract.
+- Use one shared `appId` and `tableKey` for SmartFilter variants and table layouts. `filterAppId` / `filterTableKey` are deprecated compatibility options; do not use them for new code.
+- Planning variants link to table layouts through `layoutRefs`; verify save Layout first, then save Variant, then reload and apply the variant.
+- Value Help keys must match real task fields used by filtering, such as `workCenter`, `project`, `owner.name`, material/order custom fields, or an explicitly extended filtering layer.
 - Row reordering is enabled by default; use `enableRowReorder={false}` globally or `task.reorderable = false` per task row to lock dragging.
 - Custom header tools should use `extraTools`, rendered to the left of built-in planning controls.
 - When table width is reduced, the table pane must expose horizontal scroll; the timeline pane keeps its own horizontal range.

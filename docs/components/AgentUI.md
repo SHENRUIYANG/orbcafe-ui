@@ -6,9 +6,10 @@ Published copy of `src/components/AgentUI/README.md`.
 
 `AgentUI` 是 ORBCAFE 里用于聊天类交互的标准 UI 层。当前最核心的三个布局组件是：
 
-- `AgentPanel`: 带 header 的工作台聊天面板，支持状态跑马灯和光晕。
+- `AgentPanel`: 带 header 的工作台聊天面板，支持状态展示。
 - `StdChat`: 标准聊天容器，适合整页、卡片页、抽屉页。
 - `CopilotChat`: Copilot 浮窗内容容器，适合右下角助手、可拖拽面板、悬浮问答入口。
+- `AIBrowserGlow`: 独立的浏览器边框柔光层，适合 AI 运行时由业务状态直接调用。
 
 这三个组件共用同一套消息渲染、流式输出、Markdown/卡片解析和事件回调能力。区别主要在布局壳和交互方式。
 
@@ -20,6 +21,7 @@ Published copy of `src/components/AgentUI/README.md`.
 - `type AgentPanelStatus`
 - `StdChat`
 - `CopilotChat`
+- `AIBrowserGlow`
 - `type ChatMessage`
 - `type AgentUICardHooks`
 - `type AgentUICardHookEvent`
@@ -34,6 +36,7 @@ import {
   type AgentPanelStatus,
   StdChat,
   CopilotChat,
+  AIBrowserGlow,
   type ChatMessage,
   type AgentUICardHooks,
   type AgentUICardHookEvent
@@ -58,7 +61,7 @@ import {
 src/components/AgentUI/
 ├── components/
 │   ├── cards/          # ErrorCard / WarningCard / SuggestionsCard / ToolResultCard / ChartCard
-│   ├── core/           # ChatMessage / InputArea / StreamingRenderer / DynamicCardRenderer
+│   ├── core/           # ChatMessage / InputArea / StreamingRenderer / DynamicCardRenderer / AIBrowserGlow
 │   └── renderers/      # Markdown / Math / Mermaid / Table / Think 等块级渲染器
 ├── layout/
 │   ├── agent-panel.tsx
@@ -79,6 +82,7 @@ src/components/AgentUI/
 | `ContentRenderer` | `components/core/ContentRenderer.tsx` | 统一决定文本、Markdown、卡片内容怎么渲染 |
 | `DynamicCardRenderer` | `components/core/DynamicCardRenderer.tsx` | 解析消息中的卡片 JSON，映射到具体卡片组件 |
 | `InputArea` | `components/core/InputArea.tsx` | 标准输入框，支持发送、停止、文件、语音入口等交互 |
+| `AIBrowserGlow` | `components/core/AIBrowserGlow.tsx` | 独立浏览器边框柔光层，由业务在 AI 运行时用 `active` 控制 |
 | `cardHooks` | `components/cardTypes.ts` | 将卡片点击、关闭、动作按钮等事件回传给业务层 |
 
 ### 标准能力
@@ -211,7 +215,7 @@ interface AgentUICardHookEvent {
 - 标题和描述
 - header actions 插槽
 - 状态标记（文案 + dot）
-- 状态化视觉反馈（四边跑马灯 + 彩色光晕）
+- 状态化视觉反馈（面板状态点 + 面板状态边框）
 
 实现文件：`src/components/AgentUI/layout/agent-panel.tsx`
 
@@ -233,6 +237,7 @@ export interface AgentPanelProps extends StdChatProps {
 - 展示型面板：直接用默认值（`showInput` 默认为 `false`）。
 - 可输入面板：显式传 `showInput={true}` 并传入 `onSend`。
 - 状态展示：优先传 `agentStatus`；若不传，会回退为 `isResponding ? 'running' : 'idle'`。
+- 浏览器边框柔光不要写进 `AgentPanel`，使用独立的 `AIBrowserGlow active={isRunning}`。
 
 ### 最小用法（展示型）
 
@@ -253,6 +258,16 @@ const [status, setStatus] = useState<AgentPanelStatus>('idle')
 />
 ```
 
+## AIBrowserGlow
+
+`AIBrowserGlow` 是独立基础组件，不依赖 `AgentPanel`。业务只需要在 AI 工作时渲染或打开它：
+
+```tsx
+import { AIBrowserGlow } from 'orbcafe-ui'
+
+<AIBrowserGlow active={isResponding} colors={['#ff3860', '#24e070', '#3090ff']} />
+```
+
 ### `examples/app/aipanel` 的效果是怎么实现的
 
 示例文件：`examples/app/aipanel/AIPanelExampleClient.tsx`
@@ -263,7 +278,7 @@ const [status, setStatus] = useState<AgentPanelStatus>('idle')
 2. `isResponding`：模拟任务执行中。
 3. `status`：`idle/running/success/error/pending` 手动或自动切换。
 4. 通过 `Trigger Agent Run` 按钮模拟一次任务执行并回填 assistant 消息。
-5. 跑马灯和光晕由 `agentStatus` 自动联动，不需要额外写边框动画代码。
+5. 面板状态视觉由 `agentStatus` 自动联动；浏览器边框柔光由 `AIBrowserGlow` 单独控制。
 
 ## StdChat
 
@@ -558,7 +573,7 @@ const [isResizing, setIsResizing] = useState(false)
 
 - 你要做整页或工作台 Agent 面板
 - 你需要 header（标题/描述/actions）
-- 你要展示 agent 运行状态（dot + 跑马灯 + 彩色光晕）
+- 你要展示 agent 运行状态（dot + 面板状态视觉）
 - 你需要展示型只读面板（默认 `showInput=false`）
 
 ### 什么时候用 `StdChat`

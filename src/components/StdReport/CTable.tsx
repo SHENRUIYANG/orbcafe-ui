@@ -148,6 +148,8 @@ export const CTable: React.FC<CTableProps> = (props) => {
     quickEdit,
     quickDelete,
     serviceUrl,
+    disableGrouping = false,
+    disableSorting = false,
   } = props;
   const title = titleProp || t('table.title.default');
 
@@ -457,14 +459,16 @@ export const CTable: React.FC<CTableProps> = (props) => {
 
   const menus = (
     <>
-        <CTableGroupMenu
-            groupAnchorEl={groupAnchorEl}
-            setGroupAnchorEl={setGroupAnchorEl}
-            grouping={grouping}
-            setGrouping={setGrouping}
-            columns={columns}
-            toggleGroupField={toggleGroupField}
-        />
+        {!disableGrouping && (
+            <CTableGroupMenu
+                groupAnchorEl={groupAnchorEl}
+                setGroupAnchorEl={setGroupAnchorEl}
+                grouping={grouping}
+                setGrouping={setGrouping}
+                columns={columns}
+                toggleGroupField={toggleGroupField}
+            />
+        )}
 
         <CTableColumnMenu
             anchorEl={anchorEl}
@@ -626,6 +630,7 @@ export const CTable: React.FC<CTableProps> = (props) => {
                     actions={actions}
                     extraTools={extraTools}
                     grouping={grouping}
+                    disableGrouping={disableGrouping}
                     setGroupAnchorEl={setGroupAnchorEl}
                     showSummary={showSummary}
                     setShowSummary={setShowSummary}
@@ -686,6 +691,7 @@ export const CTable: React.FC<CTableProps> = (props) => {
                             order={order}
                             orderBy={orderBy}
                             onRequestSort={handleRequestSort}
+                            disableSorting={disableSorting}
                             onContextMenu={handleContextMenu}
                             selectionMode={selectionMode}
                             grouping={grouping}

@@ -25,6 +25,8 @@ Use this file to map natural-language requests to canonical ORBCAFE component na
 | `PBarcodeScanner` | Camera barcode scanner | 摄像头扫码控件 | Kamera Barcode Scanner |
 | `PTouchCard` | Swipe/drag touch card | 手指滑动/拖动卡片 | Touch Karte |
 | `NavigationIsland` | Navigation tree island | 导航岛/左侧导航树 | Navigationsbereich |
+| `TreeMenu` | Navigation tree menu | 导航树菜单 | Navigationsbaum |
+| `pinnedNavigationItemIds` | Pinned/favorite navigation item ids | 导航收藏/置顶菜单项 | Angeheftete Navigation |
 | `CAppPageLayout` | App shell layout | 应用壳层布局 | App Layout |
 | `CGraphReport` | Graph report dialog | 图形报表弹窗 | Diagramm Bericht |
 | `CDetailInfoPage` | Detail page | 详情页 | Detailseite |
@@ -34,7 +36,9 @@ Use this file to map natural-language requests to canonical ORBCAFE component na
 | `AgentPanel` | Agent chat panel | 智能体聊天面板 | Agent Chat Panel |
 | `StdChat` | Standard chat view | 标准聊天页 | Standard Chat |
 | `CopilotChat` | Copilot floating chat content | Copilot 浮窗聊天内容 | Copilot Chat |
+| `AIBrowserGlow` | Browser edge AI glow | 浏览器边框 AI 柔光 | Browser AI Leuchteffekt |
 | `CMessageBox` | Message/confirm dialog | 统一消息确认框 | Meldungsdialog |
+| `CTreeComp` | Tree table / hierarchy tree with detail pane | 树表 / 层级树 / BOM树 / 成本树 | Baumtabelle / Hierarchiebaum |
 
 ## i18n implementation baseline for AI
 

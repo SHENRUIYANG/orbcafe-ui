@@ -144,14 +144,14 @@ export const CLayoutManagement: React.FC<CLayoutManagementProps> = ({
       {/* Save Layout Button - Explicit Action */}
       <Tooltip title={t('layout.saveLayout')}>
         <IconButton onClick={handleOpenSaveDialog} color="primary" size="small">
-            <SaveIcon />
+            <SaveIcon fontSize="small" />
         </IconButton>
       </Tooltip>
 
       {/* Layout Options (Load, Manage) */}
       <Tooltip title={t('layout.layoutOptions')}>
-        <IconButton onClick={handleMenuOpen} color={currentLayout ? 'primary' : 'default'}>
-            <ViewQuiltIcon />
+        <IconButton onClick={handleMenuOpen} color={currentLayout ? 'primary' : 'default'} size="small">
+            <ViewQuiltIcon fontSize="small" />
         </IconButton>
       </Tooltip>
 
@@ -291,4 +291,3 @@ export const CLayoutManagement: React.FC<CLayoutManagementProps> = ({
     </Box>
   );
 };
-

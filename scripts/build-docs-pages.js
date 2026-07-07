@@ -82,6 +82,7 @@ const componentSources = [
   "src/components/Auth/Hooks/README.md",
   "src/components/CustomizeAgent/README.md",
   "src/components/AINav/README.md",
+  "src/components/Tree/README.md",
   "src/lib/transitions/README.md",
 ];
 
@@ -107,10 +108,12 @@ const skillSources = [
   "skills/orbcafe-ui-component-usage/references/public-export-index.md",
   "skills/orbcafe-ui-component-usage/references/skill-routing-map.md",
   "skills/orbcafe-ui-component-usage/references/value-help.md",
+  "skills/orbcafe-stdreport-workflow/README.md",
   "skills/orbcafe-stdreport-workflow/SKILL.md",
   "skills/orbcafe-stdreport-workflow/references/component-selection.md",
   "skills/orbcafe-stdreport-workflow/references/guardrails.md",
   "skills/orbcafe-stdreport-workflow/references/recipes.md",
+  "skills/orbcafe-planning-gantt/README.md",
   "skills/orbcafe-planning-gantt/SKILL.md",
   "skills/orbcafe-planning-gantt/references/guardrails.md",
   "skills/orbcafe-planning-gantt/references/recipes.md",

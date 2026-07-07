@@ -35,9 +35,14 @@
   - keep option `value` stable, localize `label` only.
   - locale resources source: `src/i18n/messages.ts`.
 
-## Version-sensitive notes (>= 1.0.6)
+## Version-sensitive notes (>= 1.4.5)
 
 - `useStandardReport` default rows-per-page is `20` and includes `-1` (`ALL`).
 - `CAppPageLayout` supports `locale`, `localeOptions`, `onLocaleChange`.
 - `CTable` includes `quickCreate` config.
-- `AgentUI` is exported from package entry and should be consumed via `AgentPanel` / `StdChat` / `CopilotChat`, not internal renderers.
+- `CValueHelp` is exported from package entry and is the shared F4/search-help contract for StdReport, Planning, and Pad filters.
+- `Auth` is public through `CAuthPage` / `useAuthPage`.
+- `Planning` is public through `CPlanningLayout` / `CPlanningGantt` plus `usePlanningLayout` / `usePlanningGantt`; SmartFilter and row reorder are part of the expected Planning experience.
+- `AgentUI` is exported from package entry and should be consumed via `AgentPanel` / `StdChat` / `CopilotChat` / `AIBrowserGlow`, not internal renderers.
+- `Tree` is public through `CTreeComp` for hierarchy tree/table + split detail pages.
+- `NavigationIsland` supports pin/favorites and fixed/floating display mode through package-entry APIs and `CAppPageLayout` pass-through props.

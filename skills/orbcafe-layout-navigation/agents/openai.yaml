@@ -1,4 +1,4 @@
 interface:
   display_name: "ORBCAFE Layout + Navigation"
-  short_description: "Implement app shell and navigation from Next examples"
-  default_prompt: "Use $orbcafe-layout-navigation to build this app frame/navigation flow with the official Next.js examples baseline and ORBCAFE UI."
+  short_description: "Implement app shell, Navigation Island, pinning, and route UX"
+  default_prompt: "Use $orbcafe-layout-navigation to build this app frame/navigation flow with CAppPageLayout, NavigationIsland, TreeMenu, pin/favorites, fixed/floating modes, official Next.js examples, and ORBCAFE UI public APIs only."

@@ -6,6 +6,13 @@ import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore';
 import UnfoldLessIcon from '@mui/icons-material/UnfoldLess';
 import { CTableBodyProps } from '../Hooks/CTable/types';
 import { useOrbcafeI18n } from '../../../i18n';
+import {
+    tableControlCheckboxSx,
+    tableControlIconButtonSx,
+    tableGroupControlCellSx,
+    tableGroupControlsSx,
+    tableSelectionCellSx,
+} from './ctableControlSx';
 
 export const CTableBody = (props: CTableBodyProps) => {
     const { t } = useOrbcafeI18n();
@@ -81,20 +88,20 @@ export const CTableBody = (props: CTableBodyProps) => {
                             })}
                         >
                             {isSelectionEnabled && (
-                                <TableCell padding="checkbox">
+                                <TableCell padding="checkbox" sx={tableSelectionCellSx}>
                                     <Checkbox
                                         size="small"
                                         checked={isGroupSelected}
                                         indeterminate={isGroupIndeterminate}
                                         onChange={handleGroupSelect}
                                         onClick={(e) => e.stopPropagation()}
-                                        sx={{ p: 0.5 }}
+                                        sx={tableControlCheckboxSx}
                                     />
                                 </TableCell>
                             )}
                             {hasGrouping && (
-                                <TableCell padding="checkbox" sx={{ width: 44 }}>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25 }}>
+                                <TableCell padding="checkbox" sx={tableGroupControlCellSx}>
+                                    <Box sx={tableGroupControlsSx}>
                                         {grouping.length > 1 && row.level < grouping.length - 1 && (
                                             <Tooltip title={isGroupFullyExpanded?.(row.id) ? t('table.group.collapseAll') : t('table.group.expandAll')}>
                                                 <IconButton
@@ -107,12 +114,12 @@ export const CTableBody = (props: CTableBodyProps) => {
                                                             handleExpandGroupRecursively?.(row.id);
                                                         }
                                                     }}
-                                                    sx={{ p: 0.25 }}
+                                                    sx={tableControlIconButtonSx}
                                                 >
                                                     {isGroupFullyExpanded?.(row.id) ? (
-                                                        <UnfoldLessIcon fontSize="small" />
+                                                        <UnfoldLessIcon />
                                                     ) : (
-                                                        <UnfoldMoreIcon fontSize="small" />
+                                                        <UnfoldMoreIcon />
                                                     )}
                                                 </IconButton>
                                             </Tooltip>
@@ -120,7 +127,7 @@ export const CTableBody = (props: CTableBodyProps) => {
                                         <IconButton
                                             size="small"
                                             onClick={() => toggleGroupExpand && toggleGroupExpand(row.id)}
-                                            sx={{ p: 0.25 }}
+                                            sx={tableControlIconButtonSx}
                                         >
                                             {isExpanded ? <KeyboardArrowDownIcon /> : <KeyboardArrowRightIcon />}
                                         </IconButton>
@@ -160,20 +167,21 @@ export const CTableBody = (props: CTableBodyProps) => {
                             sx={{ cursor: 'pointer' }}
                         >
                             {isSelectionEnabled && (
-                                <TableCell padding="checkbox" sx={{ pl: indent > 0 ? indent + 1 : undefined }}>
+                                <TableCell padding="checkbox" sx={tableSelectionCellSx}>
                                     <Checkbox
                                         color="primary"
                                         checked={isItemSelected}
                                         inputProps={{
                                             'aria-labelledby': labelId,
                                         }}
+                                        sx={tableControlCheckboxSx}
                                     />
                                 </TableCell>
                             )}
-                            {hasGrouping && <TableCell padding="checkbox" sx={{ width: 44 }} />}
+                            {hasGrouping && <TableCell padding="checkbox" sx={tableGroupControlCellSx} />}
                             {columns.filter((c: any) => visibleColumns.includes(c.id)).map((column: any, colIndex: number) => {
-                                // If selection is not enabled, apply indentation to the first data column
-                                const isFirstColumn = !isSelectionEnabled && colIndex === 0;
+                                // Keep control columns fixed; apply grouping indentation to the first data column.
+                                const isFirstColumn = colIndex === 0;
                                 const cellSx = isFirstColumn && indent > 0 ? { pl: indent + 2 } : {};
 
                                 return (

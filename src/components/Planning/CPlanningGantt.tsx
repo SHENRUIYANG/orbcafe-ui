@@ -49,6 +49,14 @@ import {
   CTableSortDialog,
 } from '../StdReport/Components/CTableMenu';
 import { CTableHead as CSmartTableHead } from '../StdReport/Components/CTableHead';
+import {
+  TABLE_CONTROL_BUTTON_SIZE,
+  TABLE_CONTROL_ICON_SIZE,
+  TABLE_GROUP_CONTROL_COLUMN_WIDTH,
+  tableControlIconButtonSx,
+  tableGroupControlCellSx,
+} from '../StdReport/Components/ctableControlSx';
+import { CLayoutManager } from '../StdReport/CLayoutManager';
 import { useCTable } from '../StdReport/Hooks/CTable/useCTable';
 import { useOrbcafeI18n } from '../../i18n';
 import type {
@@ -221,6 +229,9 @@ const dateToOffset = (date: Dayjs, units: TimelineUnit[], unitWidth: number) => 
 };
 
 export const CPlanningGantt = ({
+  appId = 'planning-gantt',
+  tableKey = 'planning',
+  serviceUrl,
   title = 'Project Plan',
   extraTools,
   bodyHeight = 560,
@@ -240,6 +251,11 @@ export const CPlanningGantt = ({
   onTaskSelect,
   enableRowReorder = true,
   onTaskReorder,
+  layout,
+  layoutVariant,
+  layoutVariantLoadKey,
+  onLayoutIdChange,
+  onLayoutSave,
   emptyLabel = 'No planning tasks available.',
   sx,
 }: CPlanningGanttProps) => {
@@ -252,9 +268,11 @@ export const CPlanningGantt = ({
   const [tablePaneWidth, setTablePaneWidth] = useState<number | null>(null);
   const [splitMode, setSplitMode] = useState<'content' | 'even' | 'manual'>('content');
   const [expandedPane, setExpandedPane] = useState<'table' | 'timeline' | null>(null);
+  const [splitLayoutWidth, setSplitLayoutWidth] = useState(0);
   const [rowHeightMap, setRowHeightMap] = useState<Record<string, number>>({});
   const [measuredHeaderHeight, setMeasuredHeaderHeight] = useState(HEADER_HEIGHT);
   const [taskOrderIds, setTaskOrderIds] = useState<string[]>([]);
+  const lastLayoutVariantLoadKeyRef = useRef<number | undefined>(undefined);
   const [rowDragState, setRowDragState] = useState<{ activeId: string | null; overId: string | null }>({
     activeId: null,
     overId: null,
@@ -369,7 +387,8 @@ export const CPlanningGantt = ({
   }, [columns, defaultTableColumns, taskMap]);
 
   const ctable = useCTable({
-    appId: 'planning-gantt',
+    appId,
+    tableKey,
     title,
     columns: tableColumns,
     rows: tableRows,
@@ -381,7 +400,20 @@ export const CPlanningGantt = ({
     onPageChange,
     onRowsPerPageChange,
     showSummary: false,
+    layout,
+    onLayoutSave,
   });
+  const layoutManager = appId ? (
+    <CLayoutManager
+      appId={appId}
+      tableKey={tableKey}
+      currentLayoutData={ctable.currentLayoutData}
+      onLayoutLoad={ctable.handleLayoutLoad}
+      targetLayoutId={ctable.layoutIdToLoad}
+      activeLayoutId={ctable.currentLayoutId}
+      serviceUrl={serviceUrl}
+    />
+  ) : null;
   const timelineRows = ctable.visibleRows as Array<any>;
   const totalPages = ctable.rowsPerPage === -1
     ? 1
@@ -405,6 +437,17 @@ export const CPlanningGantt = ({
       return next;
     });
   }, [flatTasks]);
+
+  useEffect(() => {
+    if (layoutVariantLoadKey === undefined || !layoutVariant) return;
+    if (lastLayoutVariantLoadKeyRef.current === layoutVariantLoadKey) return;
+    lastLayoutVariantLoadKeyRef.current = layoutVariantLoadKey;
+    ctable.handleVariantLoad(layoutVariant);
+  }, [ctable, layoutVariant, layoutVariantLoadKey]);
+
+  useEffect(() => {
+    onLayoutIdChange?.(ctable.currentLayoutId);
+  }, [ctable.currentLayoutId, onLayoutIdChange]);
 
   const getTimelineEntryKey = (entry: any) =>
     entry.type === 'group' ? `group-${entry.id}` : `row-${(entry.data || entry)?.id}`;
@@ -431,32 +474,26 @@ export const CPlanningGantt = ({
   const activeScale = scaleOptions.find((item) => item.value === scale) ?? scaleOptions[1];
   const extraToolNodes = Array.isArray(extraTools) ? extraTools : extraTools ? [extraTools] : [];
   const units = useMemo(() => buildTimelineUnits(range.start, range.end, scale), [range.end, range.start, scale]);
-  const timelineWidth = units.length * activeScale.width;
+  const timelineMinWidth = units.length * activeScale.width;
+  const timelineSlotPercent = units.length > 0 ? 100 / units.length : 100;
+  const timelineGridTemplateColumns = units.length > 0
+    ? `repeat(${units.length}, minmax(${activeScale.width}px, 1fr))`
+    : '1fr';
+  const timelineGridBackgroundSize = units.length > 0 ? `calc(100% / ${units.length}) 100%` : '100% 100%';
 
   const tableWidth = (ctable.columns || [])
     .filter((column: any) => ctable.visibleColumns.includes(column.id))
-    .reduce((sum: number, column: any) => sum + (ctable.columnWidths?.[column.id] || column.minWidth || 100), 0);
+    .reduce((sum: number, column: any) => sum + (ctable.columnWidths?.[column.id] || column.minWidth || 100), 0)
+    + (ctable.grouping.length > 0 ? TABLE_GROUP_CONTROL_COLUMN_WIDTH : 0);
   const resolvedTablePaneWidth = splitMode === 'manual' && tablePaneWidth !== null ? tablePaneWidth : tableWidth;
   const tableExpanded = expandedPane === 'table';
   const timelineExpanded = expandedPane === 'timeline';
-  const visibleTableWidth: number | string = timelineExpanded
-    ? 0
-    : tableExpanded || splitMode === 'even'
-      ? '100%'
-      : resolvedTablePaneWidth;
   const tableCollapsed = expandedPane === 'timeline';
   const timelineCollapsed = expandedPane === 'table';
   const showSplitter = !tableCollapsed && !timelineCollapsed;
-  const gridTemplateColumns = tableExpanded
-    ? 'minmax(0, 1fr) 0px 0px'
-    : timelineExpanded
-      ? '0px 0px minmax(0, 1fr)'
-      : splitMode === 'even'
-        ? `minmax(0, 1fr) ${SPLITTER_WIDTH}px minmax(0, 1fr)`
-        : `${resolvedTablePaneWidth}px ${SPLITTER_WIDTH}px minmax(0, 1fr)`;
 
   const getTablePaneMaxWidth = () => {
-    const layoutWidth = splitLayoutRef.current?.clientWidth ?? 0;
+    const layoutWidth = splitLayoutWidth || splitLayoutRef.current?.clientWidth || 0;
     if (layoutWidth > 0) {
       return Math.max(MIN_TABLE_WIDTH, layoutWidth - SPLITTER_WIDTH - MIN_TIMELINE_WIDTH);
     }
@@ -467,13 +504,61 @@ export const CPlanningGantt = ({
     Math.min(Math.max(width, MIN_TABLE_WIDTH), getTablePaneMaxWidth())
   );
 
+  const getMeasuredGridColumns = () => {
+    if (splitLayoutWidth <= 0) return null;
+    const splitterWidth = showSplitter ? SPLITTER_WIDTH : 0;
+
+    if (tableExpanded) {
+      return {
+        tableWidth: splitLayoutWidth,
+        splitterWidth,
+        timelineWidth: 0,
+      };
+    }
+
+    if (timelineExpanded) {
+      return {
+        tableWidth: 0,
+        splitterWidth,
+        timelineWidth: splitLayoutWidth,
+      };
+    }
+
+    if (splitMode === 'even') {
+      const tableColumnWidth = Math.max(0, (splitLayoutWidth - splitterWidth) / 2);
+      return {
+        tableWidth: tableColumnWidth,
+        splitterWidth,
+        timelineWidth: Math.max(0, splitLayoutWidth - splitterWidth - tableColumnWidth),
+      };
+    }
+
+    const tableColumnWidth = clampTablePaneWidth(resolvedTablePaneWidth);
+    return {
+      tableWidth: tableColumnWidth,
+      splitterWidth,
+      timelineWidth: Math.max(0, splitLayoutWidth - splitterWidth - tableColumnWidth),
+    };
+  };
+
+  const measuredGridColumns = getMeasuredGridColumns();
+  const gridTemplateColumns = measuredGridColumns
+    ? `${measuredGridColumns.tableWidth}px ${measuredGridColumns.splitterWidth}px ${measuredGridColumns.timelineWidth}px`
+    : tableExpanded
+      ? 'minmax(0, 1fr) 0px 0px'
+      : timelineExpanded
+        ? '0px 0px minmax(0, 1fr)'
+        : splitMode === 'even'
+          ? `minmax(0, 1fr) ${SPLITTER_WIDTH}px minmax(0, 1fr)`
+          : `${resolvedTablePaneWidth}px ${SPLITTER_WIDTH}px minmax(0, 1fr)`;
+
   useEffect(() => {
     if (splitMode !== 'manual') return;
     setTablePaneWidth((current) => {
       if (current === null) return null;
       return clampTablePaneWidth(current);
     });
-  }, [splitMode, tableWidth]);
+  }, [splitMode, tableWidth, splitLayoutWidth]);
 
   const startResize = (event: React.PointerEvent<HTMLDivElement>) => {
     event.preventDefault();
@@ -622,6 +707,43 @@ export const CPlanningGantt = ({
   };
 
   useLayoutEffect(() => {
+    const layoutEl = splitLayoutRef.current;
+    if (!layoutEl) {
+      setSplitLayoutWidth(0);
+      return;
+    }
+
+    let animationFrame = 0;
+    const measureSplitLayoutWidth = () => {
+      window.cancelAnimationFrame(animationFrame);
+      animationFrame = window.requestAnimationFrame(() => {
+        const nextWidth = layoutEl.clientWidth;
+        setSplitLayoutWidth((prev) => (Math.abs(prev - nextWidth) < 0.5 ? prev : nextWidth));
+      });
+    };
+
+    measureSplitLayoutWidth();
+
+    if (typeof ResizeObserver === 'undefined') {
+      window.addEventListener('resize', measureSplitLayoutWidth);
+      return () => {
+        window.cancelAnimationFrame(animationFrame);
+        window.removeEventListener('resize', measureSplitLayoutWidth);
+      };
+    }
+
+    const resizeObserver = new ResizeObserver(measureSplitLayoutWidth);
+    resizeObserver.observe(layoutEl);
+    window.addEventListener('resize', measureSplitLayoutWidth);
+
+    return () => {
+      window.cancelAnimationFrame(animationFrame);
+      resizeObserver.disconnect();
+      window.removeEventListener('resize', measureSplitLayoutWidth);
+    };
+  }, [tableRows.length]);
+
+  useLayoutEffect(() => {
     if (!selectedTaskId || timelineCollapsed) return;
 
     const timelineEl = timelineScrollRef.current;
@@ -653,9 +775,11 @@ export const CPlanningGantt = ({
         tableEl.scrollTop = timelineEl.scrollTop;
       }
 
-      const taskStartOffset = dateToOffset(dayjs(selectedRow.startDate), units, activeScale.width);
-      const targetLeft = Math.max(0, taskStartOffset - activeScale.width);
-      timelineEl.scrollLeft = Math.min(targetLeft, Math.max(0, timelineWidth - timelineEl.clientWidth));
+      const timelineScrollWidth = Math.max(1, timelineEl.scrollWidth);
+      const timelineUnitWidth = units.length > 0 ? timelineScrollWidth / units.length : activeScale.width;
+      const taskStartOffset = dateToOffset(dayjs(selectedRow.startDate), units, timelineUnitWidth);
+      const targetLeft = Math.max(0, taskStartOffset - timelineUnitWidth);
+      timelineEl.scrollLeft = Math.min(targetLeft, Math.max(0, timelineScrollWidth - timelineEl.clientWidth));
 
       window.requestAnimationFrame(() => {
         syncScrollingRef.current = false;
@@ -671,7 +795,6 @@ export const CPlanningGantt = ({
     tableRowMap,
     timelineCollapsed,
     timelineRows,
-    timelineWidth,
     units,
   ]);
 
@@ -826,8 +949,24 @@ export const CPlanningGantt = ({
               fontWeight: 600,
               color: 'text.primary',
               minWidth: 64,
-              '& .MuiSelect-select': { py: 0.25, pr: '16px !important' },
-              '& .MuiSvgIcon-root': { color: 'text.primary' },
+              height: TABLE_CONTROL_BUTTON_SIZE,
+              display: 'flex',
+              alignItems: 'center',
+              '& .MuiSelect-select': {
+                py: 0,
+                pl: 0.75,
+                pr: '22px !important',
+                minHeight: `${TABLE_CONTROL_BUTTON_SIZE}px !important`,
+                height: TABLE_CONTROL_BUTTON_SIZE,
+                display: 'flex',
+                alignItems: 'center',
+                boxSizing: 'border-box',
+              },
+              '& .MuiSelect-icon': {
+                right: 0,
+                fontSize: TABLE_CONTROL_ICON_SIZE,
+                color: 'text.primary',
+              },
             }}
           >
             {rowsPerPageOptions.map((option) => (
@@ -840,9 +979,9 @@ export const CPlanningGantt = ({
             size="small"
             onClick={() => ctable.setPage(Math.max(currentPage - 1, 0))}
             disabled={!canGoPrev}
-            sx={{ p: 0.35, color: 'text.primary' }}
+            sx={{ ...tableControlIconButtonSx, color: 'text.primary' }}
           >
-            <KeyboardArrowLeftIcon fontSize="small" />
+            <KeyboardArrowLeftIcon />
           </IconButton>
           <Typography sx={{ fontSize: TOOLBAR_FONT_SIZE, fontWeight: 600, minWidth: 88, textAlign: 'center', color: 'text.primary' }}>
             {t('table.toolbar.pageOf', { current: displayPage, total: totalPages })}
@@ -851,15 +990,15 @@ export const CPlanningGantt = ({
             size="small"
             onClick={() => ctable.setPage(Math.min(currentPage + 1, totalPages - 1))}
             disabled={!canGoNext}
-            sx={{ p: 0.35, color: 'text.primary' }}
+            sx={{ ...tableControlIconButtonSx, color: 'text.primary' }}
           >
-            <KeyboardArrowRightIcon fontSize="small" />
+            <KeyboardArrowRightIcon />
           </IconButton>
         </Stack>
 
-        <Stack direction="row" spacing={1} alignItems="center" sx={{ flexWrap: 'wrap' }}>
-          {extraToolNodes.length > 0 && (
-            <Stack direction="row" spacing={0.75} alignItems="center">
+          <Stack direction="row" spacing={1} alignItems="center" sx={{ flexWrap: 'wrap' }}>
+            {extraToolNodes.length > 0 && (
+              <Stack direction="row" spacing={0.75} alignItems="center">
               {extraToolNodes.map((node, idx) => (
                 <Box key={`planning-extra-tool-${idx}`} sx={{ display: 'flex', alignItems: 'center' }}>
                   {node}
@@ -879,9 +1018,14 @@ export const CPlanningGantt = ({
               onClick={() => setSortDialogOpen(true)}
               color={ctable.sortBy.length > 0 || ctable.orderBy ? 'primary' : 'default'}
             >
-              <SortIcon fontSize="small" />
-            </CIconButton>
-          </Stack>
+                <SortIcon fontSize="small" />
+              </CIconButton>
+            </Stack>
+            {layoutManager && (
+              <Stack direction="row" spacing={0.25} sx={{ p: 0.5, borderRadius: 2, backgroundColor: 'action.hover' }}>
+                {layoutManager}
+              </Stack>
+            )}
           <Stack direction="row" spacing={0.25} sx={{ p: 0.5, borderRadius: 2, backgroundColor: 'action.hover' }}>
             <CIconButton
               tooltip="Expand task table"
@@ -939,7 +1083,7 @@ export const CPlanningGantt = ({
               ref={tableScrollRef}
               onScroll={() => syncVerticalScroll('table')}
               sx={{
-                width: visibleTableWidth,
+                width: '100%',
                 minWidth: 0,
                 maxWidth: '100%',
                 height: bodyHeight,
@@ -948,33 +1092,33 @@ export const CPlanningGantt = ({
                 opacity: tableCollapsed ? 0 : 1,
                 transform: tableCollapsed ? 'translateX(-10px)' : 'translateX(0)',
                 pointerEvents: tableCollapsed ? 'none' : 'auto',
-                transition: `opacity ${PANE_TRANSITION}, transform ${PANE_TRANSITION}, width ${PANE_TRANSITION}`,
+                transition: `opacity ${PANE_TRANSITION}, transform ${PANE_TRANSITION}`,
               }}
             >
-              <Table
-                size="small"
-                stickyHeader
-                sx={{
-                  tableLayout: 'fixed',
-                  width: tableWidth,
-                  '& thead .MuiTableCell-root': {
-                    height: HEADER_HEIGHT,
-                    py: 0,
-                    lineHeight: 1.15,
-                    boxSizing: 'border-box',
-                  },
+              <DndContext
+                sensors={columnDragSensors}
+                collisionDetection={closestCenter}
+                modifiers={[restrictToHorizontalAxis]}
+                onDragEnd={(event: DragEndEvent) => {
+                  const activeId = event?.active?.id;
+                  const overId = event?.over?.id;
+                  if (typeof activeId === 'string' && typeof overId === 'string') {
+                    ctable.handleColumnReorder(activeId, overId);
+                  }
                 }}
               >
-                <DndContext
-                  sensors={columnDragSensors}
-                  collisionDetection={closestCenter}
-                  modifiers={[restrictToHorizontalAxis]}
-                  onDragEnd={(event: DragEndEvent) => {
-                    const activeId = event?.active?.id;
-                    const overId = event?.over?.id;
-                    if (typeof activeId === 'string' && typeof overId === 'string') {
-                      ctable.handleColumnReorder(activeId, overId);
-                    }
+                <Table
+                  size="small"
+                  stickyHeader
+                  sx={{
+                    tableLayout: 'fixed',
+                    width: tableWidth,
+                    '& thead .MuiTableCell-root': {
+                      height: HEADER_HEIGHT,
+                      py: 0,
+                      lineHeight: 1.15,
+                      boxSizing: 'border-box',
+                    },
                   }}
                 >
                   <CSmartTableHead
@@ -1000,7 +1144,6 @@ export const CPlanningGantt = ({
                     onColumnResize={ctable.handleColumnResize}
                     enableColumnReorder
                   />
-                </DndContext>
                   <TableBody>
                     {timelineRows.map((entry) => {
                       const entryKey = getTimelineEntryKey(entry);
@@ -1014,14 +1157,13 @@ export const CPlanningGantt = ({
                             {ctable.grouping.length > 0 && (
                               <TableCell
                                 sx={{
-                                  width: 44,
+                                  ...tableGroupControlCellSx,
                                   height: ROW_HEIGHT,
-                                  py: 0,
                                   borderBottom: `1px solid ${theme.palette.divider}`,
                                 }}
                               >
-                                <IconButton size="small" onClick={() => ctable.toggleGroupExpand(entry.id)}>
-                                  {entry.isExpanded ? <KeyboardArrowDownIcon fontSize="small" /> : <KeyboardArrowRightIcon fontSize="small" />}
+                                <IconButton size="small" onClick={() => ctable.toggleGroupExpand(entry.id)} sx={tableControlIconButtonSx}>
+                                  {entry.isExpanded ? <KeyboardArrowDownIcon /> : <KeyboardArrowRightIcon />}
                                 </IconButton>
                               </TableCell>
                             )}
@@ -1074,9 +1216,8 @@ export const CPlanningGantt = ({
                           {ctable.grouping.length > 0 && (
                             <TableCell
                               sx={{
-                                width: 44,
+                                ...tableGroupControlCellSx,
                                 height: ROW_HEIGHT,
-                                py: 0,
                                 borderBottom: `1px solid ${theme.palette.divider}`,
                               }}
                             />
@@ -1101,7 +1242,8 @@ export const CPlanningGantt = ({
                       );
                     })}
                   </TableBody>
-              </Table>
+                </Table>
+              </DndContext>
             </TableContainer>
 
             <Box
@@ -1149,11 +1291,11 @@ export const CPlanningGantt = ({
                 onScroll={() => syncVerticalScroll('timeline')}
                 sx={{ width: '100%', height: bodyHeight, overflowX: 'auto', overflowY: 'auto' }}
               >
-                <Box sx={{ width: timelineWidth }}>
+                <Box sx={{ width: '100%', minWidth: timelineMinWidth || '100%' }}>
                   <Box
                     sx={{
                       display: 'grid',
-                      gridTemplateColumns: `repeat(${units.length}, ${activeScale.width}px)`,
+                      gridTemplateColumns: timelineGridTemplateColumns,
                       height: measuredHeaderHeight,
                       boxSizing: 'border-box',
                       borderBottom: `1px solid ${theme.palette.divider}`,
@@ -1237,9 +1379,9 @@ export const CPlanningGantt = ({
                       const row = (entry.data || entry) as PlanningTableRow;
                       const rowStart = dayjs(row.startDate);
                       const rowEnd = dayjs(row.endDate);
-                      const left = dateToOffset(rowStart, units, activeScale.width);
-                      const right = dateToOffset(rowEnd, units, activeScale.width);
-                      const width = Math.max(18, right - left);
+                      const left = dateToOffset(rowStart, units, timelineSlotPercent);
+                      const right = dateToOffset(rowEnd, units, timelineSlotPercent);
+                      const width = Math.max(0, right - left);
                       const progress = clampProgress(row.progress);
                       const selected = row.id === selectedTaskId;
                       const isDraggable = canDragTask(row.id);
@@ -1281,7 +1423,7 @@ export const CPlanningGantt = ({
                               theme.palette.mode === 'dark'
                                 ? 'linear-gradient(90deg, rgba(148,163,184,0.08) 1px, transparent 1px)'
                                 : 'linear-gradient(90deg, rgba(15,23,42,0.06) 1px, transparent 1px)',
-                            backgroundSize: `${activeScale.width}px 100%`,
+                            backgroundSize: timelineGridBackgroundSize,
                             cursor: isDragging ? 'grabbing' : isDraggable ? 'grab' : onTaskSelect ? 'pointer' : 'default',
                             transition: 'opacity 120ms ease',
                           }}
@@ -1290,9 +1432,9 @@ export const CPlanningGantt = ({
                             <Box
                               sx={{
                                 position: 'absolute',
-                                left,
+                                left: `${left}%`,
                                 top: Math.max(8, (rowHeight - 24) / 2),
-                                width,
+                                width: `max(18px, ${width}%)`,
                                 height: 24,
                                 borderRadius: 999,
                                 overflow: 'hidden',

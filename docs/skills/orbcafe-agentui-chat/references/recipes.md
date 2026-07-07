@@ -23,6 +23,7 @@ const [status, setStatus] = useState<AgentPanelStatus>('idle')
   onSend={handleSend}
   isResponding={isResponding}
   showInput={false}
+  onHeaderPointerDown={handlePanelHeaderPointerDown}
 />
 ```
 
@@ -36,6 +37,8 @@ setStatus('success')
 setIsResponding(false)
 setTimeout(() => setStatus('idle'), 1200)
 ```
+
+Use `onHeaderPointerDown` only when an outer shell owns dragging or panel positioning. `AgentPanel` does not store floating position.
 
 ## Recipe 2: StdChat with streaming
 
@@ -60,7 +63,32 @@ import { StdChat, type ChatMessage } from 'orbcafe-ui'
 />
 ```
 
-## Recipe 3: CopilotChat inside custom shell
+## Recipe 3: AIBrowserGlow for AI running state
+
+```tsx
+import { AIBrowserGlow } from 'orbcafe-ui'
+
+<AIBrowserGlow
+  active={isResponding}
+  colors={['#ff3860', '#24e070', '#3090ff']}
+  zIndex={2147483000}
+/>
+```
+
+最小状态切换：
+
+```ts
+setIsResponding(true)
+try {
+  await runAgentTask()
+} finally {
+  setIsResponding(false)
+}
+```
+
+Tie `active` to the real AI running state. Turn it off on success, error, cancel, and stop.
+
+## Recipe 4: CopilotChat inside custom shell
 
 ```tsx
 import { CopilotChat } from 'orbcafe-ui'
@@ -106,3 +134,20 @@ const [corner, setCorner] = useState<'top-left' | 'top-right' | 'bottom-left' | 
 const [panelSize, setPanelSize] = useState({ width: 340, height: 460 })
 const [panelPosition, setPanelPosition] = useState({ x: 0, y: 0 })
 ```
+
+When appending a streaming assistant message:
+
+```ts
+setMessages((prev) => [
+  ...prev,
+  {
+    id: crypto.randomUUID(),
+    type: 'assistant',
+    content: answer,
+    timestamp: new Date(),
+    isStreaming: true,
+  },
+])
+```
+
+Then clear only that message's streaming flag in `onMessageStreamingComplete`.

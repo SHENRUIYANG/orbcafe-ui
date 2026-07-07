@@ -156,8 +156,8 @@ export default function PlanningExampleClient() {
     columns: planningColumns,
     defaultScale: 'week',
     defaultSelectedTaskId: planningTasks[0]?.id,
-    filterAppId: 'planning-gantt-filter',
-    filterTableKey: 'planning',
+    appId: 'planning-gantt-demo',
+    tableKey: 'planning',
     enableRowReorder: true,
   });
 

@@ -35,6 +35,9 @@ function stableSort<T>(array: readonly T[], comparator: (a: T, b: T) => number) 
 }
 
 export const useCTable = (props: CTableProps) => {
+    const groupingDisabled = Boolean(props.disableGrouping);
+    const sortingDisabled = Boolean(props.disableSorting);
+
     const getDefaultColumnWidth = useCallback((column: any) => {
         const label = String(column?.label ?? column?.id ?? '');
         const estimatedByLabel = label.length * 9 + 64; // text + sort icon + paddings + resize handle
@@ -63,7 +66,7 @@ export const useCTable = (props: CTableProps) => {
     );
     const [showSummary, setShowSummary] = useState(props.showSummary || false);
     const [summaryColumns, setSummaryColumns] = useState<string[]>(() => getNumericColumnIds());
-    const [grouping, setGrouping] = useState<string[]>([]);
+    const [groupingState, setGroupingState] = useState<string[]>([]);
     const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
     const [columnWidths, setColumnWidths] = useState<Record<string, number>>(() => {
         const initial: Record<string, number> = {};
@@ -81,6 +84,30 @@ export const useCTable = (props: CTableProps) => {
     const [graphReportOpen, setGraphReportOpen] = useState(false);
     const [currentLayoutId, setCurrentLayoutId] = useState<string>('');
     const [layoutIdToLoad, setLayoutIdToLoad] = useState<string>('');
+    const grouping = groupingDisabled ? [] : groupingState;
+    const setGrouping = useCallback((nextGrouping: string[] | ((prev: string[]) => string[])) => {
+        if (groupingDisabled) {
+            setGroupingState([]);
+            setExpandedGroups(new Set());
+            setGroupAnchorEl(null);
+            return;
+        }
+        setGroupingState(nextGrouping);
+    }, [groupingDisabled]);
+
+    useEffect(() => {
+        if (!groupingDisabled) return;
+        setGroupingState([]);
+        setExpandedGroups(new Set());
+        setGroupAnchorEl(null);
+    }, [groupingDisabled]);
+
+    useEffect(() => {
+        if (!sortingDisabled) return;
+        setOrder('asc');
+        setOrderBy('');
+        setSortBy([]);
+    }, [sortingDisabled]);
 
     // Sync props
     useEffect(() => {
@@ -90,9 +117,14 @@ export const useCTable = (props: CTableProps) => {
     }, [props.layout]);
 
     useEffect(() => {
+        if (sortingDisabled) {
+            setOrder('asc');
+            setOrderBy('');
+            return;
+        }
         if (props.order !== undefined) setOrder(props.order);
         if (props.orderBy !== undefined) setOrderBy(props.orderBy);
-    }, [props.order, props.orderBy]);
+    }, [props.order, props.orderBy, sortingDisabled]);
 
     useEffect(() => {
         if (props.selected !== undefined) {
@@ -185,6 +217,7 @@ export const useCTable = (props: CTableProps) => {
 
     // Sort Logic — multi-column sort (sortBy) takes precedence over single-column sort.
     const sortedRows = useMemo(() => {
+        if (sortingDisabled) return filteredRows;
         if (props.onSortChange) return filteredRows;
         if (sortBy.length > 0) {
             const arr = [...filteredRows];
@@ -204,7 +237,7 @@ export const useCTable = (props: CTableProps) => {
         }
         if (!orderBy) return filteredRows;
         return stableSort(filteredRows, getComparator(order, orderBy));
-    }, [filteredRows, order, orderBy, sortBy, props.onSortChange]);
+    }, [filteredRows, order, orderBy, sortBy, props.onSortChange, sortingDisabled]);
 
     // Grouping Helper
     const getGroupedRows = useCallback((rows: any[]) => {
@@ -439,6 +472,8 @@ export const useCTable = (props: CTableProps) => {
     };
 
     const handleRequestSort = (property: string) => {
+        if (sortingDisabled) return;
+
         // When user single-clicks a header for single-column sort, drop multi-sort rules
         // so the click is the source of truth.
         if (sortBy.length > 0) setSortBy([]);
@@ -472,6 +507,13 @@ export const useCTable = (props: CTableProps) => {
     // Apply a multi-column sort definition. Single-column primitives are cleared so
     // there is one source of truth for downstream logic and serialised layouts.
     const applyMultiSort = (rules: Array<{ field: string; direction: 'asc' | 'desc' }>) => {
+        if (sortingDisabled) {
+            setOrder('asc');
+            setOrderBy('');
+            setSortBy([]);
+            return;
+        }
+
         const cleaned = rules.filter((rule) => rule && rule.field);
         setSortBy(cleaned);
         if (cleaned.length > 0) {
@@ -547,6 +589,8 @@ export const useCTable = (props: CTableProps) => {
     };
 
     const toggleGroupField = (field: string) => {
+        if (groupingDisabled) return;
+
         const currentIndex = grouping.indexOf(field);
         const newGrouping = [...grouping];
 
@@ -598,9 +642,9 @@ export const useCTable = (props: CTableProps) => {
             props.onLayoutSave({
                 visibleColumns,
                 columnOrder,
-                order,
-                orderBy,
-                sortBy,
+                order: sortingDisabled ? 'asc' : order,
+                orderBy: sortingDisabled ? '' : orderBy,
+                sortBy: sortingDisabled ? [] : sortBy,
                 grouping,
                 columnWidths,
                 showSummary,
@@ -624,9 +668,15 @@ export const useCTable = (props: CTableProps) => {
         if (layout) {
             if (layout.visibleColumns) setVisibleColumns(layout.visibleColumns);
             if (Array.isArray(layout.columnOrder)) setColumnOrder(layout.columnOrder);
-            if (layout.order) setOrder(layout.order);
-            if (layout.orderBy) setOrderBy(layout.orderBy);
-            if (Array.isArray(layout.sortBy)) setSortBy(layout.sortBy);
+            if (sortingDisabled) {
+                setOrder('asc');
+                setOrderBy('');
+                setSortBy([]);
+            } else {
+                if (layout.order) setOrder(layout.order);
+                if (layout.orderBy) setOrderBy(layout.orderBy);
+                if (Array.isArray(layout.sortBy)) setSortBy(layout.sortBy);
+            }
             if (layout.grouping) setGrouping(layout.grouping);
             if (layout.columnWidths) setColumnWidths(layout.columnWidths);
             if (layout.showSummary !== undefined) setShowSummary(Boolean(layout.showSummary));
@@ -638,9 +688,15 @@ export const useCTable = (props: CTableProps) => {
         const layout = layoutMeta?.layoutData || layoutMeta?.layout || layoutMeta || {};
         if (layout.visibleColumns) setVisibleColumns(layout.visibleColumns);
         if (Array.isArray(layout.columnOrder)) setColumnOrder(layout.columnOrder);
-        if (layout.order) setOrder(layout.order);
-        if (layout.orderBy !== undefined) setOrderBy(layout.orderBy);
-        if (Array.isArray(layout.sortBy)) setSortBy(layout.sortBy);
+        if (sortingDisabled) {
+            setOrder('asc');
+            setOrderBy('');
+            setSortBy([]);
+        } else {
+            if (layout.order) setOrder(layout.order);
+            if (layout.orderBy !== undefined) setOrderBy(layout.orderBy);
+            if (Array.isArray(layout.sortBy)) setSortBy(layout.sortBy);
+        }
         if (layout.grouping) setGrouping(layout.grouping);
         if (layout.columnWidths) setColumnWidths(layout.columnWidths);
         if (layout.showSummary !== undefined) setShowSummary(Boolean(layout.showSummary));
@@ -806,9 +862,9 @@ export const useCTable = (props: CTableProps) => {
         effectiveAppId: props.appId || '',
         currentLayoutData: {
             visibleColumns,
-            order,
-            orderBy,
-            sortBy,
+            order: sortingDisabled ? 'asc' : order,
+            orderBy: sortingDisabled ? '' : orderBy,
+            sortBy: sortingDisabled ? [] : sortBy,
             columnOrder,
             grouping,
             columnWidths,

@@ -7,6 +7,7 @@ import type { AgentUICardHooks } from '../cardTypes'
 
 export interface AssistantActionContext {
   isLatestAssistant: boolean
+  isResponding?: boolean
   onRegenerate?: () => Promise<void>
 }
 
@@ -37,6 +38,8 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
 }) => {
   
   if (message.type === 'assistant') {
+    const isAssistantActionBusy = Boolean(assistantActions?.isResponding || message.isStreaming)
+
     return (
       <div className="flex justify-start mb-4">
         <div className="w-full bg-transparent text-black dark:text-gray-100 rounded-2xl px-4 py-3 mr-auto" style={{ lineHeight: '1.5', fontSize: '16px', fontWeight: '280', fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
@@ -56,8 +59,9 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                 buttons={[
                   {
                     type: 'refresh',
-                    onClick: () => assistantActions?.onRegenerate?.(),
-                    disabled: !assistantActions?.onRegenerate
+                    onClick: () => { void assistantActions?.onRegenerate?.() },
+                    disabled: isAssistantActionBusy || !assistantActions?.onRegenerate,
+                    loading: isAssistantActionBusy
                   },
                   { type: 'copy', onClick: () => navigator.clipboard.writeText(message.content), disabled: false },
                   { type: 'volume', onClick: () => console.log('语音播放'), disabled: false },

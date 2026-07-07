@@ -44,6 +44,9 @@ const metadata = {
         getOptionValue: (item) => item.customerId,
         getOptionLabel: (item) => item.customerName,
         getOptionDescription: (item) => item.country,
+        allowManualInput: true,
+        validateManualInput: true,
+        manualInputErrorText: 'Enter a valid customer.',
       },
     },
   ],
@@ -99,7 +102,7 @@ Persistence notes for Recipe 1:
 - Use `integrated` mode. `useStandardReport` defaults to it, so `<CStandardPage {...pageProps} />` is enough.
 - To save a full user view: save table Layout first, then save SmartFilter Variant. The variant stores `layoutRefs` pointing to the saved layout id.
 - Add `serviceUrl` or `variantService` to `useStandardReport` only when backend persistence is required. Without it, variants/layouts persist in localStorage.
-- For SAP-style lookup fields, define the field as `type: 'value-help'` or `isValueHelp: true`. The selected key becomes the SmartFilter value, so it is included in filter variants and `fetchData` params.
+- For SAP-style lookup fields, define the field as `type: 'value-help'` or `isValueHelp: true`. The selected key becomes the SmartFilter value, so it is included in filter variants and `fetchData` params. Test mouse open, `F4`, legal manual key, illegal manual key, and variant reload.
 
 ## Recipe 1B: Value Help filter with remote search
 
@@ -109,6 +112,7 @@ Use this when options are too large to preload. `onSearch(query)` may return a n
 const materialValueHelp = {
   dialogTitle: 'Material Value Help',
   searchPlaceholder: 'Search material, description, or plant...',
+  selectedItems: selectedMaterials,
   columns: [
     { field: 'materialId', label: 'Material', minWidth: 140 },
     { field: 'description', label: 'Description', minWidth: 240 },
@@ -138,6 +142,37 @@ Value Help notes:
 - Do not localize selected values. Localize `label`, `dialogTitle`, `searchPlaceholder`, and `columns[].label`.
 - Single-select fields use operator `equals`; `mode: 'multiple'` uses operator `anyOf`.
 - If a saved variant displays only the raw key after reload, pass `selectedItems` or include the selected record in `items` so `CValueHelp` can reconstruct the key-description display.
+- Manual input is on by default. Keep `validateManualInput=true` for SAP/F4-style keys; invalid typed keys should show an error instead of changing filter state.
+
+## Recipe 1C: Standalone CValueHelp field
+
+Use direct `CValueHelp` only when the value is not part of SmartFilter variant state.
+
+```tsx
+import { CValueHelp, type CValueHelpSelectionValue } from 'orbcafe-ui';
+
+const [customer, setCustomer] = useState<CValueHelpSelectionValue>(null);
+
+<CValueHelp
+  label="Customer"
+  value={customer}
+  items={customers}
+  columns={[
+    { field: 'customerId', label: 'Customer', minWidth: 120 },
+    { field: 'customerName', label: 'Name', minWidth: 220 },
+  ]}
+  getOptionValue={(item) => item.customerId}
+  getOptionLabel={(item) => item.customerName}
+  allowManualInput
+  validateManualInput
+  onChange={(nextValue, selection) => {
+    setCustomer(nextValue);
+    setSelectedCustomer(selection);
+  }}
+/>
+```
+
+For report filters, prefer Recipe 1/1B so variants save the selected key.
 
 ## Recipe 2: Table-only (Controlled Pagination) + quick operations + graph entry
 

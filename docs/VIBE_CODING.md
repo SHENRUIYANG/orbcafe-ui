@@ -95,6 +95,8 @@ Use `CValueHelp` when the user says F4, SAP search help, value help, lookup fiel
 
 - `getOptionValue` returns the persisted key. Keep it stable and non-localized.
 - `getOptionLabel` and column labels are UI text and can be localized.
+- Manual entry is enabled by default and validates against current `items` / `selectedItems`; invalid keys show an error and are not written to filter state.
+- Set `valueHelp.allowManualInput: false` only when the business field must be selection-only.
 - Single selection stores `{ operator: 'equals' }`.
 - Multiple selection stores `{ operator: 'anyOf' }`.
 - Use `onSearch(query)` for remote lookup. Returning an array replaces dialog results.
@@ -220,6 +222,8 @@ For manual verification:
 
 ## Updating Skills
 
+`docs/components/*` and `docs/skills/*` are generated read-only mirrors — `scripts/build-docs-pages.js` copies them from `src/components/*/README.md` and `skills/**`. Always edit the `src/` or `skills/` source, never `docs/components/` or `docs/skills/` directly; a manual edit there will be overwritten the next time the generator runs.
+
 When adding a new public component or behavior:
 
 1. Export it from `src/index.ts`.
@@ -230,3 +234,4 @@ When adding a new public component or behavior:
 6. Update `skills/orbcafe-ui-component-usage/references/skill-routing-map.md` if routing changes.
 7. Update the target module skill and references.
 8. Run `npm run check:ai-contracts`.
+9. Run `npm run docs:build` to regenerate `docs/components/` and `docs/skills/` from the sources above, then check the diff.

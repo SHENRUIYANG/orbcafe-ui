@@ -34,18 +34,17 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { 
-  Box, 
-  Popover, 
-  TextField, 
-  InputAdornment, 
-  IconButton, 
-  Stack, 
-  Chip, 
+import {
+  Box,
+  Popover,
+  TextField,
+  InputAdornment,
+  IconButton,
+  Stack,
+  Chip,
   Button,
   Divider,
-  styled,
-  Typography
+  styled
 } from '@mui/material';
 import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
 import { PickersDay } from '@mui/x-date-pickers/PickersDay';
@@ -58,6 +57,7 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import dayjs, { Dayjs } from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
 import 'dayjs/locale/zh-cn';
 import 'dayjs/locale/fr';
 import 'dayjs/locale/de';
@@ -68,6 +68,9 @@ import type { OrbcafeLocale } from '../../i18n';
 
 dayjs.extend(isBetween);
 dayjs.extend(localizedFormat);
+dayjs.extend(customParseFormat);
+
+const MANUAL_INPUT_FORMAT = 'YYYY-MM-DD';
 
 interface CDateRangePickerProps {
   label?: string;
@@ -149,6 +152,11 @@ export const CDateRangePicker = ({
   const [selectionStep, setSelectionStep] = useState<'start' | 'end'>('start');
   const [hoveredDay, setHoveredDay] = useState<Dayjs | null>(null);
   const [viewDate, setViewDate] = useState<Dayjs>((value[0] || dayjs()).locale(dayjsLocale));
+  // Manual text input buffers for the start/end fields (committed on blur / Enter)
+  const [startInput, setStartInput] = useState('');
+  const [endInput, setEndInput] = useState('');
+  const [startError, setStartError] = useState(false);
+  const [endError, setEndError] = useState(false);
   
   // Ref to track previous prop value for comparison
   const prevValueRef = React.useRef(value);
@@ -177,6 +185,57 @@ export const CDateRangePicker = ({
     // Update ref
     prevValueRef.current = value;
   }, [value, dayjsLocale]);
+
+  // Keep the manual text inputs in sync with the committed value
+  useEffect(() => {
+    setStartInput(internalValue[0] ? internalValue[0].locale(dayjsLocale).format(MANUAL_INPUT_FORMAT) : '');
+    setEndInput(internalValue[1] ? internalValue[1].locale(dayjsLocale).format(MANUAL_INPUT_FORMAT) : '');
+    setStartError(false);
+    setEndError(false);
+  }, [internalValue, dayjsLocale]);
+
+  // Commit a manually typed date (on blur or Enter)
+  const commitManualInput = (which: 'start' | 'end', text: string) => {
+    const trimmed = text.trim();
+    const setError = which === 'start' ? setStartError : setEndError;
+
+    if (!trimmed) {
+      // Empty -> clear that side
+      const next: [Dayjs | null, Dayjs | null] =
+        which === 'start' ? [null, internalValue[1]] : [internalValue[0], null];
+      setError(false);
+      setInternalValue(next);
+      return;
+    }
+
+    const parsed = dayjs(trimmed, MANUAL_INPUT_FORMAT, true).locale(dayjsLocale);
+    if (!parsed.isValid()) {
+      setError(true);
+      return;
+    }
+    setError(false);
+
+    let next: [Dayjs | null, Dayjs | null] = [...internalValue];
+    if (which === 'start') {
+      next[0] = parsed;
+      // If the new start is after the existing end, drop the end
+      if (next[1] && parsed.isAfter(next[1], 'day')) next[1] = null;
+      setSelectionStep(next[1] ? 'start' : 'end');
+    } else {
+      const startDate = next[0];
+      if (startDate && parsed.isBefore(startDate, 'day')) {
+        // End earlier than start -> treat typed value as the new start
+        next = [parsed, null];
+        setSelectionStep('end');
+      } else {
+        next[1] = parsed;
+        setSelectionStep('start');
+      }
+    }
+
+    setInternalValue(next);
+    setViewDate(parsed);
+  };
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -291,7 +350,6 @@ export const CDateRangePicker = ({
   }, [internalValue, selectionStep, hoveredDay]);
 
   const formatDate = (date: Dayjs | null) => date ? date.locale(dayjsLocale).format('YYYY-MM-DD') : '';
-  const formatPreviewDate = (date: Dayjs | null) => date ? date.locale(dayjsLocale).format('ll') : '';
 
   return (
     <Box>
@@ -355,49 +413,49 @@ export const CDateRangePicker = ({
         }}
         slotProps={{
             paper: {
-                sx: { display: 'flex', flexDirection: 'column', p: 0, minWidth: 320 }
+                sx: { display: 'flex', flexDirection: 'column', p: 0, width: 320 }
             }
         }}
       >
         <Box sx={{ p: 2, bgcolor: 'background.default', borderBottom: 1, borderColor: 'divider' }}>
-            <Stack direction="row" alignItems="center" spacing={2} justifyContent="space-between">
-                <Box 
-                    sx={{ 
-                        p: 1, 
-                        border: 1, 
-                        borderColor: selectionStep === 'start' ? 'primary.main' : 'divider',
-                        borderRadius: 1,
-                        bgcolor: selectionStep === 'start' ? 'action.hover' : 'transparent',
-                        flex: 1,
-                        cursor: 'pointer'
+            <Stack direction="row" alignItems="center" spacing={1.5} justifyContent="space-between">
+                <TextField
+                    label={t('dateRange.startDate')}
+                    placeholder={MANUAL_INPUT_FORMAT}
+                    value={startInput}
+                    error={startError}
+                    size="small"
+                    onFocus={() => setSelectionStep('start')}
+                    onChange={(e) => { setStartInput(e.target.value); if (startError) setStartError(false); }}
+                    onBlur={() => commitManualInput('start', startInput)}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter') { e.preventDefault(); commitManualInput('start', startInput); }
                     }}
-                    onClick={() => setSelectionStep('start')}
-                >
-                    <Typography variant="caption" color="text.secondary" display="block">{t('dateRange.startDate')}</Typography>
-                    <Typography variant="body2" fontWeight={500}>
-                        {internalValue[0] ? formatPreviewDate(internalValue[0]) : t('dateRange.select')}
-                    </Typography>
-                </Box>
+                    sx={{
+                        flex: 1,
+                        '& .MuiInputBase-input': { fontSize: FILTER_FONT_SIZE, py: 0.75 },
+                        '& .MuiInputLabel-root': { fontSize: FILTER_FONT_SIZE },
+                    }}
+                />
                 <ArrowForwardIcon color="action" fontSize="small" />
-                <Box 
-                     sx={{ 
-                        p: 1, 
-                        border: 1, 
-                        borderColor: selectionStep === 'end' ? 'primary.main' : 'divider',
-                        borderRadius: 1,
-                        bgcolor: selectionStep === 'end' ? 'action.hover' : 'transparent',
+                <TextField
+                    label={t('dateRange.endDate')}
+                    placeholder={MANUAL_INPUT_FORMAT}
+                    value={endInput}
+                    error={endError}
+                    size="small"
+                    onFocus={() => { if (internalValue[0]) setSelectionStep('end'); }}
+                    onChange={(e) => { setEndInput(e.target.value); if (endError) setEndError(false); }}
+                    onBlur={() => commitManualInput('end', endInput)}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter') { e.preventDefault(); commitManualInput('end', endInput); }
+                    }}
+                    sx={{
                         flex: 1,
-                        cursor: 'pointer'
+                        '& .MuiInputBase-input': { fontSize: FILTER_FONT_SIZE, py: 0.75 },
+                        '& .MuiInputLabel-root': { fontSize: FILTER_FONT_SIZE },
                     }}
-                    onClick={() => {
-                        if (internalValue[0]) setSelectionStep('end');
-                    }}
-                >
-                    <Typography variant="caption" color="text.secondary" display="block">{t('dateRange.endDate')}</Typography>
-                    <Typography variant="body2" fontWeight={500}>
-                        {internalValue[1] ? formatPreviewDate(internalValue[1]) : t('dateRange.select')}
-                    </Typography>
-                </Box>
+                />
             </Stack>
         </Box>
 
@@ -437,7 +495,8 @@ export const CDateRangePicker = ({
               slots={{
                   day: renderWeekPickerDay
               }}
-              views={['day']}
+              views={['year', 'month', 'day']}
+              openTo="day"
               showDaysOutsideCurrentMonth
               sx={{ m: 0 }}
           />

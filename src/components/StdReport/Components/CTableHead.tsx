@@ -13,6 +13,7 @@ import { useSortable, SortableContext, horizontalListSortingStrategy } from '@dn
 import { CSS } from '@dnd-kit/utilities';
 import { CTableHeadProps } from '../Hooks/CTable/types';
 import { useOrbcafeI18n } from '../../../i18n';
+import { tableControlCheckboxSx, tableControlIconButtonSx, tableGroupControlCellSx, tableSelectionCellSx } from './ctableControlSx';
 
 export const CTableHead = (props: CTableHeadProps) => {
     const { t } = useOrbcafeI18n();
@@ -34,6 +35,7 @@ export const CTableHead = (props: CTableHeadProps) => {
         onColumnResize,
         columnWidths,
         enableColumnReorder = false,
+        disableSorting = false,
     } = props;
 
     // Resizing state
@@ -41,6 +43,7 @@ export const CTableHead = (props: CTableHeadProps) => {
     const resizingRef = useRef<{ startX: number; startWidth: number; colId: string } | null>(null);
 
     const createSortHandler = (property: string) => (_event: React.MouseEvent<unknown>) => {
+        if (disableSorting) return;
         // Prevent sorting if we are resizing
         if (resizingCol) return;
         onRequestSort(property);
@@ -106,11 +109,12 @@ export const CTableHead = (props: CTableHeadProps) => {
                 width={typeof width === 'number' ? width : 100}
                 order={order}
                 orderBy={orderBy}
-                multiSortInfo={multiSortInfo}
+                multiSortInfo={disableSorting ? undefined : multiSortInfo}
                 onRequestSort={createSortHandler(headCell.id)}
                 onContextMenu={onContextMenu}
                 onResizeMouseDown={(e) => handleMouseDown(e, headCell.id, typeof width === 'number' ? width : 100)}
                 enableColumnReorder={enableColumnReorder}
+                disableSorting={disableSorting}
             />
         );
     });
@@ -123,7 +127,7 @@ export const CTableHead = (props: CTableHeadProps) => {
                 <TableCell
                     padding="checkbox"
                     sx={(theme) => ({
-                        width: 48,
+                        ...tableSelectionCellSx,
                         position: 'sticky',
                         top: 0,
                         zIndex: 4,
@@ -137,6 +141,7 @@ export const CTableHead = (props: CTableHeadProps) => {
                         checked={rowCount > 0 && numSelected === rowCount}
                         onChange={onSelectAllClick}
                         disabled={selectionMode === 'single'}
+                        sx={tableControlCheckboxSx}
                     />
                 </TableCell>
             )}
@@ -145,7 +150,7 @@ export const CTableHead = (props: CTableHeadProps) => {
                     align="center"
                     padding="checkbox"
                     sx={(theme) => ({
-                        width: 44,
+                        ...tableGroupControlCellSx,
                         position: 'sticky',
                         top: 0,
                         zIndex: 4,
@@ -160,9 +165,9 @@ export const CTableHead = (props: CTableHeadProps) => {
                                 event.stopPropagation();
                                 handleToggleAll?.(!isAllExpanded);
                             }}
-                            sx={{ p: 0.2 }}
+                            sx={tableControlIconButtonSx}
                         >
-                            {isAllExpanded ? <UnfoldLessIcon fontSize="small" /> : <UnfoldMoreIcon fontSize="small" />}
+                            {isAllExpanded ? <UnfoldLessIcon /> : <UnfoldMoreIcon />}
                         </IconButton>
                     </Tooltip>
                 </TableCell>
@@ -190,6 +195,7 @@ interface SortableHeadCellProps {
     onContextMenu?: (event: React.MouseEvent, columnId: string) => void;
     onResizeMouseDown: (event: React.MouseEvent) => void;
     enableColumnReorder: boolean;
+    disableSorting: boolean;
 }
 
 const SortableHeadCell: React.FC<SortableHeadCellProps> = ({
@@ -202,6 +208,7 @@ const SortableHeadCell: React.FC<SortableHeadCellProps> = ({
     onContextMenu,
     onResizeMouseDown,
     enableColumnReorder,
+    disableSorting,
 }) => {
     const { setNodeRef, attributes, listeners, transform, transition, isDragging } = useSortable({
         id: headCell.id,
@@ -216,8 +223,8 @@ const SortableHeadCell: React.FC<SortableHeadCellProps> = ({
           }
         : {};
 
-    const activeSortDirection = multiSortInfo?.direction ?? (orderBy === headCell.id ? order : 'asc');
-    const isActive = Boolean(multiSortInfo) || orderBy === headCell.id;
+    const activeSortDirection = disableSorting ? 'asc' : multiSortInfo?.direction ?? (orderBy === headCell.id ? order : 'asc');
+    const isActive = !disableSorting && (Boolean(multiSortInfo) || orderBy === headCell.id);
 
     return (
         <TableCell
@@ -240,30 +247,10 @@ const SortableHeadCell: React.FC<SortableHeadCellProps> = ({
             {...(enableColumnReorder ? attributes : {})}
             {...(enableColumnReorder ? listeners : {})}
         >
-            <TableSortLabel
-                active={isActive}
-                direction={activeSortDirection}
-                onClick={onRequestSort}
-                sx={(theme) => ({
-                    '&.MuiTableSortLabel-root': { width: '100%' },
-                    '& .MuiTableSortLabel-icon': {
-                        color: theme.palette.mode === 'dark' ? '#ffffff' : theme.palette.text.primary,
-                        opacity: isActive ? 1 : 0,
-                        transition: 'opacity 0.2s',
-                    },
-                    '&:hover .MuiTableSortLabel-icon': { opacity: 0.5 },
-                    '&.Mui-active .MuiTableSortLabel-icon': {
-                        opacity: 1,
-                        color: theme.palette.mode === 'dark' ? '#ffffff' : theme.palette.text.primary,
-                    },
-                    fontWeight: 'bold',
-                    fontSize: '0.85rem',
-                    color: theme.palette.mode === 'dark' ? '#ffffff' : theme.palette.text.primary,
-                })}
-            >
+            {disableSorting ? (
                 <Box
                     component="span"
-                    sx={{
+                    sx={(theme) => ({
                         overflow: 'visible',
                         textOverflow: 'clip',
                         whiteSpace: 'normal',
@@ -273,32 +260,73 @@ const SortableHeadCell: React.FC<SortableHeadCellProps> = ({
                         display: 'inline-flex',
                         alignItems: 'center',
                         gap: 0.5,
-                    }}
+                        fontWeight: 'bold',
+                        fontSize: '0.85rem',
+                        color: theme.palette.mode === 'dark' ? '#ffffff' : theme.palette.text.primary,
+                    })}
                 >
                     {headCell.label}
-                    {multiSortInfo && (
-                        <Box
-                            component="span"
-                            sx={(theme) => ({
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                minWidth: 16,
-                                height: 16,
-                                px: 0.5,
-                                borderRadius: 999,
-                                fontSize: 10,
-                                fontWeight: 700,
-                                color: '#fff',
-                                backgroundColor: theme.palette.primary.main,
-                            })}
-                        >
-                            {multiSortInfo.priority}
-                        </Box>
-                    )}
                 </Box>
-            </TableSortLabel>
-
+            ) : (
+                <TableSortLabel
+                    active={isActive}
+                    direction={activeSortDirection}
+                    onClick={onRequestSort}
+                    sx={(theme) => ({
+                        '&.MuiTableSortLabel-root': { width: '100%' },
+                        '& .MuiTableSortLabel-icon': {
+                            color: theme.palette.mode === 'dark' ? '#ffffff' : theme.palette.text.primary,
+                            opacity: isActive ? 1 : 0,
+                            transition: 'opacity 0.2s',
+                        },
+                        '&:hover .MuiTableSortLabel-icon': { opacity: 0.5 },
+                        '&.Mui-active .MuiTableSortLabel-icon': {
+                            opacity: 1,
+                            color: theme.palette.mode === 'dark' ? '#ffffff' : theme.palette.text.primary,
+                        },
+                        fontWeight: 'bold',
+                        fontSize: '0.85rem',
+                        color: theme.palette.mode === 'dark' ? '#ffffff' : theme.palette.text.primary,
+                    })}
+                >
+                    <Box
+                        component="span"
+                        sx={{
+                            overflow: 'visible',
+                            textOverflow: 'clip',
+                            whiteSpace: 'normal',
+                            lineHeight: 1.2,
+                            wordBreak: 'break-word',
+                            pr: 1,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 0.5,
+                        }}
+                    >
+                        {headCell.label}
+                        {multiSortInfo && (
+                            <Box
+                                component="span"
+                                sx={(theme) => ({
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    minWidth: 16,
+                                    height: 16,
+                                    px: 0.5,
+                                    borderRadius: 999,
+                                    fontSize: 10,
+                                    fontWeight: 700,
+                                    color: '#fff',
+                                    backgroundColor: theme.palette.primary.main,
+                                })}
+                            >
+                                {multiSortInfo.priority}
+                            </Box>
+                        )}
+                    </Box>
+                </TableSortLabel>
+            )}
             {/* Resize Handle — stop pointer events bubbling so drag-to-reorder isn't triggered when resizing. */}
             <Box
                 onMouseDown={onResizeMouseDown}

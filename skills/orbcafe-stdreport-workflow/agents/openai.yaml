@@ -1,4 +1,4 @@
 interface:
   display_name: "ORBCAFE StdReport Workflow"
-  short_description: "Build report/list pages with filters, value help, and persistence"
-  default_prompt: "Use $orbcafe-stdreport-workflow to implement this report/list page with the official Next.js examples baseline, CStandardPage/CTable, CSmartFilter/CValueHelp where needed, and correct persistence + pagination behavior."
+  short_description: "Build reports with SmartFilter, CValueHelp/F4, layouts, variants, and quick actions"
+  default_prompt: "Use $orbcafe-stdreport-workflow to implement this report/list page with CStandardPage/useStandardReport, CTable, CSmartFilter/CValueHelp F4 lookup, manual-input validation, remote search where needed, variants/layout persistence, quick actions, and official Next.js examples."

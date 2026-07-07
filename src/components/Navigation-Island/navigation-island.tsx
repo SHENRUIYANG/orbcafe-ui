@@ -36,10 +36,13 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { 
+  Pin,
   Search
 } from 'lucide-react'
 import { TreeMenu, TreeMenuItem } from './tree-menu'
 import { useOrbcafeI18n } from '../../i18n'
+
+export type NavigationIslandDisplayMode = 'fixed' | 'floating'
 
 export interface NavigationIslandProps {
   collapsed: boolean
@@ -48,6 +51,42 @@ export interface NavigationIslandProps {
   maxHeight?: number
   menuData?: TreeMenuItem[]
   colorMode?: 'light' | 'dark'
+  displayMode?: NavigationIslandDisplayMode
+  onDisplayModeChange?: (mode: NavigationIslandDisplayMode) => void
+  showDisplayModeToggle?: boolean
+  enablePinning?: boolean
+  pinStorageKey?: string
+  pinnedItemIds?: string[]
+  defaultPinnedItemIds?: string[]
+  onPinnedItemIdsChange?: (ids: string[]) => void
+  pinnedSectionTitle?: string
+}
+
+const DEFAULT_PIN_STORAGE_KEY = 'orbcafe:navigation-island:pinned-items'
+const PINNED_SECTION_ID = 'orbcafe-navigation-pinned'
+
+const getNodeTargetUrl = (node: TreeMenuItem) => node.appurl || node.href
+
+const collectPinnableNodes = (nodes: TreeMenuItem[]): TreeMenuItem[] => {
+  const items: TreeMenuItem[] = []
+
+  nodes.forEach((node) => {
+    const hasChildren = Boolean(node.children?.length)
+    const canPin = node.pinnable !== false && Boolean(getNodeTargetUrl(node)) && !hasChildren
+
+    if (canPin) {
+      items.push({
+        ...node,
+        children: undefined,
+      })
+    }
+
+    if (node.children?.length) {
+      items.push(...collectPinnableNodes(node.children))
+    }
+  })
+
+  return items
 }
 
 export const NavigationIsland: React.FC<NavigationIslandProps> = ({ 
@@ -57,9 +96,22 @@ export const NavigationIsland: React.FC<NavigationIslandProps> = ({
   maxHeight,
   menuData = [],
   colorMode = 'light',
+  displayMode = 'fixed',
+  onDisplayModeChange,
+  showDisplayModeToggle = true,
+  enablePinning = true,
+  pinStorageKey = DEFAULT_PIN_STORAGE_KEY,
+  pinnedItemIds,
+  defaultPinnedItemIds = [],
+  onPinnedItemIdsChange,
+  pinnedSectionTitle,
 }) => {
   const { t } = useOrbcafeI18n()
   const isDark = colorMode === 'dark'
+  const isFloating = displayMode === 'floating'
+  const modeArcId = React.useId().replace(/:/g, '')
+  const modeArcGradientId = `orbcafe-nav-mode-arc-${modeArcId}`
+  const modeArcGlowId = `orbcafe-nav-mode-glow-${modeArcId}`
   const router = useRouter()
 
   // -------------
@@ -68,6 +120,17 @@ export const NavigationIsland: React.FC<NavigationIslandProps> = ({
   // const [menuData, setMenuData] = useState<TreeMenuItem[]>([]) // Removed internal state for menuData
   const [searchTerm, setSearchTerm] = useState('')
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set())
+  const [internalPinnedItemIds, setInternalPinnedItemIds] = useState<string[]>(defaultPinnedItemIds)
+  const [pinningHydrated, setPinningHydrated] = useState(false)
+  const isPinningControlled = pinnedItemIds !== undefined
+  const effectivePinnedItemIds = useMemo(
+    () => pinnedItemIds ?? internalPinnedItemIds,
+    [pinnedItemIds, internalPinnedItemIds],
+  )
+  const pinnedIdSet = useMemo(
+    () => new Set(effectivePinnedItemIds),
+    [effectivePinnedItemIds],
+  )
 
   // 监听 collapsed 变化，当侧边栏折叠时，清空所有展开状态
   useEffect(() => {
@@ -75,6 +138,97 @@ export const NavigationIsland: React.FC<NavigationIslandProps> = ({
       setExpandedNodes(new Set())
     }
   }, [collapsed])
+
+  useEffect(() => {
+    if (!enablePinning || isPinningControlled) {
+      setPinningHydrated(true)
+      return
+    }
+
+    try {
+      const savedPinnedItemIds = window.localStorage.getItem(pinStorageKey)
+      if (savedPinnedItemIds) {
+        const parsedPinnedItemIds = JSON.parse(savedPinnedItemIds)
+        if (Array.isArray(parsedPinnedItemIds)) {
+          setInternalPinnedItemIds(parsedPinnedItemIds.filter((id): id is string => typeof id === 'string'))
+        }
+      }
+    } catch {
+      // ignore storage access failures
+    } finally {
+      setPinningHydrated(true)
+    }
+  }, [enablePinning, isPinningControlled, pinStorageKey])
+
+  useEffect(() => {
+    if (!enablePinning || isPinningControlled || !pinningHydrated) return
+
+    try {
+      window.localStorage.setItem(pinStorageKey, JSON.stringify(effectivePinnedItemIds))
+    } catch {
+      // ignore storage access failures
+    }
+  }, [effectivePinnedItemIds, enablePinning, isPinningControlled, pinStorageKey, pinningHydrated])
+
+  useEffect(() => {
+    if (!enablePinning || collapsed || effectivePinnedItemIds.length === 0) return
+
+    setExpandedNodes((currentExpandedNodes) => {
+      if (currentExpandedNodes.has(PINNED_SECTION_ID)) return currentExpandedNodes
+      const nextExpandedNodes = new Set(currentExpandedNodes)
+      nextExpandedNodes.add(PINNED_SECTION_ID)
+      return nextExpandedNodes
+    })
+  }, [collapsed, effectivePinnedItemIds.length, enablePinning])
+
+  const setEffectivePinnedItemIds = useCallback(
+    (nextPinnedItemIds: string[]) => {
+      const uniquePinnedItemIds = Array.from(new Set(nextPinnedItemIds))
+      if (!isPinningControlled) {
+        setInternalPinnedItemIds(uniquePinnedItemIds)
+      }
+      onPinnedItemIdsChange?.(uniquePinnedItemIds)
+    },
+    [isPinningControlled, onPinnedItemIdsChange],
+  )
+
+  const handleTogglePin = useCallback(
+    (node: TreeMenuItem) => {
+      const nodeId = node.id
+      const nextPinnedItemIds = pinnedIdSet.has(nodeId)
+        ? effectivePinnedItemIds.filter((id) => id !== nodeId)
+        : [...effectivePinnedItemIds, nodeId]
+
+      setEffectivePinnedItemIds(nextPinnedItemIds)
+    },
+    [effectivePinnedItemIds, pinnedIdSet, setEffectivePinnedItemIds],
+  )
+
+  const displayMenuData = useMemo(() => {
+    if (!enablePinning || effectivePinnedItemIds.length === 0) {
+      return menuData
+    }
+
+    const pinnableItemsById = new Map(collectPinnableNodes(menuData).map((item) => [item.id, item]))
+    const pinnedItems = effectivePinnedItemIds
+      .map((id) => pinnableItemsById.get(id))
+      .filter((item): item is TreeMenuItem => Boolean(item))
+
+    if (pinnedItems.length === 0) {
+      return menuData
+    }
+
+    return [
+      {
+        id: PINNED_SECTION_ID,
+        title: pinnedSectionTitle || t('navigation.pinned'),
+        icon: <Pin className="w-4 h-4" />,
+        children: pinnedItems,
+        pinnable: false,
+      },
+      ...menuData,
+    ]
+  }, [effectivePinnedItemIds, enablePinning, menuData, pinnedSectionTitle, t])
 
 
   // -------------
@@ -96,7 +250,7 @@ export const NavigationIsland: React.FC<NavigationIslandProps> = ({
 
   const filteredMenuData = useMemo(() => {
     if (!searchTerm.trim()) {
-      return menuData
+      return displayMenuData
     }
 
     const filterNodes = (nodes: TreeMenuItem[]): TreeMenuItem[] => {
@@ -117,15 +271,15 @@ export const NavigationIsland: React.FC<NavigationIslandProps> = ({
       }, [])
     }
 
-    return filterNodes(menuData)
-  }, [searchTerm, menuData])
+    return filterNodes(displayMenuData)
+  }, [searchTerm, displayMenuData])
 
   const searchExpandedNodes = useMemo(() => {
     if (searchTerm.trim()) {
-      return new Set(getAllNodeIds(menuData))
+      return new Set(getAllNodeIds(displayMenuData))
     }
     return expandedNodes
-  }, [searchTerm, menuData, expandedNodes, getAllNodeIds])
+  }, [searchTerm, displayMenuData, expandedNodes, getAllNodeIds])
 
   // -------------
   // 交互处理
@@ -158,22 +312,45 @@ export const NavigationIsland: React.FC<NavigationIslandProps> = ({
     }
   }, [router])
 
+  const handleDisplayModeToggle = useCallback(() => {
+    onDisplayModeChange?.(displayMode === 'fixed' ? 'floating' : 'fixed')
+  }, [displayMode, onDisplayModeChange])
+
   // -------------
   // 渲染
   // -------------
   return (
     <div 
-      className={`flex flex-col backdrop-blur-xl border shadow-[0_4px_8px_0_rgba(31,38,135,0.1)] ${
+      className={`flex flex-col backdrop-blur-xl border ${
+        isFloating
+          ? 'shadow-[0_28px_80px_rgba(15,23,42,0.34)]'
+          : 'shadow-[0_4px_8px_0_rgba(31,38,135,0.1)]'
+      } ${
         collapsed ? 'w-14 rounded-full' : 'w-[234px] rounded-2xl'
       } relative ${className} ${
         isDark
-          ? 'bg-[#111111] border-white/10'
-          : 'bg-white/70 border-white/30'
+          ? isFloating ? 'border-white/25' : 'bg-[#111111] border-white/10'
+          : isFloating ? 'border-white/70' : 'bg-white/70 border-white/30'
       }`}
       style={{
-        backdropFilter: 'blur(16px) saturate(180%)',
-        WebkitBackdropFilter: 'blur(16px) saturate(180%)',
-        transition: 'width 400ms cubic-bezier(0.4, 0.0, 0.2, 1), border-radius 0ms cubic-bezier(0.4, 0.0, 0.2, 1), box-shadow 400ms ease-out',
+        backdropFilter: isFloating ? 'blur(34px) saturate(230%) contrast(1.12)' : 'blur(16px) saturate(180%)',
+        WebkitBackdropFilter: isFloating ? 'blur(34px) saturate(230%) contrast(1.12)' : 'blur(16px) saturate(180%)',
+        backgroundColor: isFloating
+          ? isDark
+            ? 'rgba(8, 12, 18, 0.34)'
+            : 'rgba(255, 255, 255, 0.24)'
+          : undefined,
+        backgroundImage: isFloating
+          ? isDark
+            ? 'radial-gradient(circle at 28% 8%, rgba(255,255,255,0.14), rgba(255,255,255,0) 44%), linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.015) 50%, rgba(33,188,255,0.05))'
+            : 'radial-gradient(circle at 28% 8%, rgba(255,255,255,0.42), rgba(255,255,255,0) 46%), linear-gradient(145deg, rgba(255,255,255,0.22), rgba(255,255,255,0.07) 50%, rgba(33,188,255,0.08))'
+          : undefined,
+        boxShadow: isFloating
+          ? isDark
+            ? 'inset 0 1px 0 rgba(255,255,255,0.20), inset 0 -1px 0 rgba(255,255,255,0.08), 0 26px 90px rgba(0,0,0,0.52), 0 0 0 1px rgba(255,255,255,0.06)'
+            : 'inset 0 1px 0 rgba(255,255,255,0.88), inset 0 -1px 0 rgba(255,255,255,0.34), 0 26px 90px rgba(15,23,42,0.24), 0 0 0 1px rgba(255,255,255,0.35)'
+          : undefined,
+        transition: 'width 400ms cubic-bezier(0.4, 0.0, 0.2, 1), border-radius 0ms cubic-bezier(0.4, 0.0, 0.2, 1), box-shadow 400ms ease-out, background-color 220ms ease-out, backdrop-filter 220ms ease-out',
         maxHeight: maxHeight ? `${maxHeight}px` : undefined
       }}
     >
@@ -230,6 +407,9 @@ export const NavigationIsland: React.FC<NavigationIslandProps> = ({
                   className="space-y-1"
                   expandedIds={searchExpandedNodes}
                   colorMode={colorMode}
+                  enablePinning={enablePinning}
+                  pinnedIds={pinnedIdSet}
+                  onTogglePin={handleTogglePin}
                   onToggleExpand={(id) => {
                     const newExpanded = new Set(expandedNodes)
                     
@@ -268,7 +448,7 @@ export const NavigationIsland: React.FC<NavigationIslandProps> = ({
             {/* 折叠状态显示简化图标 */}
             {collapsed && (
               <div className="space-y-2">
-                {menuData.map((category) => (
+                {displayMenuData.map((category) => (
                   <div key={category.id} className="space-y-1">
                     <button
                       onClick={() => {
@@ -336,6 +516,77 @@ export const NavigationIsland: React.FC<NavigationIslandProps> = ({
               }}
             />
           </div>
+        </button>
+      )}
+
+      {showDisplayModeToggle && collapsed && (
+        <button
+          type="button"
+          onClick={handleDisplayModeToggle}
+          className="absolute -bottom-5 left-1/2 z-30 flex h-11 -translate-x-1/2 items-end justify-center rounded-full bg-transparent px-2 pb-1 transition-opacity duration-200 hover:opacity-95 focus:outline-none focus:ring-2 focus:ring-cyan-400/70"
+          style={{
+            width: '62px',
+            touchAction: 'manipulation',
+          }}
+          title={isFloating ? t('navigation.mode.switchToFixed') : t('navigation.mode.switchToFloating')}
+          aria-label={isFloating ? t('navigation.mode.switchToFixed') : t('navigation.mode.switchToFloating')}
+        >
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 118 34"
+            preserveAspectRatio="none"
+            className="h-[34px] w-full overflow-visible"
+          >
+            <defs>
+              <linearGradient id={modeArcGradientId} x1="0" x2="1" y1="0" y2="0">
+                <stop offset="0%" stopColor="#21BCFF" />
+                <stop offset="52%" stopColor="#7C3AED" />
+                <stop offset="100%" stopColor="#F59E0B" />
+              </linearGradient>
+              <filter id={modeArcGlowId} x="-70%" y="-180%" width="240%" height="460%">
+                <feGaussianBlur stdDeviation="8.5" result="coloredBlur" />
+                <feMerge>
+                  <feMergeNode in="coloredBlur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
+            <path
+              d="M8 4 C27 21 91 21 110 4"
+              fill="none"
+              stroke={`url(#${modeArcGradientId})`}
+              strokeLinecap="round"
+              strokeWidth="18"
+              opacity={isFloating ? 0.28 : 0.20}
+              filter={`url(#${modeArcGlowId})`}
+            />
+            <path
+              d="M8 4 C27 21 91 21 110 4"
+              fill="none"
+              stroke={`url(#${modeArcGradientId})`}
+              strokeLinecap="round"
+              strokeWidth="12"
+              opacity={isFloating ? 0.40 : 0.30}
+              filter={`url(#${modeArcGlowId})`}
+            />
+            <path
+              d="M8 4 C27 21 91 21 110 4"
+              fill="none"
+              stroke={`url(#${modeArcGradientId})`}
+              strokeLinecap="round"
+              strokeWidth="6"
+              opacity={isFloating ? 0.34 : 0.25}
+              filter={`url(#${modeArcGlowId})`}
+            />
+            <path
+              d="M8 4 C27 21 91 21 110 4"
+              fill="none"
+              stroke={`url(#${modeArcGradientId})`}
+              strokeLinecap="round"
+              strokeWidth="1"
+              opacity={isFloating ? 0.28 : 0.18}
+            />
+          </svg>
         </button>
       )}
     </div>

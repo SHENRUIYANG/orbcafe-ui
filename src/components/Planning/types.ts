@@ -42,6 +42,9 @@ export interface PlanningGanttSummaryItem {
 }
 
 export interface CPlanningGanttProps {
+  appId?: string;
+  tableKey?: string;
+  serviceUrl?: string;
   title?: string;
   subtitle?: string;
   extraTools?: ReactNode | ReactNode[];
@@ -65,6 +68,11 @@ export interface CPlanningGanttProps {
     orderedTasks: PlanningTaskRecord[],
     context: { activeTask: PlanningTaskRecord; targetTask: PlanningTaskRecord },
   ) => void;
+  layout?: any;
+  layoutVariant?: any;
+  layoutVariantLoadKey?: number;
+  onLayoutIdChange?: (layoutId: string) => void;
+  onLayoutSave?: (layout: any) => void;
   summaryItems?: PlanningGanttSummaryItem[];
   emptyLabel?: string;
   sx?: SxProps<Theme>;

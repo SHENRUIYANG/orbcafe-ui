@@ -34,6 +34,7 @@ npm run dev
 默认访问：
 
 - `http://localhost:3000/`
+- `http://localhost:3000/login`
 - `http://localhost:3000/std-report`（包含 `CValueHelp` 客户字段：点击搜索按钮或按 F4 打开值帮助弹窗）
 - `http://localhost:3000/planning`（多列生产计划表格 + 甘特图；支持每页条目数、50/50 分屏切换和手工拖动）
 - `http://localhost:3000/kanban`
@@ -49,7 +50,8 @@ npm run dev
 
 | Route | 覆盖组件 |
 | --- | --- |
-| `/` | `NavigationIsland`, `Button`, `useNavigationIsland` |
+| `/` | `CAppPageLayout`, `NavigationIsland`, dashboard overview |
+| `/login` | `CAuthPage`, `useAuthPage` |
 | `/std-report` | `CAppPageLayout`, `CStandardPage`, `CSmartFilter`, `CTable`, `CValueHelp`, `useStandardReport` |
 | `/planning` | `CPlanningLayout`, `CPlanningGantt`, `usePlanningLayout` |
 | `/kanban` | `CKanbanBoard`, `useKanbanBoard`, DetailInfo 跳转 |
@@ -73,7 +75,7 @@ npx tsc --noEmit
 
 ### 1. `page.tsx` 建议使用 Server Wrapper
 
-`params` / `searchParams` 在 Next 16 是 Promise 语义。
+`params` / `searchParams` 在 Next 16 是 Promise 语义。  
 推荐在 `page.tsx`（Server Component）里先解包，再把纯值传给 Client Component。
 
 ### 2. 避免 hydration mismatch
@@ -88,9 +90,9 @@ npx tsc --noEmit
 
 ## 常见问题
 
-- 报错 `searchParams is a Promise...`
+- 报错 `searchParams is a Promise...`  
   说明你在错误层级同步访问了 `searchParams`。
-- 报错 `params are being enumerated`
+- 报错 `params are being enumerated`  
   说明你对 `params` 做了枚举操作（如 `Object.keys`）。
-- 报错 `Hydration failed...`
+- 报错 `Hydration failed...`  
   说明 SSR/CSR 首屏渲染不一致。

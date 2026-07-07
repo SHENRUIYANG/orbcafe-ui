@@ -56,6 +56,7 @@ export const StdChat: React.FC<StdChatProps> = ({
           
           const assistantActions: AssistantActionContext | undefined = msg.type === 'assistant' ? {
             isLatestAssistant: isLastAssistant,
+            isResponding,
             onRegenerate: onRegenerate ? () => onRegenerate(msg.id) : undefined
           } : undefined
 

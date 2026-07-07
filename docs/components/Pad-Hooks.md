@@ -104,3 +104,4 @@ const {
 | `setEditorValue` | `(value: string) => void` | 修改输入值。 |
 | `selectRecord` | `(row: TRecord) => void` | 选中某条记录并同步输入值。 |
 | `applyEditorValue` | `(updater) => void` | 把当前输入值写回数据。 |
+

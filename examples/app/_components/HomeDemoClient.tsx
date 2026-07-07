@@ -1,11 +1,22 @@
 'use client';
 
 import Link from 'next/link';
+import { useRef, useState } from 'react';
 import { Box, Button, Chip, Paper, Stack, Typography } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-import { Rocket, Table2, TabletSmartphone, Workflow } from 'lucide-react';
-import { CAppPageLayout, CPageTransition } from 'orbcafe-ui';
+import { Rocket, Table2, TabletSmartphone, Workflow, X } from 'lucide-react';
+import {
+  AIBrowserGlow,
+  CAppPageLayout,
+  CPageTransition,
+  FloatingAgentPanel,
+  type ChatMessage,
+  type FloatingAgentPanelAnchor,
+} from 'orbcafe-ui';
 import { EXAMPLE_MENU } from './exampleNavigation';
+
+const AI_PANEL_WIDTH = 520;
+const AI_PANEL_INSET = 24;
 
 const HeaderBrandLogo = () => {
   const theme = useTheme();
@@ -52,7 +63,105 @@ const overviewCards = [
   },
 ] as const;
 
+const initialWeatherMessages: ChatMessage[] = [
+  {
+    id: 'weather-ready',
+    type: 'assistant',
+    content: '在顶部搜索框输入天气问题，我会打开 AI Panel 并开始查询。',
+    timestamp: new Date('2024-01-01T09:00:00'),
+  },
+];
+
 export default function HomeDemoClient() {
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const [panelOpen, setPanelOpen] = useState(false);
+  const [panelAnchor, setPanelAnchor] = useState<FloatingAgentPanelAnchor>('right');
+  const [messages, setMessages] = useState<ChatMessage[]>(initialWeatherMessages);
+  const [isResponding, setIsResponding] = useState(false);
+
+  const floatingSearchSx = {
+    left: {
+      xs: 12,
+      md: panelAnchor === 'left' ? AI_PANEL_INSET : panelAnchor === 'center' ? '50%' : 'auto',
+    },
+    right: {
+      xs: 12,
+      md: panelAnchor === 'right' ? AI_PANEL_INSET : 'auto',
+    },
+    bottom: { xs: 12, md: 24 },
+    width: { xs: 'auto', md: AI_PANEL_WIDTH },
+    transform: { xs: 'none', md: panelAnchor === 'center' ? 'translateX(-50%)' : 'none' },
+  };
+
+  const appendAssistantMessage = (runId: string, content: string) => {
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: `${runId}-assistant`,
+        type: 'assistant',
+        content,
+        timestamp: new Date(),
+        isStreaming: true,
+      },
+    ]);
+  };
+
+  const runWeatherQuery = async (content: string) => {
+    const trimmedContent = content.trim();
+    if (!trimmedContent || isResponding) return;
+
+    const runId = Date.now().toString();
+    setPanelOpen(true);
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: `${runId}-user`,
+        type: 'user',
+        content: trimmedContent,
+        timestamp: new Date(),
+      },
+    ]);
+    setIsResponding(true);
+
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
+    try {
+      const response = await fetch('/api/weather-agent', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: trimmedContent }),
+        signal: controller.signal,
+      });
+      const payload = (await response.json()) as { answer?: string; error?: string };
+
+      if (!response.ok) {
+        throw new Error(payload.error || 'Weather agent request failed.');
+      }
+
+      appendAssistantMessage(runId, payload.answer || '天气查询完成。');
+    } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        appendAssistantMessage(runId, '查询已停止。');
+      } else {
+        appendAssistantMessage(
+          runId,
+          error instanceof Error ? `天气查询失败：${error.message}` : '天气查询失败。',
+        );
+      }
+      setIsResponding(false);
+    } finally {
+      abortControllerRef.current = null;
+    }
+  };
+
+  const closePanel = () => {
+    abortControllerRef.current?.abort();
+    abortControllerRef.current = null;
+    setIsResponding(false);
+    setPanelOpen(false);
+  };
+
   return (
     <CAppPageLayout
       appTitle=""
@@ -61,7 +170,13 @@ export default function HomeDemoClient() {
       localeLabel="EN"
       user={{ name: 'Ruiyang Shen', subtitle: 'ruiyang.shen@orbis.de', avatarSrc: '/orbcafe.png' }}
       logo={<HeaderBrandLogo />}
+      searchPlacement={panelOpen ? 'floating' : 'header'}
+      floatingSearchSx={floatingSearchSx}
+      onSearch={runWeatherQuery}
+      onSearchAdd={() => setPanelOpen(true)}
     >
+      <AIBrowserGlow active={isResponding} />
+
       <CPageTransition transitionKey="dashboard-home" variant="fade" durationMs={180}>
         <Box sx={{ p: { xs: 1, md: 2 }, display: 'flex', flexDirection: 'column', gap: 2 }}>
           <Paper
@@ -153,6 +268,45 @@ export default function HomeDemoClient() {
           </Box>
         </Box>
       </CPageTransition>
+
+      {panelOpen && (
+        <FloatingAgentPanel
+          width={AI_PANEL_WIDTH}
+          top={88}
+          bottom={88}
+          inset={AI_PANEL_INSET}
+          anchor={panelAnchor}
+          onAnchorChange={setPanelAnchor}
+          zIndex={1320}
+          shellStyle={{
+            borderRadius: 16,
+            boxShadow: '0 24px 80px rgba(0,0,0,0.38)',
+          }}
+          title="Weather Agent"
+          description="Top search query result"
+          agentStatus={isResponding ? 'running' : 'idle'}
+          messages={messages}
+          isResponding={isResponding}
+          streamChunkSize={3}
+          streamIntervalMs={18}
+          onMessageStreamingComplete={(messageId) => {
+            setMessages((prev) =>
+              prev.map((msg) => (msg.id === messageId ? { ...msg, isStreaming: false } : msg)),
+            );
+            setIsResponding(false);
+          }}
+          headerActions={
+            <button
+              type="button"
+              onClick={closePanel}
+              className="rounded-full p-2 text-gray-500 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
+              aria-label="Close AI Panel"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          }
+        />
+      )}
     </CAppPageLayout>
   );
 }

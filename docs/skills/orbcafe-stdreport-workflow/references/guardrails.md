@@ -17,6 +17,11 @@
 - Use `type: 'value-help'` or `isValueHelp: true` for SAP Search Help/F4 fields. This keeps selected keys inside SmartFilter state, variants, and `fetchData` params.
 - Value Help selected values must be machine-stable keys. Localize display labels and dialog copy only.
 - For multi-select Value Help, expect operator `anyOf`; for single-select, expect `equals`.
+- `CValueHelp` opens with the F4 key and the search icon; test both.
+- Manual input is allowed and validated by default. Invalid typed keys should show `manualInputErrorText` and should not update SmartFilter state.
+- Multiple manual values are split by comma, semicolon, or newline.
+- Use `selectedItems` or include selected records in `items` when loading saved variants so key-description display can be restored.
+- Use `onSearch(query)` for large remote lookup sets; returning an array replaces the dialog result list.
 
 ## Persistence Constraints
 
@@ -49,6 +54,7 @@
 - Do not seed default variants with localized `value`s. Keep values stable and localize labels only.
 - Do not seed `metadata.variants` with root-level filters for new code; use scoped filters with `scope: 'default'` or the explicit `tableKey`.
 - Do not implement Value Help as an unrelated modal beside `CSmartFilter`; it will bypass variant persistence and Adapt Filters visibility.
+- Do not disable manual input or validation unless the business process explicitly requires selection-only or free-form keys.
 
 ## i18n Constraints
 

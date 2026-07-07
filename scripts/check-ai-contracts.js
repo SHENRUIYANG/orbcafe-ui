@@ -191,6 +191,22 @@ function main() {
   assert(publicExportIndex.includes('AgentUI/*'), 'public-export-index.md must list AgentUI exports');
   assert(publicExportIndex.includes('Kanban/*'), 'public-export-index.md must list Kanban exports');
 
+  // Modules documented under a different shape than "<ModuleName>/*" in public-export-index.md
+  // (Navigation-Island exports individual symbols, Molecules only exposes a couple of members directly).
+  const modulesDocumentedDifferently = new Set(['Navigation-Island', 'Molecules']);
+  const rootIndexSource = readFile('src/index.ts');
+  const reExportedModules = new Set();
+  for (const match of rootIndexSource.matchAll(/export\s+\*\s+from\s+'\.\/components\/([^/']+)/g)) {
+    reExportedModules.add(match[1]);
+  }
+  for (const moduleName of reExportedModules) {
+    if (modulesDocumentedDifferently.has(moduleName)) continue;
+    assert(
+      publicExportIndex.includes(`${moduleName}/*`),
+      `public-export-index.md is missing "${moduleName}/*" even though src/index.ts exports ./components/${moduleName}`
+    );
+  }
+
   console.log('ai_contracts_ok');
 }
 

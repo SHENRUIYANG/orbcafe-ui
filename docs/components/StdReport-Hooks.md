@@ -93,10 +93,10 @@ import { useCTable } from '@/components/StdReport/Hooks/CTable/useCTable';
 
 const MyCustomTable = (props) => {
   const tableState = useCTable(props);
-
+  
   // Access internal state
   const { visibleRows, order, orderBy, handleRequestSort } = tableState;
-
+  
   // Render table...
 };
 ```

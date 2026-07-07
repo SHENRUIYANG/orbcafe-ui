@@ -71,6 +71,8 @@ export interface CTableProps {
     quickEdit?: CTableQuickEditConfig;
     quickDelete?: CTableQuickDeleteConfig;
     serviceUrl?: string;
+    disableGrouping?: boolean;
+    disableSorting?: boolean;
 }
 
 export interface CTableHeadProps {
@@ -80,6 +82,7 @@ export interface CTableHeadProps {
     orderBy: string;
     sortBy?: Array<{ field: string; direction: 'asc' | 'desc' }>;
     onRequestSort: (property: string) => void;
+    disableSorting?: boolean;
     onContextMenu?: (event: React.MouseEvent, columnId: string) => void;
     selectionMode?: 'single' | 'multiple';
     grouping?: string[];

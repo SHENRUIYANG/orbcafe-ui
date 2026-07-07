@@ -114,6 +114,8 @@ const workCenterValueHelp = [
 export default function PlanningPage() {
   const planning = usePlanningLayout({
     tasks,
+    appId: 'production-planning',
+    tableKey: 'main',
     columns,
     filterFields: [
       { id: 'keyword', label: 'Keyword', type: 'text', placeholder: 'Task/ID/Project' },
@@ -132,6 +134,9 @@ export default function PlanningPage() {
           getOptionValue: (item) => item.workCenter,
           getOptionLabel: (item) => item.name,
           getOptionDescription: (item) => item.resourceGroup,
+          allowManualInput: true,
+          validateManualInput: true,
+          manualInputErrorText: 'Enter a valid work center.',
         },
       },
       { id: 'dateRange', label: 'Date Range', type: 'date' },
@@ -154,7 +159,10 @@ Value Help in Planning:
 
 - Put lookup fields in `filterFields`; `CPlanningLayout` renders them through SmartFilter above the Gantt.
 - Use stable keys (`workCenter`, `materialId`, `orderId`) as `getOptionValue`.
-- If a selected Value Help key does not filter rows, update the `usePlanningGantt` filtering logic or task data so the selected key matches a task field.
+- Test both search-icon open and `F4` open.
+- If a selected Value Help key does not filter rows, update task data or the filtering layer so the selected key matches a task field.
+- Use `selectedItems` or include selected records in `items` so saved variants can display key-description labels after reload.
+- Keep `appId` and `tableKey` shared between SmartFilter variants and table/Gantt layouts.
 
 ## Recipe 2: Override scale and selected task
 
@@ -171,6 +179,26 @@ const planning = usePlanningGantt({ tasks, defaultScale: 'hour' });
   }}
 />;
 ```
+
+## Recipe 2B: Planning persistence identity
+
+```tsx
+const planning = usePlanningLayout({
+  tasks,
+  appId: 'shop-floor-planning',
+  tableKey: 'operations',
+  serviceUrl: '/api/planning/preferences',
+  onLayoutIdChange: (layoutId) => setCurrentLayoutId(layoutId),
+  onLayoutSave: async (layout) => saveLayout(layout),
+});
+```
+
+Rules:
+
+- Use `appId` for the business page identity.
+- Use `tableKey` to isolate the table/Gantt layout scope.
+- Do not use deprecated `filterAppId` / `filterTableKey` in new code.
+- Save Layout first, then save Variant, because variants reference layouts through `layoutRefs`.
 
 ## Recipe 3: Custom composition without layout wrapper
 
@@ -211,6 +239,8 @@ import MailOutlineIcon from '@mui/icons-material/MailOutline';
 ```tsx
 const planning = usePlanningLayout({
   tasks,
+  appId: 'production-planning',
+  tableKey: 'main',
   enableRowReorder: true,
   onTaskReorder: (orderedTasks, { activeTask, targetTask }) => {
     savePlanningOrder(orderedTasks.map((task) => task.id));
