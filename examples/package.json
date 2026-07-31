@@ -20,7 +20,7 @@
     "clsx": "^2.1.1",
     "dayjs": "^1.11.20",
     "lucide-react": "^0.575.0",
-    "next": "16.2.0",
+    "next": "16.2.10",
     "orbcafe-ui": "file:..",
     "react": "19.2.3",
     "react-dom": "19.2.3",
@@ -35,5 +35,8 @@
     "eslint-config-next": "16.2.0",
     "tailwindcss": "^4",
     "typescript": "^5"
+  },
+  "overrides": {
+    "postcss": "^8.5.10"
   }
 }
