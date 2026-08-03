@@ -1,14 +1,6 @@
-import { Menu, MenuItem, Checkbox, ListItemText, ListItemIcon, Divider, Switch, FormControlLabel, Box, Badge, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions, IconButton, Stack } from '@mui/material';
-import CheckIcon from '@mui/icons-material/Check';
-import ClearAllIcon from '@mui/icons-material/ClearAll';
-import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
-import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
-import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-import AccountTreeIcon from '@mui/icons-material/AccountTree';
-import FunctionsIcon from '@mui/icons-material/Functions';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import AddIcon from '@mui/icons-material/Add';
+import { AccountTreeIcon, AddIcon, ArrowDownwardIcon, ArrowUpwardIcon, Badge, CListItemIcon, CListItemText, CheckIcon, ClearAllIcon, DeleteOutlineIcon, FormControlLabel, FunctionsIcon, Switch, VisibilityOffIcon } from '../../../lib/orbis-compat';
 import { useEffect, useMemo, useState } from 'react';
+import {  CButton, CIconButton, CStack, CTypography, CCheckbox, CDialog, CMenu, CDivider, CSelect } from "../../Atoms";
 import { useOrbcafeI18n } from '../../../i18n';
 
 // --- Types ---
@@ -25,7 +17,6 @@ export interface CTableGroupMenuProps {
     grouping: string[];
     setGrouping: (grouping: string[]) => void;
     columns: Column[];
-    toggleGroupField: (field: string) => void;
 }
 
 export const CTableGroupMenu = ({
@@ -33,51 +24,90 @@ export const CTableGroupMenu = ({
     setGroupAnchorEl,
     grouping,
     setGrouping,
-    columns,
-    toggleGroupField
+    columns
 }: CTableGroupMenuProps) => {
     const { t } = useOrbcafeI18n();
+    const [draftGrouping, setDraftGrouping] = useState<string[]>(grouping);
+
+    useEffect(() => {
+        if (groupAnchorEl) setDraftGrouping(grouping);
+    }, [groupAnchorEl, grouping]);
+
+    const handleDismiss = () => {
+        setDraftGrouping(grouping);
+        setGroupAnchorEl(null);
+    };
+    const handleToggleDraftField = (field: string) => {
+        setDraftGrouping((current) => current.includes(field)
+            ? current.filter((item) => item !== field)
+            : [...current, field]);
+    };
+    const handleApply = () => {
+        setGrouping(draftGrouping);
+        setGroupAnchorEl(null);
+    };
+
     return (
-        <Menu
+        <CMenu
             anchorEl={groupAnchorEl}
             open={Boolean(groupAnchorEl)}
-            onClose={() => setGroupAnchorEl(null)}
+            onClose={handleDismiss}
+            sx={{ width: 224, minWidth: 224, maxHeight: 360, overflowY: 'auto' }}
         >
-            <Box sx={{ p: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography variant="subtitle2" sx={{ px: 1 }}>{t('table.menu.groupBy')}</Typography>
-                {grouping.length > 0 && (
-                    <Button 
-                        size="small" 
-                        color="error" 
-                        onClick={() => setGrouping([])}
-                        startIcon={<ClearAllIcon />}
+            <div className="orb-table-group-menu-header" onClick={(event) => event.stopPropagation()}>
+                <CTypography className="orb-table-group-menu-title" variant="subtitle2">
+                    {t('table.menu.groupBy')}
+                </CTypography>
+                {draftGrouping.length > 0 && (
+                    <CButton
+                        className="orb-table-group-menu-clear"
+                        size="small"
+                        color="error"
+                        onClick={(event) => {
+                            event.stopPropagation();
+                            setDraftGrouping([]);
+                        }}
                     >
                         {t('table.menu.clearAll')}
-                    </Button>
+                    </CButton>
                 )}
-            </Box>
-            <Divider />
+            </div>
+            <CDivider className="orb-table-group-menu-divider" />
             {columns.map((col) => {
-                const isSelected = grouping.includes(col.id);
-                const order = grouping.indexOf(col.id) + 1;
-                
+                const isSelected = draftGrouping.includes(col.id);
+                const order = draftGrouping.indexOf(col.id) + 1;
+
                 return (
-                    <MenuItem key={col.id} onClick={() => toggleGroupField(col.id)}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-                            <Checkbox checked={isSelected} size="small" />
-                            <ListItemText primary={col.label} />
+                    <option
+                        key={col.id}
+                        className="orb-table-group-menu-option"
+                        selected={isSelected}
+                        onClick={(event) => {
+                            event.stopPropagation();
+                            handleToggleDraftField(col.id);
+                        }}
+                    >
+                        <div className="orb-table-group-menu-option-content">
+                            <CCheckbox className="orb-table-group-menu-checkbox" checked={isSelected} size="small" />
+                            <CListItemText className="orb-table-group-menu-label" primary={col.label} />
                             {isSelected && (
-                                <Badge 
-                                    badgeContent={order} 
-                                    color="primary" 
-                                    sx={{ mr: 2 }}
-                                />
+                                <span className="orb-table-group-menu-order" aria-label={`${t('table.menu.groupBy')} ${order}`}>
+                                    {order}
+                                </span>
                             )}
-                        </Box>
-                    </MenuItem>
+                        </div>
+                    </option>
                 );
             })}
-        </Menu>
+            <div className="orb-table-group-menu-footer">
+                <CButton size="small" variant="ghost" onClick={handleDismiss}>
+                    {t('common.cancel')}
+                </CButton>
+                <CButton size="small" variant="primary" onClick={handleApply}>
+                    {t('common.ok')}
+                </CButton>
+            </div>
+        </CMenu>
     );
 };
 
@@ -99,22 +129,22 @@ export const CTableColumnMenu = ({
 }: CTableColumnMenuProps) => {
     const { t } = useOrbcafeI18n();
     return (
-        <Menu
+        <CMenu
             anchorEl={anchorEl}
             open={Boolean(anchorEl)}
             onClose={() => setAnchorEl(null)}
         >
-            <MenuItem disabled>
-                <ListItemText primary={t('table.menu.visibleColumns')} />
-            </MenuItem>
-            <Divider />
+            <option disabled>
+                <CListItemText primary={t('table.menu.visibleColumns')} />
+            </option>
+            <CDivider />
             {columns.map((col) => (
-                <MenuItem key={col.id} onClick={() => toggleColumnVisibility(col.id)}>
-                    <Checkbox checked={visibleColumns.includes(col.id)} size="small" />
-                    <ListItemText primary={col.label} />
-                </MenuItem>
+                <option key={col.id} onClick={() => toggleColumnVisibility(col.id)}>
+                    <CCheckbox checked={visibleColumns.includes(col.id)} size="small" />
+                    <CListItemText primary={col.label} />
+                </option>
             ))}
-        </Menu>
+        </CMenu>
     );
 };
 
@@ -140,12 +170,12 @@ export const CTableSummaryMenu = ({
 }: CTableSummaryMenuProps) => {
     const { t } = useOrbcafeI18n();
     return (
-        <Menu
+        <CMenu
             anchorEl={anchorEl}
             open={Boolean(anchorEl)}
             onClose={() => setAnchorEl(null)}
         >
-            <MenuItem>
+            <option>
                 <FormControlLabel
                     control={
                         <Switch
@@ -156,20 +186,20 @@ export const CTableSummaryMenu = ({
                     }
                     label={t('table.menu.showSummaryRow')}
                 />
-            </MenuItem>
-            <Divider />
+            </option>
+            <CDivider />
             {columns.filter(col => col.numeric).map((col) => (
-                <MenuItem key={col.id} onClick={() => toggleSummaryColumn(col.id)} disabled={!showSummary}>
-                    <Checkbox checked={summaryColumns.includes(col.id)} size="small" />
-                    <ListItemText primary={col.label} />
-                </MenuItem>
+                <option key={col.id} onClick={() => toggleSummaryColumn(col.id)} disabled={!showSummary}>
+                    <CCheckbox checked={summaryColumns.includes(col.id)} size="small" />
+                    <CListItemText primary={col.label} />
+                </option>
             ))}
             {columns.filter(col => col.numeric).length === 0 && (
-                <MenuItem disabled>
-                    <ListItemText primary={t('table.menu.noNumericColumns')} />
-                </MenuItem>
+                <option disabled>
+                    <CListItemText primary={t('table.menu.noNumericColumns')} />
+                </option>
             )}
-        </Menu>
+        </CMenu>
     );
 };
 
@@ -191,7 +221,7 @@ export const CTableContextMenu = ({
 }: CTableContextMenuProps) => {
     const { t } = useOrbcafeI18n();
     return (
-        <Menu
+        <CMenu
             open={contextMenu !== null}
             onClose={handleCloseContextMenu}
             anchorReference="anchorPosition"
@@ -201,18 +231,18 @@ export const CTableContextMenu = ({
                     : undefined
             }
         >
-            <MenuItem onClick={handleCloseContextMenu}>{t('common.copy')}</MenuItem>
-            <Divider />
-            <MenuItem disabled>{t('table.menu.visibleColumns')}</MenuItem>
+            <option onClick={handleCloseContextMenu}>{t('common.copy')}</option>
+            <CDivider />
+            <option disabled>{t('table.menu.visibleColumns')}</option>
             {columns.map((col) => (
-                <MenuItem key={col.id} onClick={() => toggleColumnVisibility(col.id)}>
-                    <ListItemIcon>
+                <option key={col.id} onClick={() => toggleColumnVisibility(col.id)}>
+                    <CListItemIcon>
                         {visibleColumns.includes(col.id) && <CheckIcon fontSize="small" />}
-                    </ListItemIcon>
-                    <ListItemText>{col.label}</ListItemText>
-                </MenuItem>
+                    </CListItemIcon>
+                    <CListItemText>{col.label}</CListItemText>
+                </option>
             ))}
-        </Menu>
+        </CMenu>
     );
 };
 
@@ -272,7 +302,7 @@ export const CTableHeaderMenu = ({
     const hasSort = sortedAsc || sortedDesc;
 
     return (
-        <Menu
+        <CMenu
             open={contextMenu !== null}
             onClose={handleClose}
             anchorReference="anchorPosition"
@@ -280,90 +310,90 @@ export const CTableHeaderMenu = ({
                 contextMenu !== null ? { top: contextMenu.mouseY, left: contextMenu.mouseX } : undefined
             }
         >
-            <MenuItem disabled sx={{ opacity: '1 !important', fontWeight: 700 }}>
-                <ListItemText primary={column?.label ?? columnId} />
-            </MenuItem>
-            <Divider />
-            <MenuItem
+            <option disabled sx={{ opacity: '1 !important', fontWeight: 700 }}>
+                <CListItemText primary={column?.label ?? columnId} />
+            </option>
+            <CDivider />
+            <option
                 onClick={() => {
                     onSortAsc(columnId);
                     handleClose();
                 }}
                 selected={sortedAsc}
             >
-                <ListItemIcon><ArrowUpwardIcon fontSize="small" /></ListItemIcon>
-                <ListItemText primary={t('table.headerMenu.sortAsc')} />
-            </MenuItem>
-            <MenuItem
+                <CListItemIcon><ArrowUpwardIcon fontSize="small" /></CListItemIcon>
+                <CListItemText primary={t('table.headerMenu.sortAsc')} />
+            </option>
+            <option
                 onClick={() => {
                     onSortDesc(columnId);
                     handleClose();
                 }}
                 selected={sortedDesc}
             >
-                <ListItemIcon><ArrowDownwardIcon fontSize="small" /></ListItemIcon>
-                <ListItemText primary={t('table.headerMenu.sortDesc')} />
-            </MenuItem>
+                <CListItemIcon><ArrowDownwardIcon fontSize="small" /></CListItemIcon>
+                <CListItemText primary={t('table.headerMenu.sortDesc')} />
+            </option>
             {hasSort && (
-                <MenuItem
+                <option
                     onClick={() => {
                         onClearSort(columnId);
                         handleClose();
                     }}
                 >
-                    <ListItemIcon><ClearAllIcon fontSize="small" /></ListItemIcon>
-                    <ListItemText primary={t('table.headerMenu.clearSort')} />
-                </MenuItem>
+                    <CListItemIcon><ClearAllIcon fontSize="small" /></CListItemIcon>
+                    <CListItemText primary={t('table.headerMenu.clearSort')} />
+                </option>
             )}
-            <MenuItem
+            <option
                 onClick={() => {
                     onOpenSortDialog();
                     handleClose();
                 }}
             >
-                <ListItemIcon><AddIcon fontSize="small" /></ListItemIcon>
-                <ListItemText primary={t('table.headerMenu.configureSort')} />
-            </MenuItem>
-            <Divider />
-            <MenuItem
+                <CListItemIcon><AddIcon fontSize="small" /></CListItemIcon>
+                <CListItemText primary={t('table.headerMenu.configureSort')} />
+            </option>
+            <CDivider />
+            <option
                 onClick={() => {
                     onToggleGroup(columnId);
                     handleClose();
                 }}
                 selected={isGrouped}
             >
-                <ListItemIcon><AccountTreeIcon fontSize="small" /></ListItemIcon>
-                <ListItemText
+                <CListItemIcon><AccountTreeIcon fontSize="small" /></CListItemIcon>
+                <CListItemText
                     primary={isGrouped ? t('table.headerMenu.ungroup') : t('table.headerMenu.group')}
                 />
-            </MenuItem>
+            </option>
             {isNumeric && showSummary && (
-                <MenuItem
+                <option
                     onClick={() => {
                         onToggleSummary(columnId);
                         handleClose();
                     }}
                     selected={isSummed}
                 >
-                    <ListItemIcon><FunctionsIcon fontSize="small" /></ListItemIcon>
-                    <ListItemText
+                    <CListItemIcon><FunctionsIcon fontSize="small" /></CListItemIcon>
+                    <CListItemText
                         primary={
                             isSummed ? t('table.headerMenu.removeSummary') : t('table.headerMenu.addSummary')
                         }
                     />
-                </MenuItem>
+                </option>
             )}
-            <Divider />
-            <MenuItem
+            <CDivider />
+            <option
                 onClick={() => {
                     onHideColumn(columnId);
                     handleClose();
                 }}
             >
-                <ListItemIcon><VisibilityOffIcon fontSize="small" /></ListItemIcon>
-                <ListItemText primary={t('table.headerMenu.hideColumn')} />
-            </MenuItem>
-        </Menu>
+                <CListItemIcon><VisibilityOffIcon fontSize="small" /></CListItemIcon>
+                <CListItemText primary={t('table.headerMenu.hideColumn')} />
+            </option>
+        </CMenu>
     );
 };
 
@@ -428,82 +458,87 @@ export const CTableSortDialog = ({
     };
 
     return (
-        <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-            <DialogTitle>{t('table.sortDialog.title')}</DialogTitle>
-            <DialogContent dividers>
+        <CDialog
+            open={open}
+            onClose={onClose}
+            maxWidth={620}
+            fullWidth
+            className="orb-table-sort-dialog"
+            title={t('table.sortDialog.title')}
+            actions={(
+                <>
+                    <CButton
+                        className="orb-table-sort-clear"
+                        variant="neutral"
+                        disabled={rules.length === 0 && initialRules.length === 0}
+                        onClick={() => { onClear(); onClose(); }}
+                    >
+                        {t('table.sortDialog.clearAll')}
+                    </CButton>
+                    <span className="orb-table-sort-action-spacer" />
+                    <CButton variant="neutral" onClick={onClose}>{t('common.cancel')}</CButton>
+                    <CButton variant="primary" onClick={() => { onApply(rules); onClose(); }}>
+                        {t('common.ok')}
+                    </CButton>
+                </>
+            )}
+        >
+            <div className="orb-table-sort-dialog-content">
                 {rules.length === 0 ? (
-                    <Typography variant="body2" sx={{ color: 'text.secondary', py: 2 }}>
+                    <CTypography className="orb-table-sort-empty" variant="body2">
                         {t('table.sortDialog.empty')}
-                    </Typography>
+                    </CTypography>
                 ) : (
-                    <Stack spacing={1}>
+                    <CStack className="orb-table-sort-rules" spacing={1}>
                         {rules.map((rule, idx) => {
                             const otherFields = new Set(rules.filter((_, i) => i !== idx).map((r) => r.field));
                             const fieldOptions = columns.filter((c) => !otherFields.has(c.id));
                             return (
-                                <Box
+                                <div
                                     key={`sort-rule-${idx}`}
-                                    sx={{
-                                        display: 'grid',
-                                        gridTemplateColumns: '24px 1fr 110px auto auto',
-                                        alignItems: 'center',
-                                        gap: 1,
-                                    }}
+                                    className="orb-table-sort-rule"
                                 >
-                                    <Badge badgeContent={idx + 1} color="primary" sx={{ ml: 0.5 }} />
-                                    <select
+                                    <Badge className="orb-table-sort-order" badgeContent={idx + 1} color="primary" />
+                                    <CSelect
+                                        size="small"
                                         value={rule.field}
                                         onChange={(e) => updateRule(idx, { field: e.target.value })}
-                                        style={{ padding: 6, fontSize: 13, borderRadius: 4 }}
-                                    >
-                                        {fieldOptions.map((col) => (
-                                            <option key={col.id} value={col.id}>{col.label}</option>
-                                        ))}
-                                    </select>
-                                    <select
+                                        options={fieldOptions.map((col) => ({ value: col.id, label: col.label }))}
+                                    />
+                                    <CSelect
+                                        size="small"
                                         value={rule.direction}
                                         onChange={(e) => updateRule(idx, { direction: e.target.value as 'asc' | 'desc' })}
-                                        style={{ padding: 6, fontSize: 13, borderRadius: 4 }}
-                                    >
-                                        <option value="asc">{t('table.sortDialog.asc')}</option>
-                                        <option value="desc">{t('table.sortDialog.desc')}</option>
-                                    </select>
-                                    <IconButton size="small" onClick={() => moveRule(idx, -1)} disabled={idx === 0}>
+                                        options={[
+                                            { value: 'asc', label: t('table.sortDialog.asc') },
+                                            { value: 'desc', label: t('table.sortDialog.desc') },
+                                        ]}
+                                    />
+                                    <CIconButton className="orb-table-sort-icon-button" size="small" onClick={() => moveRule(idx, -1)} disabled={idx === 0}>
                                         <ArrowUpwardIcon fontSize="small" />
-                                    </IconButton>
-                                    <Stack direction="row">
-                                        <IconButton size="small" onClick={() => moveRule(idx, 1)} disabled={idx === rules.length - 1}>
-                                            <ArrowDownwardIcon fontSize="small" />
-                                        </IconButton>
-                                        <IconButton size="small" onClick={() => removeRule(idx)}>
-                                            <DeleteOutlineIcon fontSize="small" />
-                                        </IconButton>
-                                    </Stack>
-                                </Box>
+                                    </CIconButton>
+                                    <CIconButton className="orb-table-sort-icon-button" size="small" onClick={() => moveRule(idx, 1)} disabled={idx === rules.length - 1}>
+                                        <ArrowDownwardIcon fontSize="small" />
+                                    </CIconButton>
+                                    <CIconButton className="orb-table-sort-icon-button orb-table-sort-delete" size="small" onClick={() => removeRule(idx)}>
+                                        <DeleteOutlineIcon fontSize="small" />
+                                    </CIconButton>
+                                </div>
                             );
                         })}
-                    </Stack>
+                    </CStack>
                 )}
-                <Button
+                <CButton
                     size="small"
                     onClick={addRule}
                     disabled={availableColumns.length === 0}
                     startIcon={<AddIcon />}
-                    sx={{ mt: 2 }}
+                    variant="secondary"
+                    className="orb-table-sort-add"
                 >
                     {t('table.sortDialog.addRule')}
-                </Button>
-            </DialogContent>
-            <DialogActions>
-                <Button color="inherit" onClick={() => { onClear(); onClose(); }}>
-                    {t('table.sortDialog.clearAll')}
-                </Button>
-                <Box sx={{ flex: 1 }} />
-                <Button onClick={onClose}>{t('common.cancel')}</Button>
-                <Button variant="contained" onClick={() => { onApply(rules); onClose(); }}>
-                    {t('common.ok')}
-                </Button>
-            </DialogActions>
-        </Dialog>
+                </CButton>
+            </div>
+        </CDialog>
     );
 };

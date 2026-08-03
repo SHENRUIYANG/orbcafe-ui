@@ -1,19 +1,11 @@
+import { TableSortLabel, UnfoldLessIcon, UnfoldMoreIcon } from '../../../lib/orbis-compat';
 import React, { useRef, useState, useEffect } from 'react';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import TableCell from '@mui/material/TableCell';
-import Checkbox from '@mui/material/Checkbox';
-import TableSortLabel from '@mui/material/TableSortLabel';
-import Box from '@mui/material/Box';
-import IconButton from '@mui/material/IconButton';
-import Tooltip from '@mui/material/Tooltip';
-import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore';
-import UnfoldLessIcon from '@mui/icons-material/UnfoldLess';
+import {  CIconButton, CCheckbox, CTooltip } from "../../Atoms";
 import { useSortable, SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { CTableHeadProps } from '../Hooks/CTable/types';
 import { useOrbcafeI18n } from '../../../i18n';
-import { tableControlCheckboxSx, tableControlIconButtonSx, tableGroupControlCellSx, tableSelectionCellSx } from './ctableControlSx';
+import { TABLE_CONTROL_COLUMN_WIDTH, TABLE_GROUP_CONTROL_COLUMN_WIDTH, tableControlCheckboxSx, tableControlIconButtonSx } from './ctableControlSx';
 
 export const CTableHead = (props: CTableHeadProps) => {
     const { t } = useOrbcafeI18n();
@@ -122,20 +114,13 @@ export const CTableHead = (props: CTableHeadProps) => {
     const sortableIds = visibleLeafColumns.map((c: any) => c.id);
 
     const headerRow = (
-        <TableRow>
+        <tr>
             {isSelectionEnabled && (
-                <TableCell
-                    padding="checkbox"
-                    sx={(theme) => ({
-                        ...tableSelectionCellSx,
-                        position: 'sticky',
-                        top: 0,
-                        zIndex: 4,
-                        backgroundColor: theme.palette.mode === 'dark' ? '#000000' : '#f5f5f5',
-                        color: theme.palette.mode === 'dark' ? '#ffffff' : theme.palette.text.primary,
-                    })}
+                <th
+                    className="orb-table-control-head"
+                    style={{ width: TABLE_CONTROL_COLUMN_WIDTH, minWidth: TABLE_CONTROL_COLUMN_WIDTH, maxWidth: TABLE_CONTROL_COLUMN_WIDTH }}
                 >
-                    <Checkbox
+                    <CCheckbox
                         color="primary"
                         indeterminate={numSelected > 0 && numSelected < rowCount}
                         checked={rowCount > 0 && numSelected === rowCount}
@@ -143,23 +128,15 @@ export const CTableHead = (props: CTableHeadProps) => {
                         disabled={selectionMode === 'single'}
                         sx={tableControlCheckboxSx}
                     />
-                </TableCell>
+                </th>
             )}
             {showGroupToggle && (
-                <TableCell
-                    align="center"
-                    padding="checkbox"
-                    sx={(theme) => ({
-                        ...tableGroupControlCellSx,
-                        position: 'sticky',
-                        top: 0,
-                        zIndex: 4,
-                        backgroundColor: theme.palette.mode === 'dark' ? '#000000' : '#f5f5f5',
-                        color: theme.palette.mode === 'dark' ? '#ffffff' : theme.palette.text.primary,
-                    })}
+                <th
+                    className="orb-table-control-head"
+                    style={{ width: TABLE_GROUP_CONTROL_COLUMN_WIDTH, minWidth: TABLE_GROUP_CONTROL_COLUMN_WIDTH, maxWidth: TABLE_GROUP_CONTROL_COLUMN_WIDTH }}
                 >
-                    <Tooltip title={groupToggleTitle}>
-                        <IconButton
+                    <CTooltip title={groupToggleTitle}>
+                        <CIconButton
                             size="small"
                             onClick={(event) => {
                                 event.stopPropagation();
@@ -168,9 +145,9 @@ export const CTableHead = (props: CTableHeadProps) => {
                             sx={tableControlIconButtonSx}
                         >
                             {isAllExpanded ? <UnfoldLessIcon /> : <UnfoldMoreIcon />}
-                        </IconButton>
-                    </Tooltip>
-                </TableCell>
+                        </CIconButton>
+                    </CTooltip>
+                </th>
             )}
             {enableColumnReorder ? (
                 <SortableContext items={sortableIds} strategy={horizontalListSortingStrategy}>
@@ -179,10 +156,10 @@ export const CTableHead = (props: CTableHeadProps) => {
             ) : (
                 headerCells
             )}
-        </TableRow>
+        </tr>
     );
 
-    return <TableHead>{headerRow}</TableHead>;
+    return <thead>{headerRow}</thead>;
 };
 
 interface SortableHeadCellProps {
@@ -227,129 +204,43 @@ const SortableHeadCell: React.FC<SortableHeadCellProps> = ({
     const isActive = !disableSorting && (Boolean(multiSortInfo) || orderBy === headCell.id);
 
     return (
-        <TableCell
+        <th
             ref={enableColumnReorder ? setNodeRef : undefined}
-            align="left"
-            padding={headCell.disablePadding ? 'none' : 'normal'}
-            sortDirection={isActive ? activeSortDirection : false}
+            className={`orb-table-head-cell ${headCell.numeric ? 'orb-num' : ''} ${enableColumnReorder ? 'orb-is-reorderable' : ''} ${isDragging ? 'orb-is-dragging' : ''}`}
+            aria-sort={isActive ? (activeSortDirection === 'asc' ? 'ascending' : 'descending') : 'none'}
             onContextMenu={onContextMenu ? (e) => onContextMenu(e, headCell.id) : undefined}
             style={{ width, minWidth: width, maxWidth: width, ...dragStyle }}
-            sx={(theme) => ({
-                position: 'sticky',
-                top: 0,
-                zIndex: 4,
-                backgroundColor: theme.palette.mode === 'dark' ? '#000000' : '#f5f5f5',
-                color: theme.palette.mode === 'dark' ? '#ffffff' : theme.palette.text.primary,
-                fontWeight: 'bold',
-                userSelect: 'none',
-                cursor: enableColumnReorder ? (isDragging ? 'grabbing' : 'grab') : undefined,
-            })}
             {...(enableColumnReorder ? attributes : {})}
             {...(enableColumnReorder ? listeners : {})}
         >
             {disableSorting ? (
-                <Box
-                    component="span"
-                    sx={(theme) => ({
-                        overflow: 'visible',
-                        textOverflow: 'clip',
-                        whiteSpace: 'normal',
-                        lineHeight: 1.2,
-                        wordBreak: 'break-word',
-                        pr: 1,
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: 0.5,
-                        fontWeight: 'bold',
-                        fontSize: '0.85rem',
-                        color: theme.palette.mode === 'dark' ? '#ffffff' : theme.palette.text.primary,
-                    })}
-                >
+                <span className="orb-table-head-label">
                     {headCell.label}
-                </Box>
+                </span>
             ) : (
                 <TableSortLabel
+                    className="orb-table-head-sort"
                     active={isActive}
                     direction={activeSortDirection}
                     onClick={onRequestSort}
-                    sx={(theme) => ({
-                        '&.MuiTableSortLabel-root': { width: '100%' },
-                        '& .MuiTableSortLabel-icon': {
-                            color: theme.palette.mode === 'dark' ? '#ffffff' : theme.palette.text.primary,
-                            opacity: isActive ? 1 : 0,
-                            transition: 'opacity 0.2s',
-                        },
-                        '&:hover .MuiTableSortLabel-icon': { opacity: 0.5 },
-                        '&.Mui-active .MuiTableSortLabel-icon': {
-                            opacity: 1,
-                            color: theme.palette.mode === 'dark' ? '#ffffff' : theme.palette.text.primary,
-                        },
-                        fontWeight: 'bold',
-                        fontSize: '0.85rem',
-                        color: theme.palette.mode === 'dark' ? '#ffffff' : theme.palette.text.primary,
-                    })}
                 >
-                    <Box
-                        component="span"
-                        sx={{
-                            overflow: 'visible',
-                            textOverflow: 'clip',
-                            whiteSpace: 'normal',
-                            lineHeight: 1.2,
-                            wordBreak: 'break-word',
-                            pr: 1,
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: 0.5,
-                        }}
-                    >
+                    <span className="orb-table-head-label">
                         {headCell.label}
                         {multiSortInfo && (
-                            <Box
-                                component="span"
-                                sx={(theme) => ({
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    minWidth: 16,
-                                    height: 16,
-                                    px: 0.5,
-                                    borderRadius: 999,
-                                    fontSize: 10,
-                                    fontWeight: 700,
-                                    color: '#fff',
-                                    backgroundColor: theme.palette.primary.main,
-                                })}
-                            >
+                            <span className="orb-table-sort-priority">
                                 {multiSortInfo.priority}
-                            </Box>
+                            </span>
                         )}
-                    </Box>
+                    </span>
                 </TableSortLabel>
             )}
             {/* Resize Handle — stop pointer events bubbling so drag-to-reorder isn't triggered when resizing. */}
-            <Box
+            <div
+                className="orb-table-resize-handle"
                 onMouseDown={onResizeMouseDown}
                 onPointerDown={(e) => e.stopPropagation()}
                 onClick={(e) => e.stopPropagation()}
-                sx={(theme) => ({
-                    position: 'absolute',
-                    right: 0,
-                    top: 0,
-                    bottom: 0,
-                    width: 5,
-                    cursor: 'col-resize',
-                    backgroundColor: 'transparent',
-                    transition: 'background-color 120ms ease',
-                    '&:hover': {
-                        backgroundColor:
-                            theme.palette.mode === 'dark'
-                                ? 'rgba(148,163,184,0.28)'
-                                : 'rgba(15,23,42,0.12)',
-                    },
-                    zIndex: 1,
-                })}
             />
-        </TableCell>
+        </th>
     );
 };

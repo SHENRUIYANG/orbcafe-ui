@@ -25,6 +25,8 @@ const MermaidBlock: React.FC<MermaidBlockProps> = ({
   const { theme: currentTheme } = useTheme()
 
   useEffect(() => {
+    let cancelled = false
+
     const renderMermaid = async () => {
       if (!content.trim() || !containerRef.current) return
       
@@ -37,28 +39,27 @@ const MermaidBlock: React.FC<MermaidBlockProps> = ({
           startOnLoad: false,
           theme: currentTheme === 'dark' ? 'dark' : 'default',
           securityLevel: 'loose',
-          fontFamily: 'inherit'
+          fontFamily: 'inherit',
+          flowchart: { htmlLabels: false }
         })
 
         const id = `mermaid-${Math.random().toString(36).substr(2, 9)}`
 
         const graphDefinition = content.replace(/```mermaid\n?|\n?```/g, '').trim()
 
-        const { svg } = await mermaid.render(id, graphDefinition)
+        const { svg, bindFunctions } = await mermaid.render(id, graphDefinition)
         
-        if (containerRef.current) {
+        if (!cancelled && containerRef.current) {
           containerRef.current.innerHTML = svg
+          bindFunctions?.(containerRef.current)
         }
         
       } catch (err) {
+        if (cancelled) return
         console.error('Mermaid render failed:', err)
         setError(err instanceof Error ? err.message : 'Render failed')
-        
-        if (containerRef.current) {
-            containerRef.current.innerText = content
-        }
       } finally {
-        setIsRendering(false)
+        if (!cancelled) setIsRendering(false)
       }
     }
 
@@ -66,36 +67,34 @@ const MermaidBlock: React.FC<MermaidBlockProps> = ({
         renderMermaid()
     }, 100)
 
-    return () => clearTimeout(timer)
+    return () => {
+      cancelled = true
+      clearTimeout(timer)
+    }
   }, [content, currentTheme])
 
-  if (isLoading || isRendering) {
-      return (
-          <div className={`mermaid-block loading ${className}`} style={style}>
-              <div className="flex items-center justify-center p-4 bg-gray-50 dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500 mr-2"></div>
-                  <span className="text-sm text-gray-500">Generating Diagram...</span>
-              </div>
-          </div>
-      )
-  }
-
-  if (error) {
-      return (
-          <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded text-red-600 dark:text-red-400 text-sm overflow-auto">
-              <p className="font-semibold mb-2">Mermaid Error:</p>
-              <pre>{error}</pre>
-              <pre className="mt-4 text-xs text-gray-500">{content}</pre>
-          </div>
-      )
-  }
-
   return (
-    <div 
-        className={`mermaid-block overflow-x-auto ${className}`} 
-        style={style}
+    <div className={`mermaid-block ${className}`} style={style}>
+      {(isLoading || isRendering) && (
+        <div className="flex items-center justify-center rounded border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800">
+          <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-blue-500" />
+          <span className="text-sm text-gray-500">Generating Diagram...</span>
+        </div>
+      )}
+
+      {error && (
+        <div className="overflow-auto rounded border border-red-200 bg-red-50 p-4 text-sm text-red-600 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">
+          <p className="mb-2 font-semibold">Mermaid Error:</p>
+          <pre>{error}</pre>
+          <pre className="mt-4 text-xs text-gray-500">{content}</pre>
+        </div>
+      )}
+
+      <div
         ref={containerRef}
-    />
+        className={`overflow-x-auto ${isLoading || isRendering || error ? 'hidden' : ''}`}
+      />
+    </div>
   )
 }
 

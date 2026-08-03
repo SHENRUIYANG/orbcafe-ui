@@ -6,11 +6,13 @@ export type AIBrowserGlowColors = readonly [string, string, string]
 
 export interface AIBrowserGlowProps {
   active?: boolean
+  /** Compatibility: kept as a 3-tuple; only the first color is used as the edge line color. */
   colors?: AIBrowserGlowColors
   zIndex?: number
 }
 
-const defaultColors: AIBrowserGlowColors = ['#ff3860', '#24e070', '#3090ff']
+/** ORBIS brand default: 2px primary edge line while the agent runs — no color wash. */
+const defaultColors: AIBrowserGlowColors = ['#154194', '#154194', '#154194']
 
 const styles = `
 .orbcafe-ai-browser-glow {
@@ -22,49 +24,27 @@ const styles = `
   pointer-events: none;
   overflow: hidden;
   contain: paint;
-  clip-path: inset(0);
   opacity: 0;
   transition: opacity 260ms ease;
-  --orbcafe-ai-glow-a: #ff3860;
-  --orbcafe-ai-glow-b: #24e070;
-  --orbcafe-ai-glow-c: #3090ff;
+  --orbcafe-ai-glow-line: var(--orb-primary, #154194);
 }
 
 .orbcafe-ai-browser-glow[data-active='true'] {
   opacity: 1;
 }
 
-.orbcafe-ai-browser-glow::before,
-.orbcafe-ai-browser-glow::after {
+.orbcafe-ai-browser-glow::before {
   content: '';
   position: absolute;
   inset: 0;
-  pointer-events: none;
+  border: 2px solid var(--orbcafe-ai-glow-line);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--orbcafe-ai-glow-line) 14%, transparent);
+  animation: orbcafeAiGlowBreath 2.4s ease-in-out infinite;
 }
 
-.orbcafe-ai-browser-glow::before {
-  border: 1px solid color-mix(in srgb, var(--orbcafe-ai-glow-c) 54%, transparent);
-  box-shadow:
-    inset 0 0 18px color-mix(in srgb, var(--orbcafe-ai-glow-a) 56%, transparent),
-    inset 0 0 38px color-mix(in srgb, var(--orbcafe-ai-glow-b) 44%, transparent),
-    inset 0 0 74px color-mix(in srgb, var(--orbcafe-ai-glow-c) 36%, transparent),
-    0 0 22px color-mix(in srgb, var(--orbcafe-ai-glow-a) 42%, transparent);
-  animation: orbcafeAIBrowserGlowPulse 2.2s ease-in-out infinite;
-}
-
-.orbcafe-ai-browser-glow::after {
-  background:
-    linear-gradient(90deg, var(--orbcafe-ai-glow-a), var(--orbcafe-ai-glow-b), var(--orbcafe-ai-glow-c)) top / 100% 5px no-repeat,
-    linear-gradient(90deg, var(--orbcafe-ai-glow-c), var(--orbcafe-ai-glow-b), var(--orbcafe-ai-glow-a)) bottom / 100% 5px no-repeat,
-    linear-gradient(180deg, var(--orbcafe-ai-glow-a), var(--orbcafe-ai-glow-b), var(--orbcafe-ai-glow-c)) left / 5px 100% no-repeat,
-    linear-gradient(180deg, var(--orbcafe-ai-glow-c), var(--orbcafe-ai-glow-b), var(--orbcafe-ai-glow-a)) right / 5px 100% no-repeat;
-  filter: blur(9px) saturate(1.35);
-  opacity: 0.78;
-}
-
-@keyframes orbcafeAIBrowserGlowPulse {
-  0%, 100% { opacity: 0.68; }
-  50% { opacity: 0.98; }
+@keyframes orbcafeAiGlowBreath {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
 }
 `
 
@@ -74,9 +54,7 @@ export const AIBrowserGlow: React.FC<AIBrowserGlowProps> = ({
   zIndex = 2147483000,
 }) => {
   const style = {
-    '--orbcafe-ai-glow-a': colors[0],
-    '--orbcafe-ai-glow-b': colors[1],
-    '--orbcafe-ai-glow-c': colors[2],
+    '--orbcafe-ai-glow-line': colors[0],
     '--orbcafe-ai-glow-z-index': zIndex,
   } as React.CSSProperties
 

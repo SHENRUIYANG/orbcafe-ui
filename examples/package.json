@@ -10,16 +10,10 @@
     "restart": "./restart.sh"
   },
   "dependencies": {
-    "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.1",
-    "@mui/icons-material": "^7.3.9",
-    "@mui/material": "^7.3.9",
-    "@mui/x-date-pickers": "^8.27.2",
     "@radix-ui/react-slot": "^1.2.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "dayjs": "^1.11.20",
-    "lucide-react": "^0.575.0",
     "next": "16.2.10",
     "orbcafe-ui": "file:..",
     "react": "19.2.3",

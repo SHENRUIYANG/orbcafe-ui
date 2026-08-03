@@ -1,24 +1,10 @@
 'use client';
 
+import { Avatar, CIconButton, CPaper, ChevronRightRoundedIcon, Collapse, ExpandMoreRoundedIcon, MenuOpenRoundedIcon, MenuRoundedIcon, SearchRoundedIcon, useTheme } from '../../lib/orbis-compat';
 import { useEffect, useMemo, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import {
-  Avatar,
-  Box,
-  Collapse,
-  IconButton,
-  Paper,
-  Stack,
-  TextField,
-  Typography,
-  useMediaQuery,
-} from '@mui/material';
-import { useTheme } from '@mui/material/styles';
-import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
-import MenuOpenRoundedIcon from '@mui/icons-material/MenuOpenRounded';
-import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
-import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded';
-import ChevronRightRoundedIcon from '@mui/icons-material/ChevronRightRounded';
+import { CStack, CTypography, CTextField } from "../Atoms";
+import { useMediaQuery } from '../../lib/hooks';
 import type { TreeMenuItem } from '../Navigation-Island/tree-menu';
 import type { PNavIslandProps } from './types';
 import { useOrbcafeI18n } from '../../i18n';
@@ -137,8 +123,8 @@ export const PNavIsland = ({
     const isActive = isActiveItem(item);
 
     return (
-      <Box key={item.id} sx={{ pl: level === 0 ? 0 : 1.5 }}>
-        <Paper
+      <div key={item.id} sx={{ pl: level === 0 ? 0 : 1.5 }}>
+        <CPaper
           elevation={0}
           sx={{
             mb: 1,
@@ -149,7 +135,7 @@ export const PNavIsland = ({
             bgcolor: isActive ? 'action.selected' : 'background.paper',
           }}
         >
-          <Box
+          <div
             component="button"
             type="button"
             onClick={() => handleItemPress(item)}
@@ -181,16 +167,16 @@ export const PNavIsland = ({
               {item.icon || (item.title || item.label || '?').slice(0, 1).toUpperCase()}
             </Avatar>
 
-            <Box sx={{ flex: 1, minWidth: 0 }}>
-              <Typography sx={{ fontSize: '0.95rem', fontWeight: 800, lineHeight: 1.2 }}>
+            <div sx={{ flex: 1, minWidth: 0 }}>
+              <CTypography sx={{ fontSize: '0.95rem', fontWeight: 800, lineHeight: 1.2 }}>
                 {item.title || item.label}
-              </Typography>
+              </CTypography>
               {item.description ? (
-                <Typography sx={{ mt: 0.4, fontSize: '0.78rem', color: 'text.secondary', lineHeight: 1.35 }}>
+                <CTypography sx={{ mt: 0.4, fontSize: '0.78rem', color: 'text.secondary', lineHeight: 1.35 }}>
                   {item.description}
-                </Typography>
+                </CTypography>
               ) : null}
-            </Box>
+            </div>
 
             {hasChildren ? (
               <ExpandMoreRoundedIcon
@@ -202,21 +188,21 @@ export const PNavIsland = ({
             ) : (
               <ChevronRightRoundedIcon color="action" />
             )}
-          </Box>
+          </div>
 
           {hasChildren ? (
             <Collapse in={isExpanded}>
-              <Box sx={{ px: 1.25, pb: 1.25 }}>{item.children?.map((child) => renderItem(child, level + 1))}</Box>
+              <div sx={{ px: 1.25, pb: 1.25 }}>{item.children?.map((child) => renderItem(child, level + 1))}</div>
             </Collapse>
           ) : null}
-        </Paper>
-      </Box>
+        </CPaper>
+      </div>
     );
   };
 
   if (collapsed) {
     return (
-      <Paper
+      <CPaper
         elevation={0}
         className={className}
         sx={{
@@ -230,8 +216,8 @@ export const PNavIsland = ({
           overflowY: 'auto',
         }}
       >
-        <Stack spacing={1}>
-          <IconButton
+        <CStack spacing={1}>
+          <CIconButton
             onClick={onToggle}
             sx={{
               width: 48,
@@ -242,10 +228,10 @@ export const PNavIsland = ({
             title={t('navigation.expand')}
           >
             <MenuRoundedIcon />
-          </IconButton>
+          </CIconButton>
 
           {menuData.map((item) => (
-            <IconButton
+            <CIconButton
               key={item.id}
               onClick={() => handleItemPress(item)}
               sx={{
@@ -258,15 +244,15 @@ export const PNavIsland = ({
               }}
             >
               {item.icon || (item.title || item.label || '?').slice(0, 1).toUpperCase()}
-            </IconButton>
+            </CIconButton>
           ))}
-        </Stack>
-      </Paper>
+        </CStack>
+      </CPaper>
     );
   }
 
   return (
-    <Paper
+    <CPaper
       elevation={0}
       className={className}
       sx={{
@@ -282,9 +268,9 @@ export const PNavIsland = ({
         flexDirection: 'column',
       }}
     >
-      <Stack spacing={1.25} sx={{ flex: 1, minHeight: 0 }}>
-        <Stack direction="row" spacing={1} alignItems="center">
-          <TextField
+      <CStack spacing={1.25} sx={{ flex: 1, minHeight: 0 }}>
+        <CStack direction="row" spacing={1} alignItems="center">
+          <CTextField
             value={searchTerm}
             onChange={(event) => setSearchTerm(event.target.value)}
             placeholder={t('navigation.searchPlaceholder')}
@@ -296,26 +282,26 @@ export const PNavIsland = ({
           />
 
           {resolvedOrientation === 'landscape' && !collapsed ? (
-            <IconButton onClick={onToggle} sx={{ bgcolor: 'action.hover' }}>
+            <CIconButton onClick={onToggle} sx={{ bgcolor: 'action.hover' }}>
               <MenuOpenRoundedIcon />
-            </IconButton>
+            </CIconButton>
           ) : null}
-        </Stack>
+        </CStack>
 
         {headerSlot}
 
-        <Box sx={{ flex: 1, minHeight: 0, overflowY: 'auto', pr: 0.25 }}>
+        <div sx={{ flex: 1, minHeight: 0, overflowY: 'auto', pr: 0.25 }}>
           {filteredMenuData.length > 0 ? (
             filteredMenuData.map((item) => renderItem(item))
           ) : (
-            <Typography sx={{ p: 2, fontSize: '0.88rem', color: 'text.secondary', textAlign: 'center' }}>
+            <CTypography sx={{ p: 2, fontSize: '0.88rem', color: 'text.secondary', textAlign: 'center' }}>
               {t('navigation.noMatch')}
-            </Typography>
+            </CTypography>
           )}
-        </Box>
+        </div>
 
         {footerSlot}
-      </Stack>
-    </Paper>
+      </CStack>
+    </CPaper>
   );
 };

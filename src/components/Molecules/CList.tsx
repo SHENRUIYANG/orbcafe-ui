@@ -1,70 +1,132 @@
-/**
- * @file 10_Frontend/components/sap/ui/Common/Molecules/CList.tsx
- * 
- * @summary Core frontend CList module for the ORBAI Core project
- * @author ORBAICODER
- * @version 1.0.0
- * @date 2025-01-19
- * 
- * @description
- * This file is responsible for:
- *  - Implementing CList functionality within frontend workflows
- *  - Integrating with shared ORBAI Core application processes under frontend
- * 
- * @logic
- * 1. Import required dependencies and configuration
- * 2. Execute the primary logic for CList
- * 3. Export the resulting APIs, hooks, or components for reuse
- * 
- * @changelog
- * V1.0.0 - 2025-01-19 - Initial creation
- */
+import type { ReactNode, HTMLAttributes, CSSProperties } from 'react';
 
-/**
- * File Overview
- * 
- * START CODING
- * 
- * --------------------------
- * SECTION 1: CList Core Logic
- * Section overview and description.
- * --------------------------
- */
+// Simple list component - native ul with styling
+export interface CListProps extends HTMLAttributes<HTMLUListElement> {
+  dense?: boolean;
+  sx?: CSSProperties;
+}
 
-import React from 'react';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import ListSubheader from '@mui/material/ListSubheader';
-import ListItemAvatar from '@mui/material/ListItemAvatar';
+export const CList = ({ dense, sx, className, children, ...props }: CListProps) => (
+  <ul
+    {...props}
+    className={className}
+    style={{
+      listStyle: 'none',
+      margin: 0,
+      padding: 0,
+      ...sx,
+    }}
+  >
+    {children}
+  </ul>
+);
 
-import type { ListProps } from '@mui/material/List';
-import type { ListItemProps } from '@mui/material/ListItem';
-import type { ListItemButtonProps } from '@mui/material/ListItemButton';
-import type { ListItemIconProps } from '@mui/material/ListItemIcon';
-import type { ListItemTextProps } from '@mui/material/ListItemText';
-import type { ListSubheaderProps } from '@mui/material/ListSubheader';
-import type { ListItemAvatarProps } from '@mui/material/ListItemAvatar';
+export interface CListItemProps extends HTMLAttributes<HTMLLIElement> {
+  button?: boolean;
+  divider?: boolean;
+  sx?: CSSProperties;
+}
 
-export type CListProps = ListProps;
-export const CList: React.FC<CListProps> = (props) => <List {...props} />;
+export const CListItem = ({ button, divider, sx, className, children, ...props }: CListItemProps) => (
+  <li
+    {...props}
+    className={className}
+    style={{
+      display: 'flex',
+      alignItems: 'center',
+      padding: '8px 16px',
+      minHeight: 40,
+      borderBottom: divider ? '1px solid var(--orb-border)' : undefined,
+      cursor: button ? 'pointer' : undefined,
+      transition: 'var(--orb-t-fast)',
+      ...sx,
+    }}
+    onMouseEnter={button ? (e) => { e.currentTarget.style.background = 'var(--orb-hover)'; } : undefined}
+    onMouseLeave={button ? (e) => { e.currentTarget.style.background = ''; } : undefined}
+  >
+    {children}
+  </li>
+);
 
-export type CListItemProps = ListItemProps;
-export const CListItem: React.FC<CListItemProps> = (props) => <ListItem {...props} />;
+export interface CListItemButtonProps extends HTMLAttributes<HTMLButtonElement> {
+  sx?: CSSProperties;
+}
 
-export type CListItemButtonProps = ListItemButtonProps;
-export const CListItemButton: React.FC<CListItemButtonProps> = (props) => <ListItemButton {...props} />;
+export const CListItemButton = ({ sx, className, children, ...props }: CListItemButtonProps) => (
+  <button
+    {...props}
+    type="button"
+    className={className}
+    style={{
+      width: '100%',
+      display: 'flex',
+      alignItems: 'center',
+      padding: '8px 16px',
+      border: 'none',
+      background: 'transparent',
+      textAlign: 'left',
+      cursor: 'pointer',
+      transition: 'var(--orb-t-fast)',
+      ...sx,
+    }}
+  >
+    {children}
+  </button>
+);
 
-export type CListItemIconProps = ListItemIconProps;
-export const CListItemIcon: React.FC<CListItemIconProps> = (props) => <ListItemIcon {...props} />;
+export interface CListItemIconProps {
+  children: ReactNode;
+  sx?: CSSProperties;
+}
 
-export type CListItemTextProps = ListItemTextProps;
-export const CListItemText: React.FC<CListItemTextProps> = (props) => <ListItemText {...props} />;
+export const CListItemIcon = ({ children, sx }: CListItemIconProps) => (
+  <div style={{ marginRight: 16, display: 'flex', alignItems: 'center', minWidth: 40, ...sx }}>
+    {children}
+  </div>
+);
 
-export type CListSubheaderProps = ListSubheaderProps;
-export const CListSubheader: React.FC<CListSubheaderProps> = (props) => <ListSubheader {...props} />;
+export interface CListItemTextProps {
+  primary: ReactNode;
+  secondary?: ReactNode;
+  sx?: CSSProperties;
+}
 
-export type CListItemAvatarProps = ListItemAvatarProps;
-export const CListItemAvatar: React.FC<CListItemAvatarProps> = (props) => <ListItemAvatar {...props} />;
+export const CListItemText = ({ primary, secondary, sx }: CListItemTextProps) => (
+  <div style={{ flex: 1, minWidth: 0, ...sx }}>
+    <div className="orb-body" style={{ fontWeight: 500 }}>{primary}</div>
+    {secondary && <div className="orb-meta" style={{ marginTop: 2 }}>{secondary}</div>}
+  </div>
+);
+
+export interface CListSubheaderProps extends HTMLAttributes<HTMLLIElement> {
+  sx?: CSSProperties;
+}
+
+export const CListSubheader = ({ sx, className, children, ...props }: CListSubheaderProps) => (
+  <li
+    {...props}
+    className={className}
+    style={{
+      padding: '8px 16px',
+      fontSize: 11,
+      fontWeight: 600,
+      textTransform: 'uppercase',
+      letterSpacing: '0.06em',
+      color: 'var(--orb-muted)',
+      ...sx,
+    }}
+  >
+    {children}
+  </li>
+);
+
+export interface CListItemAvatarProps {
+  children: ReactNode;
+  sx?: CSSProperties;
+}
+
+export const CListItemAvatar = ({ children, sx }: CListItemAvatarProps) => (
+  <div style={{ marginRight: 12, display: 'flex', alignItems: 'center', ...sx }}>
+    {children}
+  </div>
+);

@@ -1,4 +1,5 @@
-import { Box, Link, Typography } from '@mui/material';
+import { CTypography } from '../../../Atoms';
+
 import { buildGoogleMapEmbedUrl } from '../embed-GMAP';
 
 export interface CGoogleMapChartProps {
@@ -31,26 +32,26 @@ export const CGoogleMapChart = ({
 
   if (!resolvedUrl) {
     return (
-      <Box>
-        <Typography variant="body2" color="text.secondary">
+      <div>
+        <CTypography variant="body2" muted>
           Google Map requires `embedUrl` or (`apiKey` + `query`).
-        </Typography>
-      </Box>
+        </CTypography>
+      </div>
     );
   }
 
   return (
-    <Box>
-      <Box
+    <div>
+      <div
         component="iframe"
         src={resolvedUrl}
         loading="lazy"
         referrerPolicy="no-referrer-when-downgrade"
         sx={{ width: '100%', height, border: 0, borderRadius: 2 }}
       />
-      <Typography variant="caption" color="text.secondary" sx={{ mt: 0.75, display: 'block' }}>
-        If iframe is blocked, open directly: <Link href={resolvedUrl} target="_blank" rel="noreferrer">Google Maps</Link>
-      </Typography>
-    </Box>
+      <CTypography variant="caption" muted sx={{ mt: 0.75, display: 'block' }}>
+        If iframe is blocked, open directly: <a href={resolvedUrl} target="_blank" rel="noreferrer">Google Maps</a>
+      </CTypography>
+    </div>
   );
 };

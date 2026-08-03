@@ -22,6 +22,7 @@ const en = {
   'header.theme.dark': 'Theme: Dark',
   'header.theme.light': 'Theme: Light',
   'header.menu.setting': 'Setting',
+  'header.menu.refresh': 'Refresh',
   'header.menu.logout': 'Logout',
 
   'navigation.expand': 'Expand navigation',
@@ -280,6 +281,7 @@ const zh: OrbcafeMessages = {
   'header.theme.dark': '主题：深色',
   'header.theme.light': '主题：浅色',
   'header.menu.setting': '设置',
+  'header.menu.refresh': '刷新',
   'header.menu.logout': '注销',
 
   'navigation.expand': '展开导航',
@@ -536,6 +538,7 @@ const fr: OrbcafeMessages = {
   'header.theme.dark': 'Thème : Sombre',
   'header.theme.light': 'Thème : Clair',
   'header.menu.setting': 'Paramètres',
+  'header.menu.refresh': 'Actualiser',
   'header.menu.logout': 'Se déconnecter',
 
   'navigation.expand': 'Développer la navigation',
@@ -792,6 +795,7 @@ const de: OrbcafeMessages = {
   'header.theme.dark': 'Theme: Dunkel',
   'header.theme.light': 'Theme: Hell',
   'header.menu.setting': 'Einstellungen',
+  'header.menu.refresh': 'Aktualisieren',
   'header.menu.logout': 'Abmelden',
 
   'navigation.expand': 'Navigation erweitern',
@@ -1048,6 +1052,7 @@ const ja: OrbcafeMessages = {
   'header.theme.dark': 'テーマ：ダーク',
   'header.theme.light': 'テーマ：ライト',
   'header.menu.setting': '設定',
+  'header.menu.refresh': '再読み込み',
   'header.menu.logout': 'ログアウト',
 
   'navigation.expand': 'ナビゲーションを展開',
@@ -1304,6 +1309,7 @@ const ko: OrbcafeMessages = {
   'header.theme.dark': '테마: 다크',
   'header.theme.light': '테마: 라이트',
   'header.menu.setting': '설정',
+  'header.menu.refresh': '새로 고침',
   'header.menu.logout': '로그아웃',
 
   'navigation.expand': '탐색 펼치기',

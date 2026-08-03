@@ -1,9 +1,7 @@
+import { getOrbCompatMode } from '../../../lib/orbis-compat';
+import { KeyboardArrowDownIcon, KeyboardArrowRightIcon, UnfoldLessIcon, UnfoldMoreIcon } from '../../../lib/orbis-compat';
 import React from 'react';
-import { TableBody, TableRow, TableCell, Checkbox, IconButton, Typography, Box, Tooltip } from '@mui/material';
-import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore';
-import UnfoldLessIcon from '@mui/icons-material/UnfoldLess';
+import {  CIconButton, CTypography, CCheckbox, CTooltip } from "../../Atoms";
 import { CTableBodyProps } from '../Hooks/CTable/types';
 import { useOrbcafeI18n } from '../../../i18n';
 import {
@@ -16,13 +14,13 @@ import {
 
 export const CTableBody = (props: CTableBodyProps) => {
     const { t } = useOrbcafeI18n();
-    const { 
-        visibleRows, 
-        visibleColumns, 
-        selected = [], 
-        handleClick, 
-        columns, 
-        // grouping = [], 
+    const {
+        visibleRows,
+        visibleColumns,
+        selected = [],
+        handleClick,
+        columns,
+        // grouping = [],
         toggleGroupExpand,
         expandedGroups = new Set(),
         selectionMode,
@@ -30,8 +28,12 @@ export const CTableBody = (props: CTableBodyProps) => {
         isGroupFullyExpanded,
         handleExpandGroupRecursively,
         handleCollapseGroupRecursively,
+        emptyLabel,
+        getRowDataKey,
+        getRowProps,
+        getGroupRowProps,
     } = props;
-    
+
     const isSelected = (id: any) => selected.indexOf(id) !== -1;
     const isSelectionEnabled = selectionMode === 'multiple' || selectionMode === 'single';
     const hasGrouping = grouping.length > 0;
@@ -40,7 +42,7 @@ export const CTableBody = (props: CTableBodyProps) => {
     const totalColumns = visibleColumns.length + (isSelectionEnabled ? 1 : 0) + (hasGrouping ? 1 : 0);
 
     return (
-        <TableBody>
+        <tbody>
             {visibleRows.map((row: any, index: number) => {
                 if (row.type === 'group') {
                     // Render Group Header
@@ -50,6 +52,20 @@ export const CTableBody = (props: CTableBodyProps) => {
                     const selectedChildCount = childIds.filter((id: any) => isSelected(id)).length;
                     const isGroupSelected = childIds.length > 0 && selectedChildCount === childIds.length;
                     const isGroupIndeterminate = selectedChildCount > 0 && selectedChildCount < childIds.length;
+                    const groupContext = {
+                        entry: row,
+                        data: row,
+                        id: row.id,
+                        index,
+                        selected: isGroupSelected,
+                        group: true,
+                    };
+                    const customGroupRowProps = getGroupRowProps?.(groupContext) || {};
+                    const {
+                        className: customGroupClassName,
+                        onClick: customGroupOnClick,
+                        ...groupRowProps
+                    } = customGroupRowProps;
 
                     const handleGroupSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
                         e.stopPropagation();
@@ -68,28 +84,32 @@ export const CTableBody = (props: CTableBodyProps) => {
                     };
 
                     return (
-                        <TableRow 
+                        <tr
                             key={row.id}
+                            {...groupRowProps}
+                            data-ctable-row-key={getRowDataKey?.(groupContext)}
+                            className={['orb-table-group-row', customGroupClassName].filter(Boolean).join(' ')}
+                            onClick={customGroupOnClick}
                             sx={(theme) => ({
-                                backgroundColor: theme.palette.mode === 'dark' ? '#111111' : '#f5f5f5',
-                                '& .MuiTableCell-root': {
+                                backgroundColor: getOrbCompatMode() === 'dark' ? '#111111' : '#f5f5f5',
+                                '& th, & td': {
                                     color: theme.palette.text.primary,
                                     borderBottomColor: theme.palette.divider,
                                 },
-                                '& .MuiIconButton-root': {
+                                '& .orb-icon-btn': {
                                     color: theme.palette.text.primary,
                                 },
-                                '& .MuiCheckbox-root': {
+                                '& .orb-chk': {
                                     color: theme.palette.text.secondary,
                                 },
-                                '& .MuiCheckbox-root.Mui-checked, & .MuiCheckbox-root.MuiCheckbox-indeterminate': {
+                                '& .orb-chk:has(input:checked), & .orb-chk:has(input:indeterminate)': {
                                     color: theme.palette.primary.main,
                                 },
                             })}
                         >
                             {isSelectionEnabled && (
-                                <TableCell padding="checkbox" sx={tableSelectionCellSx}>
-                                    <Checkbox
+                                <td padding="checkbox" sx={tableSelectionCellSx}>
+                                    <CCheckbox
                                         size="small"
                                         checked={isGroupSelected}
                                         indeterminate={isGroupIndeterminate}
@@ -97,14 +117,14 @@ export const CTableBody = (props: CTableBodyProps) => {
                                         onClick={(e) => e.stopPropagation()}
                                         sx={tableControlCheckboxSx}
                                     />
-                                </TableCell>
+                                </td>
                             )}
                             {hasGrouping && (
-                                <TableCell padding="checkbox" sx={tableGroupControlCellSx}>
-                                    <Box sx={tableGroupControlsSx}>
+                                <td padding="checkbox" sx={tableGroupControlCellSx}>
+                                    <div sx={tableGroupControlsSx}>
                                         {grouping.length > 1 && row.level < grouping.length - 1 && (
-                                            <Tooltip title={isGroupFullyExpanded?.(row.id) ? t('table.group.collapseAll') : t('table.group.expandAll')}>
-                                                <IconButton
+                                            <CTooltip title={isGroupFullyExpanded?.(row.id) ? t('table.group.collapseAll') : t('table.group.expandAll')}>
+                                                <CIconButton
                                                     size="small"
                                                     onClick={() => {
                                                         const fullyExpanded = isGroupFullyExpanded?.(row.id);
@@ -121,34 +141,48 @@ export const CTableBody = (props: CTableBodyProps) => {
                                                     ) : (
                                                         <UnfoldMoreIcon />
                                                     )}
-                                                </IconButton>
-                                            </Tooltip>
+                                                </CIconButton>
+                                            </CTooltip>
                                         )}
-                                        <IconButton
+                                        <CIconButton
                                             size="small"
                                             onClick={() => toggleGroupExpand && toggleGroupExpand(row.id)}
                                             sx={tableControlIconButtonSx}
                                         >
                                             {isExpanded ? <KeyboardArrowDownIcon /> : <KeyboardArrowRightIcon />}
-                                        </IconButton>
-                                    </Box>
-                                </TableCell>
+                                        </CIconButton>
+                                    </div>
+                                </td>
                             )}
-                            <TableCell colSpan={visibleColumns.length} sx={{ py: 1, pl: (row.level * 3) + 1 }}>
-                                <Typography variant="body2" fontWeight="bold" color="text.primary" sx={{ fontSize: '0.85rem' }}>
+                            <td colSpan={visibleColumns.length} sx={{ py: 1, pl: (row.level * 3) + 1 }}>
+                                <CTypography variant="body2" fontWeight="bold" color="text.primary" sx={{ fontSize: '0.85rem' }}>
                                     {row.field}: {row.value} ({row.count})
-                                </Typography>
-                            </TableCell>
-                        </TableRow>
+                                </CTypography>
+                            </td>
+                        </tr>
                     );
                 } else {
                     // Render Data Row
                     // If row comes from useCTable grouping logic, data is in row.data
-                    const data = row.data || row; 
+                    const data = row.data || row;
                     const id = row.id || data.id || index;
                     const isItemSelected = isSelected(id);
                     const labelId = `enhanced-table-checkbox-${index}`;
-                    
+                    const rowContext = {
+                        entry: row,
+                        data,
+                        id,
+                        index,
+                        selected: isItemSelected,
+                        group: false,
+                    };
+                    const customRowProps = getRowProps?.(rowContext) || {};
+                    const {
+                        className: customRowClassName,
+                        onClick: customRowOnClick,
+                        ...rowProps
+                    } = customRowProps;
+
                     // Determine indentation level for data rows
                     // If grouping is active, data rows are at level = grouping.length
                     // We can use row.level if available, otherwise 0
@@ -156,19 +190,22 @@ export const CTableBody = (props: CTableBodyProps) => {
                     const indent = level * 4; // 32px per level (theme.spacing(4))
 
                     return (
-                        <TableRow
-                            hover
-                            onClick={(event: React.MouseEvent) => handleClick && handleClick(event, data)}
-                            role="checkbox"
-                            aria-checked={isItemSelected}
-                            tabIndex={-1}
+                        <tr
                             key={id}
-                            selected={isItemSelected}
-                            sx={{ cursor: 'pointer' }}
+                            {...rowProps}
+                            data-ctable-row-key={getRowDataKey?.(rowContext)}
+                            className={[isItemSelected ? 'orb-is-selected' : '', customRowClassName].filter(Boolean).join(' ')}
+                            onClick={(event: React.MouseEvent<HTMLTableRowElement>) => {
+                                customRowOnClick?.(event);
+                                if (!event.defaultPrevented) handleClick?.(event, data);
+                            }}
+                            role={isSelectionEnabled ? 'checkbox' : rowProps.role}
+                            aria-checked={isSelectionEnabled ? isItemSelected : rowProps['aria-checked']}
+                            tabIndex={rowProps.tabIndex ?? -1}
                         >
                             {isSelectionEnabled && (
-                                <TableCell padding="checkbox" sx={tableSelectionCellSx}>
-                                    <Checkbox
+                                <td padding="checkbox" sx={tableSelectionCellSx}>
+                                    <CCheckbox
                                         color="primary"
                                         checked={isItemSelected}
                                         inputProps={{
@@ -176,18 +213,19 @@ export const CTableBody = (props: CTableBodyProps) => {
                                         }}
                                         sx={tableControlCheckboxSx}
                                     />
-                                </TableCell>
+                                </td>
                             )}
-                            {hasGrouping && <TableCell padding="checkbox" sx={tableGroupControlCellSx} />}
+                            {hasGrouping && <td padding="checkbox" sx={tableGroupControlCellSx} />}
                             {columns.filter((c: any) => visibleColumns.includes(c.id)).map((column: any, colIndex: number) => {
                                 // Keep control columns fixed; apply grouping indentation to the first data column.
                                 const isFirstColumn = colIndex === 0;
                                 const cellSx = isFirstColumn && indent > 0 ? { pl: indent + 2 } : {};
 
                                 return (
-                                    <TableCell 
-                                        key={column.id} 
-                                        align="left"
+                                    <td
+                                        key={column.id}
+                                        className={column.numeric ? 'orb-num' : undefined}
+                                        align={column.numeric ? 'right' : 'left'}
                                         sx={cellSx}
                                     >
                                         {column.render ? column.render(data[column.id], data) : (
@@ -202,21 +240,21 @@ export const CTableBody = (props: CTableBodyProps) => {
                                                 return val;
                                             })()
                                         )}
-                                    </TableCell>
+                                    </td>
                                 );
                             })}
-                        </TableRow>
+                        </tr>
                     );
 
                 }
             })}
             {visibleRows.length === 0 && (
-                <TableRow>
-                    <TableCell colSpan={totalColumns} align="center">
-                        {t('common.noData')}
-                    </TableCell>
-                </TableRow>
+                <tr>
+                    <td colSpan={totalColumns} align="center">
+                        {emptyLabel ?? t('common.noData')}
+                    </td>
+                </tr>
             )}
-        </TableBody>
+        </tbody>
     );
 };

@@ -19,6 +19,8 @@ export interface StdChatProps {
   onMessageStreamingComplete?: (messageId: string) => void
   cardHooks?: AgentUICardHooks
   showInput?: boolean
+  /** Optional in-flow status line rendered after the last message (e.g. spinner + working text). */
+  statusLine?: React.ReactNode
 }
 
 export const StdChat: React.FC<StdChatProps> = ({
@@ -33,7 +35,8 @@ export const StdChat: React.FC<StdChatProps> = ({
   streamChunkSize,
   onMessageStreamingComplete,
   cardHooks,
-  showInput = true
+  showInput = true,
+  statusLine
 }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const prevMessageCountRef = useRef(messages.length)
@@ -72,11 +75,12 @@ export const StdChat: React.FC<StdChatProps> = ({
             />
           )
         })}
+        {statusLine}
         <div ref={messagesEndRef} />
       </div>
 
       {showInput && (
-        <div className="p-4 bg-gradient-to-t from-white via-white to-transparent dark:from-gray-900 dark:via-gray-900 pb-8 z-10">
+        <div className="border-t border-[var(--orb-border,#dbdbdb)] bg-[var(--orb-canvas,#ffffff)] p-4 z-10">
           <InputArea
             onSend={onSend || (async () => {})}
             onStop={onStop || (() => {})}

@@ -8,7 +8,7 @@ import {
   Download as ArrowDownTrayIcon,
   Eye as EyeIcon,
   AlertCircle as ExclamationCircleIcon
-} from 'lucide-react'
+} from '@/components/Icons'
 
 interface MediaBlockProps {
   url: string

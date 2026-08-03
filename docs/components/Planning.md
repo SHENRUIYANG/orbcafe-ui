@@ -23,7 +23,7 @@ Project management and production planning timeline component.
 
 ```tsx
 import { CPlanningLayout, usePlanningLayout, type PlanningTaskRecord } from 'orbcafe-ui';
-import { Button } from '@mui/material';
+import { CButton } from 'orbcafe-ui';
 
 const tasks: PlanningTaskRecord[] = [
   {

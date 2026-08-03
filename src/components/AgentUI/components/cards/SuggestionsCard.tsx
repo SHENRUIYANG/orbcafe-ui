@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from 'react'
 import type { SuggestionsCardProps } from '../cardTypes'
-import { Lightbulb, Search, X, ChevronRight } from 'lucide-react'
+import { Lightbulb, Search, X, ChevronRight } from '@/components/Icons'
 
 const SuggestionsCard: React.FC<SuggestionsCardProps> = ({
   title = '相关推荐',

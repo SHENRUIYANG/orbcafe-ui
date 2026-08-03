@@ -1,7 +1,15 @@
 import type { Metadata } from "next";
+import { Montserrat } from "next/font/google";
 import "./globals.css";
 
 import { Providers } from "./providers";
+
+const montserrat = Montserrat({
+  subsets: ["latin"],
+  weight: "variable",
+  variable: "--font-montserrat",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "ORBCAFE-UI",
@@ -20,7 +28,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body suppressHydrationWarning className="antialiased">
+      <body suppressHydrationWarning className={`antialiased ${montserrat.variable}`}>
         <Providers>
           {children}
         </Providers>

@@ -1,8 +1,9 @@
 'use client';
+import { getOrbCompatMode } from '../../lib/orbis-compat';
+import { DragIndicatorRoundedIcon } from '../../lib/orbis-compat';
+import {  CIconButton, CPaper, CStack, CTypography, CChip } from "../Atoms";
 
 import { useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
-import { Box, Chip, IconButton, Paper, Stack, Typography } from '@mui/material';
-import DragIndicatorRoundedIcon from '@mui/icons-material/DragIndicatorRounded';
 import type { PTouchCardProps } from './types';
 
 const actionColorMap = {
@@ -99,7 +100,7 @@ export const PTouchCard = ({
     const backgroundColor = action.backgroundColor || actionColorMap[action.tone || 'default'];
 
     return (
-      <Box
+      <div
         sx={{
           position: 'absolute',
           top: 0,
@@ -114,26 +115,26 @@ export const PTouchCard = ({
           background: `linear-gradient(135deg, ${backgroundColor}, rgba(15,23,42,0.92))`,
         }}
       >
-        <Stack direction="row" spacing={1} alignItems="center">
+        <CStack direction="row" spacing={1} alignItems="center">
           {action.icon}
-          <Typography sx={{ fontWeight: 700, fontSize: '0.95rem' }}>{action.label}</Typography>
-        </Stack>
-      </Box>
+          <CTypography sx={{ fontWeight: 700, fontSize: '0.95rem' }}>{action.label}</CTypography>
+        </CStack>
+      </div>
     );
   };
 
   return (
-    <Box sx={{ position: 'relative', overflow: 'hidden', borderRadius: 4, ...sx }}>
+    <div sx={{ position: 'relative', overflow: 'hidden', borderRadius: 4, ...sx }}>
       {renderAction(startAction, 'left')}
       {renderAction(endAction, 'right')}
 
-      <Paper
+      <CPaper
         elevation={0}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={resetSwipe}
-        sx={(theme) => ({
+        sx={{
           position: 'relative',
           zIndex: 1,
           p: 2,
@@ -141,7 +142,7 @@ export const PTouchCard = ({
           border: '1px solid',
           borderColor: selected ? 'primary.main' : 'divider',
           background:
-            theme.palette.mode === 'dark'
+            getOrbCompatMode() === 'dark'
               ? 'linear-gradient(180deg, rgba(30,41,59,0.96), rgba(15,23,42,0.92))'
               : 'linear-gradient(180deg, #ffffff, #f8fafc)',
           color: 'text.primary',
@@ -153,56 +154,56 @@ export const PTouchCard = ({
           touchAction: 'pan-y',
           cursor: onClick ? 'pointer' : 'default',
           opacity: isDragging ? 0.9 : 1,
-        })}
+        }}
       >
-        <Stack spacing={1.5}>
-          <Stack direction="row" spacing={1.5} alignItems="flex-start">
-            {icon ? <Box sx={{ mt: 0.25 }}>{icon}</Box> : null}
+        <CStack spacing={1.5}>
+          <CStack direction="row" spacing={1.5} alignItems="flex-start">
+            {icon ? <div sx={{ mt: 0.25 }}>{icon}</div> : null}
 
-            <Box sx={{ flex: 1, minWidth: 0 }}>
+            <div sx={{ flex: 1, minWidth: 0 }}>
               {kicker ? (
-                <Typography sx={{ fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.08em', color: 'text.secondary' }}>
+                <CTypography sx={{ fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.08em', color: 'text.secondary' }}>
                   {kicker}
-                </Typography>
+                </CTypography>
               ) : null}
 
-              <Typography sx={{ fontSize: '1.05rem', fontWeight: 800, lineHeight: 1.25 }}>{title}</Typography>
+              <CTypography sx={{ fontSize: '1.05rem', fontWeight: 800, lineHeight: 1.25 }}>{title}</CTypography>
 
               {description ? (
-                <Typography sx={{ mt: 0.5, fontSize: '0.9rem', color: 'text.secondary', lineHeight: 1.45 }}>
+                <CTypography sx={{ mt: 0.5, fontSize: '0.9rem', color: 'text.secondary', lineHeight: 1.45 }}>
                   {description}
-                </Typography>
+                </CTypography>
               ) : null}
-            </Box>
+            </div>
 
             {draggable ? (
-              <Box
+              <div
                 data-no-swipe="true"
                 {...dragHandleProps}
                 sx={{ alignSelf: 'center', display: 'inline-flex', touchAction: 'none' }}
               >
-                <IconButton size="small">
+                <CIconButton size="small">
                   <DragIndicatorRoundedIcon />
-                </IconButton>
-              </Box>
+                </CIconButton>
+              </div>
             ) : null}
-          </Stack>
+          </CStack>
 
           {badges.length > 0 ? (
-            <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
+            <CStack direction="row" spacing={1} useFlexGap flexWrap="wrap">
               {badges.map((badge, index) => (
-                <Chip
+                <CChip
                   key={index}
                   label={badge}
                   size="small"
                   sx={{ borderRadius: 999, fontWeight: 700, bgcolor: 'action.hover', color: 'text.primary' }}
                 />
               ))}
-            </Stack>
+            </CStack>
           ) : null}
 
           {metrics.length > 0 ? (
-            <Box
+            <div
               sx={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))',
@@ -210,7 +211,7 @@ export const PTouchCard = ({
               }}
             >
               {metrics.map((metric) => (
-                <Paper
+                <CPaper
                   key={metric.id}
                   elevation={0}
                   sx={{
@@ -222,17 +223,17 @@ export const PTouchCard = ({
                     color: 'text.primary',
                   }}
                 >
-                  <Typography sx={{ fontSize: '0.72rem', color: 'text.secondary' }}>{metric.label}</Typography>
-                  <Typography sx={{ fontSize: '1rem', fontWeight: 800, lineHeight: 1.2 }}>{metric.value}</Typography>
-                </Paper>
+                  <CTypography sx={{ fontSize: '0.72rem', color: 'text.secondary' }}>{metric.label}</CTypography>
+                  <CTypography sx={{ fontSize: '1rem', fontWeight: 800, lineHeight: 1.2 }}>{metric.value}</CTypography>
+                </CPaper>
               ))}
-            </Box>
+            </div>
           ) : null}
 
           {children}
           {footer}
-        </Stack>
-      </Paper>
-    </Box>
+        </CStack>
+      </CPaper>
+    </div>
   );
 };

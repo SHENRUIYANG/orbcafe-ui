@@ -1,0 +1,7 @@
+SAP-icons v5.13
+
+Copyright SAP SE or an SAP affiliate company.
+Licensed under the Apache License, Version 2.0.
+
+The matching SAP icon font and its license are redistributed with this package
+for offline UI rendering. No SAP service, API, CDN, or UI5 runtime is required.

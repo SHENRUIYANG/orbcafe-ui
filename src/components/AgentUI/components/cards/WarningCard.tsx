@@ -2,7 +2,7 @@
 
 import React from 'react'
 import type { WarningCardProps } from '../cardTypes'
-import { AlertTriangle, CheckCircle, Info, XCircle, X } from 'lucide-react'
+import { AlertTriangle, CheckCircle, Info, XCircle, X } from '@/components/Icons'
 
 const WarningCard: React.FC<WarningCardProps> = ({
   title = '警告',

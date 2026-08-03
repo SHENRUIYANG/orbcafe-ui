@@ -18,7 +18,10 @@ description: Build ORBCAFE Kanban boards with CKanbanBoard/CKanbanBucket/CKanban
 先检查宿主 `package.json`，缺失或版本不兼容时才安装：
 
 ```bash
-npm install orbcafe-ui @mui/material@^7.3.9 @mui/icons-material@^7.3.9 @mui/x-date-pickers@^8.27.2 @emotion/react@^11.14.0 @emotion/styled@^11.14.1 dayjs@^1.11.20 lucide-react@^0.575.0 tailwind-merge@^3.5.0 clsx@^2.1.1 class-variance-authority@^0.7.1 @radix-ui/react-slot@^1.2.4
+npm install orbcafe-ui
+# ORBCAFE UI v2 是 MUI-free；不要安装 @mui/*、@emotion/*、lucide-react。
+# 组件使用 Tailwind utility classes，宿主需要 Tailwind v4：
+npm install -D tailwindcss @tailwindcss/postcss
 ```
 
 官方 examples 不随 npm 包发布。消费项目没有 `examples/` 时，到 ORBCAFE GitHub 仓库或本地 ORBCAFE 源码仓库对照。

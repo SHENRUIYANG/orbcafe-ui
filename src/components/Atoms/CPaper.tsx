@@ -1,49 +1,32 @@
-/**
- * @file 10_Frontend/components/sap/ui/Common/Atoms/CPaper.tsx
- * 
- * @summary Core frontend CPaper module for the ORBAI Core project
- * @author ORBAICODER
- * @version 1.0.0
- * @date 2025-01-19
- * 
- * @description
- * This file is responsible for:
- *  - Implementing CPaper functionality within frontend workflows
- *  - Integrating with shared ORBAI Core application processes under frontend
- * 
- * @logic
- * 1. Import required dependencies and configuration
- * 2. Execute the primary logic for CPaper
- * 3. Export the resulting APIs, hooks, or components for reuse
- * 
- * @changelog
- * V1.0.0 - 2025-01-19 - Initial creation
- */
+'use client';
 
-/**
- * File Overview
- * 
- * START CODING
- * 
- * --------------------------
- * SECTION 1: CPaper Core Logic
- * Section overview and description.
- * --------------------------
- */
-
-import { Paper } from '@mui/material';
-import type { PaperProps } from '@mui/material';
 import { forwardRef } from 'react';
+import type { CSSProperties, ElementType, HTMLAttributes } from 'react';
+import { resolveOrbSx } from '../../lib/orbis-compat/sx';
+import type { OrbSxProps } from '../../lib/orbis-compat/sx';
 
-export const CPaper = forwardRef<HTMLDivElement, PaperProps>((props, ref) => {
-  return (
-    <Paper
+export interface CPaperProps extends Omit<HTMLAttributes<HTMLDivElement>, 'style'> {
+  /** 0 = flat bordered card; >0 = raised with quiet ORBIS shadow. */
+  elevation?: number;
+  variant?: 'outlined' | 'elevation' | string;
+  component?: ElementType;
+  sx?: OrbSxProps;
+  style?: CSSProperties;
+}
+
+export const CPaper = forwardRef<HTMLDivElement, CPaperProps>(
+  ({ elevation = 1, variant, component, sx, style, className, children, ...rest }, ref) => {
+    const Tag = component ?? 'div';
+    const resolved = resolveOrbSx(sx, `orb-card ${elevation > 0 && variant !== 'outlined' ? 'orb-card-raised' : ''} ${className ?? ''}`, style);
+    return <Tag
       ref={ref}
-      {...props}
-      elevation={props.elevation || 1}
-      sx={{ p: 2, mb: 2, ...props.sx }}
-    />
-  );
-});
+      className={resolved.className}
+      style={resolved.style}
+      {...rest}
+    >
+      {children}
+    </Tag>;
+  },
+);
 
 CPaper.displayName = 'CPaper';

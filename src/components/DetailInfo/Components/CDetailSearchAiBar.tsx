@@ -1,10 +1,7 @@
 'use client';
+import { CloseIcon, InputBase, MicNoneOutlinedIcon, SearchIcon, SendOutlinedIcon } from '../../../lib/orbis-compat';
+import {  CIconButton, CStack, CTypography } from "../../Atoms";
 
-import { Box, IconButton, InputBase, Stack, Typography } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import MicNoneOutlinedIcon from '@mui/icons-material/MicNoneOutlined';
-import SendOutlinedIcon from '@mui/icons-material/SendOutlined';
-import CloseIcon from '@mui/icons-material/Close';
 
 export interface CDetailSearchAiBarProps {
   value: string;
@@ -32,8 +29,8 @@ export const CDetailSearchAiBar = ({
   showStatusText = true,
 }: CDetailSearchAiBarProps) => {
   return (
-    <Stack spacing={0.75}>
-      <Box
+    <CStack spacing={0.75}>
+      <div
         sx={{
           display: 'flex',
           alignItems: 'center',
@@ -63,26 +60,26 @@ export const CDetailSearchAiBar = ({
         />
 
         {value && onClear && (
-          <IconButton size="small" onClick={onClear}>
+          <CIconButton size="small" onClick={onClear}>
             <CloseIcon sx={{ fontSize: compact ? 16 : 18 }} />
-          </IconButton>
+          </CIconButton>
         )}
 
         {onVoiceInput && (
-          <IconButton size="small" onClick={onVoiceInput}>
+          <CIconButton size="small" onClick={onVoiceInput}>
             <MicNoneOutlinedIcon sx={{ fontSize: compact ? 16 : 18 }} />
-          </IconButton>
+          </CIconButton>
         )}
-        <IconButton size="small" onClick={onSubmit} disabled={loading || !value.trim()}>
+        <CIconButton size="small" onClick={onSubmit} disabled={loading || !value.trim()}>
           <SendOutlinedIcon sx={{ fontSize: compact ? 16 : 18 }} />
-        </IconButton>
-      </Box>
+        </CIconButton>
+      </div>
 
       {showStatusText && statusText && (
-        <Typography variant="caption" color="text.secondary">
+        <CTypography variant="caption" color="text.secondary">
           {statusText}
-        </Typography>
+        </CTypography>
       )}
-    </Stack>
+    </CStack>
   );
 };

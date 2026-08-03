@@ -2,9 +2,7 @@
 
 import { useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { Box, Chip } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
-import { CAppPageLayout, CDetailInfoPage, CPageTransition } from 'orbcafe-ui';
+import { CAppPageLayout, CChip, CDetailInfoPage, CPageTransition, useOrbMode } from 'orbcafe-ui';
 import { buildExampleMenu } from '../../_components/exampleNavigation';
 
 const buildRows = (id: string) => ([
@@ -35,15 +33,14 @@ const buildRows = (id: string) => ([
 ]);
 
 const HeaderBrandLogo = () => {
-  const theme = useTheme();
-  const src = theme.palette.mode === 'dark' ? '/LOGO3.png' : '/LOGO2.png';
+  const mode = useOrbMode();
+  const src = mode === 'dark' ? '/LOGO3.png' : '/LOGO2.png';
 
   return (
-    <Box
-      component="img"
+    <img
       src={src}
       alt="ORBCAFE UI"
-      sx={{ width: 280, maxWidth: '32vw', height: 52, display: 'block', objectFit: 'contain', flexShrink: 0 }}
+      style={{ width: 280, maxWidth: '32vw', height: 52, display: 'block', objectFit: 'contain', flexShrink: 0 }}
     />
   );
 };
@@ -95,7 +92,7 @@ export default function DetailInfoExampleClient({
           {
             id: 'status',
             label: 'Status',
-            value: <Chip label="Active" size="small" color="success" variant="outlined" />,
+            value: <CChip label="Active" size="small" color="success" variant="outlined" />,
             searchableText: 'Active',
           },
         ],
@@ -122,21 +119,25 @@ export default function DetailInfoExampleClient({
   return (
     <CAppPageLayout
       appTitle=""
+      navigationVariant="v2"
+      searchPlacement="header"
       menuData={menuData}
       locale="en"
       localeLabel="EN"
       user={{ name: 'Ruiyang Shen', subtitle: 'ruiyang.shen@orbis.de', avatarSrc: '/orbcafe.png' }}
+      onUserRefresh={() => window.location.reload()}
+      onUserLogout={() => window.location.assign('/login')}
       logo={<HeaderBrandLogo />}
     >
       <CPageTransition transitionKey={rowId} variant="slide-up" durationMs={220}>
-        <Box sx={{ height: 'calc(100vh - 120px)' }}>
+        <div style={{ height: 'calc(100vh - 120px)' }}>
           <CDetailInfoPage
             title={`Detail - ${rowId}`}
             subtitle={subtitle}
             onClose={() => router.push(backHref || (sourceLabel ? '/kanban' : '/std-report'))}
             rightHeaderSlot={
               sourceLabel ? (
-                <Chip
+                <CChip
                   size="small"
                   color="primary"
                   variant="outlined"
@@ -213,7 +214,7 @@ export default function DetailInfoExampleClient({
                   id: 'status',
                   label: 'Status',
                   render: (value: string) => (
-                    <Chip
+                    <CChip
                       size="small"
                       label={value}
                       color={value === 'Flag' ? 'warning' : 'success'}
@@ -229,7 +230,7 @@ export default function DetailInfoExampleClient({
             },
           }}
           />
-        </Box>
+        </div>
       </CPageTransition>
     </CAppPageLayout>
   );

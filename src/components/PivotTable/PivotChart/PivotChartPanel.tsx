@@ -1,5 +1,6 @@
+import { FormControl } from '../../../lib/orbis-compat';
 import React, { useMemo } from 'react';
-import { Box, FormControl, MenuItem, Select, Typography } from '@mui/material';
+import {  CTypography, CSelect } from "../../Atoms";
 import type { ValueZoneItem } from '../pivotModel';
 import type { PivotChartType, PivotFieldDefinition } from '../types';
 import { formatAggregatedValue } from '../pivotUtils';
@@ -115,7 +116,7 @@ export const PivotChartPanel: React.FC<PivotChartPanelProps> = ({
       bodySx={{ display: 'flex', flexDirection: 'column', gap: 1.1 }}
     >
       {showSelectionToolbar && (
-        <Box
+        <div
           sx={{
             display: 'grid',
             gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, minmax(0, 1fr))', xl: 'repeat(4, minmax(0, 1fr))' },
@@ -124,100 +125,100 @@ export const PivotChartPanel: React.FC<PivotChartPanelProps> = ({
           }}
         >
           <FormControl size="small" sx={{ minWidth: 0, width: '100%' }}>
-            <Typography sx={{ fontSize: '0.68rem', color: 'text.secondary', mb: 0.45 }}>
+            <CTypography sx={{ fontSize: '0.68rem', color: 'text.secondary', mb: 0.45 }}>
               {t('pivot.chart.dimension')}
-            </Typography>
-            <Select
+            </CTypography>
+            <CSelect
               value={selectedDimension?.fieldId ?? ''}
               onChange={(event) => onChartDimensionFieldIdChange(String(event.target.value))}
               sx={{ fontSize: '0.75rem', height: 32 }}
             >
               {dimensionOptions.map((option) => (
-                <MenuItem key={option.fieldId} value={option.fieldId} sx={{ fontSize: '0.75rem' }}>
+                <option key={option.fieldId} value={option.fieldId} sx={{ fontSize: '0.75rem' }}>
                   {option.label}
-                </MenuItem>
+                </option>
               ))}
-            </Select>
+            </CSelect>
           </FormControl>
 
           <FormControl size="small" sx={{ minWidth: 0, width: '100%' }}>
-            <Typography sx={{ fontSize: '0.68rem', color: 'text.secondary', mb: 0.45 }}>
+            <CTypography sx={{ fontSize: '0.68rem', color: 'text.secondary', mb: 0.45 }}>
               {t('pivot.chart.primaryMeasure')}
-            </Typography>
-            <Select
+            </CTypography>
+            <CSelect
               value={primaryValue?.fieldId ?? ''}
               onChange={(event) => onChartPrimaryValueFieldIdChange(String(event.target.value))}
               sx={{ fontSize: '0.75rem', height: 32 }}
             >
               {valueOptions.map((option) => (
-                <MenuItem key={option.fieldId} value={option.fieldId} sx={{ fontSize: '0.75rem' }}>
+                <option key={option.fieldId} value={option.fieldId} sx={{ fontSize: '0.75rem' }}>
                   {option.label}
-                </MenuItem>
+                </option>
               ))}
-            </Select>
+            </CSelect>
           </FormControl>
 
           <FormControl size="small" sx={{ minWidth: 0, width: '100%' }}>
-            <Typography sx={{ fontSize: '0.68rem', color: 'text.secondary', mb: 0.45 }}>
+            <CTypography sx={{ fontSize: '0.68rem', color: 'text.secondary', mb: 0.45 }}>
               {t('pivot.chart.secondaryMeasure')}
-            </Typography>
-            <Select
+            </CTypography>
+            <CSelect
               value={secondaryValue?.fieldId ?? ''}
               onChange={(event) => onChartSecondaryValueFieldIdChange(String(event.target.value))}
               sx={{ fontSize: '0.75rem', height: 32 }}
             >
-              <MenuItem value="" sx={{ fontSize: '0.75rem', color: 'text.secondary' }}>
+              <option value="" sx={{ fontSize: '0.75rem', color: 'text.secondary' }}>
                 {t('common.none')}
-              </MenuItem>
+              </option>
               {valueOptions
                 .filter((option) => option.fieldId !== primaryValue?.fieldId)
                 .map((option) => (
-                  <MenuItem key={option.fieldId} value={option.fieldId} sx={{ fontSize: '0.75rem' }}>
+                  <option key={option.fieldId} value={option.fieldId} sx={{ fontSize: '0.75rem' }}>
                     {option.label}
-                  </MenuItem>
+                  </option>
                 ))}
-            </Select>
+            </CSelect>
           </FormControl>
 
           <FormControl size="small" sx={{ minWidth: 0, width: '100%' }}>
-            <Typography sx={{ fontSize: '0.68rem', color: 'text.secondary', mb: 0.45 }}>
+            <CTypography sx={{ fontSize: '0.68rem', color: 'text.secondary', mb: 0.45 }}>
               {t('pivot.chart.chartType')}
-            </Typography>
-            <Select
+            </CTypography>
+            <CSelect
               value={chartType}
               onChange={(event) => onChartTypeChange(event.target.value as PivotChartType)}
               sx={{ fontSize: '0.75rem', height: 32 }}
             >
-              <MenuItem value="bar-vertical" sx={{ fontSize: '0.75rem' }}>
+              <option value="bar-vertical" sx={{ fontSize: '0.75rem' }}>
                 {t('pivot.chart.style.barVertical')}
-              </MenuItem>
-              <MenuItem value="bar-horizontal" sx={{ fontSize: '0.75rem' }}>
+              </option>
+              <option value="bar-horizontal" sx={{ fontSize: '0.75rem' }}>
                 {t('pivot.chart.style.barHorizontal')}
-              </MenuItem>
-              <MenuItem value="line" sx={{ fontSize: '0.75rem' }}>
+              </option>
+              <option value="line" sx={{ fontSize: '0.75rem' }}>
                 {t('pivot.chart.style.line')}
-              </MenuItem>
-              <MenuItem value="scatter" sx={{ fontSize: '0.75rem' }}>
+              </option>
+              <option value="scatter" sx={{ fontSize: '0.75rem' }}>
                 {t('pivot.chart.style.scatter')}
-              </MenuItem>
-            </Select>
+              </option>
+            </CSelect>
           </FormControl>
-        </Box>
+        </div>
       )}
 
-      <Box>
+      <div>
         {!selectedDimension ? (
-          <Box sx={{ py: 5, textAlign: 'center' }}>
-            <Typography sx={{ fontSize: '0.86rem', color: 'text.secondary' }}>{t('pivot.chart.emptyNoDimension')}</Typography>
-          </Box>
+          <div sx={{ py: 5, textAlign: 'center' }}>
+            <CTypography sx={{ fontSize: '0.86rem', color: 'text.secondary' }}>{t('pivot.chart.emptyNoDimension')}</CTypography>
+          </div>
         ) : !primaryValue ? (
-          <Box sx={{ py: 5, textAlign: 'center' }}>
-            <Typography sx={{ fontSize: '0.86rem', color: 'text.secondary' }}>{t('pivot.chart.emptyNoValue')}</Typography>
-          </Box>
+          <div sx={{ py: 5, textAlign: 'center' }}>
+            <CTypography sx={{ fontSize: '0.86rem', color: 'text.secondary' }}>{t('pivot.chart.emptyNoValue')}</CTypography>
+          </div>
         ) : chartData.length === 0 ? (
-          <Box sx={{ py: 5, textAlign: 'center' }}>
-            <Typography sx={{ fontSize: '0.86rem', color: 'text.secondary' }}>{t('pivot.chart.emptyNoData')}</Typography>
-          </Box>
+          <div sx={{ py: 5, textAlign: 'center' }}>
+            <CTypography sx={{ fontSize: '0.86rem', color: 'text.secondary' }}>{t('pivot.chart.emptyNoData')}</CTypography>
+          </div>
         ) : chartType === 'scatter' ? (
           <PivotScatterChart
             data={chartData}
@@ -236,7 +237,7 @@ export const PivotChartPanel: React.FC<PivotChartPanelProps> = ({
             formatSecondaryValue={formatSecondaryValue}
           />
         )}
-      </Box>
+      </div>
     </PivotSectionCard>
   );
 };

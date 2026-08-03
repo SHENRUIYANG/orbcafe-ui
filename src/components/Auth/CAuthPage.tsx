@@ -1,22 +1,10 @@
 'use client';
 
 import { FormEvent, useMemo, useState } from 'react';
-import {
-  Alert,
-  Box,
-  Divider,
-  InputAdornment,
-  Stack,
-  Typography,
-  useTheme,
-} from '@mui/material';
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
-import MailOutlineIcon from '@mui/icons-material/MailOutline';
-import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
-import VpnKeyOutlinedIcon from '@mui/icons-material/VpnKeyOutlined';
+import { Lock, Mail, User } from '@/components/Icons';
+import { CAlert } from '../Atoms/CAlert';
 import { CButton } from '../Atoms/CButton';
 import { CCheckbox } from '../Atoms/CCheckbox';
-import { CPaper } from '../Atoms/CPaper';
 import { CTextField } from '../Atoms/CTextField';
 import type {
   AuthForgotPasswordPayload,
@@ -27,17 +15,25 @@ import type {
 } from './types';
 
 const DEFAULT_COPY = {
-  productName: 'ORBCAFE',
-  headline: 'Operational workbench',
-  subheadline: 'A focused entry point for reports, planning, agent workflows, and enterprise operations.',
+  productName: 'ORBCAFE — Enterprise suite',
+  headline: 'We digitalize you.',
+  subheadline: 'One sign-in for planning, production and analytics across your value chain.',
+  brandMeta: 'ORBCAFE · Enterprise manufacturing suite',
   loginTitle: 'Sign in',
-  loginSubtitle: 'Use your workspace account to continue.',
+  loginSubtitle: 'Use your corporate account to continue.',
   registerTitle: 'Create account',
   registerSubtitle: 'Request a demo workspace user for evaluation.',
   forgotTitle: 'Reset password',
   forgotSubtitle: 'Send a password reset request to your email address.',
 };
 
+/**
+ * ORBIS login page (per orbcafe-orbis-login-reference.html):
+ * dark campaign brand panel (#01091a, CSS diamond lattice, one 2px orange
+ * rule) beside a quiet form surface. All form logic, modes, callbacks and
+ * breakpoints of the previous implementation are retained — this is a
+ * color/type/texture pass. The logo slot stays host-supplied.
+ */
 export const CAuthPage = ({
   mode,
   defaultMode = 'login',
@@ -50,7 +46,6 @@ export const CAuthPage = ({
   copy,
   sx,
 }: CAuthPageProps) => {
-  const theme = useTheme();
   const isControlled = mode !== undefined;
   const [internalMode, setInternalMode] = useState<AuthPageMode>(defaultMode);
   const activeMode = mode ?? internalMode;
@@ -113,235 +108,191 @@ export const CAuthPage = ({
         : text.forgotSubtitle;
 
   return (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        display: 'grid',
-        gridTemplateColumns: { xs: '1fr', md: 'minmax(320px, 0.9fr) minmax(420px, 1.1fr)' },
-        background:
-          theme.palette.mode === 'dark'
-            ? 'linear-gradient(135deg, #071018 0%, #151515 48%, #101827 100%)'
-            : 'linear-gradient(135deg, #eef3f8 0%, #ffffff 52%, #e8f2f0 100%)',
-        ...sx,
-      }}
-    >
-      <Box
-        sx={{
-          display: { xs: 'none', md: 'flex' },
-          flexDirection: 'column',
-          justifyContent: 'space-between',
-          p: { md: 6, lg: 8 },
-          borderRight: `1px solid ${theme.palette.divider}`,
-        }}
-      >
-        <Stack spacing={4}>
-          <Box>{logo}</Box>
-          <Stack spacing={2}>
-            <Typography sx={{ fontSize: 14, fontWeight: 700, color: 'primary.main', textTransform: 'uppercase' }}>
-              {text.productName}
-            </Typography>
-            <Typography sx={{ fontSize: { md: 34, lg: 42 }, lineHeight: 1.06, fontWeight: 800 }}>
-              {text.headline}
-            </Typography>
-            <Typography sx={{ maxWidth: 460, color: 'text.secondary', fontSize: 16, lineHeight: 1.7 }}>
-              {text.subheadline}
-            </Typography>
-          </Stack>
-        </Stack>
-
-        <Stack direction="row" spacing={2} sx={{ color: 'text.secondary', fontSize: 13 }}>
-          <Typography variant="caption">Reports</Typography>
-          <Typography variant="caption">Planning</Typography>
-          <Typography variant="caption">Agent UI</Typography>
-        </Stack>
-      </Box>
-
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          p: { xs: 2, sm: 4, md: 6 },
-        }}
-      >
-        <CPaper
-          elevation={0}
-          sx={{
-            width: '100%',
-            maxWidth: 460,
-            m: 0,
-            p: { xs: 2.5, sm: 4 },
-            borderRadius: 3,
-            border: `1px solid ${theme.palette.divider}`,
-            backgroundColor: theme.palette.mode === 'dark' ? 'rgba(15, 23, 42, 0.86)' : 'rgba(255, 255, 255, 0.88)',
-            backdropFilter: 'blur(18px)',
-            boxShadow:
-              theme.palette.mode === 'dark'
-                ? '0 24px 80px rgba(0,0,0,0.34)'
-                : '0 24px 80px rgba(15,23,42,0.10)',
+    <div className="orb-auth-frame orb-root" style={sx}>
+      {/* ---- Brand panel: #01091a + diamond lattice + one 2px orange rule ---- */}
+      <div className="orb-auth-brand">
+        <span
+          className="orb-auth-dia"
+          style={{ width: 230, height: 230, right: -70, bottom: -60 }}
+        />
+        <span
+          className="orb-auth-dia orb-auth-dia-sm-hide"
+          style={{ width: 140, height: 140, right: 120, bottom: 80, borderColor: 'rgba(255,255,255,.09)' }}
+        />
+        <span
+          className="orb-auth-dia orb-auth-dia-sm-hide"
+          style={{
+            width: 76,
+            height: 76,
+            right: 60,
+            bottom: 170,
+            background: 'rgba(21,65,148,.35)',
+            borderColor: 'rgba(255,255,255,.2)',
           }}
-        >
-          <Stack spacing={3}>
-            <Stack spacing={1}>
-              <Box sx={{ display: { xs: 'block', md: 'none' }, mb: 1 }}>{logo}</Box>
-              <Typography sx={{ fontSize: 28, fontWeight: 800 }}>{title}</Typography>
-              <Typography sx={{ color: 'text.secondary' }}>{subtitle}</Typography>
-            </Stack>
+        />
+        {logo ? (
+          <span style={{ alignSelf: 'flex-start', position: 'relative' }}>{logo}</span>
+        ) : (
+          <span className="orb-logo-slot">Host logo</span>
+        )}
+        <div className="orb-auth-claim">
+          <div className="orb-auth-rule" />
+          <h2>{text.headline}</h2>
+          <p>{text.subheadline}</p>
+        </div>
+        <div className="orb-auth-meta">{text.brandMeta}</div>
+      </div>
 
-            {notice && <Alert severity="success">{notice}</Alert>}
+      {/* ---- Form surface ---- */}
+      <div className="orb-auth-form">
+        <div className="orb-auth-card">
+          <span className="orb-overline" style={{ letterSpacing: '0.12em' }}>
+            {text.productName}
+          </span>
+          <h1 className="orb-h2" style={{ margin: 0 }}>
+            {title}
+          </h1>
+          <p className="orb-body-dense" style={{ color: 'var(--orb-muted)', margin: '-10px 0 0' }}>
+            {subtitle}
+          </p>
 
-            {activeMode === 'login' && (
-              <Box component="form" onSubmit={submitLogin}>
-                <Stack spacing={2}>
-                  <CTextField
-                    label="Email or user ID"
-                    value={loginPayload.username}
-                    onChange={(event) => setLoginPayload((prev) => ({ ...prev, username: event.target.value }))}
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <PersonOutlineIcon fontSize="small" />
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                  <CTextField
-                    label="Password"
-                    type="password"
-                    value={loginPayload.password}
-                    onChange={(event) => setLoginPayload((prev) => ({ ...prev, password: event.target.value }))}
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <LockOutlinedIcon fontSize="small" />
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2 }}>
-                    <CCheckbox
-                      label="Remember me"
-                      checked={loginPayload.remember}
-                      onChange={(event) => setLoginPayload((prev) => ({ ...prev, remember: event.target.checked }))}
-                    />
-                    <CButton type="button" variant="text" size="small" onClick={() => setMode('forgot')}>
-                      Forgot?
-                    </CButton>
-                  </Box>
-                  <CButton type="submit" size="large" disabled={loading}>
-                    Sign in
-                  </CButton>
-                  <Typography variant="body2" sx={{ color: 'text.secondary', textAlign: 'center' }}>
-                    New user?{' '}
-                    <CButton type="button" variant="text" size="small" onClick={() => setMode('register')} sx={{ minWidth: 0, p: 0 }}>
-                      Register
-                    </CButton>
-                  </Typography>
-                </Stack>
-              </Box>
-            )}
+          {notice && <CAlert severity="success">{notice}</CAlert>}
 
-            {activeMode === 'register' && (
-              <Box component="form" onSubmit={submitRegister}>
-                <Stack spacing={2}>
-                  <CTextField
-                    label="Full name"
-                    value={registerPayload.name}
-                    onChange={(event) => setRegisterPayload((prev) => ({ ...prev, name: event.target.value }))}
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <PersonOutlineIcon fontSize="small" />
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                  <CTextField
-                    label="Work email"
-                    type="email"
-                    value={registerPayload.email}
-                    onChange={(event) => setRegisterPayload((prev) => ({ ...prev, email: event.target.value }))}
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <MailOutlineIcon fontSize="small" />
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                  <CTextField
-                    label="Password"
-                    type="password"
-                    value={registerPayload.password}
-                    onChange={(event) => setRegisterPayload((prev) => ({ ...prev, password: event.target.value }))}
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <VpnKeyOutlinedIcon fontSize="small" />
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                  <CTextField
-                    label="Confirm password"
-                    type="password"
-                    value={registerPayload.confirmPassword}
-                    onChange={(event) => setRegisterPayload((prev) => ({ ...prev, confirmPassword: event.target.value }))}
-                  />
-                  <CCheckbox
-                    label="I accept the demo workspace terms"
-                    checked={registerPayload.acceptedTerms}
-                    onChange={(event) => setRegisterPayload((prev) => ({ ...prev, acceptedTerms: event.target.checked }))}
-                  />
-                  <CButton type="submit" size="large" disabled={loading}>
-                    Create demo account
-                  </CButton>
-                  <Typography variant="body2" sx={{ color: 'text.secondary', textAlign: 'center' }}>
-                    Already have an account?{' '}
-                    <CButton type="button" variant="text" size="small" onClick={() => setMode('login')} sx={{ minWidth: 0, p: 0 }}>
-                      Sign in
-                    </CButton>
-                  </Typography>
-                </Stack>
-              </Box>
-            )}
+          {activeMode === 'login' && (
+            <form onSubmit={submitLogin} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <CTextField
+                label="Email"
+                type="email"
+                autoComplete="username"
+                value={loginPayload.username}
+                onChange={(event) => setLoginPayload((prev) => ({ ...prev, username: event.target.value }))}
+                startAdornment={<User size={15} strokeWidth={1.8} />}
+              />
+              <CTextField
+                label="Password"
+                type="password"
+                autoComplete="current-password"
+                value={loginPayload.password}
+                onChange={(event) => setLoginPayload((prev) => ({ ...prev, password: event.target.value }))}
+                startAdornment={<Lock size={15} strokeWidth={1.8} />}
+              />
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+                <CCheckbox
+                  label="Remember me"
+                  checked={loginPayload.remember}
+                  onChange={(event) => setLoginPayload((prev) => ({ ...prev, remember: event.target.checked }))}
+                />
+                <button type="button" className="orb-link" onClick={() => setMode('forgot')}>
+                  Forgot password?
+                </button>
+              </div>
+              <CButton type="submit" size="large" block loading={loading}>
+                {loading ? 'Signing in…' : 'Sign in'}
+              </CButton>
+              <p className="orb-meta" style={{ textAlign: 'center', margin: 0 }}>
+                New user?{' '}
+                <button type="button" className="orb-link" onClick={() => setMode('register')}>
+                  Register
+                </button>
+              </p>
+            </form>
+          )}
 
-            {activeMode === 'forgot' && (
-              <Box component="form" onSubmit={submitForgot}>
-                <Stack spacing={2}>
-                  <CTextField
-                    label="Work email"
-                    type="email"
-                    value={forgotPayload.email}
-                    onChange={(event) => setForgotPayload({ email: event.target.value })}
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <MailOutlineIcon fontSize="small" />
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                  <CButton type="submit" size="large" disabled={loading}>
-                    Send reset request
-                  </CButton>
-                  <Typography variant="body2" sx={{ color: 'text.secondary', textAlign: 'center' }}>
-                    Remember your password?{' '}
-                    <CButton type="button" variant="text" size="small" onClick={() => setMode('login')} sx={{ minWidth: 0, p: 0 }}>
-                      Back to sign in
-                    </CButton>
-                  </Typography>
-                </Stack>
-              </Box>
-            )}
+          {activeMode === 'register' && (
+            <form onSubmit={submitRegister} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <CTextField
+                label="Full name"
+                value={registerPayload.name}
+                onChange={(event) => setRegisterPayload((prev) => ({ ...prev, name: event.target.value }))}
+                startAdornment={<User size={15} strokeWidth={1.8} />}
+              />
+              <CTextField
+                label="Work email"
+                type="email"
+                autoComplete="username"
+                value={registerPayload.email}
+                onChange={(event) => setRegisterPayload((prev) => ({ ...prev, email: event.target.value }))}
+                startAdornment={<Mail size={15} strokeWidth={1.8} />}
+              />
+              <CTextField
+                label="Password"
+                type="password"
+                autoComplete="new-password"
+                value={registerPayload.password}
+                onChange={(event) => setRegisterPayload((prev) => ({ ...prev, password: event.target.value }))}
+                startAdornment={<Lock size={15} strokeWidth={1.8} />}
+              />
+              <CTextField
+                label="Confirm password"
+                type="password"
+                autoComplete="new-password"
+                value={registerPayload.confirmPassword}
+                onChange={(event) => setRegisterPayload((prev) => ({ ...prev, confirmPassword: event.target.value }))}
+              />
+              <CCheckbox
+                label="I accept the demo workspace terms"
+                checked={registerPayload.acceptedTerms}
+                onChange={(event) => setRegisterPayload((prev) => ({ ...prev, acceptedTerms: event.target.checked }))}
+              />
+              <CButton type="submit" size="large" block loading={loading}>
+                Create demo account
+              </CButton>
+              <p className="orb-meta" style={{ textAlign: 'center', margin: 0 }}>
+                Already have an account?{' '}
+                <button type="button" className="orb-link" onClick={() => setMode('login')}>
+                  Sign in
+                </button>
+              </p>
+            </form>
+          )}
 
-            <Divider />
-            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-              Demo credentials: demo@orbcafe.local / orbcafe-demo
-            </Typography>
-          </Stack>
-        </CPaper>
-      </Box>
-    </Box>
+          {activeMode === 'forgot' && (
+            <form onSubmit={submitForgot} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <CTextField
+                label="Work email"
+                type="email"
+                autoComplete="username"
+                value={forgotPayload.email}
+                onChange={(event) => setForgotPayload({ email: event.target.value })}
+                startAdornment={<Mail size={15} strokeWidth={1.8} />}
+              />
+              <CButton type="submit" size="large" block loading={loading}>
+                Send reset request
+              </CButton>
+              <p className="orb-meta" style={{ textAlign: 'center', margin: 0 }}>
+                Remember your password?{' '}
+                <button type="button" className="orb-link" onClick={() => setMode('login')}>
+                  Back to sign in
+                </button>
+              </p>
+            </form>
+          )}
+
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12,
+              font: '500 10px/1 var(--orb-font)',
+              letterSpacing: '0.1em',
+              textTransform: 'uppercase',
+              color: 'var(--orb-muted)',
+            }}
+          >
+            <span style={{ flex: 1, height: 1, background: 'var(--orb-border)' }} />
+            or
+            <span style={{ flex: 1, height: 1, background: 'var(--orb-border)' }} />
+          </div>
+          <CButton variant="neutral" size="large" block>
+            Continue with corporate SSO
+          </CButton>
+          <p className="orb-meta" style={{ textAlign: 'center', fontWeight: 300, margin: 0 }}>
+            Protected by corporate single sign-on.
+            <br />
+            Demo credentials: demo@orbcafe.local / orbcafe-demo
+          </p>
+        </div>
+      </div>
+    </div>
   );
 };

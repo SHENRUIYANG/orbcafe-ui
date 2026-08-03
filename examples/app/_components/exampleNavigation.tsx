@@ -11,7 +11,7 @@ import {
   TabletSmartphone,
   Table2,
   TreePine,
-} from 'lucide-react';
+} from 'orbcafe-ui';
 
 export const buildExampleMenu = (detailInfoHref = '/detail-info/ID-1'): TreeMenuItem[] => [
   {

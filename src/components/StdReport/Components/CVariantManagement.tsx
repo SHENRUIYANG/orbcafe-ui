@@ -1,22 +1,6 @@
+import { FormControlLabel, SaveIcon } from '../../../lib/orbis-compat';
 import { useState } from 'react';
-import { 
-    Box, 
-    Button, 
-    Typography,
-    Autocomplete, 
-    TextField, 
-    IconButton, 
-    Tooltip,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
-    FormControlLabel,
-    Checkbox,
-    useTheme
-} from '@mui/material';
-import SaveIcon from '@mui/icons-material/Save';
-import StarIcon from '@mui/icons-material/Star';
+import { CButton, CTextField, CIconButton, CTooltip, CDialog, CCheckbox, CSelect } from '../../Atoms';
 import { useOrbcafeI18n } from '../../../i18n';
 
 export interface VariantMetadata {
@@ -53,15 +37,6 @@ export const CVariantManagement = ({
     onSetDefault
 }: CVariantManagementProps) => {
     const { t } = useOrbcafeI18n();
-    const theme = useTheme();
-    const isDark = theme.palette.mode === 'dark';
-    const FONT_SIZE_SMALL = '0.85rem';
-    const FIELD_WIDTH = {
-        xs: 'calc((100% - 1 * 16px) / 2)',
-        sm: 'calc((100% - 2 * 16px) / 3)',
-        md: 'calc((100% - 3 * 16px) / 4)',
-        lg: 'calc((100% - 5 * 16px) / 6)',
-    };
     // Keep API compatibility even when manage dialog entry is hidden.
     void onDelete;
     void onSetDefault;
@@ -90,86 +65,43 @@ export const CVariantManagement = ({
     };
 
     return (
-        <Box
-            sx={{
-                display: 'flex',
-                gap: 1,
-                alignItems: 'center',
-                width: '100%',
-                maxWidth: '100%',
-            }}
-        >
-            <Autocomplete
+        <div className="orb-variant-management">
+            <CSelect
                 size="small"
+                fullWidth={false}
                 sx={{
-                    width: FIELD_WIDTH,
-                    '& .MuiInputBase-root': {
-                        fontSize: FONT_SIZE_SMALL,
-                        bgcolor: isDark ? 'rgba(25, 118, 210, 0.2)' : '#e7f1ff',
-                        '& .MuiOutlinedInput-notchedOutline': {
-                            borderColor: isDark ? 'rgba(144,202,249,0.45)' : 'rgba(25,118,210,0.45)',
-                        },
-                        '&:hover .MuiOutlinedInput-notchedOutline': {
-                            borderColor: isDark ? 'rgba(144,202,249,0.7)' : 'rgba(25,118,210,0.65)',
-                        },
-                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                            borderColor: isDark ? 'rgba(144,202,249,0.9)' : 'rgba(25,118,210,0.85)',
-                        },
-                    },
-                    '& .MuiInputBase-input': {
-                        fontSize: FONT_SIZE_SMALL
-                    },
-                    '& .MuiAutocomplete-noOptions': {
-                        fontSize: FONT_SIZE_SMALL
+                    width: 'min(240px, 100%)',
+                    '& .orb-inp': {
+                        fontSize: '0.85rem',
+                        backgroundColor: 'var(--orb-p50)',
+                        borderColor: 'color-mix(in oklch, var(--orb-primary) 30%, var(--orb-border))',
                     }
                 }}
-                noOptionsText={<Typography sx={{ fontSize: FONT_SIZE_SMALL }}>{t('variant.noOptions')}</Typography>}
-                options={variants}
-                getOptionLabel={(option) => option.name + (option.isDefault ? ` (${t('variant.defaultSuffix')})` : '')}
-                value={currentVariant || null}
-                onChange={(_, newValue) => {
-                    if (newValue) onLoad(newValue);
-                }}
-                renderInput={(params) => (
-                    <TextField 
-                        {...params} 
-                        variant="outlined" 
-                        size="small" 
-                        InputProps={{
-                            ...params.InputProps,
-                            sx: {
-                                fontSize: FONT_SIZE_SMALL,
-                                color: isDark ? '#E3F2FD' : '#0D47A1',
-                            }
-                        }}
-                        placeholder={t('variant.selectVariant')}
-                    />
-                )}
-                renderOption={(props, option) => {
-                    const { key, ...optionProps } = props;
-
-                    return (
-                        <li key={key} {...optionProps}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-                                <Typography sx={{ flex: 1, fontSize: FONT_SIZE_SMALL }}>{option.name}</Typography>
-                                {option.isDefault && <StarIcon fontSize="small" color="action" />}
-                            </Box>
-                        </li>
-                    );
+                value={currentVariantId || ''}
+                options={[
+                    { value: '', label: t('variant.selectVariant'), disabled: true },
+                    ...variants.map((variant) => ({
+                        value: variant.id,
+                        label: variant.name + (variant.isDefault ? ` (${t('variant.defaultSuffix')})` : ''),
+                    })),
+                ]}
+                onChange={(event) => {
+                    const selectedVariant = variants.find((variant) => variant.id === event.target.value);
+                    if (selectedVariant) onLoad(selectedVariant);
                 }}
             />
-            
-            <Tooltip title={t('variant.saveView')}>
-                <IconButton onClick={handleSaveClick} size="small" color="primary">
+
+            <CTooltip title={t('variant.saveView')}>
+                <CIconButton className="orb-variant-save-button" onClick={handleSaveClick} size="small" color="primary">
                     <SaveIcon fontSize="small" />
-                </IconButton>
-            </Tooltip>
+                </CIconButton>
+            </CTooltip>
 
             {/* Save Dialog */}
-            <Dialog open={saveDialogOpen} onClose={() => setSaveDialogOpen(false)}>
-                <DialogTitle>{t('variant.saveView')}</DialogTitle>
-                <DialogContent>
-                    <TextField
+            <CDialog open={saveDialogOpen} onClose={() => setSaveDialogOpen(false)}>
+                <div className="orb-dialog-title">{t('variant.saveView')}</div>
+                <div className="orb-dialog-content">
+                    <CTextField
                         autoFocus
                         margin="dense"
                         label={t('variant.viewName')}
@@ -179,19 +111,19 @@ export const CVariantManagement = ({
                         onChange={(e) => setVariantName(e.target.value)}
                     />
                     <FormControlLabel
-                        control={<Checkbox checked={isDefault} onChange={(e) => setIsDefault(e.target.checked)} />}
+                        control={<CCheckbox checked={isDefault} onChange={(e) => setIsDefault(e.target.checked)} />}
                         label={t('variant.setDefault')}
                     />
                     <FormControlLabel
-                        control={<Checkbox checked={isPublic} onChange={(e) => setIsPublic(e.target.checked)} />}
+                        control={<CCheckbox checked={isPublic} onChange={(e) => setIsPublic(e.target.checked)} />}
                         label={t('variant.publicAllUsers')}
                     />
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setSaveDialogOpen(false)}>{t('common.cancel')}</Button>
-                    <Button onClick={handleConfirmSave} variant="contained">{t('common.save')}</Button>
-                </DialogActions>
-            </Dialog>
-        </Box>
+                </div>
+                <div className="orb-dialog-actions">
+                    <CButton onClick={() => setSaveDialogOpen(false)}>{t('common.cancel')}</CButton>
+                    <CButton onClick={handleConfirmSave} variant="contained">{t('common.save')}</CButton>
+                </div>
+            </CDialog>
+        </div>
     );
 };

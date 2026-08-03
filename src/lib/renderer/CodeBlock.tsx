@@ -1,9 +1,8 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { Box, IconButton, Tooltip, Typography } from '@mui/material';
-import ContentCopyOutlinedIcon from '@mui/icons-material/ContentCopyOutlined';
-import CheckOutlinedIcon from '@mui/icons-material/CheckOutlined';
+import { Check, Copy } from '@/components/Icons';
+import { CIconButton } from '../../components/Atoms/CIconButton';
 
 export interface CodeBlockProps {
   code: string;
@@ -40,102 +39,94 @@ export const CodeBlock = ({
   };
 
   return (
-    <Box
-      sx={{
-        border: '1px solid',
-        borderColor: 'divider',
-        borderRadius: 1.5,
+    <div
+      style={{
+        border: '1px solid var(--orb-border)',
+        borderRadius: 12,
         overflow: 'hidden',
-        bgcolor: 'background.paper',
+        background: 'var(--orb-canvas)',
       }}
     >
-      <Box
-        sx={{
+      <div
+        style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          px: 1,
-          py: 0.6,
-          bgcolor: 'action.hover',
-          borderBottom: '1px solid',
-          borderColor: 'divider',
+          padding: '4.8px 8px',
+          background: 'var(--orb-hover)',
+          borderBottom: '1px solid var(--orb-border)',
         }}
       >
-        <Typography
-          variant="caption"
-          sx={{
+        <span
+          style={{
+            fontSize: 12,
+            fontWeight: 500,
             textTransform: 'uppercase',
             letterSpacing: 0.5,
-            color: 'text.secondary',
+            color: 'var(--orb-muted)',
             fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
           }}
         >
           {language}
-        </Typography>
+        </span>
 
         {copyable && (
-          <Tooltip title={copied ? 'Copied' : 'Copy'}>
-            <IconButton size="small" onClick={handleCopy}>
-              {copied ? <CheckOutlinedIcon fontSize="inherit" /> : <ContentCopyOutlinedIcon fontSize="inherit" />}
-            </IconButton>
-          </Tooltip>
+          <CIconButton size="small" tooltip={copied ? 'Copied' : 'Copy'} onClick={handleCopy}>
+            {copied ? <Check size={14} strokeWidth={1.8} /> : <Copy size={14} strokeWidth={1.8} />}
+          </CIconButton>
         )}
-      </Box>
+      </div>
 
-      <Box
-        component="pre"
-        sx={{
-          m: 0,
-          p: 1.25,
+      <pre
+        style={{
+          margin: 0,
+          padding: 10,
           fontSize: '0.82rem',
           lineHeight: 1.55,
           overflow: 'auto',
           maxHeight,
-          bgcolor: 'background.default',
+          background: 'var(--orb-surface)',
           fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
         }}
       >
         {showLineNumbers
           ? lines.map((line, index) => (
-            <Box key={`${index}-${line}`} sx={{ display: 'flex' }}>
-              <Box
-                component="span"
-                sx={{
+            <div key={`${index}-${line}`} style={{ display: 'flex' }}>
+              <span
+                style={{
                   width: 34,
                   flexShrink: 0,
                   textAlign: 'right',
-                  pr: 1,
-                  color: 'text.disabled',
+                  paddingRight: 8,
+                  color: 'var(--orb-disabled-fg)',
                   userSelect: 'none',
                 }}
               >
                 {index + 1}
-              </Box>
-              <Box
-                component="span"
-                sx={{
+              </span>
+              <span
+                style={{
                   whiteSpace: wrapLongLines ? 'pre-wrap' : 'pre',
                   wordBreak: wrapLongLines ? 'break-word' : 'normal',
                 }}
               >
                 {line}
-              </Box>
-            </Box>
+              </span>
+            </div>
           ))
           : (
-            <Box
-              component="code"
-              sx={{
+            <code
+              style={{
                 display: 'block',
                 whiteSpace: wrapLongLines ? 'pre-wrap' : 'pre',
                 wordBreak: wrapLongLines ? 'break-word' : 'normal',
               }}
             >
               {code}
-            </Box>
+            </code>
           )}
-      </Box>
-    </Box>
+      </pre>
+    </div>
   );
 };
 

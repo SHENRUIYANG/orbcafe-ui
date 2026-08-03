@@ -6,7 +6,7 @@ Published copy of `src/components/StdReport/stdreport.md`.
 
 **StdReport** (Standard Report) is a high-order React component suite designed for building enterprise-grade data reporting pages with advanced filtering, dynamic table layouts, and variant management.
 
-It is built on top of **Material UI (MUI)** and provides a standardized "Page-Filter-Table" architecture.
+It is built on the ORBIS design primitives and provides a standardized "Page-Filter-Table" architecture.
 
 ## 📦 Core Components
 
@@ -14,7 +14,7 @@ It is built on top of **Material UI (MUI)** and provides a standardized "Page-Fi
 The main layout container that orchestrates the Filter Bar and Data Table.
 
 ```tsx
-import { CStandardPage } from 'orbcafe-ui/StdReport';
+import { CStandardPage } from 'orbcafe-ui';
 
 <CStandardPage
   title="Employee Report"
@@ -30,22 +30,24 @@ A collapsible, configuration-driven filter bar supporting:
 - **Variant Management**: Save/Load filter presets.
 
 ### 3. CTable
-A feature-rich data table wrapper around MUI Table.
+A feature-rich ORBIS data table.
 - **Features**: Sorting, Pagination, Column Visibility, Grouping (placeholder), Layout Persistence.
 - **Integration**: Works seamlessly with `CLayoutManager` to persist user preferences (column order, width, visibility).
 
 ## 🛠 Usage
 
 ### Prerequisites
-Ensure you have the following peer dependencies installed:
+`orbcafe-ui` 自带运行时依赖（`dayjs`、`@dnd-kit/*` 等）。V2 是 MUI-free：不要安装 `@mui/*`/`@emotion/*`。宿主项目需要 Tailwind v4（编译组件 utility classes）并在全局 CSS 引入 `orbcafe-ui/styles.css`：
+
 ```bash
-npm install @mui/material @mui/icons-material @mui/x-date-pickers dayjs @dnd-kit/core @dnd-kit/sortable @dnd-kit/modifiers
+npm install orbcafe-ui
+npm install -D tailwindcss @tailwindcss/postcss
 ```
 
 ### Basic Example
 
 ```tsx
-import { CStandardPage } from 'orbcafe-ui/StdReport';
+import { CStandardPage } from 'orbcafe-ui';
 
 const MyReport = () => {
   return (

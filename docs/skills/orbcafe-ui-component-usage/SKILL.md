@@ -23,7 +23,10 @@ description: Route ORBCAFE UI requests to the correct module skill and teach dev
 先检查宿主 `package.json`。仅当缺失或版本不兼容时，才执行安装：
 
 ```bash
-npm install orbcafe-ui @mui/material@^7.3.9 @mui/icons-material@^7.3.9 @mui/x-date-pickers@^8.27.2 @emotion/react@^11.14.0 @emotion/styled@^11.14.1 dayjs@^1.11.20 lucide-react@^0.575.0 tailwind-merge@^3.5.0 clsx@^2.1.1 class-variance-authority@^0.7.1 @radix-ui/react-slot@^1.2.4
+npm install orbcafe-ui
+# ORBCAFE UI v2 是 MUI-free 的；不要安装 @mui/*、@emotion/* 或 lucide-react。
+# 组件里使用了 Tailwind utility classes，宿主需要 Tailwind v4 来编译：
+npm install -D tailwindcss @tailwindcss/postcss
 ```
 
 官方 examples 是效果基准，但不随 npm 包发布。消费项目没有 `examples/` 时，去 ORBCAFE GitHub 仓库或本地 ORBCAFE checkout 对照 `examples/app/*`，不要因为消费项目缺少 `examples/` 就跳过基线。
@@ -48,17 +51,32 @@ npm run dev
    ```css
    /* examples/app/globals.css */
    @import "tailwindcss";
+   @import "orbcafe-ui/styles.css";   /* V2：ORBIS 设计系统自写 CSS，必须引入一次 */
    @source "../node_modules/orbcafe-ui/dist";
    @source "../../src";
    ```
 
    消费项目按自己的全局 CSS 位置调整相对路径。Tailwind v3 `tailwind.config.js content` 只能作为旧项目 fallback，不是 ORBCAFE 默认范式。
 
-2. **Provider 基线要求**: `orbcafe-ui` 组件的正常渲染（特别是弹窗、日期、主题切换和全局消息）强依赖以下 Provider 的包裹。宿主应用的 Root Layout 必须注入：
-   - `ThemeProvider` (MUI)
-   - `CssBaseline` (MUI)
-   - `LocalizationProvider` (MUI X)
-   - `GlobalMessage` (orbcafe-ui)
+2. **Provider 基线要求**: V2 是 MUI-free，不再需要 MUI 的 `ThemeProvider/CssBaseline/LocalizationProvider`。宿主应用的 Root Layout 必须注入：
+   - `OrbisModeProvider`（ORBIS 亮/暗模式，自动在 `<html>` 上切换 `orb-dark` class 与 `data-orb-mode`；`CAppPageLayout`/`PAppPageLayout` 内部已自带，独立页面才需要手动包裹）
+   - `GlobalMessage`（全局消息/确认框）
+
+   参考 `examples/app/providers.tsx`：
+
+   ```tsx
+   'use client';
+   import { GlobalMessage, OrbisModeProvider } from 'orbcafe-ui';
+
+   export function Providers({ children }: { children: React.ReactNode }) {
+     return (
+       <OrbisModeProvider mode="system">
+         <GlobalMessage />
+         {children}
+       </OrbisModeProvider>
+     );
+   }
+   ```
 
 ## Output Contract
 

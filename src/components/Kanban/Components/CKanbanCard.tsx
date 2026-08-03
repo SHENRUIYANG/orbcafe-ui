@@ -1,7 +1,9 @@
 'use client';
+import { getOrbCompatMode } from '../../../lib/orbis-compat';
+import { Avatar, LinearProgress } from '../../../lib/orbis-compat';
+import {  CPaper, CStack, CTypography, CChip } from "../../Atoms";
+import { orbAlpha } from "../../../lib/theme";
 
-import { Avatar, Box, Chip, LinearProgress, Paper, Stack, Typography } from '@mui/material';
-import { alpha } from '@mui/material/styles';
 import type { CKanbanCardProps, KanbanCardPriority, KanbanCardTone } from '../types';
 import { useOrbcafeI18n } from '../../../i18n';
 
@@ -54,7 +56,7 @@ export const CKanbanCard = ({ card, bucket, dragging = false, overlay = false, o
   const clickContext = bucket ? { card, bucket } : undefined;
 
   return (
-    <Paper
+    <CPaper
       onClick={interactive ? () => clickContext && onClick?.(clickContext) : undefined}
       onKeyDown={
         interactive
@@ -75,14 +77,14 @@ export const CKanbanCard = ({ card, bucket, dragging = false, overlay = false, o
             position: 'relative',
             overflow: 'hidden',
             p: 1.4,
-            borderRadius: 3,
-            border: `1px solid ${alpha(accentColor, theme.palette.mode === 'dark' ? 0.42 : 0.2)}`,
-            bgcolor: alpha(theme.palette.background.paper, theme.palette.mode === 'dark' ? 0.96 : 0.98),
+            borderRadius: 'var(--orb-r-container)',
+            border: `1px solid ${orbAlpha(accentColor, getOrbCompatMode() === 'dark' ? 0.42 : 0.2)}`,
+            bgcolor: orbAlpha(theme.palette.background.paper, getOrbCompatMode() === 'dark' ? 0.96 : 0.98),
             boxShadow: overlay
-              ? `0 20px 45px ${alpha(theme.palette.common.black, 0.24)}`
+              ? `0 20px 45px ${orbAlpha(theme.palette.common.black, 0.24)}`
               : dragging
                 ? 'none'
-                : `0 8px 24px ${alpha(theme.palette.common.black, theme.palette.mode === 'dark' ? 0.18 : 0.08)}`,
+                : `0 8px 24px ${orbAlpha(theme.palette.common.black, getOrbCompatMode() === 'dark' ? 0.18 : 0.08)}`,
             transform: overlay ? 'rotate(1deg) scale(1.01)' : 'none',
             transition: 'transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease',
             cursor: interactive ? 'pointer' : 'default',
@@ -97,7 +99,7 @@ export const CKanbanCard = ({ card, bucket, dragging = false, overlay = false, o
             '&:hover': interactive
               ? {
                   transform: 'translateY(-1px)',
-                  boxShadow: `0 14px 32px ${alpha(theme.palette.common.black, theme.palette.mode === 'dark' ? 0.28 : 0.12)}`,
+                  boxShadow: `0 14px 32px ${orbAlpha(theme.palette.common.black, getOrbCompatMode() === 'dark' ? 0.28 : 0.12)}`,
                 }
               : undefined,
           };
@@ -105,21 +107,21 @@ export const CKanbanCard = ({ card, bucket, dragging = false, overlay = false, o
         ...(Array.isArray(sx) ? sx : sx ? [sx] : []),
       ]}
     >
-      <Stack spacing={1.1}>
-        <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 1 }}>
-          <Box sx={{ minWidth: 0, flex: 1 }}>
+      <CStack spacing={1.1}>
+        <div sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 1 }}>
+          <div sx={{ minWidth: 0, flex: 1 }}>
             {(card.kicker || bucket?.title) && (
-              <Typography sx={{ fontSize: '0.72rem', fontWeight: 700, letterSpacing: 0.4, color: 'text.secondary', textTransform: 'uppercase' }}>
+              <CTypography sx={{ fontSize: '0.72rem', fontWeight: 700, letterSpacing: 0.4, color: 'text.secondary', textTransform: 'uppercase' }}>
                 {card.kicker ?? bucket?.title}
-              </Typography>
+              </CTypography>
             )}
-            <Typography sx={{ mt: 0.2, fontSize: '0.98rem', fontWeight: 800, lineHeight: 1.3 }}>
+            <CTypography sx={{ mt: 0.2, fontSize: '0.98rem', fontWeight: 800, lineHeight: 1.3 }}>
               {card.title}
-            </Typography>
-          </Box>
+            </CTypography>
+          </div>
 
           {card.priority && (
-            <Chip
+            <CChip
               size="small"
               color={paletteColor}
               label={getPriorityLabel(card.priority, t)}
@@ -127,96 +129,96 @@ export const CKanbanCard = ({ card, bucket, dragging = false, overlay = false, o
               sx={{ height: 22, fontWeight: 700 }}
             />
           )}
-        </Box>
+        </div>
 
         {card.summary && (
-          <Typography sx={{ fontSize: '0.82rem', color: 'text.secondary', lineHeight: 1.5 }}>
+          <CTypography sx={{ fontSize: '0.82rem', color: 'text.secondary', lineHeight: 1.5 }}>
             {card.summary}
-          </Typography>
+          </CTypography>
         )}
 
         {card.metrics && card.metrics.length > 0 && (
-          <Box sx={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(card.metrics.length, 3)}, minmax(0, 1fr))`, gap: 0.9 }}>
+          <div sx={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(card.metrics.length, 3)}, minmax(0, 1fr))`, gap: 0.9 }}>
             {card.metrics.slice(0, 3).map((metric) => (
-              <Box
+              <div
                 key={metric.id}
                 sx={(theme) => ({
                   borderRadius: 2,
                   px: 1,
                   py: 0.8,
-                  bgcolor: theme.palette.mode === 'dark' ? alpha(theme.palette.common.white, 0.05) : alpha(theme.palette.primary.main, 0.05),
+                  bgcolor: getOrbCompatMode() === 'dark' ? orbAlpha(theme.palette.common.white, 0.05) : orbAlpha(theme.palette.primary.main, 0.05),
                 })}
               >
-                <Typography sx={{ fontSize: '0.68rem', color: 'text.secondary', textTransform: 'uppercase', letterSpacing: 0.35 }}>
+                <CTypography sx={{ fontSize: '0.68rem', color: 'text.secondary', textTransform: 'uppercase', letterSpacing: 0.35 }}>
                   {metric.label}
-                </Typography>
-                <Typography sx={{ fontSize: '0.86rem', fontWeight: 700 }}>{metric.value}</Typography>
-              </Box>
+                </CTypography>
+                <CTypography sx={{ fontSize: '0.86rem', fontWeight: 700 }}>{metric.value}</CTypography>
+              </div>
             ))}
-          </Box>
+          </div>
         )}
 
         {typeof card.progress === 'number' && (
-          <Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.5 }}>
-              <Typography sx={{ fontSize: '0.72rem', color: 'text.secondary' }}>{t('kanban.card.progress')}</Typography>
-              <Typography sx={{ fontSize: '0.72rem', fontWeight: 700 }}>{Math.round(card.progress)}%</Typography>
-            </Box>
+          <div>
+            <div sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.5 }}>
+              <CTypography sx={{ fontSize: '0.72rem', color: 'text.secondary' }}>{t('kanban.card.progress')}</CTypography>
+              <CTypography sx={{ fontSize: '0.72rem', fontWeight: 700 }}>{Math.round(card.progress)}%</CTypography>
+            </div>
             <LinearProgress
               variant="determinate"
               value={Math.max(0, Math.min(100, card.progress))}
               color={paletteColor}
               sx={{ height: 8, borderRadius: 999 }}
             />
-          </Box>
+          </div>
         )}
 
         {(card.tags?.length || card.assignee || card.dueDate || card.footer || interactive) && (
-          <Stack spacing={0.9}>
+          <CStack spacing={0.9}>
             {card.tags && card.tags.length > 0 && (
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75 }}>
+              <div sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75 }}>
                 {card.tags.map((tag) => (
-                  <Chip key={tag.id} size="small" label={tag.label} color={tag.color ?? 'default'} variant="outlined" />
+                  <CChip key={tag.id} size="small" label={tag.label} color={tag.color ?? 'default'} variant="outlined" />
                 ))}
-              </Box>
+              </div>
             )}
 
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8, minWidth: 0 }}>
+            <div sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1 }}>
+              <div sx={{ display: 'flex', alignItems: 'center', gap: 0.8, minWidth: 0 }}>
                 {card.assignee && (
                   <>
                     <Avatar src={card.assignee.avatarSrc} sx={{ width: 28, height: 28, fontSize: '0.75rem' }}>
                       {card.assignee.initials ?? getInitials(card.assignee.name)}
                     </Avatar>
-                    <Box sx={{ minWidth: 0 }}>
-                      <Typography sx={{ fontSize: '0.78rem', fontWeight: 700, lineHeight: 1.2 }} noWrap>
+                    <div sx={{ minWidth: 0 }}>
+                      <CTypography sx={{ fontSize: '0.78rem', fontWeight: 700, lineHeight: 1.2 }} noWrap>
                         {card.assignee.name}
-                      </Typography>
+                      </CTypography>
                       {card.dueDate && (
-                        <Typography sx={{ fontSize: '0.7rem', color: 'text.secondary', lineHeight: 1.2 }} noWrap>
+                        <CTypography sx={{ fontSize: '0.7rem', color: 'text.secondary', lineHeight: 1.2 }} noWrap>
                           {card.dueDate}
-                        </Typography>
+                        </CTypography>
                       )}
-                    </Box>
+                    </div>
                   </>
                 )}
 
                 {!card.assignee && card.dueDate && (
-                  <Typography sx={{ fontSize: '0.76rem', color: 'text.secondary' }}>{card.dueDate}</Typography>
+                  <CTypography sx={{ fontSize: '0.76rem', color: 'text.secondary' }}>{card.dueDate}</CTypography>
                 )}
-              </Box>
+              </div>
 
               {interactive && (
-                <Typography sx={{ fontSize: '0.72rem', color: 'primary.main', fontWeight: 700, whiteSpace: 'nowrap' }}>
+                <CTypography sx={{ fontSize: '0.72rem', color: 'primary.main', fontWeight: 700, whiteSpace: 'nowrap' }}>
                   {t('kanban.card.openDetail')}
-                </Typography>
+                </CTypography>
               )}
-            </Box>
+            </div>
 
             {card.footer}
-          </Stack>
+          </CStack>
         )}
-      </Stack>
-    </Paper>
+      </CStack>
+    </CPaper>
   );
 };

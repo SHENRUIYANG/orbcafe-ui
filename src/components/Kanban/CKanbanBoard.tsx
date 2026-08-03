@@ -1,6 +1,6 @@
 'use client';
+import {  CStack } from "../Atoms";
 
-import { Box, Stack } from '@mui/material';
 import {
   DndContext,
   DragOverlay,
@@ -50,9 +50,9 @@ const SortableKanbanCard = ({ card, bucket, onCardClick }: SortableKanbanCardPro
   };
 
   return (
-    <Box ref={setNodeRef} style={style} {...attributes} {...listeners}>
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
       <CKanbanCard card={card} bucket={bucket} dragging={isDragging} onClick={onCardClick} />
-    </Box>
+    </div>
   );
 };
 
@@ -76,7 +76,7 @@ const DroppableKanbanBucket = ({
   });
 
   return (
-    <Box ref={setNodeRef} sx={{ minWidth: 0 }}>
+    <div ref={setNodeRef} sx={{ minWidth: 0 }}>
       <CKanbanBucket
         bucket={bucket}
         cardCount={bucket.cards.length}
@@ -85,14 +85,14 @@ const DroppableKanbanBucket = ({
         maxHeight={bucketMaxHeight}
       >
         <SortableContext items={bucket.cards.map((card) => toCardDndId(card.id))} strategy={verticalListSortingStrategy}>
-          <Stack spacing={1}>
+          <CStack spacing={1}>
             {bucket.cards.map((card) => (
               <SortableKanbanCard key={card.id} card={card} bucket={bucket} onCardClick={onCardClick} />
             ))}
-          </Stack>
+          </CStack>
         </SortableContext>
       </CKanbanBucket>
-    </Box>
+    </div>
   );
 };
 
@@ -226,7 +226,7 @@ export const CKanbanBoard = ({
       onDragEnd={handleDragEnd}
       onDragCancel={resetDragState}
     >
-      <Box
+      <div
         sx={[
           {
             display: 'grid',
@@ -250,13 +250,13 @@ export const CKanbanBoard = ({
             onCardClick={onCardClick}
           />
         ))}
-      </Box>
+      </div>
 
       <DragOverlay>
         {activeLookup ? (
-          <Box sx={{ width: Math.max(minBucketWidth - 24, 260) }}>
+          <div sx={{ width: Math.max(minBucketWidth - 24, 260) }}>
             <CKanbanCard card={activeLookup.card} bucket={activeLookup.bucket} overlay />
-          </Box>
+          </div>
         ) : null}
       </DragOverlay>
     </DndContext>

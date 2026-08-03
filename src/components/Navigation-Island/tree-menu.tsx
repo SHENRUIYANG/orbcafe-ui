@@ -35,7 +35,7 @@
 
 import React, { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
-import { ChevronRight, Pin } from 'lucide-react'
+import { ChevronRight, Pin } from '@/components/Icons'
 import { cn } from '../../lib/utils'
 import { Button } from './button'
 import { useOrbcafeI18n } from '../../i18n'
@@ -154,7 +154,7 @@ export function TreeMenu({
               <div
                 className={cn(
                   'absolute left-0 top-2 bottom-2 w-[3px] rounded-r-full z-10',
-                  isDark ? 'bg-[#90caf9]' : 'bg-[#1976d2]',
+                  isDark ? 'bg-[#91a8d1]' : 'bg-[#154194]',
                 )}
               />
             )}
@@ -172,8 +172,8 @@ export function TreeMenu({
                 level >= 2 ? 'min-h-9 py-1.5 rounded-md' : level > 0 ? 'min-h-10 rounded-lg' : 'rounded-lg',
                 isActive
                   ? (isDark
-                      ? 'bg-transparent text-[#90caf9] hover:bg-gray-800/35'
-                      : 'bg-transparent text-[#1976d2] hover:bg-gray-100/60')
+                      ? 'bg-transparent text-[#91a8d1] hover:bg-gray-800/35'
+                      : 'bg-transparent text-[#154194] hover:bg-gray-100/60')
                   : (isDark
                       ? 'hover:bg-gray-800/50 text-gray-300'
                       : 'hover:bg-gray-100/50 text-gray-700')
@@ -189,7 +189,7 @@ export function TreeMenu({
                   "flex-shrink-0 transition-transform duration-200",
                   isExpanded && "rotate-90",
                   isActive
-                    ? (isDark ? 'text-[#90caf9]' : 'text-[#1976d2]')
+                    ? (isDark ? 'text-[#91a8d1]' : 'text-[#154194]')
                     : (isDark
                         ? "text-gray-500 group-hover:text-gray-300"
                         : "text-gray-400 group-hover:text-gray-600")
@@ -202,7 +202,7 @@ export function TreeMenu({
                 <div className={cn(
                   "flex h-4 w-4 flex-shrink-0 items-center justify-center transition-colors duration-200",
                   isActive
-                    ? (isDark ? 'text-[#90caf9]' : 'text-[#1976d2]')
+                    ? (isDark ? 'text-[#91a8d1]' : 'text-[#154194]')
                     : (isDark
                         ? "text-gray-500 group-hover:text-gray-300"
                         : "text-gray-400 group-hover:text-gray-600")
@@ -222,7 +222,7 @@ export function TreeMenu({
                   <div className={cn(
                     "text-xs truncate transition-colors duration-200",
                     isActive
-                      ? (isDark ? 'text-[#90caf9]/70' : 'text-[#1976d2]/75')
+                      ? (isDark ? 'text-[#91a8d1]/70' : 'text-[#154194]/75')
                       : (isDark ? "text-gray-400" : "text-gray-500")
                   )} title={item.description}>
                     {item.description}
@@ -243,14 +243,8 @@ export function TreeMenu({
                   onTogglePin(item)
                 }}
                 className={cn(
-                  'absolute right-1 top-1/2 z-20 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-md transition-colors duration-150',
-                  isPinned
-                    ? (isDark
-                        ? 'bg-[#90caf9]/14 text-[#90caf9] hover:bg-[#90caf9]/22'
-                        : 'bg-[#1976d2]/10 text-[#1976d2] hover:bg-[#1976d2]/16')
-                    : (isDark
-                        ? 'text-gray-500 hover:bg-gray-800/70 hover:text-gray-200'
-                        : 'text-gray-400 hover:bg-gray-100 hover:text-gray-700')
+                  'orb-navigation-pin-button absolute right-1 top-1/2 z-20 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-md transition-colors duration-150',
+                  isPinned && 'orb-is-pinned',
                 )}
               >
                 <Pin className={cn('h-3.5 w-3.5', isPinned && 'fill-current')} />

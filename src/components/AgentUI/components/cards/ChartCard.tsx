@@ -12,7 +12,7 @@ import {
   TrendingDown, 
   MapPin, 
   Globe 
-} from 'lucide-react'
+} from '@/components/Icons'
 import { 
   CBarChart, 
   CLineChart, 

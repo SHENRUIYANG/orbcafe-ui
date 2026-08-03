@@ -1,5 +1,5 @@
+import { CPaper, CTypography } from '../../../Atoms';
 import type { ReactNode } from 'react';
-import { Paper, Typography } from '@mui/material';
 
 export interface CChartCardProps {
   title: string;
@@ -8,15 +8,15 @@ export interface CChartCardProps {
 }
 
 export const CChartCard = ({ title, subtitle, children }: CChartCardProps) => (
-  <Paper variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
-    <Typography variant="subtitle1" fontWeight={700}>
+  <CPaper elevation={0} sx={{ padding: 16 }}>
+    <CTypography variant="h4" sx={{ fontWeight: 700 }}>
       {title}
-    </Typography>
+    </CTypography>
     {subtitle && (
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+      <CTypography variant="body2" muted sx={{ marginBottom: 16 }}>
         {subtitle}
-      </Typography>
+      </CTypography>
     )}
     {children}
-  </Paper>
+  </CPaper>
 );

@@ -1,22 +1,9 @@
 'use client';
 
+import { getOrbCompatMode } from '../../lib/orbis-compat';
+import { Alert, CChip, CPaper, CStack, CameraAltRoundedIcon, QrCodeScannerRoundedIcon } from '../../lib/orbis-compat';
 import React from 'react';
-import {
-  Alert,
-  Box,
-  Button,
-  Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Paper,
-  Stack,
-  TextField,
-  Typography,
-} from '@mui/material';
-import CameraAltRoundedIcon from '@mui/icons-material/CameraAltRounded';
-import QrCodeScannerRoundedIcon from '@mui/icons-material/QrCodeScannerRounded';
+import { CButton, CDialog, CTextField, CTypography } from "./../Atoms";
 import type { PBarcodeScannerDetectedValue, PBarcodeScannerProps } from './types';
 
 declare global {
@@ -188,15 +175,15 @@ export const PBarcodeScanner = ({
   };
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle sx={{ fontSize: '1rem', fontWeight: 900 }}>{title}</DialogTitle>
-      <DialogContent sx={{ pt: '8px !important' }}>
-        <Stack spacing={2} sx={sx}>
-          <Typography sx={{ fontSize: '0.88rem', color: 'text.secondary', lineHeight: 1.55 }}>{subtitle}</Typography>
+    <CDialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+      <div className="orb-dialog-title" sx={{ fontSize: '1rem', fontWeight: 900 }}>{title}</div>
+      <div className="orb-dialog-content" sx={{ pt: '8px !important' }}>
+        <CStack spacing={2} sx={sx}>
+          <CTypography sx={{ fontSize: '0.88rem', color: 'text.secondary', lineHeight: 1.55 }}>{subtitle}</CTypography>
 
-          <Paper
+          <CPaper
             elevation={0}
-            sx={(theme) => ({
+            sx={{
               position: 'relative',
               overflow: 'hidden',
               borderRadius: 4,
@@ -204,10 +191,10 @@ export const PBarcodeScanner = ({
               borderColor: 'divider',
               minHeight: 280,
               background:
-                theme.palette.mode === 'dark'
+                getOrbCompatMode() === 'dark'
                   ? 'linear-gradient(180deg, rgba(15,23,42,0.92), rgba(2,6,23,0.96))'
                   : 'linear-gradient(180deg, rgba(241,245,249,1), rgba(226,232,240,0.92))',
-            })}
+            }}
           >
             <video
               ref={videoRef}
@@ -222,7 +209,7 @@ export const PBarcodeScanner = ({
               }}
             />
 
-            <Box
+            <div
               sx={{
                 pointerEvents: 'none',
                 position: 'absolute',
@@ -232,7 +219,7 @@ export const PBarcodeScanner = ({
                 justifyContent: 'center',
               }}
             >
-              <Box
+              <div
                 sx={{
                   width: '72%',
                   maxWidth: 320,
@@ -243,7 +230,7 @@ export const PBarcodeScanner = ({
                   position: 'relative',
                 }}
               >
-                <Box
+                <div
                   sx={{
                     position: 'absolute',
                     top: '50%',
@@ -254,10 +241,10 @@ export const PBarcodeScanner = ({
                     boxShadow: '0 0 18px rgba(56,189,248,0.85)',
                   }}
                 />
-              </Box>
-            </Box>
+              </div>
+            </div>
 
-            <Box
+            <div
               sx={{
                 position: 'absolute',
                 top: 12,
@@ -267,7 +254,7 @@ export const PBarcodeScanner = ({
                 flexWrap: 'wrap',
               }}
             >
-              <Chip
+              <CChip
                 icon={<CameraAltRoundedIcon />}
                 label={
                   scannerState === 'ready'
@@ -285,7 +272,7 @@ export const PBarcodeScanner = ({
                 variant="filled"
               />
               {lastDetected ? (
-                <Chip
+                <CChip
                   icon={<QrCodeScannerRoundedIcon />}
                   label={`${lastDetected.format || 'barcode'}: ${lastDetected.rawValue}`}
                   size="small"
@@ -293,31 +280,30 @@ export const PBarcodeScanner = ({
                   variant="filled"
                 />
               ) : null}
-            </Box>
-          </Paper>
+            </div>
+          </CPaper>
 
           {errorMessage ? <Alert severity={scannerState === 'unsupported' ? 'info' : 'warning'}>{errorMessage}</Alert> : null}
 
           {manualEntry ? (
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.25}>
-              <TextField
+            <CStack direction={{ xs: 'column', sm: 'row' }} spacing={1.25}>
+              <CTextField
                 fullWidth
                 label="Barcode"
                 placeholder={manualPlaceholder}
                 value={manualValue}
                 onChange={(event) => setManualValue(event.target.value)}
               />
-              <Button variant="contained" onClick={handleUseManualValue} sx={{ minHeight: 56, px: 2.5 }}>
+              <CButton variant="contained" onClick={handleUseManualValue} sx={{ minHeight: 56, px: 2.5 }}>
                 {confirmLabel}
-              </Button>
-            </Stack>
+              </CButton>
+            </CStack>
           ) : null}
-        </Stack>
-      </DialogContent>
-      <DialogActions sx={{ px: 3, pb: 2 }}>
-        <Button onClick={onClose}>{cancelLabel}</Button>
-      </DialogActions>
-    </Dialog>
+        </CStack>
+      </div>
+      <div className="orb-dialog-actions" sx={{ px: 3, pb: 2 }}>
+        <CButton onClick={onClose}>{cancelLabel}</CButton>
+      </div>
+    </CDialog>
   );
 };
-

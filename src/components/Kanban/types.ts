@@ -1,5 +1,5 @@
+import { SxProps, Theme } from '../../lib/orbis-compat';
 import type { ReactNode } from 'react';
-import type { SxProps, Theme } from '@mui/material/styles';
 
 export type KanbanCardPriority = 'critical' | 'high' | 'medium' | 'low';
 export type KanbanCardTone = 'default' | 'success' | 'warning' | 'info' | 'error';

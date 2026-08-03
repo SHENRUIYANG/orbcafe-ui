@@ -1,4 +1,5 @@
 import type { GraphReportConfig } from '../../../GraphReport/types';
+import type { HTMLAttributes, ReactNode } from 'react';
 
 export interface CTableQuickCreateConfig {
     enabled?: boolean;
@@ -115,6 +116,19 @@ export interface CTableBodyProps {
     rowKeyProp?: string;
     page?: number;
     rowsPerPage?: number;
+    emptyLabel?: ReactNode;
+    getRowDataKey?: (context: CTableBodyRowContext) => string | undefined;
+    getRowProps?: (context: CTableBodyRowContext) => HTMLAttributes<HTMLTableRowElement>;
+    getGroupRowProps?: (context: CTableBodyRowContext) => HTMLAttributes<HTMLTableRowElement>;
+}
+
+export interface CTableBodyRowContext {
+    entry: any;
+    data: any;
+    id: any;
+    index: number;
+    selected: boolean;
+    group: boolean;
 }
 
 export interface CTableCellProps {

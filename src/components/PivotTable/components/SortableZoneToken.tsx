@@ -1,7 +1,7 @@
+import { getOrbCompatMode } from '../../../lib/orbis-compat';
+import { CloseIcon, DragIndicatorIcon } from '../../../lib/orbis-compat';
 import React from 'react';
-import { Box, IconButton, Paper, Typography } from '@mui/material';
-import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
-import CloseIcon from '@mui/icons-material/Close';
+import {  CIconButton, CPaper, CTypography } from "../../Atoms";
 import { useSortable } from '@dnd-kit/sortable';
 
 interface SortableZoneTokenUIProps {
@@ -36,45 +36,45 @@ export const SortableZoneTokenUI: React.FC<SortableZoneTokenUIProps> = ({
   style,
 }) => {
   return (
-    <Paper
+    <CPaper
       ref={dragRef}
       style={style}
-      sx={(theme) => ({
+      sx={{
         p: 1,
-        borderRadius: 2,
+        borderRadius: 'var(--orb-r-container)',
         border: '1px solid',
         borderColor: 'divider',
-        bgcolor: theme.palette.mode === 'dark' ? '#111111' : 'background.paper',
+        bgcolor: getOrbCompatMode() === 'dark' ? '#111111' : 'background.paper',
         touchAction: 'none',
         opacity: isDragging ? 0 : 1,
-      })}
+      }}
     >
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8 }}>
-        <Box
+      <div sx={{ display: 'flex', alignItems: 'center', gap: 0.8 }}>
+        <div
           {...attributes}
           {...listeners}
-          sx={(theme) => ({
+          sx={{
             display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'center',
             p: 0.25,
             borderRadius: 1,
-            bgcolor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(17, 24, 39, 0.08)',
+            bgcolor: getOrbCompatMode() === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(17, 24, 39, 0.08)',
             cursor: 'grab',
-          })}
+          }}
         >
           <DragIndicatorIcon sx={{ fontSize: 15, color: 'text.secondary' }} />
-        </Box>
+        </div>
 
-        <Box sx={{ minWidth: 0, flex: 1 }}>
-          <Typography sx={{ fontSize: '0.8rem', fontWeight: 700, lineHeight: 1.2 }}>{label}</Typography>
-          {caption && <Typography sx={{ fontSize: '0.7rem', color: 'text.secondary', lineHeight: 1.2 }}>{caption}</Typography>}
-        </Box>
+        <div sx={{ minWidth: 0, flex: 1 }}>
+          <CTypography sx={{ fontSize: '0.8rem', fontWeight: 700, lineHeight: 1.2 }}>{label}</CTypography>
+          {caption && <CTypography sx={{ fontSize: '0.7rem', color: 'text.secondary', lineHeight: 1.2 }}>{caption}</CTypography>}
+        </div>
 
         {trailing}
 
         {onRemove && (
-          <IconButton
+          <CIconButton
             size="small"
             onClick={(event) => {
               event.stopPropagation();
@@ -83,10 +83,10 @@ export const SortableZoneTokenUI: React.FC<SortableZoneTokenUIProps> = ({
             sx={{ p: 0.2 }}
           >
             <CloseIcon sx={{ fontSize: 16 }} />
-          </IconButton>
+          </CIconButton>
         )}
-      </Box>
-    </Paper>
+      </div>
+    </CPaper>
   );
 };
 

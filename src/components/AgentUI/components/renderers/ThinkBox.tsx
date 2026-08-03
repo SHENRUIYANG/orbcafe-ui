@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useMemo } from 'react'
+import { ChevronDown, Lightbulb } from '@/components/Icons'
 
 export interface ThinkBoxProps {
   
@@ -49,7 +50,7 @@ const ThinkBox: React.FC<ThinkBoxProps> = ({
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <span className="flex items-center">
-          <span className="mr-2">🤔</span>
+          <Lightbulb className="mr-2 h-4 w-4" />
           <span 
             className={`font-medium ${
               theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
@@ -59,18 +60,13 @@ const ThinkBox: React.FC<ThinkBoxProps> = ({
             }}
           >思考过程</span>
         </span>
-        <svg 
+        <ChevronDown
           className={`w-4 h-4 transition-transform duration-200 ${
             isExpanded ? 'rotate-180' : ''
           } ${
             theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
           }`}
-          fill="none" 
-          stroke="currentColor" 
-          viewBox="0 0 24 24"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
+        />
       </div>
       
       {isExpanded && (

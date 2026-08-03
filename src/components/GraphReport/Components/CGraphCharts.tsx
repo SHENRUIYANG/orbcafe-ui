@@ -1,4 +1,3 @@
-import { Box } from '@mui/material';
 import type { GraphBarDatum, GraphPieDatum, GraphReportInteractionState } from '../types';
 import { CBarChart, CChartCard, CPieChart } from './charts';
 import { useOrbcafeI18n } from '../../../i18n';
@@ -23,14 +22,10 @@ export const CGraphCharts = ({
 }: CGraphChartsProps) => {
   const { t } = useOrbcafeI18n();
   return (
-    <Box
-      sx={{
+        <div style={{
         display: 'grid',
-        gap: 1.5,
-        gridTemplateColumns: {
-          xs: '1fr',
-          lg: '1.2fr 1.2fr 1fr',
-        },
+        gap: 12,
+        gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
       }}
     >
       <CChartCard title={t('graph.chart.billable.title')} subtitle={t('graph.chart.billable.subtitle')}>
@@ -60,6 +55,6 @@ export const CGraphCharts = ({
           onItemClick={(item) => interaction?.onStatusClick?.(item.name)}
         />
       </CChartCard>
-    </Box>
+    </div>
   );
 };

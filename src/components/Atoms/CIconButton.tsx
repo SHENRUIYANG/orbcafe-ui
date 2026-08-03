@@ -1,62 +1,41 @@
-/**
- * @file 10_Frontend/components/sap/ui/Common/Atoms/CIconButton.tsx
- * 
- * @summary Core frontend CIconButton module for the ORBAI Core project
- * @author ORBAICODER
- * @version 1.0.0
- * @date 2025-01-19
- * 
- * @description
- * This file is responsible for:
- *  - Implementing CIconButton functionality within frontend workflows
- *  - Integrating with shared ORBAI Core application processes under frontend
- * 
- * @logic
- * 1. Import required dependencies and configuration
- * 2. Execute the primary logic for CIconButton
- * 3. Export the resulting APIs, hooks, or components for reuse
- * 
- * @changelog
- * V1.0.0 - 2025-01-19 - Initial creation
- */
+'use client';
 
-/**
- * File Overview
- * 
- * START CODING
- * 
- * --------------------------
- * SECTION 1: CIconButton Core Logic
- * Section overview and description.
- * --------------------------
- */
-
-import { IconButton, Tooltip } from '@mui/material';
-import type { IconButtonProps } from '@mui/material';
 import { forwardRef } from 'react';
+import type { ButtonHTMLAttributes } from 'react';
+import { CTooltip } from './CTooltip';
+import { resolveOrbSx } from '../../lib/orbis-compat/sx';
+import type { OrbSxProps } from '../../lib/orbis-compat/sx';
 
-interface CIconButtonProps extends IconButtonProps {
+export interface CIconButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'style'> {
   tooltip?: string;
+  size?: 'small' | 'medium';
+  /** Render in the primary color (e.g. active toggle state). */
+  active?: boolean;
+  edge?: 'start' | 'end' | false;
+  color?: string;
+  sx?: OrbSxProps;
 }
 
-export const CIconButton = forwardRef<HTMLButtonElement, CIconButtonProps>(({ tooltip, ...props }, ref) => {
-  const button = (
-    <IconButton
-      ref={ref}
-      {...props}
-      size={props.size || 'small'}
-    />
-  );
-
-  if (tooltip) {
-    return (
-      <Tooltip title={tooltip}>
-        {button}
-      </Tooltip>
+export const CIconButton = forwardRef<HTMLButtonElement, CIconButtonProps>(
+  ({ tooltip, size = 'small', active = false, edge, color, sx, className, children, type = 'button', ...rest }, ref) => {
+    const resolved = resolveOrbSx([
+      { color: active ? 'var(--orb-primary)' : color, ...(edge === 'start' ? { marginLeft: -8 } : edge === 'end' ? { marginRight: -8 } : undefined) },
+      ...(Array.isArray(sx) ? sx : sx ? [sx] : []),
+    ], `orb-icon-btn ${size === 'small' ? 'orb-icon-btn-sm' : ''} ${className ?? ''}`);
+    const button = (
+      <button
+        ref={ref}
+        type={type}
+        className={resolved.className}
+        style={resolved.style}
+        {...rest}
+      >
+        {children}
+      </button>
     );
-  }
 
-  return button;
-});
+    return tooltip ? <CTooltip title={tooltip}>{button}</CTooltip> : button;
+  },
+);
 
 CIconButton.displayName = 'CIconButton';

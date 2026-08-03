@@ -1,13 +1,16 @@
 'use client';
 
 import { useMemo, useState, type ComponentProps } from 'react';
-import { Box, Chip, Stack, Typography } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
 import {
   CAppPageLayout,
+  CChip,
   CDetailInfoPage,
   CPageTransition,
+  CStack,
+  CTypography,
+  CPaper,
   CTreeComp,
+  useOrbMode,
   type CTreeCompColumn,
   type CTreeCompNode,
   type FilterField,
@@ -45,15 +48,14 @@ type CostDetailTabs = NonNullable<ComponentProps<typeof CDetailInfoPage>['tabs']
 type CostDetailTable = NonNullable<ComponentProps<typeof CDetailInfoPage>['table']>;
 
 const HeaderBrandLogo = () => {
-  const theme = useTheme();
-  const src = theme.palette.mode === 'dark' ? '/LOGO3.png' : '/LOGO2.png';
+  const mode = useOrbMode();
+  const src = mode === 'dark' ? '/LOGO3.png' : '/LOGO2.png';
 
   return (
-    <Box
-      component="img"
+    <img
       src={src}
       alt="ORBCAFE UI"
-      sx={{ width: 280, maxWidth: '32vw', height: 52, display: 'block', objectFit: 'contain', flexShrink: 0 }}
+      style={{ width: 280, maxWidth: '32vw', height: 52, display: 'block', objectFit: 'contain', flexShrink: 0 }}
     />
   );
 };
@@ -252,6 +254,12 @@ const getKindColor = (kind: CostKind) => {
   return 'primary';
 };
 
+const getKindColorBg = (kind: CostKind) => {
+  if (kind === 'External') return 'rgba(243, 106, 58, 0.12)';
+  if (kind === 'Overhead') return 'var(--orb-surface-2)';
+  return 'rgba(39, 112, 255, 0.12)';
+};
+
 const buildDetailSearchText = (node: CostTreeNode) => [
   node.code,
   node.label,
@@ -292,7 +300,7 @@ const buildCostDetailSections = (node: CostTreeNode): CostDetailSections => {
         {
           id: 'kind',
           label: 'Component Type',
-          value: <Chip size="small" color={getKindColor(node.kind)} label={node.kind} sx={{ fontWeight: 700 }} />,
+          value: <span style={{ display: 'inline-flex', padding: '4px 12px', borderRadius: 16, fontSize: '0.875rem', fontWeight: 700, backgroundColor: getKindColorBg(node.kind), color: getKindColor(node.kind) }}>{node.kind}</span>,
           searchableText: node.kind,
         },
         { id: 'quantity', label: 'Quantity', value: formatQty(node.qty) || 'Rollup' },
@@ -435,7 +443,7 @@ const CostDetail = ({ node }: { node: CostTreeNode | null }) => {
       table={table}
       searchBarWidth={360}
       rightHeaderSlot={
-        <Chip
+        <CChip
           size="small"
           color={getKindColor(activeNode.kind)}
           label={activeNode.kind}
@@ -552,14 +560,14 @@ export default function CTreeExampleClient() {
         label: 'Cost component',
         minWidth: 360,
         render: (node) => (
-          <Stack spacing={0.25} sx={{ minWidth: 0 }}>
-            <Typography sx={{ fontSize: 15, fontWeight: 780, lineHeight: 1.15 }} noWrap>
+          <CStack spacing={0.25} sx={{ minWidth: 0 }}>
+            <CTypography sx={{ fontSize: 15, fontWeight: 780, lineHeight: 1.15 }} noWrap>
               {node.code} · {node.label}
-            </Typography>
-            <Typography sx={{ fontSize: 13, color: 'text.secondary' }} noWrap>
+            </CTypography>
+            <CTypography sx={{ fontSize: 13, color: 'var(--orb-muted)' }} noWrap>
               {node.kind} · {node.source}
-            </Typography>
-          </Stack>
+            </CTypography>
+          </CStack>
         ),
       },
       { id: 'plant', label: 'Plant', minWidth: 92, render: (node) => node.plant },
@@ -585,21 +593,23 @@ export default function CTreeExampleClient() {
   return (
     <CAppPageLayout
       appTitle=""
+      navigationVariant="v2"
+      searchPlacement="header"
       menuData={EXAMPLE_MENU}
       locale="en"
       localeLabel="EN"
       user={{ name: 'Ruiyang Shen', subtitle: 'ruiyang.shen@orbis.de', avatarSrc: '/orbcafe.png' }}
+      onUserRefresh={() => window.location.reload()}
+      onUserLogout={() => window.location.assign('/login')}
       logo={<HeaderBrandLogo />}
     >
       <CPageTransition transitionKey="ctree-demo" variant="fade" durationMs={180}>
-        <Box
+        <div
           className="ctree_page"
-          sx={{
+          style={{
             height: 'calc(100vh - 84px)',
             minHeight: 680,
             overflow: 'hidden',
-            px: { xs: 1, md: 2 },
-            py: 1.5,
           }}
         >
           <CTreeComp<CostTreeNode>
@@ -636,7 +646,7 @@ export default function CTreeExampleClient() {
             headerAction={null}
             sx={{ height: '100%' }}
           />
-        </Box>
+        </div>
       </CPageTransition>
     </CAppPageLayout>
   );

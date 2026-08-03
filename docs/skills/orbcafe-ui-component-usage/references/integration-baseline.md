@@ -35,6 +35,21 @@
   - keep option `value` stable, localize `label` only.
   - locale resources source: `src/i18n/messages.ts`.
 
+## V2 baseline (MUI-free, self-written CSS)
+
+`orbcafe-ui@2` 是 MUI-free 版本，样式全部自写（`orbis.css` 内置于包中）。以下差异必须遵守：
+
+- **不要**为 ORBCAFE 组件安装 `@mui/*`、`@emotion/*` 或 `lucide-react`。
+- 全局 CSS 必须引入一次 ORBIS 样式：
+  ```css
+  @import "orbcafe-ui/styles.css";
+  ```
+- 主题/暗色模式使用 `OrbisModeProvider`（自动切换 `<html class="orb-dark">` + `data-orb-mode`）；`CAppPageLayout`/`PAppPageLayout` 内部已渲染，独立页面才需要手动包裹。
+- 全局消息使用 `GlobalMessage`（配 `showMessage()` / `messageManager`）。
+- 组件 `sx` 是 ORBIS 兼容层 `OrbSxProps`（`src/lib/orbis-compat/sx`），不再映射到 MUI theme。
+- 图标从 `orbcafe-ui` 包入口导入（`SapIcon` + Lucide 风格别名），不依赖外部图标库。
+- 组件内部仍然使用 Tailwind utility classes，宿主必须用 Tailwind v4 + `@source` 扫描 `node_modules/orbcafe-ui/dist`。
+
 ## Version-sensitive notes (>= 1.4.5)
 
 - `useStandardReport` default rows-per-page is `20` and includes `-1` (`ALL`).

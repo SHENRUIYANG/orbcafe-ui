@@ -1,4 +1,5 @@
-import { Box, Typography } from '@mui/material';
+import { CTypography } from '../../../Atoms';
+
 import type { GraphHeatmapDatum } from '../../types';
 
 export interface CHeatmapChartProps {
@@ -13,7 +14,7 @@ const toHeatColor = (ratio: number) => {
 
 export const CHeatmapChart = ({ data }: CHeatmapChartProps) => {
   if (data.length === 0) {
-    return <Typography variant="body2" color="text.secondary">No data</Typography>;
+    return <CTypography variant="body2" muted>No data</CTypography>;
   }
 
   const xLabels = Array.from(new Set(data.map((d) => d.x)));
@@ -22,52 +23,51 @@ export const CHeatmapChart = ({ data }: CHeatmapChartProps) => {
   const valueMap = new Map(data.map((d) => [`${d.y}__${d.x}`, d.value]));
 
   return (
-    <Box sx={{ overflowX: 'auto' }}>
-      <Box
-        sx={{
+        <div style={{ overflowX: 'auto' }}>
+          <div style={{
           display: 'grid',
           gridTemplateColumns: `120px repeat(${xLabels.length}, minmax(64px, 1fr))`,
           gap: 1,
           minWidth: 120 + xLabels.length * 64,
         }}
       >
-        <Box />
+        <div />
         {xLabels.map((x) => (
-          <Typography key={x} variant="caption" sx={{ textAlign: 'center', fontWeight: 600 }}>
+          <CTypography key={x} variant="caption" sx={{ textAlign: 'center', fontWeight: 600 }}>
             {x}
-          </Typography>
+          </CTypography>
         ))}
 
         {yLabels.map((y) => (
-          <Box key={y} sx={{ display: 'contents' }}>
-            <Typography variant="caption" sx={{ alignSelf: 'center' }}>
+          <div key={y} style={{ display: 'contents' }}>
+            <CTypography variant="caption" sx={{ alignSelf: 'center' }}>
               {y}
-            </Typography>
+            </CTypography>
             {xLabels.map((x) => {
               const value = valueMap.get(`${y}__${x}`) || 0;
               const ratio = value / maxValue;
               return (
-                <Box
+                <div
                   key={`${y}-${x}`}
                   sx={{
                     height: 36,
                     borderRadius: 1,
-                    bgcolor: toHeatColor(ratio),
+                    background: toHeatColor(ratio),
                     border: '1px solid rgba(148,163,184,0.2)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                   }}
                 >
-                  <Typography variant="caption" fontWeight={700}>
+                  <CTypography variant="caption" sx={{ fontWeight: 700 }}>
                     {value.toFixed(1)}
-                  </Typography>
-                </Box>
+                  </CTypography>
+                </div>
               );
             })}
-          </Box>
+          </div>
         ))}
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 };

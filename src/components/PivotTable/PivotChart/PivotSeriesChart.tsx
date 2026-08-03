@@ -1,6 +1,6 @@
+import { alpha, useTheme } from '../../../lib/orbis-compat';
 import React from 'react';
-import { Box, Stack, Typography } from '@mui/material';
-import { alpha, useTheme } from '@mui/material/styles';
+import {  CStack, CTypography } from "../../Atoms";
 import type { PivotChartType } from '../types';
 import type { PivotChartDatum } from './pivotChartUtils';
 
@@ -37,9 +37,9 @@ export const PivotSeriesChart: React.FC<PivotSeriesChartProps> = ({
     );
 
     return (
-      <Stack spacing={1.1}>
+      <CStack spacing={1.1}>
         {data.map((item) => (
-          <Box
+          <div
             key={item.name}
             sx={{
               display: 'grid',
@@ -48,11 +48,11 @@ export const PivotSeriesChart: React.FC<PivotSeriesChartProps> = ({
               alignItems: 'center',
             }}
           >
-            <Typography sx={{ fontSize: '0.78rem', fontWeight: 700 }} noWrap title={item.name}>
+            <CTypography sx={{ fontSize: '0.78rem', fontWeight: 700 }} noWrap title={item.name}>
               {item.name}
-            </Typography>
-            <Stack spacing={0.65}>
-              <Box
+            </CTypography>
+            <CStack spacing={0.65}>
+              <div
                 sx={{
                   height: 10,
                   borderRadius: 999,
@@ -60,16 +60,16 @@ export const PivotSeriesChart: React.FC<PivotSeriesChartProps> = ({
                   bgcolor: alpha(theme.palette.action.active, 0.08),
                 }}
               >
-                <Box
+                <div
                   sx={{
                     width: `${(item.primaryValue / maxValue) * 100}%`,
                     height: '100%',
                     bgcolor: primaryColor,
                   }}
                 />
-              </Box>
+              </div>
               {secondaryLabel && (
-                <Box
+                <div
                   sx={{
                     height: 8,
                     borderRadius: 999,
@@ -77,29 +77,29 @@ export const PivotSeriesChart: React.FC<PivotSeriesChartProps> = ({
                     bgcolor: alpha(theme.palette.action.active, 0.08),
                   }}
                 >
-                  <Box
+                  <div
                     sx={{
                       width: `${((item.secondaryValue ?? 0) / maxValue) * 100}%`,
                       height: '100%',
                       bgcolor: secondaryColor,
                     }}
                   />
-                </Box>
+                </div>
               )}
-            </Stack>
-            <Box sx={{ minWidth: 0 }}>
-              <Typography sx={{ fontSize: '0.72rem', textAlign: { xs: 'left', md: 'right' }, fontWeight: 700 }}>
+            </CStack>
+            <div sx={{ minWidth: 0 }}>
+              <CTypography sx={{ fontSize: '0.72rem', textAlign: { xs: 'left', md: 'right' }, fontWeight: 700 }}>
                 {formatPrimaryValue(item.primaryValue)}
-              </Typography>
+              </CTypography>
               {secondaryLabel && (
-                <Typography sx={{ fontSize: '0.72rem', textAlign: { xs: 'left', md: 'right' }, color: 'text.secondary' }}>
+                <CTypography sx={{ fontSize: '0.72rem', textAlign: { xs: 'left', md: 'right' }, color: 'text.secondary' }}>
                   {(formatSecondaryValue ?? formatPrimaryValue)(item.secondaryValue ?? 0)}
-                </Typography>
+                </CTypography>
               )}
-            </Box>
-          </Box>
+            </div>
+          </div>
         ))}
-      </Stack>
+      </CStack>
     );
   }
 
@@ -110,8 +110,8 @@ export const PivotSeriesChart: React.FC<PivotSeriesChartProps> = ({
     const cellWidth = secondaryLabel ? 92 : 76;
 
     return (
-      <Box sx={{ overflowX: 'auto', pb: 0.5 }}>
-        <Box
+      <div sx={{ overflowX: 'auto', pb: 0.5 }}>
+        <div
           sx={{
             minWidth: Math.max(620, data.length * cellWidth),
             display: 'grid',
@@ -121,9 +121,9 @@ export const PivotSeriesChart: React.FC<PivotSeriesChartProps> = ({
           }}
         >
           {data.map((item) => (
-            <Box key={item.name} sx={{ minWidth: 0 }}>
-              <Box sx={{ height: 210, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: 0.8 }}>
-                <Box
+            <div key={item.name} sx={{ minWidth: 0 }}>
+              <div sx={{ height: 210, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: 0.8 }}>
+                <div
                   sx={{
                     width: secondaryLabel ? 16 : 26,
                     minHeight: 8,
@@ -134,7 +134,7 @@ export const PivotSeriesChart: React.FC<PivotSeriesChartProps> = ({
                   title={`${primaryLabel}: ${formatPrimaryValue(item.primaryValue)}`}
                 />
                 {secondaryLabel && (
-                  <Box
+                  <div
                     sx={{
                       width: 16,
                       minHeight: 8,
@@ -145,26 +145,26 @@ export const PivotSeriesChart: React.FC<PivotSeriesChartProps> = ({
                     title={`${secondaryLabel}: ${(formatSecondaryValue ?? formatPrimaryValue)(item.secondaryValue ?? 0)}`}
                   />
                 )}
-              </Box>
-              <Typography sx={{ fontSize: '0.76rem', fontWeight: 700 }} noWrap title={item.name}>
+              </div>
+              <CTypography sx={{ fontSize: '0.76rem', fontWeight: 700 }} noWrap title={item.name}>
                 {item.name}
-              </Typography>
-              <Typography sx={{ fontSize: '0.7rem', color: 'text.secondary' }} noWrap title={formatPrimaryValue(item.primaryValue)}>
+              </CTypography>
+              <CTypography sx={{ fontSize: '0.7rem', color: 'text.secondary' }} noWrap title={formatPrimaryValue(item.primaryValue)}>
                 {formatPrimaryValue(item.primaryValue)}
-              </Typography>
+              </CTypography>
               {secondaryLabel && (
-                <Typography
+                <CTypography
                   sx={{ fontSize: '0.7rem', color: 'text.secondary' }}
                   noWrap
                   title={(formatSecondaryValue ?? formatPrimaryValue)(item.secondaryValue ?? 0)}
                 >
                   {(formatSecondaryValue ?? formatPrimaryValue)(item.secondaryValue ?? 0)}
-                </Typography>
+                </CTypography>
               )}
-            </Box>
+            </div>
           ))}
-        </Box>
-      </Box>
+        </div>
+      </div>
     );
   }
 
@@ -188,9 +188,9 @@ export const PivotSeriesChart: React.FC<PivotSeriesChartProps> = ({
     : [];
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.1 }}>
-      <Box sx={{ overflowX: 'auto' }}>
-        <Box component="svg" viewBox={`0 0 ${width} ${height}`} sx={{ width: '100%', minWidth: width, height }}>
+    <div sx={{ display: 'flex', flexDirection: 'column', gap: 1.1 }}>
+      <div sx={{ overflowX: 'auto' }}>
+        <div component="svg" viewBox={`0 0 ${width} ${height}`} sx={{ width: '100%', minWidth: width, height }}>
           <line
             x1={padding.left}
             y1={height - padding.bottom}
@@ -233,10 +233,10 @@ export const PivotSeriesChart: React.FC<PivotSeriesChartProps> = ({
               ))}
             </>
           )}
-        </Box>
-      </Box>
+        </div>
+      </div>
 
-      <Box
+      <div
         sx={{
           display: 'grid',
           gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, minmax(0, 1fr))', xl: 'repeat(4, minmax(0, 1fr))' },
@@ -244,30 +244,30 @@ export const PivotSeriesChart: React.FC<PivotSeriesChartProps> = ({
         }}
       >
         {data.map((item) => (
-          <Box
+          <div
             key={item.name}
             sx={(theme) => ({
-              borderRadius: 2,
+              borderRadius: 'var(--orb-r-container)',
               px: 1.1,
               py: 0.9,
               border: `1px solid ${alpha(theme.palette.divider, 0.7)}`,
               bgcolor: alpha(theme.palette.background.default, 0.35),
             })}
           >
-            <Typography sx={{ fontSize: '0.76rem', fontWeight: 700 }} noWrap title={item.name}>
+            <CTypography sx={{ fontSize: '0.76rem', fontWeight: 700 }} noWrap title={item.name}>
               {item.name}
-            </Typography>
-            <Typography sx={{ fontSize: '0.71rem', color: 'text.secondary' }}>
+            </CTypography>
+            <CTypography sx={{ fontSize: '0.71rem', color: 'text.secondary' }}>
               {formatPrimaryValue(item.primaryValue)}
-            </Typography>
+            </CTypography>
             {secondaryLabel && (
-              <Typography sx={{ fontSize: '0.71rem', color: 'text.secondary' }}>
+              <CTypography sx={{ fontSize: '0.71rem', color: 'text.secondary' }}>
                 {(formatSecondaryValue ?? formatPrimaryValue)(item.secondaryValue ?? 0)}
-              </Typography>
+              </CTypography>
             )}
-          </Box>
+          </div>
         ))}
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 };

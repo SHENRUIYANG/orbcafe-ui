@@ -1,49 +1,28 @@
-/**
- * @file 10_Frontend/components/sap/ui/Common/Molecules/CFilterField.tsx
- * 
- * @summary Core frontend CFilterField module for the ORBAI Core project
- * @author ORBAICODER
- * @version 1.0.0
- * @date 2025-01-19
- * 
- * @description
- * This file is responsible for:
- *  - Implementing CFilterField functionality within frontend workflows
- *  - Integrating with shared ORBAI Core application processes under frontend
- * 
- * @logic
- * 1. Import required dependencies and configuration
- * 2. Execute the primary logic for CFilterField
- * 3. Export the resulting APIs, hooks, or components for reuse
- * 
- * @changelog
- * V1.0.0 - 2025-01-19 - Initial creation
- */
+import type { ReactNode, HTMLAttributes, CSSProperties } from 'react';
 
-/**
- * File Overview
- * 
- * START CODING
- * 
- * --------------------------
- * SECTION 1: CFilterField Core Logic
- * Section overview and description.
- * --------------------------
- */
-
-import { Grid } from '@mui/material';
-import type { GridProps } from '@mui/material';
-
-interface CFilterFieldProps extends Omit<GridProps, 'size'> {
+interface CFilterFieldProps extends HTMLAttributes<HTMLDivElement> {
   xs?: number;
   md?: number;
   lg?: number;
+  sx?: CSSProperties;
+  children?: ReactNode;
 }
 
-export const CFilterField = ({ xs, md, lg, children, ...props }: CFilterFieldProps) => {
+export const CFilterField = ({ xs, md, lg, sx, children, className, ...props }: CFilterFieldProps) => {
+  // Simple responsive grid item wrapper
+  const gridColumn = lg ? `span ${lg}` : md ? `span ${md}` : xs ? `span ${xs}` : 'span 12';
+
   return (
-    <Grid size={{ xs, md, lg }} {...props}>
+    <div
+      {...props}
+      className={className}
+      style={{
+        gridColumn,
+        minWidth: 0,
+        ...sx,
+      }}
+    >
       {children}
-    </Grid>
+    </div>
   );
 };

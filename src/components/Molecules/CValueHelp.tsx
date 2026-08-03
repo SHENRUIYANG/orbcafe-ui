@@ -1,34 +1,11 @@
 'use client';
 
+import { CSpinner, CloseIcon, InputAdornment, TableCellProps, TextFieldProps } from '../../lib/orbis-compat';
+import { useOrbMode, orbAlpha } from "../../lib/theme";
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
-import {
-  Box,
-  Button,
-  Checkbox,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  IconButton,
-  InputAdornment,
-  Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TextField,
-  Tooltip,
-  Typography,
-} from '@mui/material';
-import type { TableCellProps, TextFieldProps } from '@mui/material';
-import { alpha } from '@mui/material/styles';
-import ClearIcon from '@mui/icons-material/Clear';
-import CloseIcon from '@mui/icons-material/Close';
-import SearchIcon from '@mui/icons-material/Search';
+import { CButton, CDialog, CIconButton, CTextField, CCheckbox, CTypography, CStack } from "./../Atoms";
+import { SapIcon } from '../Icons';
 
 export type CValueHelpPrimitive = string | number;
 export type CValueHelpMode = 'single' | 'multiple';
@@ -139,6 +116,7 @@ export const CValueHelp = <TRecord extends CValueHelpRecord = CValueHelpRecord,>
   helperText,
   ...textFieldProps
 }: CValueHelpProps<TRecord>) => {
+  const orbMode = useOrbMode();
   const isMultiple = mode === 'multiple';
   const [open, setOpen] = useState(false);
   const [fieldFocused, setFieldFocused] = useState(false);
@@ -352,8 +330,13 @@ export const CValueHelp = <TRecord extends CValueHelpRecord = CValueHelpRecord,>
 
   return (
     <>
-      <TextField
+      <CTextField
         {...textFieldProps}
+        className={[
+          'orb-value-help-field',
+          clearable && hasValue && !disabled ? 'orb-value-help-has-clear' : '',
+          textFieldProps.className ?? '',
+        ].filter(Boolean).join(' ')}
         disabled={disabled}
         value={fieldValue}
         error={Boolean(manualInputError) || error}
@@ -376,45 +359,61 @@ export const CValueHelp = <TRecord extends CValueHelpRecord = CValueHelpRecord,>
           ...InputProps,
           readOnly: !allowManualInput,
           endAdornment: (
-            <InputAdornment position="end">
-              {busy ? <CircularProgress size={18} /> : null}
+            <span className="orb-value-help-actions">
+              {busy ? <CSpinner size={18} /> : null}
               {clearable && hasValue && !disabled ? (
-                <Tooltip title={clearLabel}>
-                  <IconButton size="small" edge="end" aria-label={clearLabel} onClick={handleClear}>
-                    <ClearIcon fontSize="small" />
-                  </IconButton>
-                </Tooltip>
+                <CIconButton
+                  className="orb-value-help-clear-trigger"
+                  size="small"
+                  tooltip={clearLabel}
+                  aria-label={clearLabel}
+                  onMouseDown={(event) => event.preventDefault()}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    handleClear();
+                  }}
+                >
+                  <SapIcon name="decline" size={14} />
+                </CIconButton>
               ) : null}
-              <Tooltip title={valueHelpLabel}>
-                <span>
-                  <IconButton size="small" edge="end" aria-label={valueHelpLabel} onClick={handleOpen} disabled={disabled}>
-                    <SearchIcon fontSize="small" />
-                  </IconButton>
-                </span>
-              </Tooltip>
-            </InputAdornment>
+              <CIconButton
+                className="orb-value-help-search-trigger"
+                size="small"
+                tooltip={valueHelpLabel}
+                aria-label={valueHelpLabel}
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  handleOpen();
+                }}
+                disabled={disabled}
+              >
+                <SapIcon name="search" size={16} />
+              </CIconButton>
+            </span>
           ),
         }}
       />
 
-      <Dialog
+      <CDialog
         open={open}
         onClose={handleClose}
         fullWidth
-        maxWidth="md"
+        maxWidth={820}
+        hideCloseButton
         PaperProps={{
           sx: (theme) => ({
             borderRadius: 2,
             overflow: 'hidden',
             border: `1px solid ${theme.palette.divider}`,
             boxShadow:
-              theme.palette.mode === 'dark'
-                ? `0 24px 80px ${alpha(theme.palette.common.black, 0.72)}`
-                : `0 24px 80px ${alpha(theme.palette.common.black, 0.18)}`,
+              orbMode === 'dark'
+                ? `0 24px 80px ${orbAlpha(theme.palette.common.black, 0.72)}`
+                : `0 24px 80px ${orbAlpha(theme.palette.common.black, 0.18)}`,
           }),
         }}
       >
-        <DialogTitle
+        <div className="orb-dialog-title"
           sx={(theme) => ({
             display: 'flex',
             alignItems: 'center',
@@ -427,21 +426,21 @@ export const CValueHelp = <TRecord extends CValueHelpRecord = CValueHelpRecord,>
             bgcolor: theme.palette.background.paper,
           })}
         >
-          <Box>
-            <Typography sx={{ fontSize: '1.05rem', fontWeight: 800, lineHeight: 1.25 }}>{dialogTitle}</Typography>
+          <div>
+            <CTypography sx={{ fontSize: '1.05rem', fontWeight: 800, lineHeight: 1.25 }}>{dialogTitle}</CTypography>
             {isMultiple ? (
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25 }}>
+              <CTypography variant="body2" color="text.secondary" sx={{ mt: 0.25 }}>
                 {`${pendingValues.length} selected`}
-              </Typography>
+              </CTypography>
             ) : null}
-          </Box>
-          <IconButton aria-label="Close" onClick={handleClose} size="small">
+          </div>
+          <CIconButton aria-label="Close" onClick={handleClose} size="small">
             <CloseIcon fontSize="small" />
-          </IconButton>
-        </DialogTitle>
+          </CIconButton>
+        </div>
 
-        <DialogContent sx={{ p: 0 }}>
-          <Stack
+        <div className="orb-dialog-content" sx={{ p: 0 }}>
+          <CStack
             direction={{ xs: 'column', sm: 'row' }}
             spacing={1}
             sx={(theme) => ({
@@ -449,14 +448,15 @@ export const CValueHelp = <TRecord extends CValueHelpRecord = CValueHelpRecord,>
               py: 1.5,
               borderBottom: `1px solid ${theme.palette.divider}`,
               bgcolor:
-                theme.palette.mode === 'dark'
-                  ? alpha(theme.palette.common.white, 0.025)
-                  : alpha(theme.palette.primary.main, 0.035),
+                orbMode === 'dark'
+                  ? orbAlpha(theme.palette.common.white, 0.025)
+                  : orbAlpha(theme.palette.primary.main, 0.035),
             })}
           >
-            <TextField
+            <CTextField
               size="small"
               fullWidth
+              autoFocus
               value={query}
               placeholder={searchPlaceholder}
               onChange={(event) => setQuery(event.target.value)}
@@ -469,72 +469,72 @@ export const CValueHelp = <TRecord extends CValueHelpRecord = CValueHelpRecord,>
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <SearchIcon fontSize="small" />
+                    <SapIcon name="search" size={16} />
                   </InputAdornment>
                 ),
                 sx: (theme) => ({
                   borderRadius: 1,
                   bgcolor: theme.palette.background.paper,
                   '& fieldset': {
-                    borderColor: alpha(theme.palette.text.primary, theme.palette.mode === 'dark' ? 0.2 : 0.16),
+                    borderColor: orbAlpha(theme.palette.text.primary, orbMode === 'dark' ? 0.2 : 0.16),
                   },
                   '&:hover fieldset': {
-                    borderColor: alpha(theme.palette.primary.main, 0.52),
+                    borderColor: orbAlpha(theme.palette.primary.main, 0.52),
                   },
-                  '&.Mui-focused fieldset': {
+                  '&:focus-within fieldset': {
                     borderColor: theme.palette.primary.main,
                   },
                 }),
               }}
             />
             {onSearch ? (
-              <Button
+              <CButton
                 variant="outlined"
                 onClick={() => void runSearch()}
                 disabled={busy}
                 sx={{ minWidth: 96, textTransform: 'none', fontWeight: 700 }}
               >
-                {busy ? <CircularProgress size={18} /> : 'Search'}
-              </Button>
+                {busy ? <CSpinner size={18} /> : 'Search'}
+              </CButton>
             ) : null}
-          </Stack>
+          </CStack>
 
-          <TableContainer sx={{ maxHeight: 420 }}>
-            <Table stickyHeader size="small">
-              <TableHead>
-                <TableRow>
-                  <TableCell
+          <div sx={{ maxHeight: 420 }}>
+            <table className="orb-tbl" stickyHeader size="small">
+              <thead>
+                <tr>
+                  <td
                     padding="checkbox"
                     sx={(theme) => ({
-                      bgcolor: theme.palette.mode === 'dark' ? '#111111' : theme.palette.background.paper,
+                      bgcolor: orbMode === 'dark' ? '#01091a' : theme.palette.background.paper,
                       borderBottom: `1px solid ${theme.palette.divider}`,
                     })}
                   />
                   {tableColumns.map((column) => (
-                    <TableCell
+                    <td
                       key={String(column.field)}
-                      align={column.align}
+                      align={column.align === 'inherit' ? undefined : column.align}
                       sx={(theme) => ({
                         minWidth: column.minWidth,
                         width: column.width,
                         fontSize: '0.78rem',
                         fontWeight: 800,
-                        bgcolor: theme.palette.mode === 'dark' ? '#111111' : theme.palette.background.paper,
+                        bgcolor: orbMode === 'dark' ? '#01091a' : theme.palette.background.paper,
                         borderBottom: `1px solid ${theme.palette.divider}`,
                       })}
                     >
                       {column.label}
-                    </TableCell>
+                    </td>
                   ))}
-                </TableRow>
-              </TableHead>
-              <TableBody>
+                </tr>
+              </thead>
+              <tbody>
                 {locallyFilteredItems.map((item) => {
                   const primitive = getOptionValue(item);
                   const checked = pendingValues.some((currentValue) => valueKey(currentValue) === valueKey(primitive));
 
                   return (
-                    <TableRow
+                    <tr
                       hover
                       key={valueKey(primitive)}
                       selected={checked}
@@ -548,65 +548,65 @@ export const CValueHelp = <TRecord extends CValueHelpRecord = CValueHelpRecord,>
                       }}
                       sx={(theme) => ({
                         cursor: 'pointer',
-                        '&.Mui-selected': {
-                          bgcolor: alpha(theme.palette.primary.main, theme.palette.mode === 'dark' ? 0.22 : 0.12),
+                        '&.orb-selected': {
+                          bgcolor: orbAlpha(theme.palette.primary.main, orbMode === 'dark' ? 0.22 : 0.12),
                         },
-                        '&.Mui-selected:hover': {
-                          bgcolor: alpha(theme.palette.primary.main, theme.palette.mode === 'dark' ? 0.28 : 0.18),
+                        '&.orb-selected:hover': {
+                          bgcolor: orbAlpha(theme.palette.primary.main, orbMode === 'dark' ? 0.28 : 0.18),
                         },
                       })}
                     >
-                      <TableCell padding="checkbox">
-                        <Checkbox size="small" checked={checked} />
-                      </TableCell>
+                      <td padding="checkbox">
+                        <CCheckbox size="small" checked={checked} />
+                      </td>
                       {tableColumns.map((column) => {
                         const cellValue = getFieldValue(item, column.field);
                         return (
-                          <TableCell key={String(column.field)} align={column.align} sx={{ fontSize: '0.82rem', py: 1 }}>
+                          <td key={String(column.field)} align={column.align === 'inherit' ? undefined : column.align} sx={{ fontSize: '0.82rem', py: 1 }}>
                             {column.render ? column.render(cellValue, item) : String(cellValue ?? '')}
-                          </TableCell>
+                          </td>
                         );
                       })}
-                    </TableRow>
+                    </tr>
                   );
                 })}
 
                 {locallyFilteredItems.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={tableColumns.length + 1}>
-                      <Box sx={{ py: 5, textAlign: 'center', color: 'text.secondary' }}>{noResultsText}</Box>
-                    </TableCell>
-                  </TableRow>
+                  <tr>
+                    <td colSpan={tableColumns.length + 1}>
+                      <div sx={{ py: 5, textAlign: 'center', color: 'text.secondary' }}>{noResultsText}</div>
+                    </td>
+                  </tr>
                 ) : null}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </DialogContent>
+              </tbody>
+            </table>
+          </div>
+        </div>
 
-        <DialogActions
+        <div className="orb-dialog-actions"
           sx={(theme) => ({
             px: 2.5,
             py: 1.5,
             borderTop: `1px solid ${theme.palette.divider}`,
             bgcolor: theme.palette.background.paper,
-            '& .MuiButton-root': {
+            '& .orb-btn': {
               textTransform: 'none',
               fontWeight: 700,
             },
           })}
         >
           {clearable && (hasValue || pendingValues.length > 0) ? (
-            <Button onClick={handleClear}>
+            <CButton onClick={handleClear}>
               {clearLabel}
-            </Button>
+            </CButton>
           ) : null}
-          <Box sx={{ flex: 1 }} />
-          <Button onClick={handleClose}>{cancelLabel}</Button>
-          <Button variant="contained" onClick={handleConfirm} disabled={!isMultiple && pendingValues.length === 0}>
+          <div sx={{ flex: 1 }} />
+          <CButton onClick={handleClose}>{cancelLabel}</CButton>
+          <CButton variant="contained" onClick={handleConfirm} disabled={!isMultiple && pendingValues.length === 0}>
             {selectLabel}
-          </Button>
-        </DialogActions>
-      </Dialog>
+          </CButton>
+        </div>
+      </CDialog>
     </>
   );
 };

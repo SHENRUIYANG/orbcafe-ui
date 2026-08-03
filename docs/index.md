@@ -41,10 +41,16 @@ The library is designed for two audiences at once:
 
 ## Install
 
-Install the package and its peer/runtime dependencies with pinned compatible ranges:
+Install the package. `orbcafe-ui@2` is **MUI-free** — the runtime dependencies (Radix primitives, `class-variance-authority`, `tailwind-merge`, `clsx`, `dayjs`, ...) ship with the package, so you do **not** need `@mui/*`, `@emotion/*`, or `lucide-react`:
 
 ```bash
-npm install orbcafe-ui @mui/material@^7.3.9 @mui/icons-material@^7.3.9 @mui/x-date-pickers@^8.27.2 @emotion/react@^11.14.0 @emotion/styled@^11.14.1 dayjs@^1.11.20 lucide-react@^0.575.0 tailwind-merge@^3.5.0 clsx@^2.1.1 class-variance-authority@^0.7.1 @radix-ui/react-slot@^1.2.4
+npm install orbcafe-ui
+```
+
+Tailwind v4 is required to compile the utility classes used by the components:
+
+```bash
+npm install -D tailwindcss @tailwindcss/postcss
 ```
 
 ## Required App Setup
@@ -57,6 +63,7 @@ Tailwind v4 / Next.js baseline:
 
 ```css
 @import "tailwindcss";
+@import "orbcafe-ui/styles.css"; /* ORBIS 自写样式（orb-* 类 + 暗色变量），必须引入一次 */
 @source "../node_modules/orbcafe-ui/dist";
 ```
 
@@ -76,30 +83,26 @@ module.exports = {
 
 ### Providers
 
-Wrap your app with the MUI and ORBCAFE providers used by the official examples:
+Wrap your app with the ORBCAFE providers used by the official examples. V2 is MUI-free — there is no MUI `ThemeProvider`/`CssBaseline`/`LocalizationProvider`:
 
 ```tsx
-import { CssBaseline, ThemeProvider, createTheme } from '@mui/material';
-import { LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { GlobalMessage, OrbcafeI18nProvider } from 'orbcafe-ui';
+'use client';
 
-const theme = createTheme();
+import { GlobalMessage, OrbisModeProvider, OrbcafeI18nProvider } from 'orbcafe-ui';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <LocalizationProvider dateAdapter={AdapterDayjs}>
-        <OrbcafeI18nProvider locale="en">
-          {children}
-          <GlobalMessage />
-        </OrbcafeI18nProvider>
-      </LocalizationProvider>
-    </ThemeProvider>
+    <OrbisModeProvider mode="system">
+      <OrbcafeI18nProvider locale="en">
+        {children}
+        <GlobalMessage />
+      </OrbcafeI18nProvider>
+    </OrbisModeProvider>
   );
 }
 ```
+
+> `CAppPageLayout` / `PAppPageLayout` already render `OrbisModeProvider` + `GlobalMessage` internally; the explicit providers above are only required for standalone surfaces (e.g. a login page without the app shell). Dark mode is applied automatically by toggling the `orb-dark` class on `<html>`.
 
 ## Run The Official Examples
 

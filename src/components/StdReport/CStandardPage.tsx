@@ -1,4 +1,7 @@
+import { CStack } from '../../lib/orbis-compat';
 /**
+import {  CStack } from "../Atoms";
+import { useOrbMode, orbAlpha } from "../../lib/theme";
  * @file 10_Frontend/components/sap/ui/Common/PageComponents/CStandardPage.tsx
  * @summary Standardized Page Layout for SAP-like Applications (OSM3, etc.)
  * @author ORBAICODER
@@ -15,7 +18,6 @@
 'use client';
 
 import React from 'react';
-import { Box, Stack } from '@mui/material';
 import { CPageLayout } from './Structures/CPageLayout';
 import { CTable } from './CTable';
 import { CSmartFilter } from './CSmartFilter';
@@ -84,24 +86,24 @@ export const CStandardPage = ({
 
     return (
         <CPageLayout title={title} hideHeader={hideHeader}>
-            <Stack spacing={spacing} sx={{ height: '100%', overflow: 'hidden' }}>
+            <CStack spacing={spacing} sx={{ height: '100%', overflow: 'hidden' }}>
                 {/* Filter Section - Only render if separated */}
                 {mode === 'separated' && effectiveFilterConfig && (
-                    <Box sx={{ flexShrink: 0 }}>
+                    <div sx={{ flexShrink: 0 }}>
                         <CSmartFilter {...effectiveFilterConfig} />
-                    </Box>
+                    </div>
                 )}
                 
                 {/* Table Section */}
-                <Box sx={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                <div sx={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
                    <CTable 
                         {...effectiveTableProps}
                         fitContainer={true}
                         // If integrated, pass filterConfig. If separated, pass undefined.
                         filterConfig={mode === 'integrated' ? effectiveFilterConfig : undefined} 
                    />
-                </Box>
-            </Stack>
+                </div>
+            </CStack>
             {children}
         </CPageLayout>
     );

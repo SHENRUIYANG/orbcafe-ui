@@ -1,42 +1,58 @@
-/**
- * @file 10_Frontend/components/sap/ui/Common/Atoms/CBadge.tsx
- * 
- * @summary Core frontend CBadge module for the ORBAI Core project
- * @author ORBAICODER
- * @version 1.0.0
- * @date 2025-01-19
- * 
- * @description
- * This file is responsible for:
- *  - Implementing CBadge functionality within frontend workflows
- *  - Integrating with shared ORBAI Core application processes under frontend
- * 
- * @logic
- * 1. Import required dependencies and configuration
- * 2. Execute the primary logic for CBadge
- * 3. Export the resulting APIs, hooks, or components for reuse
- * 
- * @changelog
- * V1.0.0 - 2025-01-19 - Initial creation
- */
+'use client';
+
+import { forwardRef } from 'react';
+import type { ReactNode } from 'react';
+import { resolveOrbSx } from '../../lib/orbis-compat/sx';
+import type { OrbSxProps } from '../../lib/orbis-compat/sx';
+
+export interface CBadgeProps {
+  /** Badge content — typically a count or short marker. */
+  badgeContent?: ReactNode;
+  /** Visual tone; `error` maps to the ORBIS deepened orange, per brand discipline. */
+  color?: 'primary' | 'error' | 'muted';
+  /** Anchor the badge to the top-right corner of the child. */
+  children?: ReactNode;
+  /** Hide the badge (keeps DOM for transitions). */
+  invisible?: boolean;
+  sx?: OrbSxProps;
+  className?: string;
+}
 
 /**
- * File Overview
- * 
- * START CODING
- * 
- * --------------------------
- * SECTION 1: CBadge Core Logic
- * Section overview and description.
- * --------------------------
+ * Numeric/status badge. Without children it renders standalone;
+ * with children it anchors to their top-right corner.
  */
+export const CBadge = forwardRef<HTMLSpanElement, CBadgeProps>(
+  ({ badgeContent, color = 'primary', children, invisible = false, sx, className }, ref) => {
+    const resolved = resolveOrbSx(sx, className, { display: 'inline-flex', position: children ? 'relative' : undefined });
+    const badge = !invisible && badgeContent !== undefined && badgeContent !== null && (
+      <span
+        className={`orb-badge ${color === 'error' ? 'orb-badge-err' : color === 'muted' ? 'orb-badge-muted' : ''}`}
+        style={
+          children
+            ? { position: 'absolute', top: -6, right: -6, zIndex: 1 }
+            : undefined
+        }
+      >
+        {badgeContent}
+      </span>
+    );
 
-import React from 'react';
-import Badge from '@mui/material/Badge';
-import type { BadgeProps } from '@mui/material/Badge';
+    if (!children) {
+      return (
+        <span ref={ref} className={resolved.className} style={resolved.style}>
+          {badge}
+        </span>
+      );
+    }
 
-export type CBadgeProps = BadgeProps;
+    return (
+      <span ref={ref} className={resolved.className} style={resolved.style}>
+        {children}
+        {badge}
+      </span>
+    );
+  },
+);
 
-export const CBadge: React.FC<CBadgeProps> = (props) => {
-  return <Badge {...props} />;
-};
+CBadge.displayName = 'CBadge';

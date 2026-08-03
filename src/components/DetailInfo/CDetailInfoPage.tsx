@@ -1,8 +1,8 @@
 'use client';
+import { CloseOutlinedIcon, Tab, Tabs } from '../../lib/orbis-compat';
+import {  CIconButton, CPaper, CStack, CTypography, CTooltip } from "../Atoms";
 
 import { useCallback, useMemo } from 'react';
-import { Box, IconButton, Paper, Stack, Tab, Tabs, Tooltip, Typography } from '@mui/material';
-import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 import { CTable } from '../StdReport/CTable';
 import { useOrbcafeI18n } from '../../i18n';
 import { MarkdownRenderer } from '../../lib/renderer/md_renderer';
@@ -78,7 +78,7 @@ export const CDetailInfoPage = ({
   }, [tabs, setActiveTabId, jumpToSection]);
 
   return (
-    <Box
+    <div
       sx={{
         display: 'flex',
         flexDirection: 'column',
@@ -86,25 +86,25 @@ export const CDetailInfoPage = ({
         minHeight: '100%',
       }}
     >
-      <Stack direction={{ xs: 'column', md: 'row' }} justifyContent="space-between" alignItems={{ xs: 'flex-start', md: 'center' }} spacing={1}>
-        <Box sx={{ minWidth: 0 }}>
-          <Typography variant="h5" sx={{ fontWeight: 800, color: 'text.primary' }}>
+      <CStack direction={{ xs: 'column', md: 'row' }} justifyContent="space-between" alignItems={{ xs: 'flex-start', md: 'center' }} spacing={1}>
+        <div sx={{ minWidth: 0 }}>
+          <CTypography variant="h5" sx={{ fontWeight: 800, color: 'text.primary' }}>
             {title}
-          </Typography>
+          </CTypography>
           {subtitle && (
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.35 }}>
+            <CTypography variant="body2" color="text.secondary" sx={{ mt: 0.35 }}>
               {subtitle}
-            </Typography>
+            </CTypography>
           )}
-        </Box>
+        </div>
 
-        <Stack
+        <CStack
           direction="row"
           spacing={0.6}
           alignItems="center"
           sx={{ width: { xs: '100%', md: 'auto' }, ml: { xs: 0, md: 'auto' } }}
         >
-          <Box sx={{ width: { xs: '100%', md: searchBarWidth }, maxWidth: '100%', minWidth: { md: 320 } }}>
+          <div sx={{ width: { xs: '100%', md: searchBarWidth }, maxWidth: '100%', minWidth: { md: 320 } }}>
             <CDetailSearchAiBar
               value={query}
               onChange={setQuery}
@@ -120,34 +120,34 @@ export const CDetailInfoPage = ({
               compact
               showStatusText={false}
             />
-          </Box>
+          </div>
 
           {onClose && (
-            <Tooltip title={closeLabel}>
-              <IconButton size="small" onClick={onClose}>
+            <CTooltip title={closeLabel}>
+              <CIconButton size="small" onClick={onClose}>
                 <CloseOutlinedIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
+              </CIconButton>
+            </CTooltip>
           )}
 
           {rightHeaderSlot}
-        </Stack>
-      </Stack>
+        </CStack>
+      </CStack>
 
       {statusText && (
-        <Typography variant="caption" color="text.secondary" sx={{ mt: -0.7 }}>
+        <CTypography variant="caption" color="text.secondary" sx={{ mt: -0.7 }}>
           {statusText}
-        </Typography>
+        </CTypography>
       )}
 
       {searchMode === 'search' && hits.length > 0 && (
-        <Paper variant="outlined" sx={{ p: 1.5, borderRadius: 2 }}>
-          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.6 }}>
+        <CPaper variant="outlined" sx={{ p: 1.5, borderRadius: 2 }}>
+          <CTypography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.6 }}>
             {t('detail.searchAi.matches', { count: hits.length })}
-          </Typography>
-          <Stack spacing={0.35}>
+          </CTypography>
+          <CStack spacing={0.35}>
             {hits.slice(0, 8).map((hit) => (
-              <Box
+              <div
                 key={`${hit.source}|${hit.sourceId}|${hit.fieldId}`}
                 component="button"
                 type="button"
@@ -163,25 +163,25 @@ export const CDetailInfoPage = ({
                   '&:hover': { bgcolor: 'action.hover' },
                 }}
               >
-                <Typography variant="body2" sx={{ fontSize: '0.84rem' }}>
-                  <Box component="span" sx={{ color: 'text.secondary' }}>{hit.sourceTitle}</Box>
+                <CTypography variant="body2" sx={{ fontSize: '0.84rem' }}>
+                  <div component="span" sx={{ color: 'text.secondary' }}>{hit.sourceTitle}</div>
                   {' · '}
-                  <Box component="span" sx={{ fontWeight: 700 }}>{hit.fieldLabel}</Box>
+                  <div component="span" sx={{ fontWeight: 700 }}>{hit.fieldLabel}</div>
                   {' = '}
-                  <Box component="span">{hit.fieldValue || '-'}</Box>
-                </Typography>
-              </Box>
+                  <div component="span">{hit.fieldValue || '-'}</div>
+                </CTypography>
+              </div>
             ))}
-          </Stack>
-        </Paper>
+          </CStack>
+        </CPaper>
       )}
 
       {searchMode === 'ai' && aiResponse && (
-        <Paper variant="outlined" sx={{ p: 1.5, borderRadius: 2 }}>
-          <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 0.7 }}>
+        <CPaper variant="outlined" sx={{ p: 1.5, borderRadius: 2 }}>
+          <CTypography variant="subtitle2" sx={{ fontWeight: 700, mb: 0.7 }}>
             {t('detail.searchAi.aiResultTitle')}
-          </Typography>
-          <Box
+          </CTypography>
+          <div
             sx={{
               fontSize: '0.9rem',
               lineHeight: 1.6,
@@ -211,11 +211,11 @@ export const CDetailInfoPage = ({
             }}
           >
             <MarkdownRenderer markdown={aiResponse} />
-          </Box>
-        </Paper>
+          </div>
+        </CPaper>
       )}
 
-      <Box
+      <div
         sx={{
           display: 'grid',
           gap: 1.5,
@@ -226,17 +226,17 @@ export const CDetailInfoPage = ({
         }}
       >
         {sections.map((section) => (
-          <Box key={section.id} id={`detail-section-${section.id}`}>
+          <div key={section.id} id={`detail-section-${section.id}`}>
             <CDetailSectionCard section={section} highlightQuery={query} />
-          </Box>
+          </div>
         ))}
-      </Box>
+      </div>
 
       {tabs.length > 0 && (
-        <Paper variant="outlined" sx={{ borderRadius: 2, overflow: 'hidden' }}>
+        <CPaper variant="outlined" sx={{ borderRadius: 2, overflow: 'hidden' }}>
           <Tabs
             value={activeTab?.id || false}
-            onChange={(_, value) => setActiveTabId(value)}
+            onChange={(_, value) => setActiveTabId(String(value))}
             variant="scrollable"
             scrollButtons="auto"
             sx={{ borderBottom: '1px solid', borderColor: 'divider' }}
@@ -246,22 +246,22 @@ export const CDetailInfoPage = ({
             ))}
           </Tabs>
 
-          <Box sx={{ p: 1.5 }}>
-            <Box id={`detail-tab-${activeTab?.id || ''}`} />
+          <div sx={{ p: 1.5 }}>
+            <div id={`detail-tab-${activeTab?.id || ''}`} />
             {activeTab?.description && (
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 1.2 }}>
+              <CTypography variant="body2" color="text.secondary" sx={{ mb: 1.2 }}>
                 {activeTab.description}
-              </Typography>
+              </CTypography>
             )}
 
             {activeTab?.content ? (
               activeTab.content
             ) : (
-              <Stack spacing={1.5}>
+              <CStack spacing={1.5}>
                 {(activeTab?.sections || []).map((section) => (
-                  <Box key={section.id} id={`detail-tab-${activeTab?.id}-section-${section.id}`}>
+                  <div key={section.id} id={`detail-tab-${activeTab?.id}-section-${section.id}`}>
                     <CDetailSectionCard section={section} highlightQuery={query} />
-                  </Box>
+                  </div>
                 ))}
 
                 {activeTab?.fields && activeTab.fields.length > 0 && (
@@ -275,10 +275,10 @@ export const CDetailInfoPage = ({
                     highlightQuery={query}
                   />
                 )}
-              </Stack>
+              </CStack>
             )}
-          </Box>
-        </Paper>
+          </div>
+        </CPaper>
       )}
 
       {table && (
@@ -289,6 +289,6 @@ export const CDetailInfoPage = ({
           fitContainer={false}
         />
       )}
-    </Box>
+    </div>
   );
 };

@@ -1,6 +1,6 @@
+import { alpha, useTheme } from '../../../lib/orbis-compat';
 import React from 'react';
-import { alpha, useTheme } from '@mui/material/styles';
-import { Box, Typography } from '@mui/material';
+import {  CTypography } from "../../Atoms";
 import type { PivotChartDatum } from './pivotChartUtils';
 
 interface PivotScatterChartProps {
@@ -46,9 +46,9 @@ export const PivotScatterChart: React.FC<PivotScatterChartProps> = ({
   });
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.25 }}>
-      <Box sx={{ overflowX: 'auto' }}>
-        <Box component="svg" viewBox={`0 0 ${width} ${height}`} sx={{ width: '100%', minWidth: width, height }}>
+    <div sx={{ display: 'flex', flexDirection: 'column', gap: 1.25 }}>
+      <div sx={{ overflowX: 'auto' }}>
+        <div component="svg" viewBox={`0 0 ${width} ${height}`} sx={{ width: '100%', minWidth: width, height }}>
           <line
             x1={padding.left}
             y1={height - padding.bottom}
@@ -126,10 +126,10 @@ export const PivotScatterChart: React.FC<PivotScatterChartProps> = ({
           >
             {formatAxisNumber(maxX)}
           </text>
-        </Box>
-      </Box>
+        </div>
+      </div>
 
-      <Box
+      <div
         sx={{
           display: 'grid',
           gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, minmax(0, 1fr))', lg: 'repeat(3, minmax(0, 1fr))' },
@@ -137,30 +137,30 @@ export const PivotScatterChart: React.FC<PivotScatterChartProps> = ({
         }}
       >
         {data.map((item) => (
-          <Box
+          <div
             key={item.name}
             sx={(theme) => ({
-              borderRadius: 2,
+              borderRadius: 'var(--orb-r-container)',
               px: 1.25,
               py: 1,
               border: `1px solid ${alpha(theme.palette.divider, 0.7)}`,
               bgcolor: alpha(theme.palette.background.default, 0.35),
             })}
           >
-            <Typography sx={{ fontSize: '0.78rem', fontWeight: 700 }} noWrap title={item.name}>
+            <CTypography sx={{ fontSize: '0.78rem', fontWeight: 700 }} noWrap title={item.name}>
               {item.name}
-            </Typography>
-            <Typography sx={{ fontSize: '0.72rem', color: 'text.secondary' }}>
+            </CTypography>
+            <CTypography sx={{ fontSize: '0.72rem', color: 'text.secondary' }}>
               {primaryLabel}: {formatPrimaryValue(item.primaryValue)}
-            </Typography>
+            </CTypography>
             {secondaryLabel && (
-              <Typography sx={{ fontSize: '0.72rem', color: 'text.secondary' }}>
+              <CTypography sx={{ fontSize: '0.72rem', color: 'text.secondary' }}>
                 {secondaryLabel}: {(formatSecondaryValue ?? formatPrimaryValue)(item.secondaryValue ?? 0)}
-              </Typography>
+              </CTypography>
             )}
-          </Box>
+          </div>
         ))}
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 };

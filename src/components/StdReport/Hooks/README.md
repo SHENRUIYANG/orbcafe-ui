@@ -84,6 +84,8 @@ The `useCTable` hook manages the internal state of a table component. It handles
 
 This hook is typically used inside the `CTable` component but can be used to build custom table implementations.
 
+> 注意：`useCTable` 是**内部实现**，不从 `orbcafe-ui` 包入口导出。消费项目请使用 `CTable` 或 `useStandardReport`；只有在本仓库内部自定义表格时才按下面的路径引入。
+
 ```typescript
 import { useCTable } from '@/components/StdReport/Hooks/CTable/useCTable';
 

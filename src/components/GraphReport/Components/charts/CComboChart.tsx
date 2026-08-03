@@ -1,4 +1,5 @@
-import { Box, Stack, Typography } from '@mui/material';
+import { CStack, CTypography } from '../../../Atoms';
+
 import type { GraphComboDatum } from '../../types';
 
 export interface CComboChartProps {
@@ -15,7 +16,7 @@ export const CComboChart = ({
   height = 220,
 }: CComboChartProps) => {
   if (data.length === 0) {
-    return <Typography variant="body2" color="text.secondary">No data</Typography>;
+    return <CTypography variant="body2" muted>No data</CTypography>;
   }
 
   const width = 640;
@@ -40,8 +41,8 @@ export const CComboChart = ({
   });
 
   return (
-    <Stack spacing={1.25}>
-      <Box component="svg" viewBox={`0 0 ${width} ${height}`} sx={{ width: '100%', height }}>
+    <CStack spacing={1.25}>
+      <div component="svg" viewBox={`0 0 ${width} ${height}`} style={{ width: '100%', height }}>
         <line x1={padding} y1={height - padding} x2={width - padding} y2={height - padding} stroke="rgba(148,163,184,0.4)" />
 
         {bars.map((bar) => (
@@ -65,23 +66,23 @@ export const CComboChart = ({
         {points.map((point) => (
           <circle key={`${point.item.name}-line`} cx={point.x} cy={point.y} r={3.5} fill={lineColor} />
         ))}
-      </Box>
+      </div>
 
-      <Box sx={{ display: 'grid', gridTemplateColumns: `repeat(${data.length}, minmax(0, 1fr))`, gap: 1 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: `repeat(${data.length}, minmax(0, 1fr))`, gap: 1 }}>
         {data.map((item) => (
-          <Box key={item.name} sx={{ minWidth: 0 }}>
-            <Typography variant="caption" noWrap title={item.name} sx={{ display: 'block' }}>
+          <div key={item.name} style={{ minWidth: 0 }}>
+            <CTypography variant="caption"  title={item.name} sx={{ display: 'block' }}>
               {item.name}
-            </Typography>
-            <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+            </CTypography>
+            <CTypography variant="caption" muted sx={{ display: 'block' }}>
               Bar: {item.barValue.toFixed(1)}
-            </Typography>
-            <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+            </CTypography>
+            <CTypography variant="caption" muted sx={{ display: 'block' }}>
               Line: {item.lineValue.toFixed(1)}
-            </Typography>
-          </Box>
+            </CTypography>
+          </div>
         ))}
-      </Box>
-    </Stack>
+      </div>
+    </CStack>
   );
 };

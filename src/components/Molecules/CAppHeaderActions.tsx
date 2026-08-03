@@ -1,30 +1,31 @@
+import { Avatar, CDivider, CListItemIcon, CStack, CTooltip, DarkModeIcon, LightModeIcon, LockResetIcon, LogoutIcon, SettingsIcon, TranslateIcon, useColorScheme } from '../../lib/orbis-compat';
 /**
  * @file 10_Frontend/components/sap/ui/Common/Molecules/CAppHeaderActions.tsx
- * 
+ *
  * @summary Core frontend CAppHeaderActions module for the ORBAI Core project
  * @author ORBAICODER
  * @version 1.0.0
  * @date 2025-01-19
- * 
+ *
  * @description
  * This file is responsible for:
  *  - Implementing CAppHeaderActions functionality within frontend workflows
  *  - Integrating with shared ORBAI Core application processes under frontend
- * 
+ *
  * @logic
  * 1. Import required dependencies and configuration
  * 2. Execute the primary logic for CAppHeaderActions
  * 3. Export the resulting APIs, hooks, or components for reuse
- * 
+ *
  * @changelog
  * V1.0.0 - 2025-01-19 - Initial creation
  */
 
 /**
  * File Overview
- * 
+ *
  * START CODING
- * 
+ *
  * --------------------------
  * SECTION 1: CAppHeaderActions Core Logic
  * Section overview and description.
@@ -36,23 +37,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
-import { 
-    Stack, 
-    IconButton, 
-    Tooltip, 
-    Menu, 
-    MenuItem, 
-    ListItemIcon, 
-    Avatar, 
-    Divider, 
-    useColorScheme 
-} from '@mui/material';
-import LightModeIcon from '@mui/icons-material/LightMode';
-import DarkModeIcon from '@mui/icons-material/DarkMode';
-import TranslateIcon from '@mui/icons-material/Translate';
-import SettingsIcon from '@mui/icons-material/Settings';
-import LockResetIcon from '@mui/icons-material/LockReset';
-import LogoutIcon from '@mui/icons-material/Logout';
+import { CIconButton, CMenu } from "./../Atoms";
 
 export const CAppHeaderActions = () => {
     const router = useRouter();
@@ -102,47 +87,47 @@ export const CAppHeaderActions = () => {
     };
 
     return (
-        <Stack direction="row" spacing={2} alignItems="center">
+        <CStack direction="row" spacing={2} alignItems="center">
             {/* Theme Toggle */}
-            <Tooltip title="Switch Theme">
-                <IconButton onClick={toggleTheme} size="small" sx={iconButtonStyle}>
+            <CTooltip title="Switch Theme">
+                <CIconButton onClick={toggleTheme} size="small" sx={iconButtonStyle}>
                     {effectiveMode === 'dark' ? <LightModeIcon fontSize="small" /> : <DarkModeIcon fontSize="small" />}
-                </IconButton>
-            </Tooltip>
+                </CIconButton>
+            </CTooltip>
 
             {/* Language Toggle */}
-            <Tooltip title="Switch Language">
-                <IconButton onClick={handleLangClick} size="small" sx={iconButtonStyle}>
+            <CTooltip title="Switch Language">
+                <CIconButton onClick={handleLangClick} size="small" sx={iconButtonStyle}>
                     <TranslateIcon fontSize="small" />
-                </IconButton>
-            </Tooltip>
+                </CIconButton>
+            </CTooltip>
 
             {/* User Menu */}
-            <Tooltip title="User Settings">
-                <IconButton 
-                    onClick={handleUserClick} 
+            <CTooltip title="User Settings">
+                <CIconButton
+                    onClick={handleUserClick}
                     size="small"
                     sx={{ ...iconButtonStyle, p: 0, ml: 1 }}
                 >
                     <Avatar sx={{ bgcolor: 'secondary.main', width: 24, height: 24, fontSize: '0.875rem' }}>U</Avatar>
-                </IconButton>
-            </Tooltip>
+                </CIconButton>
+            </CTooltip>
 
             {/* Language Menu */}
-            <Menu
+            <CMenu
                 anchorEl={langAnchorEl}
                 open={Boolean(langAnchorEl)}
                 onClose={() => handleLangClose()}
             >
-                <MenuItem onClick={() => handleLangClose('EN')}>English</MenuItem>
-                <MenuItem onClick={() => handleLangClose('ZH')}>中文 (Chinese)</MenuItem>
-                <MenuItem onClick={() => handleLangClose('JA')}>日本語 (Japanese)</MenuItem>
-                <MenuItem onClick={() => handleLangClose('DE')}>Deutsch (German)</MenuItem>
-                <MenuItem onClick={() => handleLangClose('FR')}>Français (French)</MenuItem>
-            </Menu>
+                <option onClick={() => handleLangClose('EN')}>English</option>
+                <option onClick={() => handleLangClose('ZH')}>中文 (Chinese)</option>
+                <option onClick={() => handleLangClose('JA')}>日本語 (Japanese)</option>
+                <option onClick={() => handleLangClose('DE')}>Deutsch (German)</option>
+                <option onClick={() => handleLangClose('FR')}>Français (French)</option>
+            </CMenu>
 
             {/* User Menu */}
-            <Menu
+            <CMenu
                 anchorEl={userAnchorEl}
                 open={Boolean(userAnchorEl)}
                 onClose={handleUserClose}
@@ -171,26 +156,26 @@ export const CAppHeaderActions = () => {
                     }
                 }}
             >
-                <MenuItem onClick={handleUserClose}>
-                    <ListItemIcon>
+                <option onClick={handleUserClose}>
+                    <CListItemIcon>
                         <SettingsIcon fontSize="small" />
-                    </ListItemIcon>
+                    </CListItemIcon>
                     Personalization
-                </MenuItem>
-                <MenuItem onClick={handleUserClose}>
-                    <ListItemIcon>
+                </option>
+                <option onClick={handleUserClose}>
+                    <CListItemIcon>
                         <LockResetIcon fontSize="small" />
-                    </ListItemIcon>
+                    </CListItemIcon>
                     Change Password
-                </MenuItem>
-                <Divider />
-                <MenuItem onClick={handleLogout}>
-                    <ListItemIcon>
+                </option>
+                <CDivider />
+                <option onClick={handleLogout}>
+                    <CListItemIcon>
                         <LogoutIcon fontSize="small" />
-                    </ListItemIcon>
+                    </CListItemIcon>
                     Logout
-                </MenuItem>
-            </Menu>
-        </Stack>
+                </option>
+            </CMenu>
+        </CStack>
     );
 };

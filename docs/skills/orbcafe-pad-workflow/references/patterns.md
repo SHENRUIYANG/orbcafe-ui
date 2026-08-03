@@ -7,37 +7,28 @@ This is the standard, best-practice structure for a Pad application based on `Pa
 ```tsx
 import { useState } from 'react';
 import { PAppPageLayout, PNavIsland, PWorkloadNav, PTable, PNumericKeypad, PBarcodeScanner } from 'orbcafe-ui';
-import { PackageCheck, Truck } from 'lucide-react';
-import { Box, Paper, Stack } from '@mui/material';
+import { PackageCheck, Truck } from 'orbcafe-ui'; // 图标从包入口导入，V2 不依赖 lucide-react / @mui
 
 export default function PadApp() {
-  const [activeMenu, setActiveMenu] = useState('dashboard');
   const [activeWorkload, setActiveWorkload] = useState('picking');
   const [scannerOpen, setScannerOpen] = useState(false);
 
   return (
     <PAppPageLayout
-      navigation={
-        <PNavIsland
-          items={[{ id: 'dashboard', label: 'Dashboard', icon: <PackageCheck /> }]}
-          activeId={activeMenu}
-          onItemClick={setActiveMenu}
-        />
-      }
-      workloads={
-        <PWorkloadNav
-          items={[
-            { id: 'picking', title: 'Picking', description: 'Wave pick tasks', icon: <PackageCheck /> },
-            { id: 'dispatch', title: 'Dispatch', description: 'Load routes', icon: <Truck /> }
-          ]}
-          activeId={activeWorkload}
-          onItemClick={setActiveWorkload}
-        />
-      }
-      header={<Box component="img" src="/logo.png" sx={{ height: 40 }} />}
+      appTitle="Pad Workspace"
+      menuData={[
+        { id: 'dashboard', title: 'Dashboard', icon: <PackageCheck /> },
+      ]}
+      workloadItems={[
+        { id: 'picking', title: 'Picking', description: 'Wave pick tasks', icon: <PackageCheck /> },
+        { id: 'dispatch', title: 'Dispatch', description: 'Load routes', icon: <Truck /> },
+      ]}
+      workloadSelectedId={activeWorkload}
+      onWorkloadSelect={(item) => setActiveWorkload(item.id)}
+      logo={<img src="/logo.png" alt="logo" style={{ height: 40 }} />}
     >
-      <Box sx={{ p: 2, height: '100%', display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-        <Box sx={{ flex: '1 1 600px', minWidth: 0, height: '100%' }}>
+      <div style={{ padding: 16, height: '100%', display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+        <div style={{ flex: '1 1 600px', minWidth: 0, height: '100%' }}>
           {/* Main content area (e.g., PTable) */}
           <PTable
              appId="pad-demo"
@@ -48,21 +39,21 @@ export default function PadApp() {
              cardTitleField="title"
              cardSubtitleFields={['taskId', 'status']}
           />
-        </Box>
-        <Box sx={{ flex: '0 0 360px', width: 360 }}>
+        </div>
+        <div style={{ flex: '0 0 360px', width: 360 }}>
           {/* Side panel for tools (Keypad, Scanner trigger) */}
-          <Stack spacing={2}>
-             <Paper sx={{ p: 2 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+             <div style={{ padding: 16 }}>
                <PNumericKeypad 
                  title="Enter Quantity" 
                  value="" 
                  onChange={() => {}} 
                  onSubmit={() => {}} 
                />
-             </Paper>
-          </Stack>
-        </Box>
-      </Box>
+             </div>
+          </div>
+        </div>
+      </div>
 
       {/* Global Dialogs */}
       <PBarcodeScanner 
@@ -153,5 +144,5 @@ export default function PadApp() {
 Pad Value Help notes:
 
 - Use stable keys as selected values; the card display can use localized descriptions.
-- The popup remains MUI dialog based, so keep labels short and columns few enough for touch use.
+- The popup uses the ORBIS `CDialog` (V2 is MUI-free), so keep labels short and columns few enough for touch use.
 - Prefer `PBarcodeScanner` for barcode capture and `CValueHelp` for searchable master-data lookup; do not merge both concerns into one custom input.

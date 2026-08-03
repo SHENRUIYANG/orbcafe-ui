@@ -34,7 +34,7 @@ export const tableControlCheckboxSx = {
     height: TABLE_CONTROL_BUTTON_SIZE,
     p: 0.25,
     flex: '0 0 auto',
-    '& .MuiSvgIcon-root': {
+    '& svg': {
         fontSize: TABLE_CONTROL_ICON_SIZE,
     },
 } as const;
@@ -46,7 +46,7 @@ export const tableControlIconButtonSx = {
     minHeight: TABLE_CONTROL_BUTTON_SIZE,
     p: 0.25,
     flex: '0 0 auto',
-    '& .MuiSvgIcon-root': {
+    '& svg': {
         fontSize: TABLE_CONTROL_ICON_SIZE,
     },
 } as const;
@@ -61,6 +61,18 @@ export const tableGroupControlsSx = {
 } as const;
 
 export const tableToolbarIconButtonSx = {
-    ...tableControlIconButtonSx,
+    width: 32,
+    height: 32,
+    minWidth: 32,
+    minHeight: 32,
+    p: 0,
+    flex: '0 0 auto',
     borderRadius: 1,
+    color: 'text.secondary',
+    '& svg, & [data-sap-icon]': {
+        width: 16,
+        height: 16,
+        fontSize: 16,
+        strokeWidth: 1.8,
+    },
 } as const;

@@ -1,51 +1,84 @@
-/**
- * @file 10_Frontend/components/sap/ui/Common/Atoms/CButton.tsx
- * 
- * @summary Core frontend CButton module for the ORBAI Core project
- * @author ORBAICODER
- * @version 1.0.0
- * @date 2025-01-19
- * 
- * @description
- * This file is responsible for:
- *  - Implementing CButton functionality within frontend workflows
- *  - Integrating with shared ORBAI Core application processes under frontend
- * 
- * @logic
- * 1. Import required dependencies and configuration
- * 2. Execute the primary logic for CButton
- * 3. Export the resulting APIs, hooks, or components for reuse
- * 
- * @changelog
- * V1.0.0 - 2025-01-19 - Initial creation
- */
+'use client';
 
-/**
- * File Overview
- * 
- * START CODING
- * 
- * --------------------------
- * SECTION 1: CButton Core Logic
- * Section overview and description.
- * --------------------------
- */
+import { forwardRef } from 'react';
+import type { ButtonHTMLAttributes, ElementType, ReactNode } from 'react';
+import { resolveOrbSx } from '../../lib/orbis-compat/sx';
+import type { OrbSxProps } from '../../lib/orbis-compat/sx';
 
-import { Button } from '@mui/material';
-import type { ButtonProps } from '@mui/material';
+export type CButtonVariant = 'primary' | 'secondary' | 'ghost' | 'neutral';
+export type CButtonSize = 'small' | 'medium' | 'large';
 
-interface CButtonProps extends ButtonProps {
-  // Add any custom props here if needed in future
+export interface CButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'style'> {
+  /** Visual variant. Compatibility values map contained→primary, outlined→secondary, text→ghost. */
+  variant?: CButtonVariant | 'contained' | 'outlined' | 'text';
+  size?: CButtonSize;
+  /** Stretch to fill the parent width. */
+  block?: boolean;
+  /** Show a spinner and freeze interactions (label stays to keep width stable). */
+  loading?: boolean;
+  startIcon?: ReactNode;
+  endIcon?: ReactNode;
+  component?: ElementType;
+  href?: string;
+  /** ORBIS style override. */
+  sx?: OrbSxProps;
 }
 
-export const CButton = (props: CButtonProps) => {
-  return (
-    <Button
-      {...props}
-      // Default props override
-      variant={props.variant || 'contained'}
-      size={props.size || 'medium'}
-      sx={{ textTransform: 'none', ...props.sx }}
-    />
-  );
+const LEGACY_VARIANTS: Record<string, CButtonVariant> = {
+  contained: 'primary',
+  outlined: 'secondary',
+  text: 'ghost',
 };
+
+const SIZE_CLASS: Record<CButtonSize, string | undefined> = {
+  small: 'orb-btn-sm',
+  medium: undefined,
+  large: 'orb-btn-lg',
+};
+
+export const CButton = forwardRef<HTMLButtonElement, CButtonProps>(
+  (
+    {
+      variant = 'primary',
+      size = 'medium',
+      block = false,
+      loading = false,
+      startIcon,
+      endIcon,
+      component,
+      href,
+      sx,
+      className,
+      children,
+      disabled,
+      type = 'button',
+      ...rest
+    },
+    ref,
+  ) => {
+    const resolvedVariant = LEGACY_VARIANTS[variant] ?? (variant as CButtonVariant);
+    const classes = [
+      'orb-btn',
+      `orb-btn-${resolvedVariant}`,
+      SIZE_CLASS[size],
+      block ? 'orb-btn-block' : undefined,
+      loading ? 'orb-is-loading' : undefined,
+      className,
+    ]
+      .filter(Boolean)
+      .join(' ');
+    const resolved = resolveOrbSx(sx, classes);
+    const Tag = component ?? (href ? 'a' : 'button');
+
+    return (
+      <Tag ref={ref} type={Tag === 'button' ? type : undefined} href={href} className={resolved.className} style={resolved.style} disabled={Tag === 'button' ? disabled || loading : undefined} aria-disabled={Tag !== 'button' && (disabled || loading) ? true : undefined} {...rest}>
+        {loading && <span className={`orb-spin ${resolvedVariant === 'primary' ? 'orb-spin-light' : ''}`} aria-hidden />}
+        {!loading && startIcon}
+        {children}
+        {!loading && endIcon}
+      </Tag>
+    );
+  },
+);
+
+CButton.displayName = 'CButton';

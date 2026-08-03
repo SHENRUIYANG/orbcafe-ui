@@ -1,82 +1,65 @@
 'use client'
 
+import { AddRoundedIcon, Close, HardwareRoundedIcon, InsertDriveFile, SendRoundedIcon, Stop } from '../../../../lib/orbis-compat';
 import React, { useState, useCallback, useRef } from 'react'
 import { cn } from '../../lib/utils'
 import { VoiceInputButton } from './VoiceInputButton'
-import { Stop, Close, InsertDriveFile } from '@mui/icons-material'
-import SendRoundedIcon from '@mui/icons-material/SendRounded'
-import AddRoundedIcon from '@mui/icons-material/AddRounded'
-import HardwareRoundedIcon from '@mui/icons-material/HardwareRounded'
 
 const STYLES = {
   container: 'w-full max-w-4xl mx-auto',
-  
+
   inputContainer: cn(
-    
-    'w-full border backdrop-blur-xl transition-all duration-300 shadow-2xl flex flex-col',
-    
-    'bg-white/80 dark:bg-gray-900/80', 
-    
-    'border-gray-200/60 dark:border-gray-600/40',
-    
-    'shadow-gray-900/5',
-    
-    'hover:border-blue-300/80 hover:shadow-blue-500/10 hover:shadow-2xl',
-    
-    'focus-within:border-blue-400/90 focus-within:shadow-blue-500/20 focus-within:shadow-3xl focus-within:scale-[1.005] transform-gpu'
+    'w-full flex flex-col border border-[var(--orb-border,#dbdbdb)] bg-[var(--orb-canvas,#ffffff)] transition-colors duration-200',
+    'rounded-[var(--orb-r,10px)]',
+    'focus-within:border-[var(--orb-primary,#154194)] focus-within:ring-1 focus-within:ring-[var(--orb-focus-ring,#e4e9f5)]'
   ),
 
-  dragActive: 'border-blue-500 bg-blue-50/50 dark:bg-blue-900/20',
-  
-  textareaWrapper: 'flex-1 relative flex items-center', 
-  
+  dragActive: 'border-[var(--orb-primary,#154194)] bg-[var(--orb-p50,#eef2f9)]',
+
+  textareaWrapper: 'flex-1 relative flex items-center',
+
   textarea: cn(
-    
-    'w-full outline-none appearance-none resize-none bg-transparent border-none text-sm font-normal py-3 px-2',
-    
-    'placeholder:text-gray-400/70 dark:placeholder:text-gray-500/60 placeholder:font-normal',
-    
-    'text-gray-800 dark:text-gray-100 selection:bg-blue-200/50 dark:selection:bg-blue-500/30',
-    
+    'w-full outline-none appearance-none resize-none bg-transparent border-none text-sm font-normal py-3 px-3',
+    'placeholder:text-[var(--orb-muted,#8c8c8c)] placeholder:font-normal',
+    'text-[var(--orb-fg,#555555)] selection:bg-[var(--orb-p100,#e4e9f5)]',
     'focus:ring-0 focus:outline-none focus:border-none focus:shadow-none',
-    
     'min-h-[44px] max-h-[12em] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600'
   ),
 
-  filePreviewArea: 'px-6 pt-3 pb-1 flex flex-wrap gap-2',
-  
+  filePreviewArea: 'px-4 pt-3 pb-1 flex flex-wrap gap-2',
+
   fileTag: cn(
     'flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium',
-    'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300',
-    'border border-gray-200 dark:border-gray-700',
-    'transition-all hover:bg-gray-200 dark:hover:bg-gray-700'
+    'bg-[var(--orb-surface,#f5f5f5)] text-[var(--orb-fg,#555555)]',
+    'border border-[var(--orb-border,#dbdbdb)]',
+    'transition-all hover:bg-[var(--orb-hover,#eef2f9)]'
   ),
-  
-  toolbar: 'flex items-center justify-between px-6 pb-4',
+
+  toolbar: 'flex items-center justify-between px-4 pb-3',
   toolbarLeft: 'flex items-center gap-1',
   toolbarRight: 'flex-shrink-0',
-  
-  buttonBase: 'flex items-center justify-center transition-all duration-200 rounded-full', 
-  
-  buttonSmall: 'w-10 h-10',
-  buttonLarge: 'w-10 h-10',
-  
+
+  buttonBase: 'flex items-center justify-center transition-all duration-200 rounded-full',
+
+  buttonSmall: 'h-[38px] w-[38px] shrink-0 md:h-8 md:w-8',
+  buttonLarge: 'h-[38px] w-[38px] shrink-0 md:h-8 md:w-8',
+
   buttonNormal: cn(
-    'bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400',
+    'bg-transparent hover:bg-[var(--orb-hover,#eef2f9)] text-[var(--orb-muted,#8c8c8c)] hover:text-[var(--orb-fg,#555555)]',
     'cursor-pointer active:scale-95'
   ),
-  buttonDisabled: 'cursor-not-allowed opacity-50 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-600',
-  
+  buttonDisabled: 'cursor-not-allowed opacity-50 bg-[var(--orb-disabled-bg,#f5f5f5)] border border-[var(--orb-border,#dbdbdb)]',
+
   sendButton: cn(
-    'cursor-pointer bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400 shadow-none active:scale-95'
+    'cursor-pointer bg-[var(--orb-primary,#154194)] hover:bg-[var(--orb-p600,#0e2d63)] text-white shadow-none active:scale-95'
   ),
-  
+
   sendButtonDisabled: cn(
-    'cursor-not-allowed opacity-40 bg-transparent text-gray-400'
+    'cursor-not-allowed opacity-40 bg-[var(--orb-disabled-bg,#f5f5f5)] text-[var(--orb-disabled-fg,#8c8c8c)]'
   ),
-  
+
   stopButton: cn(
-    'cursor-pointer bg-red-500 hover:bg-red-600 text-white shadow-sm active:scale-95'
+    'cursor-pointer bg-[var(--orb-err,#c43f02)] hover:opacity-90 text-white shadow-none active:scale-95'
   )
 } as const
 
@@ -105,18 +88,18 @@ const AttachmentButton: React.FC<AttachmentButtonProps> = ({ enabled, onClick })
     aria-label="Upload file"
     type="button"
   >
-    <AddRoundedIcon sx={{ fontSize: 24 }} />
+    <AddRoundedIcon size={16} />
   </button>
 )
 
 const ToolsButton: React.FC = () => (
   <button
-    className={cn(STYLES.buttonBase, 'h-10 px-3 py-2 gap-1.5 rounded-full', STYLES.buttonNormal)}
+    className={cn(STYLES.buttonBase, 'h-[38px] gap-1 rounded-full px-2.5 md:h-8 md:px-2', STYLES.buttonNormal)}
     aria-label="Tools"
     type="button"
   >
-    <HardwareRoundedIcon sx={{ fontSize: 20 }} />
-    <span className="text-sm font-medium">Tools</span>
+    <HardwareRoundedIcon size={15} />
+    <span className="text-xs font-medium">Tools</span>
   </button>
 )
 
@@ -136,7 +119,7 @@ const SendButton: React.FC<SendButtonProps> = ({ canSend, isResponding, onSend, 
         aria-label="Stop generating"
         type="button"
       >
-        <Stop sx={{ fontSize: 20 }} />
+        <Stop size={15} />
       </button>
     )
   }
@@ -153,7 +136,7 @@ const SendButton: React.FC<SendButtonProps> = ({ canSend, isResponding, onSend, 
       aria-label="Send message"
       type="button"
     >
-      <SendRoundedIcon sx={{ fontSize: 24 }} className={canSend ? 'text-gray-500 dark:text-gray-400' : 'text-gray-300 dark:text-gray-600'} />
+      <SendRoundedIcon size={16} className={canSend ? 'text-[var(--orb-on-primary,#ffffff)]' : 'text-[var(--orb-disabled-fg,#8c8c8c)]'} />
     </button>
   )
 }
@@ -310,7 +293,7 @@ export const InputArea: React.FC<InputAreaProps> = ({
         />
         <div 
           className={cn(STYLES.inputContainer, isDragging && STYLES.dragActive)}
-          style={{ borderRadius: '32px' }}
+          style={{ borderRadius: '24px' }}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
@@ -333,8 +316,8 @@ export const InputArea: React.FC<InputAreaProps> = ({
             </div>
           )}
 
-          <div className="flex flex-col w-full p-2">
-            <div className={cn(STYLES.textareaWrapper, "px-3 pt-2 pb-3 min-h-[60px]")}>
+          <div className="flex w-full flex-col p-2">
+            <div className={cn(STYLES.textareaWrapper, "min-h-[52px] px-2 pb-2 pt-1.5 md:min-h-[44px]")}>
               <textarea
                 className={cn(STYLES.textarea, "min-h-[24px] py-0 px-0")}
                 placeholder={placeholderText}
@@ -350,7 +333,7 @@ export const InputArea: React.FC<InputAreaProps> = ({
               />
             </div>
 
-            <div className="flex items-center justify-between px-1 pb-1">
+            <div className="flex items-center justify-between px-1 pb-0.5">
               <div className="flex items-center gap-1" role="toolbar" aria-label="Input tools">
                 <AttachmentButton 
                   enabled={visionConfig.enabled} 
@@ -359,7 +342,7 @@ export const InputArea: React.FC<InputAreaProps> = ({
                 <ToolsButton />
               </div>
               
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
                 <VoiceInputButton
                   onTextUpdate={handleVoiceTextUpdate}
                   onComplete={handleVoiceComplete}

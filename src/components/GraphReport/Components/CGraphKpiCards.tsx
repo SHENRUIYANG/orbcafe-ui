@@ -1,4 +1,4 @@
-import { Box, Paper, Typography } from '@mui/material';
+import { CPaper, CTypography } from '../../Atoms';
 import type { GraphReportKpis } from '../types';
 import { useOrbcafeI18n } from '../../../i18n';
 
@@ -12,47 +12,41 @@ const formatNumber = (value: number, maximumFractionDigits = 2) =>
 export const CGraphKpiCards = ({ kpis }: CGraphKpiCardsProps) => {
   const { t } = useOrbcafeI18n();
   const cards = [
-    { label: t('graph.kpi.totalRecords'), value: formatNumber(kpis.totalRecords, 0), color: 'text.primary' },
-    { label: t('graph.kpi.totalReport'), value: formatNumber(kpis.totalReportHours), color: 'text.primary' },
-    { label: t('graph.kpi.totalBillable'), value: formatNumber(kpis.totalBillableHours), color: 'success.main' },
-    { label: t('graph.kpi.efficiency'), value: `${kpis.efficiency.toFixed(2)}%`, color: 'warning.main' },
-    { label: t('graph.kpi.amount'), value: formatNumber(kpis.totalAmount), color: 'info.main' },
-    { label: t('graph.kpi.flagged'), value: formatNumber(kpis.flaggedCount, 0), color: 'error.main' },
+    { label: t('graph.kpi.totalRecords'), value: formatNumber(kpis.totalRecords, 0), color: 'var(--orb-fg)' },
+    { label: t('graph.kpi.totalReport'), value: formatNumber(kpis.totalReportHours), color: 'var(--orb-fg)' },
+    { label: t('graph.kpi.totalBillable'), value: formatNumber(kpis.totalBillableHours), color: 'var(--orb-primary)' },
+    { label: t('graph.kpi.efficiency'), value: `${kpis.efficiency.toFixed(2)}%`, color: 'var(--orb-accent)' },
+    { label: t('graph.kpi.amount'), value: formatNumber(kpis.totalAmount), color: 'var(--orb-primary)' },
+    { label: t('graph.kpi.flagged'), value: formatNumber(kpis.flaggedCount, 0), color: 'var(--orb-err)' },
   ];
 
   return (
-    <Box
-      sx={{
+        <div style={{
         display: 'grid',
-        gridTemplateColumns: {
-          xs: '1fr',
-          sm: 'repeat(2, minmax(0, 1fr))',
-          lg: 'repeat(6, minmax(0, 1fr))',
-        },
-        gap: 1.5,
+        gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+        gap: 12,
       }}
     >
       {cards.map((card) => (
-        <Paper
+        <CPaper
           key={card.label}
-          variant="outlined"
+          elevation={0}
           sx={{
-            p: 1.5,
-            borderRadius: 2,
+            padding: 12,
             minHeight: 96,
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between',
           }}
         >
-          <Typography variant="caption" color="text.secondary">
+          <CTypography variant="caption" muted>
             {card.label}
-          </Typography>
-          <Typography variant="h4" fontWeight={800} sx={{ color: card.color }}>
+          </CTypography>
+          <CTypography variant="h3" sx={{ fontWeight: 800, color: card.color, fontVariantNumeric: 'tabular-nums' }}>
             {card.value}
-          </Typography>
-        </Paper>
+          </CTypography>
+        </CPaper>
       ))}
-    </Box>
+    </div>
   );
 };

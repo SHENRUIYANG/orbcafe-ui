@@ -1,9 +1,9 @@
 'use client';
 
-import { Box, useTheme } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import {
   CAuthPage,
+  useOrbMode,
   type AuthForgotPasswordPayload,
   type AuthLoginPayload,
   type AuthRegisterPayload,
@@ -11,15 +11,14 @@ import {
 } from 'orbcafe-ui';
 
 const HeaderBrandLogo = () => {
-  const theme = useTheme();
-  const src = theme.palette.mode === 'dark' ? '/LOGO3.png' : '/LOGO2.png';
+  const mode = useOrbMode();
+  const src = mode === 'dark' ? '/LOGO3.png' : '/LOGO2.png';
 
   return (
-    <Box
-      component="img"
+    <img
       src={src}
       alt="ORBCAFE UI"
-      sx={{ width: 260, maxWidth: '72vw', height: 48, display: 'block', objectFit: 'contain' }}
+      style={{ width: 260, maxWidth: '72vw', height: 48, display: 'block', objectFit: 'contain' }}
     />
   );
 };

@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Box, Button, Checkbox, FormControl, ListItemText, ListSubheader, MenuItem, Select, TextField } from '@mui/material';
+import { CButton, CCheckbox, CMenu, CTextField } from "../../Atoms";
 import { useOrbcafeI18n } from '../../../i18n';
 
 interface DimensionFilterSelectProps {
@@ -17,6 +17,7 @@ export const DimensionFilterSelect: React.FC<DimensionFilterSelectProps> = ({
 }) => {
   const { t } = useOrbcafeI18n();
   const [searchText, setSearchText] = useState('');
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
   const filteredOptions = useMemo(() => {
     const keyword = searchText.trim().toLowerCase();
@@ -27,45 +28,38 @@ export const DimensionFilterSelect: React.FC<DimensionFilterSelectProps> = ({
   }, [options, searchText]);
 
   const allSelected = options.length > 0 && selectedValues.length === options.length;
+  const triggerLabel = options.length === 0
+    ? t('pivot.filter.na')
+    : selectedValues.length === 0
+      ? t('common.none')
+      : allSelected
+        ? t('common.all')
+        : `${selectedValues.length}/${options.length}`;
+
+  const toggleOption = (option: string) => {
+    onChange(selectedValues.includes(option)
+      ? selectedValues.filter((value) => value !== option)
+      : [...selectedValues, option]);
+  };
 
   return (
-    <FormControl size="small" sx={{ minWidth }}>
-      <Select
-        multiple
-        value={selectedValues}
-        onChange={(event) => {
-          const value = event.target.value;
-          const nextSelected = typeof value === 'string' ? value.split(',') : value;
-          onChange(nextSelected);
-        }}
-        onClick={(event) => event.stopPropagation()}
-        onMouseDown={(event) => event.stopPropagation()}
-        renderValue={(selected) => {
-          const selectedList = selected as string[];
-          if (options.length === 0) return t('pivot.filter.na');
-          if (selectedList.length === 0) return t('common.none');
-          if (selectedList.length === options.length) return t('common.all');
-          return `${selectedList.length}/${options.length}`;
-        }}
-        MenuProps={{ PaperProps: { sx: { maxHeight: 320, bgcolor: 'background.paper' } } }}
-        sx={{
-          fontSize: '0.72rem',
-          height: 26,
-          '& .MuiSelect-select': {
-            py: 0.35,
-          },
-        }}
+    <div sx={{ minWidth }} onClick={(event) => event.stopPropagation()} onMouseDown={(event) => event.stopPropagation()}>
+      <CButton
+        variant="outlined"
+        size="small"
+        onClick={(event) => setAnchorEl(event.currentTarget)}
+        sx={{ minWidth, height: 26, px: 1, py: 0.35, fontSize: '0.72rem', justifyContent: 'space-between' }}
       >
-        <ListSubheader
-          disableSticky
-          sx={(theme) => ({
-            bgcolor: 'background.paper',
-            py: 0.8,
-            lineHeight: 'normal',
-            borderBottom: `1px solid ${theme.palette.divider}`,
-          })}
-        >
-          <TextField
+        {triggerLabel}
+      </CButton>
+      <CMenu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={() => setAnchorEl(null)}
+        PaperProps={{ sx: { width: Math.max(minWidth, 220), maxHeight: 320, overflowY: 'auto', p: 0.5 } }}
+      >
+        <div onClick={(event) => event.stopPropagation()} sx={{ display: 'grid', gap: 0.4 }}>
+          <CTextField
             size="small"
             placeholder={`${t('common.search')}...`}
             fullWidth
@@ -75,31 +69,15 @@ export const DimensionFilterSelect: React.FC<DimensionFilterSelectProps> = ({
             onClick={(event) => event.stopPropagation()}
             sx={{
               m: 0,
-              '& .MuiInputBase-input': {
+              '& .orb-inp': {
                 fontSize: '0.75rem',
                 py: 0.7,
               },
             }}
           />
-        </ListSubheader>
 
-        <Box
-          sx={(theme) => ({
-            px: 1.5,
-            py: 0.5,
-            borderBottom: `1px solid ${theme.palette.divider}`,
-            bgcolor: 'background.paper',
-          })}
-          onMouseDown={(event) => {
-            event.preventDefault();
-            event.stopPropagation();
-          }}
-          onClick={(event) => {
-            event.preventDefault();
-            event.stopPropagation();
-          }}
-        >
-          <Button
+          <div sx={{ px: 1, py: 0.5, borderBottom: '1px solid var(--orb-border)' }}>
+          <CButton
             variant="text"
             size="small"
             onClick={(event) => {
@@ -117,25 +95,40 @@ export const DimensionFilterSelect: React.FC<DimensionFilterSelectProps> = ({
             }}
           >
             {allSelected ? t('pivot.filter.deselectAll') : t('pivot.filter.selectAll')}
-          </Button>
-        </Box>
+          </CButton>
+          </div>
 
-        {filteredOptions.length === 0 && (
-          <MenuItem disabled sx={{ fontSize: '0.75rem' }}>
+          {filteredOptions.length === 0 && (
+          <div className="orb-menu-item" aria-disabled="true" sx={{ fontSize: '0.75rem' }}>
             {t('pivot.filter.noResults')}
-          </MenuItem>
-        )}
+          </div>
+          )}
 
-        {filteredOptions.map((option) => {
-          const checked = selectedValues.includes(option);
-          return (
-            <MenuItem key={option} value={option} sx={{ fontSize: '0.75rem', py: 0.25 }}>
-              <Checkbox size="small" checked={checked} sx={{ p: 0.5, mr: 0.5 }} />
-              <ListItemText primary={option} primaryTypographyProps={{ sx: { fontSize: '0.75rem', lineHeight: 1.2 } }} />
-            </MenuItem>
-          );
-        })}
-      </Select>
-    </FormControl>
+          {filteredOptions.map((option) => {
+            const checked = selectedValues.includes(option);
+            return (
+              <div
+                key={option}
+                role="option"
+                aria-selected={checked}
+                tabIndex={0}
+                className={`orb-menu-item ${checked ? 'orb-selected' : ''}`}
+                onClick={() => toggleOption(option)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    toggleOption(option);
+                  }
+                }}
+                sx={{ display: 'flex', alignItems: 'center', fontSize: '0.75rem', py: 0.4 }}
+              >
+                <CCheckbox size="small" checked={checked} inputProps={{ tabIndex: -1 }} sx={{ p: 0.5, mr: 0.5, pointerEvents: 'none' }} />
+                <span>{option}</span>
+              </div>
+            );
+          })}
+        </div>
+      </CMenu>
+    </div>
   );
 };

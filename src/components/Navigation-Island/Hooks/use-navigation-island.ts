@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
-import type { NavigationIslandDisplayMode, NavigationIslandProps } from '../navigation-island';
+import type { NavigationIslandDisplayMode, NavigationIslandProps } from '../navigation-island.types';
 import type { TreeMenuItem } from '../tree-menu';
 
 export interface UseNavigationIslandOptions {

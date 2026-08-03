@@ -753,7 +753,7 @@ export const useCTable = (props: CTableProps) => {
         });
         
         // Label the first visible non-numeric column as "Total" if possible
-        const firstCol = props.columns.find((c: any) => visibleColumns.includes(c.id));
+        const firstCol = props.columns.find((c: any) => visibleColumns.includes(c.id) && !c.numeric);
         if (firstCol && !firstCol.numeric) {
             summary[firstCol.id] = 'Total';
         }

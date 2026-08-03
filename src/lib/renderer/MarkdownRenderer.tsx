@@ -1,7 +1,7 @@
 'use client';
 
 import { Fragment, type ReactNode, useMemo } from 'react';
-import { Box, Divider, Link, Paper, Typography } from '@mui/material';
+import { Box, Divider, Link, Paper, Typography } from '../orbis-compat';
 import { CodeBlock } from './CodeBlock';
 import { MathBlock } from './MathBlock';
 import { MermaidBlock } from './MermaidBlock';
@@ -82,7 +82,7 @@ const parseInline = (text: string, options: InlineOptions, keyPrefix: string): R
       const linkMatch = token.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
       if (linkMatch) {
         nodes.push(
-          <Link key={tokenKey} href={linkMatch[2]} target="_blank" rel="noreferrer" underline="hover">
+          <Link key={tokenKey} href={linkMatch[2]} target="_blank" rel="noreferrer">
             {linkMatch[1]}
           </Link>,
         );

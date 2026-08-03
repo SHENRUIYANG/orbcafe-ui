@@ -2,16 +2,15 @@
 
 import Link from 'next/link';
 import { useRef, useState } from 'react';
-import { Box, Button, Chip, Paper, Stack, Typography } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
-import { Rocket, Table2, TabletSmartphone, Workflow, X } from 'lucide-react';
+import { Rocket, Table2, TabletSmartphone, Workflow, X } from 'orbcafe-ui';
 import {
-  AIBrowserGlow,
   CAppPageLayout,
   CPageTransition,
-  FloatingAgentPanel,
-  type ChatMessage,
-  type FloatingAgentPanelAnchor,
+  CPaper,
+  CStack,
+  CButton,
+  CTypography,
+  useOrbMode,
 } from 'orbcafe-ui';
 import { EXAMPLE_MENU } from './exampleNavigation';
 
@@ -19,15 +18,14 @@ const AI_PANEL_WIDTH = 520;
 const AI_PANEL_INSET = 24;
 
 const HeaderBrandLogo = () => {
-  const theme = useTheme();
-  const src = theme.palette.mode === 'dark' ? '/LOGO3.png' : '/LOGO2.png';
+  const mode = useOrbMode();
+  const src = mode === 'dark' ? '/LOGO3.png' : '/LOGO2.png';
 
   return (
-    <Box
-      component="img"
+    <img
       src={src}
       alt="ORBCAFE UI"
-      sx={{ width: 280, maxWidth: '32vw', height: 52, display: 'block', objectFit: 'contain', flexShrink: 0 }}
+      style={{ width: 280, maxWidth: '32vw', height: 52, display: 'block', objectFit: 'contain', flexShrink: 0 }}
     />
   );
 };
@@ -63,36 +61,31 @@ const overviewCards = [
   },
 ] as const;
 
-const initialWeatherMessages: ChatMessage[] = [
-  {
-    id: 'weather-ready',
-    type: 'assistant',
-    content: '在顶部搜索框输入天气问题，我会打开 AI Panel 并开始查询。',
-    timestamp: new Date('2024-01-01T09:00:00'),
-  },
-];
+// Temporarily disabled - ChatMessage requires AgentUI export
+// const initialWeatherMessages: ChatMessage[] = [
+//   {
+//     id: 'weather-ready',
+//     type: 'assistant',
+//     content: '在顶部搜索框输入天气问题，我会打开 AI Panel 并开始查询。',
+//     timestamp: new Date('2024-01-01T09:00:00'),
+//   },
+// ];
 
 export default function HomeDemoClient() {
   const abortControllerRef = useRef<AbortController | null>(null);
   const [panelOpen, setPanelOpen] = useState(false);
-  const [panelAnchor, setPanelAnchor] = useState<FloatingAgentPanelAnchor>('right');
-  const [messages, setMessages] = useState<ChatMessage[]>(initialWeatherMessages);
+  // const [panelAnchor, setPanelAnchor] = useState<FloatingAgentPanelAnchor>('right');
+  // const [messages, setMessages] = useState<ChatMessage[]>(initialWeatherMessages);
   const [isResponding, setIsResponding] = useState(false);
 
   const floatingSearchSx = {
-    left: {
-      xs: 12,
-      md: panelAnchor === 'left' ? AI_PANEL_INSET : panelAnchor === 'center' ? '50%' : 'auto',
-    },
-    right: {
-      xs: 12,
-      md: panelAnchor === 'right' ? AI_PANEL_INSET : 'auto',
-    },
+    left: { xs: 12, md: 24 },
+    right: { xs: 12, md: 24 },
     bottom: { xs: 12, md: 24 },
     width: { xs: 'auto', md: AI_PANEL_WIDTH },
-    transform: { xs: 'none', md: panelAnchor === 'center' ? 'translateX(-50%)' : 'none' },
   };
 
+  /* Temporarily disabled - requires AgentUI export
   const appendAssistantMessage = (runId: string, content: string) => {
     setMessages((prev) => [
       ...prev,
@@ -161,114 +154,97 @@ export default function HomeDemoClient() {
     setIsResponding(false);
     setPanelOpen(false);
   };
+  */
 
   return (
     <CAppPageLayout
       appTitle=""
+      navigationVariant="v2"
+      searchPlacement="header"
       menuData={EXAMPLE_MENU}
       locale="en"
       localeLabel="EN"
       user={{ name: 'Ruiyang Shen', subtitle: 'ruiyang.shen@orbis.de', avatarSrc: '/orbcafe.png' }}
+      onUserRefresh={() => window.location.reload()}
+      onUserLogout={() => window.location.assign('/login')}
       logo={<HeaderBrandLogo />}
-      searchPlacement={panelOpen ? 'floating' : 'header'}
-      floatingSearchSx={floatingSearchSx}
-      onSearch={runWeatherQuery}
-      onSearchAdd={() => setPanelOpen(true)}
     >
-      <AIBrowserGlow active={isResponding} />
-
       <CPageTransition transitionKey="dashboard-home" variant="fade" durationMs={180}>
-        <Box sx={{ p: { xs: 1, md: 2 }, display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <Paper
-            variant="outlined"
-            sx={(theme) => ({
-              p: { xs: 2, md: 2.5 },
-              borderRadius: 4,
-              borderColor: 'divider',
-              background:
-                theme.palette.mode === 'dark'
-                  ? 'linear-gradient(135deg, rgba(15,23,42,0.98), rgba(30,41,59,0.84))'
-                  : 'linear-gradient(135deg, rgba(255,255,255,0.96), rgba(239,246,255,0.92))',
-            })}
-          >
-            <Stack spacing={1.25}>
-              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems={{ xs: 'flex-start', sm: 'center' }}>
-                <Chip label="Examples workspace" color="primary" variant="outlined" size="small" />
-                <Chip label="Navigation island unified" variant="outlined" size="small" />
-              </Stack>
+        <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <CPaper sx={{ padding: 24, borderRadius: 16 }}>
+            <CStack spacing={1.25}>
+              <CStack direction="row" spacing={1} sx={{ flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '0.875rem', padding: '4px 12px', borderRadius: 16, border: '1px solid var(--orb-primary)', color: 'var(--orb-primary)' }}>
+                  Examples workspace
+                </span>
+                <span style={{ fontSize: '0.875rem', padding: '4px 12px', borderRadius: 16, border: '1px solid var(--orb-divider)' }}>
+                  Navigation island unified
+                </span>
+              </CStack>
 
-              <Typography sx={{ fontSize: { xs: '1.6rem', md: '2rem' }, fontWeight: 900, lineHeight: 1.05 }}>
+              <CTypography sx={{ fontSize: '2rem', fontWeight: 900, lineHeight: 1.05 }}>
                 ORBCAFE dashboard
-              </Typography>
-              <Typography sx={{ maxWidth: 780, color: 'text.secondary' }}>
+              </CTypography>
+              <CTypography sx={{ maxWidth: 780, color: 'var(--orb-muted)' }}>
                 This landing page now carries the full example navigation again. Login takes you here first, and the menu
                 branches from dashboard, reports, operations, to the AI workbench instead of dumping straight into standard report.
-              </Typography>
+              </CTypography>
 
-              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
-                <Button component={Link} href="/std-report" variant="contained">
-                  Open standard report
-                </Button>
-                <Button component={Link} href="/login" variant="outlined">
-                  Open login page
-                </Button>
-              </Stack>
-            </Stack>
-          </Paper>
+              <CStack direction="row" spacing={1} sx={{ flexWrap: 'wrap' }}>
+                <Link href="/std-report" style={{ textDecoration: 'none' }}>
+                  <CButton variant="contained">
+                    Open standard report
+                  </CButton>
+                </Link>
+                <Link href="/login" style={{ textDecoration: 'none' }}>
+                  <CButton variant="outlined">
+                    Open login page
+                  </CButton>
+                </Link>
+              </CStack>
+            </CStack>
+          </CPaper>
 
-          <Box
-            sx={{
-              display: 'grid',
-              gridTemplateColumns: { xs: '1fr', md: 'repeat(2, minmax(0, 1fr))' },
-              gap: 1.5,
-            }}
-          >
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 12 }}>
             {overviewCards.map((card) => (
               <Link key={card.title} href={card.href} style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}>
-                <Paper
-                  variant="outlined"
-                  sx={(theme) => ({
-                    p: 2,
-                    borderRadius: 4,
-                    borderColor: 'divider',
+                <CPaper
+                  className="orb-card-hover"
+                  sx={{
+                    padding: 16,
+                    borderRadius: 16,
+                    border: '1px solid var(--orb-divider)',
                     transition: 'transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease',
-                    '&:hover': {
-                      transform: 'translateY(-2px)',
-                      borderColor: card.accent,
-                      boxShadow:
-                        theme.palette.mode === 'dark'
-                          ? '0 18px 34px rgba(0,0,0,0.35)'
-                          : '0 18px 34px rgba(15,23,42,0.08)',
-                    },
-                  })}
+                  }}
                 >
-                  <Stack spacing={1}>
-                    <Box
-                      sx={{
+                  <CStack spacing={1}>
+                    <div
+                      style={{
                         width: 40,
                         height: 40,
-                        borderRadius: 2,
+                        borderRadius: 8,
                         display: 'inline-flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         color: card.accent,
-                        bgcolor: `${card.accent}18`,
+                        backgroundColor: `${card.accent}18`,
                       }}
                     >
                       {card.icon}
-                    </Box>
-                    <Box>
-                      <Typography sx={{ fontSize: '1.05rem', fontWeight: 800 }}>{card.title}</Typography>
-                      <Typography sx={{ mt: 0.35, color: 'text.secondary' }}>{card.description}</Typography>
-                    </Box>
-                  </Stack>
-                </Paper>
+                    </div>
+                    <div>
+                      <CTypography sx={{ fontSize: '1.05rem', fontWeight: 800 }}>{card.title}</CTypography>
+                      <CTypography sx={{ marginTop: 4, color: 'var(--orb-muted)' }}>{card.description}</CTypography>
+                    </div>
+                  </CStack>
+                </CPaper>
               </Link>
             ))}
-          </Box>
-        </Box>
+          </div>
+        </div>
       </CPageTransition>
 
+      {/* Temporarily disabled - FloatingAgentPanel requires AgentUI export
       {panelOpen && (
         <FloatingAgentPanel
           width={AI_PANEL_WIDTH}
@@ -307,6 +283,7 @@ export default function HomeDemoClient() {
           }
         />
       )}
+      */}
     </CAppPageLayout>
   );
 }

@@ -1,12 +1,11 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { Box } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
 import {
   CAppPageLayout,
   CPivotTable,
   CPageTransition,
+  useOrbMode,
   type OrbcafeLocale,
   type PivotFieldDefinition,
   type PivotTablePreset,
@@ -14,15 +13,14 @@ import {
 import { EXAMPLE_MENU } from './exampleNavigation';
 
 const HeaderBrandLogo = () => {
-  const theme = useTheme();
-  const src = theme.palette.mode === 'dark' ? '/LOGO3.png' : '/LOGO2.png';
+  const mode = useOrbMode();
+  const src = mode === 'dark' ? '/LOGO3.png' : '/LOGO2.png';
 
   return (
-    <Box
-      component="img"
+    <img
       src={src}
       alt="ORBCAFE UI"
-      sx={{ width: 280, maxWidth: '32vw', height: 52, display: 'block', objectFit: 'contain', flexShrink: 0 }}
+      style={{ width: 280, maxWidth: '32vw', height: 52, display: 'block', objectFit: 'contain', flexShrink: 0 }}
     />
   );
 };
@@ -243,15 +241,19 @@ export default function PivotTableExampleClient() {
   return (
     <CAppPageLayout
       appTitle=""
+      navigationVariant="v2"
+      searchPlacement="header"
       menuData={menuData}
       locale={locale}
       localeLabel={i18nText.localeLabel}
       onLocaleChange={setLocale}
       user={{ name: 'Ruiyang Shen', subtitle: 'ruiyang.shen@orbis.de', avatarSrc: '/orbcafe.png' }}
+      onUserRefresh={() => window.location.reload()}
+      onUserLogout={() => window.location.assign('/login')}
       logo={<HeaderBrandLogo />}
     >
       <CPageTransition transitionKey="pivot-table-demo" variant="fade" durationMs={200}>
-        <Box sx={{ p: { xs: 1, md: 2 }, display: 'flex', flexDirection: 'column', gap: 1.2 }}>
+        <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
           <CPivotTable
             rows={pivotRows}
             fields={pivotFields}
@@ -270,7 +272,7 @@ export default function PivotTableExampleClient() {
             presets={pivotPresets}
             onPresetsChange={setPivotPresets}
           />
-        </Box>
+        </div>
       </CPageTransition>
     </CAppPageLayout>
   );

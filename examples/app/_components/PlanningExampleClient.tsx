@@ -1,14 +1,14 @@
 'use client';
 
 import { useMemo } from 'react';
-import { Box, Button, Stack, Typography } from '@mui/material';
-import MailOutlineIcon from '@mui/icons-material/MailOutline';
-import { useTheme } from '@mui/material/styles';
 import dayjs from 'dayjs';
 import {
   CAppPageLayout,
+  CButton,
+  CStack,
   CPlanningLayout,
   CPageTransition,
+  useOrbMode,
   type PlanningGanttColumn,
   type PlanningTaskRecord,
   usePlanningLayout,
@@ -28,15 +28,14 @@ type DemoPlanningTaskRecord = PlanningTaskRecord & {
 };
 
 const HeaderBrandLogo = () => {
-  const theme = useTheme();
-  const src = theme.palette.mode === 'dark' ? '/LOGO3.png' : '/LOGO2.png';
+  const mode = useOrbMode();
+  const src = mode === 'dark' ? '/LOGO3.png' : '/LOGO2.png';
 
   return (
-    <Box
-      component="img"
+    <img
       src={src}
       alt="ORBCAFE UI"
-      sx={{ width: 280, maxWidth: '32vw', height: 52, display: 'block', objectFit: 'contain', flexShrink: 0 }}
+      style={{ width: 280, maxWidth: '32vw', height: 52, display: 'block', objectFit: 'contain', flexShrink: 0 }}
     />
   );
 };
@@ -166,16 +165,20 @@ export default function PlanningExampleClient() {
   return (
     <CAppPageLayout
       appTitle=""
+      navigationVariant="v2"
+      searchPlacement="header"
       menuData={menuData}
       locale="en"
       localeLabel="EN"
       user={{ name: 'Ruiyang Shen', subtitle: 'ruiyang.shen@orbis.de', avatarSrc: '/orbcafe.png' }}
+      onUserRefresh={() => window.location.reload()}
+      onUserLogout={() => window.location.assign('/login')}
       logo={<HeaderBrandLogo />}
     >
       <CPageTransition transitionKey="planning-demo" variant="fade" durationMs={180}>
-        <Box sx={{ height: 'calc(100vh - 120px)', overflow: 'hidden', px: { xs: 1, md: 2 }, pb: 0 }}>
-          <Stack spacing={2} sx={{ height: '100%' }}>
-            <Box sx={{ flex: 1, minHeight: 0 }}>
+        <div style={{ height: 'calc(100vh - 120px)', overflow: 'hidden', padding: '0 16px' }}>
+          <CStack spacing={2} sx={{ height: '100%' }}>
+            <div style={{ flex: 1, minHeight: 0 }}>
               <CPlanningLayout
                 filterProps={planning.layoutProps.filterProps}
                 ganttProps={{
@@ -183,22 +186,21 @@ export default function PlanningExampleClient() {
                   title: 'Production Plan',
                   subtitle: 'Project management and production planning table with Gantt timeline',
                   extraTools: (
-                    <Button
+                    <CButton
                       size="small"
                       variant="outlined"
-                      startIcon={<MailOutlineIcon fontSize="small" />}
                       onClick={() => console.log('Send planning email')}
                       sx={{ minWidth: 132, height: 36 }}
                     >
                       Send email
-                    </Button>
+                    </CButton>
                   ),
                 }}
                 sx={{ height: '100%' }}
               />
-            </Box>
-          </Stack>
-        </Box>
+            </div>
+          </CStack>
+        </div>
       </CPageTransition>
     </CAppPageLayout>
   );

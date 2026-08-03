@@ -1,7 +1,8 @@
+import { getOrbCompatMode } from '../../../lib/orbis-compat';
+import { Collapse, KeyboardArrowUpIcon, SxProps, Theme } from '../../../lib/orbis-compat';
 import React from 'react';
-import { Box, Collapse, IconButton, Paper, Typography } from '@mui/material';
-import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
-import { alpha, type SxProps, type Theme } from '@mui/material/styles';
+import {  CIconButton, CPaper, CTypography } from "../../Atoms";
+import { orbAlpha } from "../../../lib/theme";
 
 interface PivotSectionCardProps {
   title: string;
@@ -31,15 +32,15 @@ export const PivotSectionCard: React.FC<PivotSectionCardProps> = ({
   headerActions,
 }) => {
   return (
-    <Paper
+    <CPaper
       sx={(theme) => ({
-        borderRadius: 3,
+        borderRadius: 'var(--orb-r-container)',
         border: `1px solid ${theme.palette.divider}`,
         overflow: 'hidden',
-        bgcolor: alpha(theme.palette.background.paper, 0.95),
+        bgcolor: orbAlpha(theme.palette.background.paper, 0.95),
       })}
     >
-      <Box
+      <div
         sx={(theme) => ({
           px: bodyPaddingX,
           py: 1,
@@ -50,9 +51,9 @@ export const PivotSectionCard: React.FC<PivotSectionCardProps> = ({
           borderBottom: !collapsed ? `1px solid ${theme.palette.divider}` : 'none',
         })}
       >
-        <Box sx={{ minWidth: 0, flex: 1 }}>
-          <Typography sx={{ fontSize: '0.9rem', fontWeight: 800 }}>{title}</Typography>
-          <Typography
+        <div sx={{ minWidth: 0, flex: 1 }}>
+          <CTypography sx={{ fontSize: '0.9rem', fontWeight: 800 }}>{title}</CTypography>
+          <CTypography
             sx={{
               fontSize: '0.74rem',
               color: 'text.secondary',
@@ -62,24 +63,24 @@ export const PivotSectionCard: React.FC<PivotSectionCardProps> = ({
             }}
           >
             {subtitle}
-          </Typography>
-        </Box>
+          </CTypography>
+        </div>
 
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, flexShrink: 0 }}>
+        <div sx={{ display: 'flex', alignItems: 'center', gap: 0.75, flexShrink: 0 }}>
           {headerActions}
-          <IconButton
+          <CIconButton
             size="small"
             aria-label={collapsed ? expandAriaLabel : collapseAriaLabel}
             onClick={onToggleCollapse}
             sx={(theme) => ({
               border: `1px solid ${theme.palette.divider}`,
-              bgcolor: alpha(theme.palette.background.paper, 0.88),
+              bgcolor: orbAlpha(theme.palette.background.paper, 0.88),
               width: 28,
               height: 28,
               borderRadius: 999,
               flexShrink: 0,
               '&:hover': {
-                bgcolor: theme.palette.mode === 'dark' ? alpha(theme.palette.primary.main, 0.18) : alpha(theme.palette.primary.main, 0.08),
+                bgcolor: getOrbCompatMode() === 'dark' ? orbAlpha(theme.palette.primary.main, 0.18) : orbAlpha(theme.palette.primary.main, 0.08),
               },
             })}
           >
@@ -90,15 +91,15 @@ export const PivotSectionCard: React.FC<PivotSectionCardProps> = ({
                 transform: collapsed ? 'rotate(180deg)' : 'rotate(0deg)',
               }}
             />
-          </IconButton>
-        </Box>
-      </Box>
+          </CIconButton>
+        </div>
+      </div>
 
       <Collapse in={!collapsed} timeout={260} easing="cubic-bezier(0.2, 0, 0, 1)" unmountOnExit={unmountOnExit}>
-        <Box sx={[{ px: bodyPaddingX, py: { xs: 1.2, md: 1.6 } }, ...(Array.isArray(bodySx) ? bodySx : bodySx ? [bodySx] : [])]}>
+        <div sx={[{ px: bodyPaddingX, py: { xs: 1.2, md: 1.6 } }, ...(Array.isArray(bodySx) ? bodySx : bodySx ? [bodySx] : [])]}>
           {children}
-        </Box>
+        </div>
       </Collapse>
-    </Paper>
+    </CPaper>
   );
 };

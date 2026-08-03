@@ -1,39 +1,15 @@
 'use client';
 
-import { useCallback, useState, type FormEvent } from 'react';
-import { Mic, MicOff, SendHorizontal } from 'lucide-react';
-import {
-  AppBar,
-  Avatar,
-  Box,
-  IconButton,
-  InputAdornment,
-  Menu,
-  MenuItem,
-  ListItemIcon,
-  ListItemText,
-  Stack,
-  TextField,
-  Toolbar,
-  Typography,
-  useTheme,
-} from '@mui/material';
-import type { SxProps, Theme } from '@mui/material/styles';
-import AddRoundedIcon from '@mui/icons-material/AddRounded';
-import LanguageIcon from '@mui/icons-material/Language';
-import DesktopWindowsIcon from '@mui/icons-material/DesktopWindows';
-import DarkModeIcon from '@mui/icons-material/DarkMode';
-import LightModeIcon from '@mui/icons-material/LightMode';
-import SettingsIcon from '@mui/icons-material/Settings';
-import LogoutIcon from '@mui/icons-material/Logout';
+import { useCallback, useState, type FormEvent, type CSSProperties } from 'react';
+import { SapIcon, Globe, Sun, Moon, Settings, LogOut, RefreshCw } from '@/components/Icons';
+import { CIconButton, CAvatar, CTypography } from '../../Atoms';
+import { CMenu } from '../../Atoms/CMenu';
 import type { CAppHeaderProps, CAppHeaderUserMenuItem } from '../types';
 import { useOrbcafeI18n } from '../../../i18n';
 import type { OrbcafeLocale } from '../../../i18n';
 import { useVoiceInput } from '../../AINav/Hooks/useVoiceInput';
+import { useOrbMode } from '../../../lib/theme';
 
-const HEADER_HEIGHT = 64;
-const LIGHT_HEADER_BASE = '#E9EDF2';
-const LIGHT_HEADER_GRADIENT = 'linear-gradient(90deg, #F5F7FA 0%, #E9EDF2 50%, #F5F7FA 100%)';
 const DEFAULT_LOCALE_OPTIONS: OrbcafeLocale[] = ['en', 'zh', 'fr', 'de', 'ja', 'ko'];
 const DEFAULT_LOCALE_LABELS: Record<OrbcafeLocale, string> = {
   en: 'EN',
@@ -49,7 +25,7 @@ export interface CAppHeaderSearchProps {
   onSearch?: (query: string) => void;
   onSearchAdd?: () => void;
   maxWidth?: number | string;
-  sx?: SxProps<Theme>;
+  sx?: CSSProperties;
 }
 
 export const CAppHeaderSearch = ({
@@ -60,8 +36,6 @@ export const CAppHeaderSearch = ({
   sx,
 }: CAppHeaderSearchProps) => {
   const { t } = useOrbcafeI18n();
-  const theme = useTheme();
-  const isDark = theme.palette.mode === 'dark';
   const [query, setQuery] = useState('');
 
   const submitSearch = useCallback(
@@ -96,123 +70,57 @@ export const CAppHeaderSearch = ({
       stopRecording();
       return;
     }
-
     await startRecording();
   }, [isRecording, startRecording, stopRecording]);
 
   const effectiveSearchPlaceholder = searchPlaceholder || t('header.searchPlaceholder');
   const canSubmitSearch = query.trim().length > 0;
-  const searchIconButtonSx = {
-    width: 28,
-    height: 28,
-    p: 0,
-    color: isDark ? 'rgba(255,255,255,0.72)' : 'rgba(15,23,42,0.56)',
-    '&:hover': {
-      bgcolor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(15,23,42,0.06)',
-    },
-    '&.Mui-disabled': {
-      color: isDark ? 'rgba(255,255,255,0.28)' : 'rgba(15,23,42,0.24)',
-    },
-  } as const;
 
   return (
-    <Box
-      component="form"
+    <form
+      className="orb-app-header-search"
       onSubmit={handleSearchSubmit}
-      sx={[
-        { width: '100%', maxWidth },
-        ...(Array.isArray(sx) ? sx : sx ? [sx] : []),
-      ]}
+      style={{
+        width: '100%',
+        maxWidth: typeof maxWidth === 'number' ? `${maxWidth}px` : maxWidth,
+        ...sx,
+      }}
     >
-      <TextField
-        size="small"
-        fullWidth
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        placeholder={effectiveSearchPlaceholder}
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start" sx={{ ml: 0.25, mr: 0.5 }}>
-              <IconButton
-                size="small"
-                type="button"
-                onClick={onSearchAdd}
-                aria-label={t('header.searchAddFeature')}
-                title={t('header.searchAddFeature')}
-                sx={searchIconButtonSx}
-              >
-                <AddRoundedIcon sx={{ fontSize: 20 }} />
-              </IconButton>
-            </InputAdornment>
-          ),
-          endAdornment: (
-            <InputAdornment position="end" sx={{ ml: 0.5, mr: 0.25 }}>
-              <Stack direction="row" alignItems="center" spacing={0.15}>
-                <IconButton
-                  size="small"
-                  type="button"
-                  onClick={() => void handleVoiceToggle()}
-                  aria-label={isRecording ? t('header.searchStopVoice') : t('header.searchStartVoice')}
-                  title={isRecording ? t('header.searchStopVoice') : t('header.searchStartVoice')}
-                  sx={{
-                    ...searchIconButtonSx,
-                    color: isRecording ? theme.palette.error.main : searchIconButtonSx.color,
-                    bgcolor: isRecording
-                      ? (isDark ? 'rgba(239,68,68,0.18)' : 'rgba(239,68,68,0.1)')
-                      : 'transparent',
-                  }}
-                >
-                  {isRecording ? <MicOff size={17} strokeWidth={2.35} /> : <Mic size={17} strokeWidth={2.35} />}
-                </IconButton>
-                <IconButton
-                  size="small"
-                  type="submit"
-                  disabled={!canSubmitSearch}
-                  aria-label={t('header.searchSend')}
-                  title={t('header.searchSend')}
-                  sx={{
-                    ...searchIconButtonSx,
-                    color: canSubmitSearch ? theme.palette.primary.main : searchIconButtonSx.color,
-                  }}
-                >
-                  <SendHorizontal size={17} strokeWidth={2.35} />
-                </IconButton>
-              </Stack>
-            </InputAdornment>
-          ),
-          sx: {
-            color: isDark ? 'common.white' : 'rgba(17,24,39,0.9)',
-            bgcolor: isDark ? 'rgba(255,255,255,0.08)' : '#ffffff',
-            borderRadius: 999,
-            pr: 0.5,
-            '& .MuiInputBase-input': {
-              py: 1.1,
-            },
-            '& .MuiOutlinedInput-notchedOutline': {
-              borderColor: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(15,23,42,0.2)',
-            },
-            '&:hover .MuiOutlinedInput-notchedOutline': {
-              borderColor: isDark ? 'rgba(255,255,255,0.35)' : 'rgba(15,23,42,0.35)',
-            },
-            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-              borderColor: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(15,23,42,0.55)',
-            },
-          },
-        }}
-        inputProps={{
-          style: {
-            color: isDark ? 'white' : '#111827',
-          },
-        }}
-      />
-    </Box>
+      <div className="orb-inp-adornment-wrap orb-app-header-search-shell" style={{ background: 'var(--orb-surface)', border: '1px solid var(--orb-border)', borderRadius: 999, paddingRight: 4 }}>
+        <div className="orb-inp-adornment">
+          <CIconButton className="orb-app-header-ai-action" size="small" onClick={onSearchAdd} tooltip={t('header.searchAddFeature')}>
+            <SapIcon name="add" size={16} />
+          </CIconButton>
+        </div>
+        <input
+          className="orb-inp orb-inp-dense orb-app-header-ai-input"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder={effectiveSearchPlaceholder}
+          style={{ border: 'none', background: 'transparent', flex: 1, minWidth: 0 }}
+        />
+        <div className="orb-inp-adornment orb-inp-adornment-end">
+          <CIconButton
+            className="orb-app-header-ai-action"
+            size="small"
+            onClick={() => void handleVoiceToggle()}
+            tooltip={isRecording ? t('header.searchStopVoice') : t('header.searchStartVoice')}
+            sx={{ color: isRecording ? 'var(--orb-err)' : undefined }}
+          >
+            <SapIcon name="microphone" size={16} />
+          </CIconButton>
+          <CIconButton className="orb-app-header-ai-action" size="small" type="submit" disabled={!canSubmitSearch} tooltip={t('header.searchSend')}>
+            <SapIcon name="paperPlane" size={16} />
+          </CIconButton>
+        </div>
+      </div>
+    </form>
   );
 };
 
 export const CAppHeader = ({
   appTitle,
   logo,
-  mode = 'dark',
   onToggleMode,
   locale: localeProp,
   localeLabel,
@@ -223,6 +131,7 @@ export const CAppHeader = ({
   onSearch,
   onSearchAdd,
   user,
+  onUserRefresh,
   onUserSetting,
   onUserLogout,
   userMenuItems,
@@ -230,89 +139,46 @@ export const CAppHeader = ({
   rightSlot,
 }: CAppHeaderProps) => {
   const { t, locale } = useOrbcafeI18n();
-  const theme = useTheme();
-  const isDark = theme.palette.mode === 'dark';
-  const [localeMenuAnchor, setLocaleMenuAnchor] = useState<null | HTMLElement>(null);
-  const [userMenuAnchor, setUserMenuAnchor] = useState<null | HTMLElement>(null);
+  const mode = useOrbMode();
+  const effectiveLocale = localeProp || locale;
+  const effectiveLocaleLabel = localeLabel || DEFAULT_LOCALE_LABELS[effectiveLocale];
+  const effectiveLocaleOptions = localeOptions || DEFAULT_LOCALE_OPTIONS;
 
   const themeIcon =
-    mode === 'system'
-      ? <DesktopWindowsIcon fontSize="small" />
-      : mode === 'dark'
-        ? <DarkModeIcon fontSize="small" />
-        : <LightModeIcon fontSize="small" />;
-  const themeTooltip =
-    mode === 'system'
-      ? t('header.theme.system')
-      : mode === 'dark'
-        ? t('header.theme.dark')
-        : t('header.theme.light');
-  const effectiveLocale = localeProp || locale;
-  const effectiveLocaleOptions = localeOptions && localeOptions.length > 0 ? localeOptions : DEFAULT_LOCALE_OPTIONS;
-  const effectiveLocaleLabel = localeLabel || DEFAULT_LOCALE_LABELS[effectiveLocale] || effectiveLocale.toUpperCase();
-  const localeMenuOpen = Boolean(localeMenuAnchor);
-  const userMenuOpen = Boolean(userMenuAnchor);
-  const defaultUserMenuItems: CAppHeaderUserMenuItem[] = [
-    {
-      key: 'setting',
-      label: t('header.menu.setting'),
-      icon: <SettingsIcon sx={{ fontSize: 18 }} />,
-      onClick: onUserSetting,
-    },
-    {
-      key: 'logout',
-      label: t('header.menu.logout'),
-      icon: <LogoutIcon sx={{ fontSize: 18 }} />,
-      onClick: onUserLogout,
-    },
-  ];
-  const effectiveUserMenuItems =
-    userMenuItems && userMenuItems.length > 0 ? userMenuItems : defaultUserMenuItems;
+    mode === 'dark' ? <Moon size={15} /> : <Sun size={15} />;
 
-  const handleUserMenuItemClick = (action?: () => void) => {
-    setUserMenuAnchor(null);
-    action?.();
-  };
+  const themeTooltip = mode === 'dark' ? t('header.theme.dark') : t('header.theme.light');
+
+  const defaultUserMenuItems: CAppHeaderUserMenuItem[] = [
+    ...(onUserRefresh ? [{ key: 'refresh', label: t('header.menu.refresh'), icon: <RefreshCw size={15} />, onClick: onUserRefresh }] : []),
+    ...(onUserSetting ? [{ key: 'settings', label: t('header.menu.setting'), icon: <Settings size={16} />, onClick: onUserSetting }] : []),
+    ...(onUserLogout ? [{ key: 'logout', label: t('header.menu.logout'), icon: <LogOut size={16} />, onClick: onUserLogout }] : []),
+  ];
+  const effectiveUserMenuItems = userMenuItems || defaultUserMenuItems;
+
+  const localeMenuItems = effectiveLocaleOptions.map(loc => ({
+    label: DEFAULT_LOCALE_LABELS[loc],
+    onClick: () => {
+      onLocaleChange?.(loc);
+      window.requestAnimationFrame(() => {
+        if (document.activeElement instanceof HTMLElement) {
+          document.activeElement.blur();
+        }
+      });
+    },
+    disabled: loc === effectiveLocale,
+  }));
 
   return (
-    <AppBar
-      position="sticky"
-      elevation={0}
-      sx={(theme) => ({
-        top: 0,
-        zIndex: theme.zIndex.drawer + 10,
-        height: HEADER_HEIGHT,
-        backgroundColor: theme.palette.mode === 'dark' ? '#0D0D0D' : LIGHT_HEADER_BASE,
-        backgroundImage:
-          theme.palette.mode === 'dark'
-            ? [
-                'radial-gradient(circle at 18% 22%, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 45%)',
-                'radial-gradient(circle at 78% 32%, rgba(144,202,249,0.14) 0%, rgba(144,202,249,0) 42%)',
-                'linear-gradient(90deg, #0A0A0A 0%, #151515 50%, #0A0A0A 100%)',
-                'linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px)',
-                'linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)',
-              ].join(',')
-            : [
-                'radial-gradient(circle at 22% 22%, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0) 48%)',
-                'radial-gradient(circle at 76% 24%, rgba(203,213,225,0.45) 0%, rgba(203,213,225,0) 42%)',
-                LIGHT_HEADER_GRADIENT,
-                'linear-gradient(rgba(15,23,42,0.05) 1px, transparent 1px)',
-                'linear-gradient(90deg, rgba(15,23,42,0.04) 1px, transparent 1px)',
-              ].join(','),
-        backgroundSize: 'auto, auto, auto, 24px 24px, 24px 24px',
-        borderBottom: '1px solid',
-        borderColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(15,23,42,0.12)',
-      })}
-    >
-      <Toolbar sx={{ minHeight: `${HEADER_HEIGHT}px !important`, px: 2, gap: 2 }}>
-        <Stack direction="row" alignItems="center" spacing={1.5} sx={{ minWidth: 220 }}>
-          {leftSlot}
-          {logo === null ? null : logo || (
-            <Box
-              component="img"
+    <header className="orb-app-header">
+      <div className="orb-app-header-brand">
+        {leftSlot}
+        {logo === null ? null : logo || (
+          <div className="orb-logo-slot">
+            <img
               src="/orbcafe.png"
               alt="ORBCAFE Logo"
-              sx={{
+              style={{
                 width: 44,
                 height: 44,
                 display: 'block',
@@ -320,162 +186,95 @@ export const CAppHeader = ({
                 flexShrink: 0,
               }}
             />
-          )}
-          {appTitle && (
-            <Typography variant="h6" sx={{ fontWeight: 700, color: isDark ? 'common.white' : '#111827' }}>
-              {appTitle}
-            </Typography>
-          )}
-        </Stack>
+          </div>
+        )}
+        {appTitle && (
+          <CTypography variant="h4" sx={{ fontWeight: 700 }}>
+            {appTitle}
+          </CTypography>
+        )}
+      </div>
 
-        <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', minWidth: 0 }}>
-          {showSearch && (
-            <CAppHeaderSearch
-              searchPlaceholder={searchPlaceholder}
-              onSearch={onSearch}
-              onSearchAdd={onSearchAdd}
-            />
-          )}
-        </Box>
+      <div className="orb-app-header-center">
+        {showSearch && (
+          <CAppHeaderSearch
+            searchPlaceholder={searchPlaceholder}
+            onSearch={onSearch}
+            onSearchAdd={onSearchAdd}
+          />
+        )}
+      </div>
 
-        <Stack direction="row" alignItems="center" spacing={1.5}>
+      <div className="orb-app-header-actions">
+        <div className="orb-app-header-utilities">
           {onLocaleChange ? (
-            <>
-              <IconButton
-                size="small"
-                onClick={(event) => setLocaleMenuAnchor(event.currentTarget)}
-                sx={{ color: isDark ? 'common.white' : '#111827', borderRadius: 1, px: 0.5 }}
-              >
-                <Stack direction="row" alignItems="center" spacing={0.45}>
-                  <LanguageIcon sx={{ fontSize: 18 }} />
-                  <Typography variant="caption" sx={{ fontWeight: 500 }}>
-                    {effectiveLocaleLabel}
-                  </Typography>
-                </Stack>
-              </IconButton>
-              <Menu
-                anchorEl={localeMenuAnchor}
-                open={localeMenuOpen}
-                onClose={() => setLocaleMenuAnchor(null)}
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-              >
-                {effectiveLocaleOptions.map((localeCode) => (
-                  <MenuItem
-                    key={localeCode}
-                    selected={localeCode === effectiveLocale}
-                    onClick={() => {
-                      onLocaleChange(localeCode);
-                      setLocaleMenuAnchor(null);
-                    }}
-                    sx={{ fontSize: '0.82rem' }}
-                  >
-                    {DEFAULT_LOCALE_LABELS[localeCode]}
-                  </MenuItem>
-                ))}
-              </Menu>
-            </>
+            <CMenu
+              triggerLabel={effectiveLocaleLabel}
+              trigger={
+                <button type="button" className="orb-icon-btn orb-app-header-locale">
+                  <Globe size={15} />
+                  <span className="orb-label">{effectiveLocaleLabel}</span>
+                </button>
+              }
+              items={localeMenuItems}
+              align="end"
+            />
           ) : (
-            <Stack direction="row" alignItems="center" spacing={0.5}>
-              <LanguageIcon sx={{ color: isDark ? 'common.white' : '#111827', fontSize: 18 }} />
-              <Typography variant="caption" sx={{ color: isDark ? 'common.white' : '#111827', fontWeight: 500 }}>
-                {effectiveLocaleLabel}
-              </Typography>
-            </Stack>
+            <div className="orb-app-header-locale" aria-label={effectiveLocaleLabel}>
+              <Globe size={15} />
+              <span className="orb-label">{effectiveLocaleLabel}</span>
+            </div>
           )}
-          <IconButton size="small" sx={{ color: isDark ? 'common.white' : '#111827' }} onClick={onToggleMode} title={themeTooltip}>
+
+          <CIconButton
+            className="orb-app-header-theme"
+            size="small"
+            onClick={onToggleMode}
+            tooltip={themeTooltip}
+          >
             {themeIcon}
-          </IconButton>
+          </CIconButton>
+        </div>
 
-          {user && (
-            <Stack direction="row" alignItems="center" spacing={1}>
-              <Box sx={{ textAlign: 'right', minWidth: 0 }}>
-                <Typography variant="body2" sx={{ color: isDark ? 'common.white' : '#111827', fontWeight: 700, lineHeight: 1.15 }}>
-                  {user.name}
-                </Typography>
-                {user.subtitle && (
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      display: 'block',
-                      mt: 0.25,
-                      color: isDark ? 'rgba(255,255,255,0.72)' : 'rgba(17,24,39,0.62)',
-                      fontSize: '0.72rem',
-                      lineHeight: 1.1,
-                      letterSpacing: '0.01em',
-                      whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      maxWidth: 220,
-                    }}
-                    title={user.subtitle}
-                  >
-                    {user.subtitle}
-                  </Typography>
-                )}
-              </Box>
-              <IconButton
-                size="small"
-                onClick={(e) => setUserMenuAnchor(e.currentTarget)}
-                sx={{ p: 0 }}
-              >
-                <Avatar
-                  src={user.avatarSrc}
-                  imgProps={{ style: { objectFit: 'cover' } }}
-                  sx={{ width: 34, height: 34, bgcolor: 'grey.100', color: 'grey.700', fontSize: '0.85rem' }}
-                >
+        {user && <span className="orb-app-header-divider" aria-hidden="true" />}
+
+        {user && (
+          <CMenu
+            triggerLabel={user.name}
+            trigger={
+              <button type="button" className="orb-app-header-user-trigger">
+                <span className="orb-app-header-user-copy">
+                  <CTypography variant="body2" className="orb-app-header-user-name">
+                    {user.name}
+                  </CTypography>
+                  {user.subtitle && (
+                    <CTypography
+                      variant="caption"
+                      muted
+                      className="orb-app-header-user-subtitle"
+                      title={user.subtitle}
+                    >
+                      {user.subtitle}
+                    </CTypography>
+                  )}
+                </span>
+                <CAvatar src={user.avatarSrc} alt={user.name} size={32}>
                   {user.avatarText || user.name.slice(0, 1).toUpperCase()}
-                </Avatar>
-              </IconButton>
-            </Stack>
-          )}
+                </CAvatar>
+              </button>
+            }
+            items={effectiveUserMenuItems.map(item => ({
+              label: item.label,
+              onClick: item.onClick,
+              disabled: item.disabled,
+              icon: item.icon,
+            }))}
+            align="end"
+          />
+        )}
 
-          {rightSlot}
-        </Stack>
-      </Toolbar>
-
-      {user && (
-        <Menu
-          anchorEl={userMenuAnchor}
-          open={userMenuOpen}
-          onClose={() => setUserMenuAnchor(null)}
-          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-          transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-          slotProps={{
-            paper: {
-              sx: {
-                minWidth: 160,
-                '& .MuiMenuItem-root': {
-                  minHeight: 34,
-                  py: 0.5,
-                  px: 1.25,
-                },
-              },
-            },
-          }}
-        >
-          {effectiveUserMenuItems.map((item) => (
-            <MenuItem
-              key={item.key}
-              disabled={item.disabled}
-              onClick={() => handleUserMenuItemClick(item.onClick)}
-            >
-              {item.icon && <ListItemIcon>{item.icon}</ListItemIcon>}
-              <ListItemText
-                primary={item.label}
-                slotProps={{
-                  primary: {
-                    sx: {
-                      fontSize: '0.86rem',
-                      fontWeight: 500,
-                    },
-                  },
-                }}
-              />
-            </MenuItem>
-          ))}
-        </Menu>
-      )}
-    </AppBar>
+        {rightSlot}
+      </div>
+    </header>
   );
 };

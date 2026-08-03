@@ -1,22 +1,23 @@
 @import "tailwindcss";
+@import "orbcafe-ui/styles.css";
 @custom-variant dark (&:is(.dark *));
 @source "../node_modules/orbcafe-ui/dist";
 @source "../../src";
 
 :root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
+  --background: #ffffff;
+  --foreground: #555555;
 }
 
 :root.dark {
-  --background: #020617;
-  --foreground: #f8fafc;
+  --background: #01091a;
+  --foreground: #ffffff;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: "Segoe UI", Helvetica, Arial, sans-serif;
+  --font-sans: var(--font-montserrat), "Montserrat", system-ui, -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   --font-mono: "SFMono-Regular", "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
 }
 

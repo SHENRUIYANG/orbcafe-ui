@@ -1,10 +1,9 @@
 'use client';
+import { getOrbCompatMode } from '../../lib/orbis-compat';
+import { BackspaceRoundedIcon, CheckRoundedIcon, CloseRoundedIcon } from '../../lib/orbis-compat';
+import {  CIconButton, CPaper, CStack, CTypography } from "../Atoms";
 
 import { useState } from 'react';
-import { Box, IconButton, Paper, Stack, Typography } from '@mui/material';
-import BackspaceRoundedIcon from '@mui/icons-material/BackspaceRounded';
-import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
-import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
 import type { PNumericKeypadProps } from './types';
 import { useOrbcafeI18n } from '../../i18n';
 
@@ -15,7 +14,7 @@ interface KeypadButtonProps {
 }
 
 const KeypadButton = ({ label, onPress, emphasis = 'default' }: KeypadButtonProps) => (
-  <Box
+  <div
     component="button"
     type="button"
     onClick={onPress}
@@ -28,10 +27,10 @@ const KeypadButton = ({ label, onPress, emphasis = 'default' }: KeypadButtonProp
         emphasis === 'primary'
           ? theme.palette.primary.main
           : emphasis === 'danger'
-            ? theme.palette.mode === 'dark'
+            ? getOrbCompatMode() === 'dark'
               ? 'rgba(239,68,68,0.18)'
               : 'rgba(239,68,68,0.10)'
-            : theme.palette.mode === 'dark'
+            : getOrbCompatMode() === 'dark'
               ? 'rgba(255,255,255,0.04)'
               : '#fff',
       color: emphasis === 'primary' ? '#fff' : 'text.primary',
@@ -48,7 +47,7 @@ const KeypadButton = ({ label, onPress, emphasis = 'default' }: KeypadButtonProp
     })}
   >
     {label}
-  </Box>
+  </div>
 );
 
 export const PNumericKeypad = ({
@@ -123,7 +122,7 @@ export const PNumericKeypad = ({
   };
 
   return (
-    <Paper
+    <CPaper
       elevation={0}
       sx={{
         p: 2,
@@ -134,23 +133,23 @@ export const PNumericKeypad = ({
         ...sx,
       }}
     >
-      <Stack spacing={2}>
-        <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
-          <Box sx={{ minWidth: 0 }}>
-            {title ? <Typography sx={{ fontSize: '1rem', fontWeight: 800 }}>{title}</Typography> : null}
+      <CStack spacing={2}>
+        <CStack direction="row" justifyContent="space-between" alignItems="flex-start">
+          <div sx={{ minWidth: 0 }}>
+            {title ? <CTypography sx={{ fontSize: '1rem', fontWeight: 800 }}>{title}</CTypography> : null}
             {subtitle ? (
-              <Typography sx={{ mt: 0.5, fontSize: '0.86rem', color: 'text.secondary' }}>{subtitle}</Typography>
+              <CTypography sx={{ mt: 0.5, fontSize: '0.86rem', color: 'text.secondary' }}>{subtitle}</CTypography>
             ) : null}
-          </Box>
+          </div>
 
           {onClose ? (
-            <IconButton onClick={onClose} size="small">
+            <CIconButton onClick={onClose} size="small">
               <CloseRoundedIcon />
-            </IconButton>
+            </CIconButton>
           ) : null}
-        </Stack>
+        </CStack>
 
-        <Paper
+        <CPaper
           elevation={0}
           sx={{
             p: 2,
@@ -160,7 +159,7 @@ export const PNumericKeypad = ({
             bgcolor: 'action.hover',
           }}
         >
-          <Typography
+          <CTypography
             sx={{
               minHeight: 38,
               fontSize: currentValue ? '1.9rem' : '1.25rem',
@@ -170,10 +169,10 @@ export const PNumericKeypad = ({
             }}
           >
             {currentValue || placeholder}
-          </Typography>
-        </Paper>
+          </CTypography>
+        </CPaper>
 
-        <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 1.25 }}>
+        <div sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 1.25 }}>
           {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((digit) => (
             <KeypadButton key={digit} label={digit} onPress={() => handleDigit(digit)} />
           ))}
@@ -181,10 +180,10 @@ export const PNumericKeypad = ({
           <KeypadButton label={allowNegative ? '+/-' : '00'} onPress={allowNegative ? handleToggleNegative : () => handleDigit('00')} />
           <KeypadButton label="0" onPress={() => handleDigit('0')} />
           <KeypadButton label={allowDecimal ? '.' : backspaceLabel ? String(backspaceLabel) : 'DEL'} onPress={allowDecimal ? handleDecimal : handleBackspace} />
-        </Box>
+        </div>
 
-        <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 1.25 }}>
-          <Box
+        <div sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 1.25 }}>
+          <div
             component="button"
             type="button"
             onClick={handleBackspace}
@@ -200,15 +199,15 @@ export const PNumericKeypad = ({
               WebkitTapHighlightColor: 'transparent',
             }}
           >
-            <Stack direction="row" spacing={1} justifyContent="center" alignItems="center">
+            <CStack direction="row" spacing={1} justifyContent="center" alignItems="center">
               <BackspaceRoundedIcon />
-              <Typography sx={{ fontWeight: 700 }}>{backspaceLabel || 'DEL'}</Typography>
-            </Stack>
-          </Box>
+              <CTypography sx={{ fontWeight: 700 }}>{backspaceLabel || 'DEL'}</CTypography>
+            </CStack>
+          </div>
 
           <KeypadButton label={String(clearLabel || 'CLR')} onPress={handleClear} emphasis="danger" />
 
-          <Box
+          <div
             component="button"
             type="button"
             onClick={handleSubmit}
@@ -225,13 +224,13 @@ export const PNumericKeypad = ({
               WebkitTapHighlightColor: 'transparent',
             })}
           >
-            <Stack direction="row" spacing={1} justifyContent="center" alignItems="center">
+            <CStack direction="row" spacing={1} justifyContent="center" alignItems="center">
               <CheckRoundedIcon />
-              <Typography sx={{ fontWeight: 800 }}>{confirmLabel || t('common.ok')}</Typography>
-            </Stack>
-          </Box>
-        </Box>
-      </Stack>
-    </Paper>
+              <CTypography sx={{ fontWeight: 800 }}>{confirmLabel || t('common.ok')}</CTypography>
+            </CStack>
+          </div>
+        </div>
+      </CStack>
+    </CPaper>
   );
 };

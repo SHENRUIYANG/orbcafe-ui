@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { Copy, RefreshCw, Volume2, ThumbsUp, ThumbsDown } from 'lucide-react'
+import { Copy, RefreshCw, Volume2, ThumbsUp, ThumbsDown } from '@/components/Icons'
 import { cn } from '../../lib/utils'
 
 export interface MiniAnswerIslandButton {

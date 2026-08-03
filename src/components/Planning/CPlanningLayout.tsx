@@ -1,8 +1,8 @@
 'use client';
+import { SxProps, Theme } from '../../lib/orbis-compat';
+import {  CStack } from "../Atoms";
 
 import type { ReactNode } from 'react';
-import { Box, Stack } from '@mui/material';
-import type { SxProps, Theme } from '@mui/material/styles';
 import { CSmartFilter } from '../StdReport/CSmartFilter';
 import type { CSmartFilterProps } from '../StdReport/CSmartFilter';
 import { CPlanningGantt } from './CPlanningGantt';
@@ -31,16 +31,16 @@ export const CPlanningLayout = ({
     : { height: '100%' };
 
   return (
-    <Stack spacing={spacing} sx={stackSx}>
-      <Box sx={{ flexShrink: 0 }}>
+    <CStack spacing={spacing} sx={stackSx}>
+      <div sx={{ flexShrink: 0 }}>
         <CSmartFilter {...filterProps} />
-      </Box>
+      </div>
 
-      <Box sx={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
+      <div sx={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
         <CPlanningGantt {...ganttProps} bodyHeight={ganttProps.bodyHeight ?? '100%'} sx={ganttSx} />
-      </Box>
+      </div>
 
       {children}
-    </Stack>
+    </CStack>
   );
 };

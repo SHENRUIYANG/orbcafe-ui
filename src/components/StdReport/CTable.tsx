@@ -1,30 +1,32 @@
+import { Alert, CButton, CDialog, CPaper, CTextField } from '../../lib/orbis-compat';
 /**
+import {  CButton, CPaper, CTextField, CDialog } from "../Atoms";
  * @file 10_Frontend/components/sap/ui/Common/Structures/CTable.tsx
- * 
+ *
  * @summary Core frontend CTable module for the ORBAI Core project
  * @author ORBAICODER
  * @version 1.0.0
  * @date 2025-01-19
- * 
+ *
  * @description
  * This file is responsible for:
  *  - Implementing CTable functionality within frontend workflows
  *  - Integrating with shared ORBAI Core application processes under frontend
- * 
+ *
  * @logic
  * 1. Import required dependencies and configuration
  * 2. Execute the primary logic for CTable
  * 3. Export the resulting APIs, hooks, or components for reuse
- * 
+ *
  * @changelog
  * V1.0.0 - 2025-01-19 - Initial creation
  */
 
 /**
  * File Overview
- * 
+ *
  * START CODING
- * 
+ *
  * --------------------------
  * SECTION 1: CTable Core Logic
  * Section overview and description.
@@ -34,35 +36,20 @@
 'use client';
 
 import React from 'react';
-import Box from '@mui/material/Box';
-import Paper from '@mui/material/Paper';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Dialog from '@mui/material/Dialog';
-import DialogTitle from '@mui/material/DialogTitle';
-import DialogContent from '@mui/material/DialogContent';
-import DialogActions from '@mui/material/DialogActions';
-import TextField from '@mui/material/TextField';
-import Button from '@mui/material/Button';
-import Alert from '@mui/material/Alert';
 
 // Dnd Kit
-import { 
-  DndContext, 
+import {
+  DndContext,
   closestCenter,
 } from '@dnd-kit/core';
 import { restrictToHorizontalAxis } from '@dnd-kit/modifiers';
 
 // Types
-import type { 
-    CTableProps, 
-    CTableCellProps, 
-    CTableContainerProps, 
-    CTableRowProps 
+import type {
+    CTableProps,
+    CTableCellProps,
+    CTableContainerProps,
+    CTableRowProps
 } from './Hooks/CTable/types';
 
 // Components
@@ -85,11 +72,11 @@ import { useOrbcafeI18n } from '../../i18n';
 import { useCTable } from './Hooks/CTable/useCTable';
 
 // Re-exports for wrappers
-export const CTableBody: React.FC<any> = (props) => <TableBody {...props} />;
-export const CTableCell: React.FC<CTableCellProps> = (props) => <TableCell {...props} />;
-export const CTableContainer: React.FC<CTableContainerProps> = (props) => <TableContainer {...props} />;
-export const CTableHead: React.FC<any> = (props) => <TableHead {...props} />;
-export const CTableRow: React.FC<CTableRowProps> = (props) => <TableRow {...props} />;
+export const CTableBody: React.FC<any> = (props) => <tbody {...props} />;
+export const CTableCell: React.FC<CTableCellProps> = ({ align, ...props }) => <td align={align === 'inherit' ? undefined : align} {...props} />;
+export const CTableContainer: React.FC<CTableContainerProps> = (props) => <div {...props} />;
+export const CTableHead: React.FC<any> = (props) => <thead {...props} />;
+export const CTableRow: React.FC<CTableRowProps> = (props) => <tr {...props} />;
 
 /**
  * --------------------------
@@ -99,9 +86,9 @@ export const CTableRow: React.FC<CTableRowProps> = (props) => <TableRow {...prop
 
 /**
  * CTable
- * 
+ *
  * A powerful, feature-rich data table component designed for the SAP Frontend architecture.
- * 
+ *
  * Key Features:
  * - Integrated Smart Filter Bar (Optional)
  * - Sort, Filter, Pagination
@@ -111,8 +98,8 @@ export const CTableRow: React.FC<CTableRowProps> = (props) => <TableRow {...prop
  * - Export to CSV
  * - Responsive Layout (Mobile Card View)
  * - Auto-fit Height Mode (Flexbox)
- * 
- * @param props.fitContainer - If true, the table expands to fill the parent container's remaining height (Flexbox). 
+ *
+ * @param props.fitContainer - If true, the table expands to fill the parent container's remaining height (Flexbox).
  *                             Requires parent to be a flex column with defined height.
  * @param props.maxHeight - Explicit max height string (e.g., '500px' or 'calc(100vh - 200px)').
  *                          Use this if fitContainer is false or for specific constraints.
@@ -197,7 +184,6 @@ export const CTable: React.FC<CTableProps> = (props) => {
     handleCloseContextMenu,
     toggleColumnVisibility,
     toggleGroupExpand,
-    toggleGroupField,
     handleToggleAll,
     handleExpandGroupRecursively,
     handleCollapseGroupRecursively,
@@ -466,7 +452,6 @@ export const CTable: React.FC<CTableProps> = (props) => {
                 grouping={grouping}
                 setGrouping={setGrouping}
                 columns={columns}
-                toggleGroupField={toggleGroupField}
             />
         )}
 
@@ -501,7 +486,7 @@ export const CTable: React.FC<CTableProps> = (props) => {
   // Mobile View Render (Card View)
   if (isMobile) {
     return (
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, height: '100%' }}>
+      <div sx={{ display: 'flex', flexDirection: 'column', gap: 2, height: '100%' }}>
           {filterConfig && (
               <CSmartFilter
                   fields={filterConfig.fields}
@@ -539,13 +524,13 @@ export const CTable: React.FC<CTableProps> = (props) => {
             selectionMode={selectionMode}
           />
           {menus}
-      </Box>
+      </div>
     );
   }
 
   return (
-    <Box sx={{ 
-        width: fullWidth ? '100%' : 'auto', 
+    <div sx={{
+        width: fullWidth ? '100%' : 'auto',
         mb: fitContainer ? 0 : 2,
         ...(fitContainer ? {
             flex: 1,
@@ -557,7 +542,7 @@ export const CTable: React.FC<CTableProps> = (props) => {
         } : {})
     }}>
         {filterConfig && (
-            <Box sx={{ mb: 2 }}>
+            <div sx={{ mb: 2 }}>
                 <CSmartFilter
                     fields={filterConfig.fields}
                     filters={filterConfig.filters}
@@ -583,11 +568,11 @@ export const CTable: React.FC<CTableProps> = (props) => {
                     variantService={filterConfig.variantService}
                     serviceUrl={serviceUrl ?? filterConfig.serviceUrl}
                 />
-            </Box>
+            </div>
         )}
 
-        <Paper sx={{ 
-            width: fullWidth ? '100%' : 'auto', 
+        <CPaper className="orb-ctable-surface" sx={{
+            width: fullWidth ? '100%' : 'auto',
             mb: fitContainer ? 0 : 2,
             display: 'flex',
             flexDirection: 'column',
@@ -614,7 +599,7 @@ export const CTable: React.FC<CTableProps> = (props) => {
                     backgroundPosition: '-120% 0',
                 },
             },
-            ...(maxHeight ? { height: maxHeight } : 
+            ...(maxHeight ? { height: maxHeight } :
                fitContainer ? { flex: 1, minHeight: 0, height: '100%' } : {})
         }}>
             {showToolbar && (
@@ -631,10 +616,13 @@ export const CTable: React.FC<CTableProps> = (props) => {
                     extraTools={extraTools}
                     grouping={grouping}
                     disableGrouping={disableGrouping}
+                    groupAnchorEl={groupAnchorEl}
                     setGroupAnchorEl={setGroupAnchorEl}
                     showSummary={showSummary}
                     setShowSummary={setShowSummary}
+                    anchorEl={anchorEl}
                     setAnchorEl={setAnchorEl}
+                    summaryAnchorEl={summaryAnchorEl}
                     setSummaryAnchorEl={setSummaryAnchorEl}
                     handleExport={handleExport}
                     showCreateButton={quickCreateEnabled}
@@ -652,7 +640,7 @@ export const CTable: React.FC<CTableProps> = (props) => {
                 />
             )}
 
-            <TableContainer sx={{ 
+            <div sx={{
                 flex: 1,
                 ...(maxHeight
                   ? { maxHeight, height: maxHeight }
@@ -664,26 +652,23 @@ export const CTable: React.FC<CTableProps> = (props) => {
                 position: 'relative',
                 minHeight: 0 // Important for nested flex scrolling
             }}>
-                <DndContext 
-                    sensors={sensors} 
-                    collisionDetection={closestCenter} 
+                <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
                     onDragEnd={handleDragEnd}
                     modifiers={[restrictToHorizontalAxis]}
                 >
-                    <Table
-                        sx={{ 
-                            minWidth: fullWidth ? 750 : 'auto',
+                    <table
+                        className="orb-tbl orb-ctable"
+                        style={{
+                            minWidth: fullWidth ? 750 : undefined,
                             width: fullWidth ? '100%' : 'auto',
                             tableLayout: Object.keys(columnWidths).length > 0 ? 'fixed' : 'auto',
-                            borderCollapse: 'separate', 
+                            borderCollapse: 'separate',
                             borderSpacing: 0,
-                            '& .MuiTableCell-root': {
-                              fontSize: TABLE_FONT_SIZE,
-                            },
+                            fontSize: TABLE_FONT_SIZE,
                         }}
                         aria-labelledby="tableTitle"
-                        size="small"
-                        stickyHeader={true}
                     >
                         <CSmartTableHead
                             columns={columns}
@@ -703,7 +688,7 @@ export const CTable: React.FC<CTableProps> = (props) => {
                             columnWidths={columnWidths}
                             onColumnResize={handleColumnResize}
                         />
-                        
+
                         <CSmartTableBody
                             visibleRows={visibleRows}
                             columns={columns}
@@ -732,17 +717,18 @@ export const CTable: React.FC<CTableProps> = (props) => {
                                 summaryRow={summaryRow}
                                 selectionMode={selectionMode?.toString()}
                                 grouping={grouping}
+                                columnWidths={columnWidths}
                                 orderBy={orderBy}
                                 zIndex={3} // Higher than default sticky header (2) to ensure it stays on top of content
                             />
                         )}
-                    </Table>
+                    </table>
                 </DndContext>
-            </TableContainer>
-        </Paper>
+            </div>
+        </CPaper>
 
         {quickCreateEnabled && (
-            <Dialog
+            <CDialog
                 open={quickCreateOpen}
                 onClose={handleCloseQuickCreateDialog}
                 fullWidth
@@ -757,16 +743,16 @@ export const CTable: React.FC<CTableProps> = (props) => {
                     },
                 }}
             >
-                <DialogTitle sx={{ fontSize: '0.85rem', fontWeight: 700, pb: 1 }}>
+                <div className="orb-dialog-title" sx={{ fontSize: '0.85rem', fontWeight: 700, pb: 1 }}>
                     {quickCreate?.title || t('quickCreate.createWithTitle', { title })}
-                </DialogTitle>
-                <DialogContent sx={{ pt: '8px !important' }}>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.25 }}>
+                </div>
+                <div className="orb-dialog-content" sx={{ pt: '8px !important' }}>
+                    <div sx={{ display: 'flex', flexDirection: 'column', gap: 1.25 }}>
                         {quickCreateColumns.map((column: any) => {
                             const type = column.type === 'number' || column.numeric ? 'number' : column.type === 'date' ? 'date' : 'text';
                             const label = column.label || column.id;
                             return (
-                                <TextField
+                                <CTextField
                                     key={`quick-create-${column.id}`}
                                     label={label}
                                     value={quickCreateValues[column.id] ?? ''}
@@ -784,30 +770,30 @@ export const CTable: React.FC<CTableProps> = (props) => {
                         })}
 
                         {quickCreate?.description && (
-                            <Alert severity="info" sx={{ fontSize: '0.85rem', '& .MuiAlert-message': { fontSize: '0.85rem' } }}>
+                            <Alert severity="info" sx={{ fontSize: '0.85rem', '& span': { fontSize: '0.85rem' } }}>
                                 {quickCreate.description}
                             </Alert>
                         )}
-                    </Box>
-                </DialogContent>
-                <DialogActions sx={{ px: 3, pb: 2 }}>
-                    <Button onClick={handleCloseQuickCreateDialog} sx={{ fontSize: '0.85rem' }} disabled={quickCreateSubmitting}>
+                    </div>
+                </div>
+                <div className="orb-dialog-actions" sx={{ px: 3, pb: 2 }}>
+                    <CButton onClick={handleCloseQuickCreateDialog} sx={{ fontSize: '0.85rem' }} disabled={quickCreateSubmitting}>
                         {quickCreate?.cancelLabel || t('common.cancel')}
-                    </Button>
-                    <Button
+                    </CButton>
+                    <CButton
                         onClick={handleSubmitQuickCreate}
                         variant="contained"
                         sx={{ fontSize: '0.85rem', fontWeight: 700 }}
                         disabled={quickCreateSubmitting}
                     >
                         {quickCreate?.submitLabel || t('common.save')}
-                    </Button>
-                </DialogActions>
-            </Dialog>
+                    </CButton>
+                </div>
+            </CDialog>
         )}
 
         {quickEditEnabled && (
-            <Dialog
+            <CDialog
                 open={quickEditOpen}
                 onClose={handleCloseQuickEditDialog}
                 fullWidth
@@ -822,17 +808,17 @@ export const CTable: React.FC<CTableProps> = (props) => {
                     },
                 }}
             >
-                <DialogTitle sx={{ fontSize: '0.85rem', fontWeight: 700, pb: 1 }}>
+                <div className="orb-dialog-title" sx={{ fontSize: '0.85rem', fontWeight: 700, pb: 1 }}>
                     {quickEdit?.title || t('quickEdit.editWithTitle', { title })}
-                </DialogTitle>
-                <DialogContent sx={{ pt: '8px !important' }}>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.25 }}>
+                </div>
+                <div className="orb-dialog-content" sx={{ pt: '8px !important' }}>
+                    <div sx={{ display: 'flex', flexDirection: 'column', gap: 1.25 }}>
                         {quickEditColumns.map((column: any) => {
                             const type = column.type === 'number' || column.numeric ? 'number' : column.type === 'date' ? 'date' : 'text';
                             const label = column.label || column.id;
                             const editable = isQuickEditFieldEditable(column.id);
                             return (
-                                <TextField
+                                <CTextField
                                     key={`quick-edit-${column.id}`}
                                     label={label}
                                     value={quickEditValues[column.id] ?? ''}
@@ -851,26 +837,26 @@ export const CTable: React.FC<CTableProps> = (props) => {
                         })}
 
                         {quickEdit?.description && (
-                            <Alert severity="info" sx={{ fontSize: '0.85rem', '& .MuiAlert-message': { fontSize: '0.85rem' } }}>
+                            <Alert severity="info" sx={{ fontSize: '0.85rem', '& span': { fontSize: '0.85rem' } }}>
                                 {quickEdit.description}
                             </Alert>
                         )}
-                    </Box>
-                </DialogContent>
-                <DialogActions sx={{ px: 3, pb: 2 }}>
-                    <Button onClick={handleCloseQuickEditDialog} sx={{ fontSize: '0.85rem' }} disabled={quickEditSubmitting}>
+                    </div>
+                </div>
+                <div className="orb-dialog-actions" sx={{ px: 3, pb: 2 }}>
+                    <CButton onClick={handleCloseQuickEditDialog} sx={{ fontSize: '0.85rem' }} disabled={quickEditSubmitting}>
                         {quickEdit?.cancelLabel || t('common.cancel')}
-                    </Button>
-                    <Button
+                    </CButton>
+                    <CButton
                         onClick={handleSubmitQuickEdit}
                         variant="contained"
                         sx={{ fontSize: '0.85rem', fontWeight: 700 }}
                         disabled={quickEditSubmitting || !selectedEditRow}
                     >
                         {quickEdit?.submitLabel || t('common.save')}
-                    </Button>
-                </DialogActions>
-            </Dialog>
+                    </CButton>
+                </div>
+            </CDialog>
         )}
 
         {quickDeleteEnabled && (
@@ -928,7 +914,7 @@ export const CTable: React.FC<CTableProps> = (props) => {
                 }
             />
         )}
-    </Box>
+    </div>
   );
 };
 

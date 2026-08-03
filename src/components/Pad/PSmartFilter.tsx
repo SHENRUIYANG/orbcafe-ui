@@ -1,6 +1,5 @@
 'use client';
 
-import { Box } from '@mui/material';
 import { CSmartFilter } from '../StdReport/CSmartFilter';
 import type { PSmartFilterProps } from './types';
 
@@ -8,70 +7,70 @@ export const PSmartFilter = ({ touchMode = 'comfortable', sx, ...props }: PSmart
   const expanded = touchMode === 'expanded';
 
   return (
-    <Box
+    <div
       sx={{
-        '& .MuiPaper-root': {
+        '& .orb-card': {
           borderRadius: 4,
         },
-        '& .MuiAutocomplete-root': {
+        '& .orb-autocomplete': {
           minWidth: { xs: '100%', md: 260 },
         },
-        '& .MuiAutocomplete-root .MuiInputBase-root': {
+        '& .orb-autocomplete .orb-inp-adornment-wrap, & .orb-inp': {
           backgroundColor: 'transparent !important',
         },
-        '& .MuiInputBase-root': {
+        '& .orb-inp-adornment-wrap, & .orb-inp': {
           minHeight: expanded ? 56 : 50,
           borderRadius: 3,
           fontSize: expanded ? '0.98rem' : '0.92rem',
         },
-        '& .MuiInputBase-input': {
+        '& .orb-inp': {
           py: expanded ? 1.6 : 1.25,
           fontSize: expanded ? '0.98rem' : '0.92rem',
         },
-        '& .MuiInputLabel-root': {
+        '& label': {
           fontSize: expanded ? '0.95rem' : '0.88rem',
         },
-        '& .MuiButton-root': {
+        '& .orb-btn': {
           minHeight: expanded ? 48 : 44,
           px: expanded ? 2.25 : 1.75,
           borderRadius: 3,
           fontSize: expanded ? '0.95rem' : '0.88rem',
           fontWeight: 700,
         },
-        '& .MuiIconButton-root': {
+        '& .orb-icon-btn': {
           width: expanded ? 40 : 36,
           height: expanded ? 40 : 36,
         },
-        '& .MuiMenuItem-root': {
+        '& .orb-menu-item, & option': {
           minHeight: expanded ? 44 : 38,
           fontSize: expanded ? '0.95rem' : '0.88rem',
         },
-        '& .MuiListSubheader-root': {
+        '& .orb-list-subheader': {
           py: 1,
         },
-        '& .MuiCheckbox-root': {
+        '& .orb-chk': {
           p: expanded ? 1 : 0.75,
         },
-        '& .MuiFormControlLabel-label': {
+        '& .orb-form-control-label > span': {
           fontSize: expanded ? '0.95rem' : '0.88rem',
         },
-        '& .MuiDialog-paper': {
+        '& .orb-dialog': {
           borderRadius: 4,
         },
-        '& .MuiDialogTitle-root': {
+        '& .orb-dialog-title': {
           fontSize: expanded ? '1.05rem' : '0.98rem',
           fontWeight: 800,
         },
-        '& .MuiDialogContent-root .MuiInputBase-root': {
+        '& .orb-dialog-content .orb-inp-adornment-wrap, & .orb-inp': {
           minHeight: 52,
         },
-        '& .MuiGrid-root > .MuiGrid-item, & .MuiGrid-root > .MuiGrid-sizeXs-1, & .MuiGrid-root > [class*="MuiGrid-grid-"]': {
+        '& .orb-grid > *': {
           minWidth: 0,
         },
         ...sx,
       }}
     >
       <CSmartFilter {...props} />
-    </Box>
+    </div>
   );
 };

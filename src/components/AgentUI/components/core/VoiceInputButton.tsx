@@ -1,8 +1,7 @@
 'use client'
 
+import { MicOffRoundedIcon, MicRoundedIcon } from '../../../../lib/orbis-compat';
 import React from 'react'
-import MicRoundedIcon from '@mui/icons-material/MicRounded'
-import MicOffRoundedIcon from '@mui/icons-material/MicOffRounded'
 import { useVoiceInput } from '@/components/AINav/Hooks/useVoiceInput'
 import { cn } from '../../lib/utils'
 
@@ -55,7 +54,7 @@ export const VoiceInputButton: React.FC<VoiceInputProps> = ({
       title={isRecording ? "Stop recording" : "Start recording"}
       type="button"
     >
-      {isRecording ? <MicOffRoundedIcon sx={{ fontSize: 24 }} /> : <MicRoundedIcon sx={{ fontSize: 24 }} />}
+      {isRecording ? <MicOffRoundedIcon size={16} /> : <MicRoundedIcon size={16} />}
     </button>
   )
 }

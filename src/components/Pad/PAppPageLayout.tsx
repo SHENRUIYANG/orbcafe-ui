@@ -1,17 +1,9 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
-import {
-  Box,
-  Divider,
-  Drawer,
-  IconButton,
-  Paper,
-  Stack,
-  useMediaQuery,
-} from '@mui/material';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
-import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
+import { Drawer, MenuRoundedIcon } from '../../lib/orbis-compat';
+import { useEffect, useState } from 'react';
+import { CDivider, CPaper, CStack, CIconButton } from "../Atoms";
+import { useMediaQuery } from "../../lib/hooks";
 import type { PAppPageLayoutProps } from './types';
 import { PNavIsland } from './PNavIsland';
 import { PWorkloadNav } from './PWorkloadNav';
@@ -95,66 +87,19 @@ export const PAppPageLayout = ({
   useEffect(() => {
     if (effectiveMode === 'dark') {
       document.documentElement.classList.add('dark');
+      document.documentElement.classList.add('orb-dark');
+      document.documentElement.dataset.orbMode = 'dark';
       document.documentElement.style.colorScheme = 'dark';
     } else {
       document.documentElement.classList.remove('dark');
+      document.documentElement.classList.remove('orb-dark');
+      document.documentElement.dataset.orbMode = 'light';
       document.documentElement.style.colorScheme = 'light';
     }
   }, [effectiveMode]);
 
-  const theme = useMemo(
-    () =>
-      createTheme({
-        palette:
-          effectiveMode === 'dark'
-            ? {
-                mode: 'dark',
-                primary: {
-                  main: '#93c5fd',
-                },
-                background: {
-                  default: '#060913',
-                  paper: '#101826',
-                },
-                text: {
-                  primary: '#f8fafc',
-                  secondary: 'rgba(226,232,240,0.74)',
-                },
-                divider: 'rgba(148,163,184,0.18)',
-                action: {
-                  hover: 'rgba(148,163,184,0.10)',
-                  selected: 'rgba(59,130,246,0.18)',
-                },
-              }
-            : {
-                mode: 'light',
-                background: {
-                  default: '#eef3f8',
-                  paper: '#ffffff',
-                },
-              },
-        components: {
-          MuiCssBaseline: {
-            styleOverrides: {
-              body: {
-                backgroundColor: effectiveMode === 'dark' ? '#060913' : '#eef3f8',
-              },
-            },
-          },
-          MuiPaper: {
-            styleOverrides: {
-              root: {
-                backgroundImage: 'none',
-              },
-            },
-          },
-        },
-      }),
-    [effectiveMode],
-  );
-
   const isPortraitViewport = useMediaQuery('(orientation: portrait)');
-  const isCompactViewport = useMediaQuery(theme.breakpoints.down('md'));
+  const isCompactViewport = useMediaQuery('(max-width: 899.95px)');
   const resolvedOrientation =
     orientation === 'auto' ? (!mounted || isPortraitViewport || isCompactViewport ? 'portrait' : 'landscape') : orientation;
 
@@ -174,21 +119,21 @@ export const PAppPageLayout = ({
   };
 
   const headerLeftSlot = (
-    <Stack direction="row" spacing={1} alignItems="center">
+    <CStack direction="row" spacing={1} alignItems="center">
       {(!mounted || (showNavigation && resolvedOrientation === 'portrait')) ? (
-        <IconButton onClick={() => updateNavigationOpen(!navigationOpen)} sx={{ bgcolor: 'action.hover' }}>
+        <CIconButton onClick={() => updateNavigationOpen(!navigationOpen)} sx={{ bgcolor: 'action.hover' }}>
           <MenuRoundedIcon />
-        </IconButton>
+        </CIconButton>
       ) : null}
       {leftHeaderSlot}
-    </Stack>
+    </CStack>
   );
 
   const headerRightSlot = (
-    <Stack direction="row" spacing={1} alignItems="center">
+    <CStack direction="row" spacing={1} alignItems="center">
       {actionSlot}
       {rightHeaderSlot}
-    </Stack>
+    </CStack>
   );
 
   const navContent = (
@@ -203,9 +148,8 @@ export const PAppPageLayout = ({
   );
 
   return (
-    <ThemeProvider theme={theme}>
-      <OrbcafeI18nProvider locale={locale}>
-        <Box
+    <OrbcafeI18nProvider locale={locale}>
+        <div
           sx={[
             (t) => ({
               minHeight: '100vh',
@@ -241,14 +185,14 @@ export const PAppPageLayout = ({
           />
 
           {headerSlot ? (
-            <Box sx={{ px: { xs: 2, md: 3 }, py: 1.5, borderBottom: '1px solid', borderColor: 'divider' }}>
+            <div sx={{ px: { xs: 2, md: 3 }, py: 1.5, borderBottom: '1px solid', borderColor: 'divider' }}>
               {headerSlot}
-            </Box>
+            </div>
           ) : null}
 
-          <Box sx={{ flex: 1, minHeight: 0, display: 'flex', position: 'relative' }}>
+          <div sx={{ flex: 1, minHeight: 0, display: 'flex', position: 'relative' }}>
             {mounted && showNavigation && resolvedOrientation === 'landscape' ? (
-              <Box sx={{ p: 1.5, pr: 0, flexShrink: 0 }}>{navContent}</Box>
+              <div sx={{ p: 1.5, pr: 0, flexShrink: 0 }}>{navContent}</div>
             ) : null}
 
             {(!mounted || (showNavigation && resolvedOrientation === 'portrait')) ? (
@@ -268,7 +212,7 @@ export const PAppPageLayout = ({
               </Drawer>
             ) : null}
 
-            <Box
+            <div
               sx={{
                 flex: 1,
                 minWidth: 0,
@@ -278,7 +222,7 @@ export const PAppPageLayout = ({
                 ...contentSx,
               }}
             >
-              <Stack spacing={1.5}>
+              <CStack spacing={1.5}>
                 {showWorkloadNav && workloadItems.length > 0 ? (
                   <PWorkloadNav
                     items={workloadItems}
@@ -288,7 +232,7 @@ export const PAppPageLayout = ({
                   />
                 ) : null}
 
-                <Paper
+                <CPaper
                   elevation={0}
                   sx={{
                     flex: 1,
@@ -298,25 +242,24 @@ export const PAppPageLayout = ({
                     border: '1px solid',
                     borderColor: 'divider',
                     bgcolor:
-                      theme.palette.mode === 'dark' ? 'rgba(15,23,42,0.72)' : 'rgba(255,255,255,0.72)',
+                      mode === 'dark' ? 'rgba(15,23,42,0.72)' : 'rgba(255,255,255,0.72)',
                     backdropFilter: 'blur(12px)',
                     color: 'text.primary',
                   }}
                 >
                   {children}
-                </Paper>
-              </Stack>
-            </Box>
-          </Box>
+                </CPaper>
+              </CStack>
+            </div>
+          </div>
 
           {resolvedOrientation === 'portrait' && portraitBottomSlot ? (
             <>
-              <Divider />
-              <Box sx={{ p: 1.5 }}>{portraitBottomSlot}</Box>
+              <CDivider />
+              <div sx={{ p: 1.5 }}>{portraitBottomSlot}</div>
             </>
           ) : null}
-        </Box>
-      </OrbcafeI18nProvider>
-    </ThemeProvider>
+        </div>
+    </OrbcafeI18nProvider>
   );
 };

@@ -15,14 +15,14 @@ Published copy of `src/components/Molecules/README.md`.
 
 - `CMessageBox`（直接从 `src/index.ts` 导出）
 - `CValueHelp`（直接从 `src/index.ts` 导出）
+- `CStatusBadge`（直接从 `src/index.ts` 导出）
+- `CList` 及 `CListItem`/`CListItemButton`/`CListItemIcon`/`CListItemText`/`CListSubheader`/`CListItemAvatar` 等（直接从 `src/index.ts` 导出）
+- `CFilterField`（直接从 `src/index.ts` 导出）
 - `CLayoutManagement`（通过 `StdReport` 间接导出，`import { CLayoutManagement } from 'orbcafe-ui'` 依然可用）
 
 ## 内部组件（不对外导出）
 
 - `CDateRangePicker`
-- `CFilterField`
-- `CList`（及 `CListItem` 等）
-- `CStatusBadge`
 - `CVariantManagement`
 - `CAppHeaderActions`
 

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import type { TreeMenuItem } from '../../Navigation-Island/tree-menu';
-import type { NavigationIslandDisplayMode } from '../../Navigation-Island/navigation-island';
+import type { NavigationIslandDisplayMode } from '../../Navigation-Island/navigation-island.types';
 import { useNavigationIsland } from '../../Navigation-Island/Hooks/use-navigation-island';
 
 export interface UsePageLayoutOptions {

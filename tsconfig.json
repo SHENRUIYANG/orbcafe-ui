@@ -13,6 +13,7 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
+    "jsxImportSource": "@orbcafe/orbis-jsx",
 
     /* Linting */
     "strict": true,
@@ -23,7 +24,9 @@
     /* Path Aliases */
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@orbcafe/orbis-jsx": ["./src/lib/orbis-compat"],
+      "@orbcafe/orbis-jsx/*": ["./src/lib/orbis-compat/*"]
     }
   },
   "include": ["src"],

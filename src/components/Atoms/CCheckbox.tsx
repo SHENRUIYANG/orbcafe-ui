@@ -1,48 +1,67 @@
-/**
- * @file 10_Frontend/components/sap/ui/Common/Atoms/CCheckbox.tsx
- * 
- * @summary Core frontend CCheckbox module for the ORBAI Core project
- * @author ORBAICODER
- * @version 1.0.0
- * @date 2025-01-19
- * 
- * @description
- * This file is responsible for:
- *  - Implementing CCheckbox functionality within frontend workflows
- *  - Integrating with shared ORBAI Core application processes under frontend
- * 
- * @logic
- * 1. Import required dependencies and configuration
- * 2. Execute the primary logic for CCheckbox
- * 3. Export the resulting APIs, hooks, or components for reuse
- * 
- * @changelog
- * V1.0.0 - 2025-01-19 - Initial creation
- */
+'use client';
 
-/**
- * File Overview
- * 
- * START CODING
- * 
- * --------------------------
- * SECTION 1: CCheckbox Core Logic
- * Section overview and description.
- * --------------------------
- */
+import { forwardRef } from 'react';
+import type { ChangeEvent, InputHTMLAttributes } from 'react';
+import { resolveOrbSx } from '../../lib/orbis-compat/sx';
+import type { OrbSxProps } from '../../lib/orbis-compat/sx';
 
-import { Checkbox, FormControlLabel } from '@mui/material';
-import type { CheckboxProps } from '@mui/material';
-
-interface CCheckboxProps extends CheckboxProps {
-  label: string;
+export interface CCheckboxProps {
+  label?: React.ReactNode;
+  checked?: boolean;
+  defaultChecked?: boolean;
+  onChange?: (event: ChangeEvent<HTMLInputElement>) => void;
+  disabled?: boolean;
+  indeterminate?: boolean;
+  name?: string;
+  value?: string;
+  id?: string;
+  size?: 'small' | 'medium';
+  color?: string;
+  onClick?: React.MouseEventHandler<HTMLElement>;
+  inputProps?: InputHTMLAttributes<HTMLInputElement>;
+  sx?: OrbSxProps;
+  className?: string;
 }
 
-export const CCheckbox = ({ label, ...props }: CCheckboxProps) => {
-  return (
-    <FormControlLabel
-      control={<Checkbox {...props} />}
-      label={label}
-    />
-  );
-};
+export const CCheckbox = forwardRef<HTMLInputElement, CCheckboxProps>(
+  ({ label, checked, defaultChecked, onChange, disabled, indeterminate, name, value, id, size, color, onClick, inputProps, sx, className }, ref) => {
+    const resolved = resolveOrbSx([{ ...(size === 'small' ? { fontSize: 13 } : undefined), ...(color ? { color } : undefined) }, ...(Array.isArray(sx) ? sx : sx ? [sx] : [])], `orb-chk ${className ?? ''}`);
+    const input = (
+      <input
+        ref={(node) => {
+          if (node) node.indeterminate = Boolean(indeterminate);
+          if (typeof ref === 'function') ref(node);
+          else if (ref) ref.current = node;
+        }}
+        type="checkbox"
+        id={id}
+        checked={checked}
+        defaultChecked={defaultChecked}
+        onChange={onChange}
+        readOnly={checked !== undefined && onChange === undefined}
+        disabled={disabled}
+        name={name}
+        value={value}
+        onClick={onClick}
+        {...inputProps}
+      />
+    );
+
+    if (label === undefined || label === null) {
+      return (
+        <span className={resolved.className} style={resolved.style}>
+          {input}
+        </span>
+      );
+    }
+
+    return (
+      <label className={resolved.className} style={resolved.style}>
+        {input}
+        <span>{label}</span>
+      </label>
+    );
+  },
+);
+
+CCheckbox.displayName = 'CCheckbox';

@@ -1,31 +1,40 @@
-
-import { TableFooter, TableRow, TableCell } from '@mui/material';
-import { tableGroupControlCellSx, tableSelectionCellSx } from './ctableControlSx';
+import { TABLE_CONTROL_COLUMN_WIDTH, TABLE_GROUP_CONTROL_COLUMN_WIDTH } from './ctableControlSx';
 
 export const CTableFooter = (props: any) => {
-    const { visibleColumns, summaryRow, selectionMode, grouping = [] } = props;
+    const { columns = [], visibleColumns, summaryRow, selectionMode, grouping = [], columnWidths = {} } = props;
     if (!props.showSummary) return null;
 
     const isSelectionEnabled = selectionMode === 'multiple' || selectionMode === 'single';
     const hasGrouping = grouping.length > 0;
+    const orderedVisibleColumns = columns.filter((column: any) => visibleColumns.includes(column.id));
 
     return (
-        <TableFooter sx={{ position: 'sticky', bottom: 0, zIndex: props.zIndex, bgcolor: 'background.paper' }}>
-            <TableRow>
-                {isSelectionEnabled && <TableCell padding="checkbox" sx={{ ...tableSelectionCellSx, bgcolor: 'background.paper' }} />}
-                {hasGrouping && <TableCell padding="checkbox" sx={{ ...tableGroupControlCellSx, bgcolor: 'background.paper' }} />}
-                {visibleColumns.map((colId: string) => (
-                    <TableCell 
-                        key={colId} 
-                        sx={{ 
-                            fontWeight: 'bold',
-                            fontSize: '0.85rem',
-                            bgcolor: 'background.paper', // Ensure sticky footer has background
-                            color: 'text.primary'
+        <tfoot className="orb-table-footer" style={{ zIndex: props.zIndex }}>
+            <tr>
+                {isSelectionEnabled && (
+                    <td
+                        className="orb-table-footer-control"
+                        style={{ width: TABLE_CONTROL_COLUMN_WIDTH, minWidth: TABLE_CONTROL_COLUMN_WIDTH, maxWidth: TABLE_CONTROL_COLUMN_WIDTH }}
+                    />
+                )}
+                {hasGrouping && (
+                    <td
+                        className="orb-table-footer-control"
+                        style={{ width: TABLE_GROUP_CONTROL_COLUMN_WIDTH, minWidth: TABLE_GROUP_CONTROL_COLUMN_WIDTH, maxWidth: TABLE_GROUP_CONTROL_COLUMN_WIDTH }}
+                    />
+                )}
+                {orderedVisibleColumns.map((column: any) => (
+                    <td
+                        key={column.id}
+                        className={`orb-table-footer-cell ${column.numeric ? 'orb-num' : ''}`}
+                        style={{
+                            width: columnWidths[column.id] || column.minWidth || 100,
+                            minWidth: columnWidths[column.id] || column.minWidth || 100,
+                            maxWidth: columnWidths[column.id] || column.minWidth || 100,
                         }}
                     >
                         {(function formatSummaryValue() {
-                            const val = summaryRow[colId];
+                            const val = summaryRow[column.id];
                             if (val === undefined || val === null || val === '') return '';
                             // Try to format as number if it looks like one
                             if (typeof val === 'number') return val.toLocaleString();
@@ -34,9 +43,9 @@ export const CTableFooter = (props: any) => {
                             }
                             return val;
                         })()}
-                    </TableCell>
+                    </td>
                 ))}
-            </TableRow>
-        </TableFooter>
+            </tr>
+        </tfoot>
     );
 };

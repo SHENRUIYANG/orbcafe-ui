@@ -1,4 +1,5 @@
-import { Box, Stack, Typography } from '@mui/material';
+import { CStack, CTypography } from '../../../Atoms';
+
 import type { GraphPieDatum } from '../../types';
 
 const DEFAULT_COLORS = ['#1E88E5', '#1ABC9C', '#FBC02D', '#EF5350', '#7E57C2', '#78909C'];
@@ -21,7 +22,7 @@ export const CPieChart = ({
   onItemClick,
 }: CPieChartProps) => {
   if (data.length === 0) {
-    return <Typography variant="body2" color="text.secondary">No data</Typography>;
+    return <CTypography variant="body2" muted>No data</CTypography>;
   }
 
   let offset = 0;
@@ -32,9 +33,8 @@ export const CPieChart = ({
   });
 
   return (
-    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="center">
-      <Box
-        sx={{
+    <CStack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="center">
+          <div style={{
           width: size,
           height: size,
           borderRadius: '50%',
@@ -44,19 +44,18 @@ export const CPieChart = ({
         }}
       >
         {variant === 'donut' && (
-          <Box
-            sx={{
+              <div style={{
               position: 'absolute',
               inset: Math.round(size * 0.18),
-              bgcolor: 'background.paper',
+              background: 'background.paper',
               borderRadius: '50%',
             }}
           />
         )}
-      </Box>
-      <Stack spacing={1} sx={{ minWidth: 180 }}>
+      </div>
+      <CStack spacing={1} sx={{ minWidth: 180 }}>
         {data.map((item, index) => (
-          <Box
+          <div
             key={item.name}
             onClick={() => onItemClick?.(item)}
             sx={{
@@ -67,16 +66,16 @@ export const CPieChart = ({
               opacity: activeName && item.name !== activeName ? 0.45 : 1,
             }}
           >
-            <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: colors[index % colors.length] }} />
-            <Typography variant="caption" sx={{ flex: 1 }}>
+                <div style={{ width: 10, height: 10, borderRadius: '50%', background: colors[index % colors.length] }} />
+            <CTypography variant="caption" sx={{ flex: 1 }}>
               {item.name}
-            </Typography>
-            <Typography variant="caption" sx={{ fontWeight: 700 }}>
+            </CTypography>
+            <CTypography variant="caption" sx={{ fontWeight: 700 }}>
               {item.percent.toFixed(0)}%
-            </Typography>
-          </Box>
+            </CTypography>
+          </div>
         ))}
-      </Stack>
-    </Stack>
+      </CStack>
+    </CStack>
   );
 };

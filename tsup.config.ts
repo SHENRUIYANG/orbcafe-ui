@@ -6,14 +6,10 @@ export default defineConfig({
   dts: true,              // 自动生成 TypeScript 类型声明文件 (.d.ts)
   minify: true,           // 压缩代码
   clean: true,            // 每次打包前清空旧文件
+  publicDir: 'src/styles', // 拷贝 orbis.css 等到 dist/（消费者 import 'orbcafe-ui/dist/orbis.css'）
   external: [
     'react',
     'react-dom',
-    '@emotion/react',
-    '@emotion/styled',
-    '@mui/material',
-    '@mui/icons-material',
-    '@mui/x-date-pickers',
     'framer-motion',
     'ogl',
   ], // 告诉打包工具：这些包由使用者的项目提供，不要打包进去

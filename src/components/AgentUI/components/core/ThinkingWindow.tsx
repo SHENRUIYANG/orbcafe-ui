@@ -2,8 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Loader2, RefreshCw } from 'lucide-react'
-import { CButton as Button } from '@/components/Atoms/CButton'
+import { Loader2, RefreshCw } from '@/components/Icons'
+import { CButton } from '@/components/Atoms/CButton'
 import { CTextArea as Textarea } from '@/components/Atoms/CTextArea'
 import { cn } from '@/lib/utils'
 
@@ -53,7 +53,7 @@ export function ThinkingWindow({
     if (!isStreaming && !isWaitingForInput && isThinkingOpen && onCloseThinking) {
       const timer = setTimeout(() => {
         onCloseThinking()
-      }, 1500) 
+      }, 1500)
       return () => clearTimeout(timer)
     }
   }, [isStreaming, isThinkingOpen, onCloseThinking, isWaitingForInput])
@@ -128,18 +128,18 @@ export function ThinkingWindow({
               )}
             </div>
             {!isStreaming && onCloseThinking && (
-              <Button 
-                variant="outlined" 
-                size="small" 
+              <CButton
+                variant="outlined"
+                size="small"
                 onClick={onCloseThinking}
                 className="h-6 text-xs text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
               >
                 Close
-              </Button>
+              </CButton>
             )}
           </div>
-          
-          <div 
+
+          <div
             ref={scrollRef}
             className={cn(
                 "flex-1 overflow-y-auto scrollbar-hide px-4 pb-4 transition-all duration-300",
@@ -153,7 +153,7 @@ export function ThinkingWindow({
 
           <AnimatePresence>
             {isWaitingForInput && interruptState && (
-                <motion.div 
+                <motion.div
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
                     exit={{ opacity: 0, height: 0 }}
@@ -181,7 +181,7 @@ export function ThinkingWindow({
                                     <div className="flex-1 max-h-[200px] overflow-y-auto mb-2 scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-gray-700">
                                         <p className="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap">{interruptState.original}</p>
                                     </div>
-                                    <Button variant="outlined" size="small" className="w-full text-xs h-7 border border-gray-200 dark:border-gray-800" onClick={handleUseOriginal}>Use Original</Button>
+                                    <CButton variant="outlined" size="small" className="w-full text-xs h-7 border border-gray-200 dark:border-gray-800" onClick={handleUseOriginal}>Use Original</CButton>
                                 </div>
                                 <div className="p-3 rounded-lg border border-green-200 dark:border-green-900 bg-green-50/30 dark:bg-green-900/10 ring-1 ring-green-500/20 flex flex-col">
                                     <p className="text-xs font-semibold text-green-600 dark:text-green-400 mb-1 uppercase tracking-wider">Refined Request</p>
@@ -189,36 +189,36 @@ export function ThinkingWindow({
                                         <p className="text-sm text-gray-900 dark:text-gray-100 whitespace-pre-wrap">{interruptState.proposed}</p>
                                     </div>
                                     <div className="flex gap-2">
-                                        <Button variant="outlined" size="small" className="flex-1 text-xs h-7 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/30" onClick={() => setEditMode(true)}>
+                                        <CButton variant="outlined" size="small" className="flex-1 text-xs h-7 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/30" onClick={() => setEditMode(true)}>
                                             Edit
-                                        </Button>
-                                        <Button size="small" className="flex-[2] text-xs h-7 bg-green-600 hover:bg-green-700 text-white" onClick={handleConfirmProposed}>
+                                        </CButton>
+                                        <CButton size="small" className="flex-[2] text-xs h-7 bg-green-600 hover:bg-green-700 text-white" onClick={handleConfirmProposed}>
                                             Confirm
-                                        </Button>
+                                        </CButton>
                                     </div>
                                 </div>
                             </div>
                         ) : (
                             <div className="space-y-2">
                                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Edit Request</p>
-                                <Textarea 
+                                <Textarea
                                     value={customInput}
                                     onChange={(e: any) => setCustomInput(e.target.value)}
                                     className="text-sm min-h-[100px] resize-none"
                                     placeholder="Enter your instructions..."
                                 />
                                 <div className="flex justify-end gap-2">
-                                    <Button variant="outlined" size="small" onClick={() => setEditMode(false)}>Cancel</Button>
-                                    <Button size="small" onClick={handleSubmitCustom}>Submit</Button>
+                                    <CButton variant="outlined" size="small" onClick={() => setEditMode(false)}>Cancel</CButton>
+                                    <CButton size="small" onClick={handleSubmitCustom}>Submit</CButton>
                                 </div>
                             </div>
                         )}
 
                         {!editMode && (
                              <div className="flex justify-center">
-                                 <Button variant="text" size="small" className="text-xs text-gray-500" onClick={() => setEditMode(true)}>
+                                 <CButton variant="text" size="small" className="text-xs text-gray-500" onClick={() => setEditMode(true)}>
                                      I want to edit the request manually
-                                 </Button>
+                                 </CButton>
                              </div>
                         )}
                     </div>

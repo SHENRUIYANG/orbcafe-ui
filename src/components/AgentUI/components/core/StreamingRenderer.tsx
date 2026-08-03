@@ -81,10 +81,11 @@ const StreamingMarkdown: React.FC<StreamingMarkdownProps> = ({
         />
         
         {showCursor && (
-          <span 
-            className="inline-block w-0.5 h-5 bg-blue-500 ml-1 animate-pulse"
+          <span
+            className="inline-block w-[2px] h-[13px] ml-0.5 animate-pulse"
             style={{
-              verticalAlign: 'text-bottom'
+              verticalAlign: 'text-bottom',
+              backgroundColor: 'var(--orb-primary, #154194)'
             }}
           />
         )}

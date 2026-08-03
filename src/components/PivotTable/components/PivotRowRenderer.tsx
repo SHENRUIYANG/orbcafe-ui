@@ -1,7 +1,7 @@
+import { getOrbCompatMode } from '../../../lib/orbis-compat';
+import { KeyboardArrowDownIcon, KeyboardArrowRightIcon } from '../../../lib/orbis-compat';
 import React from 'react';
-import { Box, IconButton, TableCell, TableRow } from '@mui/material';
-import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import {  CIconButton } from "../../Atoms";
 import type { PivotDataColumn, PivotTreeNode } from '../pivotModel';
 import type { PivotFieldDefinition } from '../types';
 import { formatAggregatedValue } from '../pivotUtils';
@@ -31,27 +31,27 @@ export const PivotRowRenderer: React.FC<PivotRowRendererProps> = ({
 
   return (
     <>
-      <TableRow
-        sx={(theme) => ({
+      <tr
+        sx={{
           bgcolor: isGrandTotal
-            ? theme.palette.mode === 'dark'
+            ? getOrbCompatMode() === 'dark'
               ? 'rgba(25, 118, 210, 0.22)'
               : 'rgba(47, 91, 255, 0.08)'
-            : theme.palette.mode === 'dark'
+            : getOrbCompatMode() === 'dark'
               ? '#111111'
               : 'background.paper',
           '&:hover': {
             bgcolor: isGrandTotal
-              ? theme.palette.mode === 'dark'
+              ? getOrbCompatMode() === 'dark'
                 ? 'rgba(25, 118, 210, 0.28)'
                 : 'rgba(47, 91, 255, 0.12)'
-              : theme.palette.mode === 'dark'
+              : getOrbCompatMode() === 'dark'
                 ? '#181818'
                 : 'rgba(0, 0, 0, 0.02)',
           },
-        })}
+        }}
       >
-        <TableCell
+        <td
           sx={(theme) => ({
             fontSize: '0.76rem',
             fontWeight: isGrandTotal ? 800 : 600,
@@ -64,16 +64,16 @@ export const PivotRowRenderer: React.FC<PivotRowRendererProps> = ({
           })}
         >
           {hasChildren && !isGrandTotal && (
-            <IconButton size="small" onClick={() => onToggle(node.key)} sx={{ p: 0.2, mr: 0.5, ml: -1 }}>
+            <CIconButton size="small" onClick={() => onToggle(node.key)} sx={{ p: 0.2, mr: 0.5, ml: -1 }}>
               {isExpanded ? <KeyboardArrowDownIcon sx={{ fontSize: 16 }} /> : <KeyboardArrowRightIcon sx={{ fontSize: 16 }} />}
-            </IconButton>
+            </CIconButton>
           )}
-          {!hasChildren && !isGrandTotal && level > 0 && <Box sx={{ width: 20 }} />}
+          {!hasChildren && !isGrandTotal && level > 0 && <div sx={{ width: 20 }} />}
           {node.value}
-        </TableCell>
+        </td>
 
         {dataColumns.map((column) => (
-          <TableCell
+          <td
             key={`${node.key}-${column.id}`}
             align="right"
             sx={{
@@ -84,9 +84,9 @@ export const PivotRowRenderer: React.FC<PivotRowRendererProps> = ({
             }}
           >
             {formatAggregatedValue(getValue ? getValue(node, column.id) : (node.aggregatedValues[column.id] ?? 0), column.valueItem, fieldMap)}
-          </TableCell>
+          </td>
         ))}
-      </TableRow>
+      </tr>
 
       {isExpanded &&
         node.children.map((child) => (

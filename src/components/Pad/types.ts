@@ -1,5 +1,5 @@
+import { SxProps, Theme } from '../../lib/orbis-compat';
 import type { HTMLAttributes, ReactNode } from 'react';
-import type { SxProps, Theme } from '@mui/material/styles';
 import type { TreeMenuItem } from '../Navigation-Island/tree-menu';
 import type { CTableProps } from '../StdReport/Hooks/CTable/types';
 import type { CSmartFilterProps } from '../StdReport/CSmartFilter';

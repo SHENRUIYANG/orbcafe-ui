@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { Alert, Box, CircularProgress, Paper, Typography } from '@mui/material';
+import { Alert, Box, CircularProgress, Paper, Typography } from '../orbis-compat';
 import { CodeBlock } from './CodeBlock';
 
 export interface MermaidBlockProps {

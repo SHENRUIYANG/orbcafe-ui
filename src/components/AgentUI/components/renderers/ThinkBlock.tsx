@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { ChevronDown as ChevronDownIcon, ChevronRight as ChevronRightIcon } from 'lucide-react'
+import { ChevronDown as ChevronDownIcon, ChevronRight as ChevronRightIcon } from '@/components/Icons'
 import { useTheme } from 'next-themes'
 import styles from '../styles/thinkblock.module.css'
 

@@ -1,4 +1,5 @@
-import { Box, Typography } from '@mui/material';
+import { CTypography } from '../../../Atoms';
+
 import type { GraphLineDatum } from '../../types';
 
 export interface CLineChartProps {
@@ -15,7 +16,7 @@ export const CLineChart = ({
   height = 220,
 }: CLineChartProps) => {
   if (data.length === 0) {
-    return <Typography variant="body2" color="text.secondary">No data</Typography>;
+    return <CTypography variant="body2" muted>No data</CTypography>;
   }
 
   const width = 640;
@@ -34,27 +35,27 @@ export const CLineChart = ({
   const pointsAttr = points.map((p) => `${p.x},${p.y}`).join(' ');
 
   return (
-    <Box>
-      <Box component="svg" viewBox={`0 0 ${width} ${height}`} sx={{ width: '100%', height }}>
+    <div>
+      <div component="svg" viewBox={`0 0 ${width} ${height}`} style={{ width: '100%', height }}>
         <line x1={padding} y1={height - padding} x2={width - padding} y2={height - padding} stroke="rgba(148,163,184,0.4)" />
         <polyline fill="none" stroke={color} strokeWidth={3} points={pointsAttr} />
         {points.map((point) => (
           <circle key={point.name} cx={point.x} cy={point.y} r={4} fill={color} />
         ))}
-      </Box>
+      </div>
 
-      <Box sx={{ mt: 1, display: 'grid', gridTemplateColumns: `repeat(${data.length}, minmax(0, 1fr))`, gap: 1 }}>
+          <div sx={{ mt: 1, display: 'grid', gridTemplateColumns: `repeat(${data.length}, minmax(0, 1fr))`, gap: 1 }}>
         {data.map((item) => (
-          <Box key={item.name} sx={{ minWidth: 0 }}>
-            <Typography variant="caption" noWrap title={item.name} sx={{ display: 'block' }}>
+          <div key={item.name} style={{ minWidth: 0 }}>
+            <CTypography variant="caption"  title={item.name} sx={{ display: 'block' }}>
               {item.name}
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
+            </CTypography>
+            <CTypography variant="caption" muted>
               {item.value.toFixed(1)}{valueSuffix}
-            </Typography>
-          </Box>
+            </CTypography>
+          </div>
         ))}
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 };

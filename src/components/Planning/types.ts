@@ -1,5 +1,5 @@
+import { SxProps, Theme } from '../../lib/orbis-compat';
 import type { ReactNode } from 'react';
-import type { SxProps, Theme } from '@mui/material/styles';
 
 export type PlanningGanttScale = 'hour' | 'day' | 'week' | 'month';
 export type PlanningTaskStatus = 'not-started' | 'planned' | 'in-progress' | 'blocked' | 'done' | string;

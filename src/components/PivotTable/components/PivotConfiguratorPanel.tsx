@@ -1,10 +1,6 @@
+import { DragIndicatorIcon, FilterListIcon, FunctionsIcon, TableRowsIcon, ViewColumnIcon } from '../../../lib/orbis-compat';
 import React from 'react';
-import { Box, Stack, Typography } from '@mui/material';
-import FunctionsIcon from '@mui/icons-material/Functions';
-import FilterListIcon from '@mui/icons-material/FilterList';
-import TableRowsIcon from '@mui/icons-material/TableRows';
-import ViewColumnIcon from '@mui/icons-material/ViewColumn';
-import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
+import {  CStack, CTypography } from "../../Atoms";
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import type { AxisZone, ValueZoneItem } from '../pivotModel';
 import type { PivotAggregation, PivotFieldDefinition } from '../types';
@@ -72,7 +68,7 @@ export const PivotConfiguratorPanel: React.FC<PivotConfiguratorPanelProps> = ({
       collapseAriaLabel={t('pivot.collapse.ariaCollapse')}
       unmountOnExit
     >
-      <Box
+      <div
         sx={{
           display: 'grid',
           gridTemplateColumns: { xs: '1fr', lg: '260px 1fr' },
@@ -86,9 +82,9 @@ export const PivotConfiguratorPanel: React.FC<PivotConfiguratorPanelProps> = ({
           itemCount={availableFields.length}
           icon={<DragIndicatorIcon sx={{ fontSize: 16, color: 'text.secondary' }} />}
         >
-          <Stack spacing={0.8} sx={{ maxHeight: 400, overflowY: 'auto', pr: 0.5 }}>
+          <CStack spacing={0.8} sx={{ maxHeight: 400, overflowY: 'auto', pr: 0.5 }}>
             {availableFields.length === 0 && (
-              <Typography sx={{ fontSize: '0.74rem', color: 'text.secondary', py: 1 }}>{t('pivot.allFieldsInUse')}</Typography>
+              <CTypography sx={{ fontSize: '0.74rem', color: 'text.secondary', py: 1 }}>{t('pivot.allFieldsInUse')}</CTypography>
             )}
             {availableFields.map((field) => (
               <FieldPaletteToken
@@ -98,11 +94,11 @@ export const PivotConfiguratorPanel: React.FC<PivotConfiguratorPanelProps> = ({
                 subtitle={field.type ?? 'string'}
               />
             ))}
-          </Stack>
+          </CStack>
         </DropZone>
 
-        <Stack spacing={2}>
-          <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+        <CStack spacing={2}>
+          <div sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
             <DropZone
               zone="filters"
               title={t('pivot.zone.filters')}
@@ -112,7 +108,7 @@ export const PivotConfiguratorPanel: React.FC<PivotConfiguratorPanelProps> = ({
               onClear={() => clearZone('filters')}
             >
               <SortableContext items={filterFields.map((fieldId) => `item|filters|${fieldId}`)} strategy={verticalListSortingStrategy}>
-                <Stack spacing={0.7}>
+                <CStack spacing={0.7}>
                   {filterFields.map((fieldId) => (
                     <SortableZoneToken
                       key={fieldId}
@@ -123,7 +119,7 @@ export const PivotConfiguratorPanel: React.FC<PivotConfiguratorPanelProps> = ({
                       onRemove={() => removeFieldFromZone('filters', fieldId)}
                     />
                   ))}
-                </Stack>
+                </CStack>
               </SortableContext>
             </DropZone>
 
@@ -136,7 +132,7 @@ export const PivotConfiguratorPanel: React.FC<PivotConfiguratorPanelProps> = ({
               onClear={() => clearZone('columns')}
             >
               <SortableContext items={columnFields.map((fieldId) => `item|columns|${fieldId}`)} strategy={verticalListSortingStrategy}>
-                <Stack spacing={0.7}>
+                <CStack spacing={0.7}>
                   {columnFields.map((fieldId) => (
                     <SortableZoneToken
                       key={fieldId}
@@ -147,12 +143,12 @@ export const PivotConfiguratorPanel: React.FC<PivotConfiguratorPanelProps> = ({
                       onRemove={() => removeFieldFromZone('columns', fieldId)}
                     />
                   ))}
-                </Stack>
+                </CStack>
               </SortableContext>
             </DropZone>
-          </Box>
+          </div>
 
-          <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+          <div sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
             <DropZone
               zone="rows"
               title={t('pivot.zone.rows')}
@@ -162,7 +158,7 @@ export const PivotConfiguratorPanel: React.FC<PivotConfiguratorPanelProps> = ({
               onClear={() => clearZone('rows')}
             >
               <SortableContext items={rowFields.map((fieldId) => `item|rows|${fieldId}`)} strategy={verticalListSortingStrategy}>
-                <Stack spacing={0.7}>
+                <CStack spacing={0.7}>
                   {rowFields.map((fieldId) => (
                     <SortableZoneToken
                       key={fieldId}
@@ -173,7 +169,7 @@ export const PivotConfiguratorPanel: React.FC<PivotConfiguratorPanelProps> = ({
                       onRemove={() => removeFieldFromZone('rows', fieldId)}
                     />
                   ))}
-                </Stack>
+                </CStack>
               </SortableContext>
             </DropZone>
 
@@ -186,7 +182,7 @@ export const PivotConfiguratorPanel: React.FC<PivotConfiguratorPanelProps> = ({
               onClear={() => clearZone('values')}
             >
               <SortableContext items={valueFields.map((item) => `item|values|${item.tokenId}`)} strategy={verticalListSortingStrategy}>
-                <Stack spacing={0.7}>
+                <CStack spacing={0.7}>
                   {valueFields.map((item) => {
                     const fieldLabel = fieldMap.get(item.fieldId)?.label ?? item.fieldId;
                     const caption = `${getAggregationLabel(item.aggregation)}(${fieldLabel})`;
@@ -201,12 +197,12 @@ export const PivotConfiguratorPanel: React.FC<PivotConfiguratorPanelProps> = ({
                       />
                     );
                   })}
-                </Stack>
+                </CStack>
               </SortableContext>
             </DropZone>
-          </Box>
-        </Stack>
-      </Box>
+          </div>
+        </CStack>
+      </div>
     </PivotSectionCard>
   );
 };

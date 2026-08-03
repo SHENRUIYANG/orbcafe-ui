@@ -17,23 +17,22 @@ description: Build ORBCAFE application shell and navigation with CAppPageLayout,
 ## Canonical Setup
 
 先检查宿主 `package.json`，缺失或版本不兼容时才安装。  
-`NavigationIsland` / `TreeMenu` / `button` 相关依赖建议完整满足：
-- `lucide-react`
-- `tailwind-merge`
-- `clsx`
-- `class-variance-authority`
-- `@radix-ui/react-slot`
+V2 是 MUI-free，`NavigationIsland` / `TreeMenu` / `Button` 的运行时依赖（`@radix-ui/react-slot`、`class-variance-authority`、`tailwind-merge`、`clsx` 等）已随 `orbcafe-ui` 一并安装，消费项目不需要单独安装它们。
 
 标准安装命令：
 
 ```bash
-npm install orbcafe-ui @mui/material@^7.3.9 @mui/icons-material@^7.3.9 @mui/x-date-pickers@^8.27.2 @emotion/react@^11.14.0 @emotion/styled@^11.14.1 dayjs@^1.11.20 lucide-react@^0.575.0 tailwind-merge@^3.5.0 clsx@^2.1.1 class-variance-authority@^0.7.1 @radix-ui/react-slot@^1.2.4
+npm install orbcafe-ui
+# ORBCAFE UI v2 是 MUI-free；不要安装 @mui/*、@emotion/*、lucide-react。
+# 组件使用 Tailwind utility classes，宿主需要 Tailwind v4：
+npm install -D tailwindcss @tailwindcss/postcss
 ```
 
 安装后建议做一次依赖验证：
 
 ```bash
-npm ls lucide-react tailwind-merge clsx class-variance-authority @radix-ui/react-slot
+npm ls orbcafe-ui
+# 再确认全局 CSS 里已引入 orbis.css 并配置 Tailwind v4 @source（见 orbcafe-ui-component-usage/integration-baseline.md）
 ```
 
 官方 examples 不随 npm 包发布。消费项目没有 `examples/` 时，到 ORBCAFE GitHub 仓库或本地 ORBCAFE 源码仓库对照。
@@ -75,5 +74,5 @@ npm run dev
 - `CAppPageLayout` 是首选接入口；只有自定义 shell 时才直接使用 `NavigationIsland + useNavigationIsland`。
 - `navigationMode` / `defaultNavigationMode` 控制 fixed/floating；不要在页面层重写一个独立浮动导航系统。
 - `CPageTransition` 持续使用 `160-260ms`，仅用 transform/opacity 变换，性能更稳。
-- `Providers` 层集中挂载 `ThemeProvider + LocalizationProvider + GlobalMessage`，避免每页重复配置。
+- `Providers` 层集中挂载 `OrbisModeProvider + GlobalMessage`（V2 MUI-free），避免每页重复配置；`CAppPageLayout` 已内部渲染这两个 Provider，独立页面才需要手动包裹。
 - 如无明确需求，建议不改全局样式文件（如 `app/globals.css`、`styles.css`、tailwind 主题变量）；优先通过组件 props、`sx`、现有 theme 扩展完成调整。

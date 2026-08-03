@@ -11,7 +11,7 @@ import {
   TableHead,
   TableRow,
   Typography,
-} from '@mui/material';
+} from '../orbis-compat';
 
 export type TableAlign = 'left' | 'center' | 'right';
 

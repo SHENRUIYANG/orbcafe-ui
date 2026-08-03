@@ -19,7 +19,10 @@ description: Build ORBCAFE touch-first pad experiences with PAppPageLayout, PNav
 先检查宿主 `package.json`，缺失或版本不兼容时才安装：
 
 ```bash
-npm install orbcafe-ui @mui/material@^7.3.9 @mui/icons-material@^7.3.9 lucide-react@^0.575.0
+npm install orbcafe-ui
+# ORBCAFE UI v2 是 MUI-free；不要安装 @mui/*、@emotion/*、lucide-react。
+# 组件使用 Tailwind utility classes，宿主需要 Tailwind v4：
+npm install -D tailwindcss @tailwindcss/postcss
 ```
 
 参考实现：
@@ -32,26 +35,27 @@ npm install orbcafe-ui @mui/material@^7.3.9 @mui/icons-material@^7.3.9 lucide-re
 
 标准 Pad 页面使用固定的组件层级，Pad 路由不要使用桌面端布局（`CAppPageLayout`、`CTable`）。
 
-1. **`PAppPageLayout`**：Pad 页面的根布局壳层，负责响应式外壳、安全区和背景。
-   - Props：`navigation`（通常传 `PNavIsland`）、`workloads`（通常传 `PWorkloadNav`）、`header`（品牌 logo/标题）。
+1. **`PAppPageLayout`**：Pad 页面的根布局壳层，负责响应式外壳、安全区和背景，内部自带 `OrbisModeProvider` 与 `GlobalMessage`。
+   - Props：`appTitle`、`menuData`（树菜单，通常配合 `PNavIsland`）、`workloadItems`/`onWorkloadSelect`（通常配合 `PWorkloadNav`）、`logo`/`headerSlot`、`orientation`、`navOpen`/`onNavOpenChange`、`showNavigation`/`showWorkloadNav`。
 2. **`PNavIsland`**：左侧竖向导航栏，为拇指可触达距离设计。
-   - Props：`items`（`TreeMenuItem[]`）、`activeId`、`onItemClick`、可选 `collapsed`。
+   - Props：`menuData`（`TreeMenuItem[]`）、`collapsed`/`onToggle`、`activeHref`、`onItemSelect`、`orientation`、`headerSlot`/`footerSlot`。
 3. **`PWorkloadNav`**：顶部横向 tab/卡片导航，用于在主要工作流之间切换（如 Receiving、Picking、Packing）。
-   - Props：`items`（`PWorkloadNavItem[]`）、`activeId`、`onItemClick`。
+   - Props：`items`（`PWorkloadNavItem[]`）、`selectedId`、`onItemSelect`、`orientation`。
 4. **`PTable`**：`CTable` 的触控友好版本，行以大号 `PTouchCard` 渲染，同时保留 variants、smart filter、快速操作等核心能力。
    - 关键 Props：`cardTitleField`、`cardSubtitleFields`、`renderCardFooter`、`cardActionSlot`。
    - `filterConfig.fields` 使用 `PSmartFilter`，继承 `CSmartFilter` 的 Value Help 字段（`type: 'value-help'` / `isValueHelp: true`），用于触控端的物料/客户/库位查找，不要另起自定义弹窗。
 5. **`PNumericKeypad`**：屏幕内置数字小键盘，用于快速录入数量/数据而不唤起系统键盘。
-6. **`PBarcodeScanner`**：调用设备摄像头扫描条码/二维码的弹窗组件（底层基于 `html5-qrcode`）。
+6. **`PBarcodeScanner`**：调用设备摄像头扫描条码/二维码的弹窗组件，优先使用浏览器原生 `BarcodeDetector` API（`code_128/ean_13/ean_8/qr_code/upc_a/upc_e`），不支持时回退到手动录入；关闭弹窗时自动释放摄像头 `MediaStream`。
 
 ## Integration Requirements（必查项）
 
 1. **Tailwind CSS 编译**：`orbcafe-ui` 的 Pad 组件大量依赖 Tailwind 原子类（如 `rounded-2xl`、`backdrop-blur`），宿主项目必须配置 Tailwind 扫描到该库：
    - Tailwind v4（`globals.css`）：使用 CSS `@source`，指向 `node_modules/orbcafe-ui/dist` 的正确相对路径。
    - Tailwind v3（`tailwind.config.js`）仅作为遗留兼容：`content: ["./node_modules/orbcafe-ui/dist/**/*.{js,mjs}"]`。
-2. **Provider 基线**：确保根层级已包裹 `ThemeProvider`、`CssBaseline`、`LocalizationProvider`（MUI）。
-3. **Examples 来源**：npm 包不包含 `examples/`。当前项目没有 `examples/` 时，查阅 ORBCAFE GitHub 仓库或本地 checkout。
-4. **依赖检查**：先看 `package.json`，缺失或不兼容时再安装。
+2. **Provider 基线**：V2 是 MUI-free。`PAppPageLayout` 内部已渲染 `OrbisModeProvider` + `GlobalMessage`；只有在不使用 Pad 壳层时才需要手动包裹这两个 Provider。
+3. **CSS 基线**：全局 CSS 必须 `@import "orbcafe-ui/styles.css";` 一次（ORBIS 自写样式，含 `orb-*` 类与暗色变量）。
+4. **Examples 来源**：npm 包不包含 `examples/`。当前项目没有 `examples/` 时，查阅 ORBCAFE GitHub 仓库或本地 checkout。
+5. **依赖检查**：先看 `package.json`，缺失或不兼容时再安装。
 
 ## Output Contract
 

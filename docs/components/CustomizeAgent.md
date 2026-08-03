@@ -16,7 +16,7 @@ Published copy of `src/components/CustomizeAgent/README.md`.
   - `Analysis Prompt`
   - `Response Prompt`
 - Single save action (`Save`) to persist all settings and selected template versions.
-- Built with MUI `outlined/small` input behavior (floating label on focus), aligned with `SmartFilter` interaction style.
+- Built with compact ORBIS input behavior, aligned with `SmartFilter` interaction style.
 
 ## Usage
 

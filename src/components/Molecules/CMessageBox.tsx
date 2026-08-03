@@ -1,48 +1,6 @@
-/**
- * @file 10_Frontend/components/sap/ui/Common/Molecules/CMessageBox.tsx
- * 
- * @summary Core frontend CMessageBox module for the ORBAI Core project
- * @author ORBAICODER
- * @version 1.0.0
- * @date 2025-01-19
- * 
- * @description
- * This file is responsible for:
- *  - Implementing CMessageBox functionality within frontend workflows
- *  - Integrating with shared ORBAI Core application processes under frontend
- * 
- * @logic
- * 1. Import required dependencies and configuration
- * 2. Execute the primary logic for CMessageBox
- * 3. Export the resulting APIs, hooks, or components for reuse
- * 
- * @changelog
- * V1.0.0 - 2025-01-19 - Initial creation
- */
-
-/**
- * File Overview
- * 
- * START CODING
- * 
- * --------------------------
- * SECTION 1: CMessageBox Core Logic
- * Section overview and description.
- * --------------------------
- */
-
 import React from 'react';
-import Dialog from '@mui/material/Dialog';
-import DialogTitle from '@mui/material/DialogTitle';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogActions from '@mui/material/DialogActions';
-import Box from '@mui/material/Box';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import WarningIcon from '@mui/icons-material/Warning';
-import ErrorIcon from '@mui/icons-material/Error';
-import InfoIcon from '@mui/icons-material/Info';
-import { CButton } from '../Atoms/CButton';
+import { CircleCheck, CircleAlert, TriangleAlert, Info } from '@/components/Icons';
+import { CButton, CDialog } from '../Atoms';
 import { useOrbcafeI18n } from '../../i18n';
 import { messageManager } from '../../lib/message';
 import type { CMessageBoxType, MessageEvent } from '../../lib/message';
@@ -63,34 +21,29 @@ export interface CMessageBoxProps {
 
 const typeConfig = {
   success: {
-    icon: <CheckCircleIcon sx={{ fontSize: 40 }} />,
-    color: '#e8f5e9', // Light Green
-    iconColor: '#66bb6a',
-    borderColor: '#a5d6a7',
+    icon: <CircleCheck size={40} />,
+    color: 'var(--orb-success-bg)',
+    iconColor: 'var(--orb-success)',
   },
   warning: {
-    icon: <WarningIcon sx={{ fontSize: 40 }} />,
-    color: '#fff3e0', // Light Orange
-    iconColor: '#ffa726',
-    borderColor: '#ffcc80',
+    icon: <TriangleAlert size={40} />,
+    color: 'var(--orb-warn-bg)',
+    iconColor: 'var(--orb-warn)',
   },
   error: {
-    icon: <ErrorIcon sx={{ fontSize: 40 }} />,
-    color: '#ffebee', // Light Red
-    iconColor: '#ef5350',
-    borderColor: '#ef9a9a',
+    icon: <CircleAlert size={40} />,
+    color: 'var(--orb-err-bg)',
+    iconColor: 'var(--orb-err)',
   },
   info: {
-    icon: <InfoIcon sx={{ fontSize: 40 }} />,
-    color: '#e3f2fd', // Light Blue
-    iconColor: '#42a5f5',
-    borderColor: '#90caf9',
+    icon: <Info size={40} />,
+    color: 'var(--orb-info-bg)',
+    iconColor: 'var(--orb-info)',
   },
   default: {
     icon: null,
     color: 'transparent',
     iconColor: 'inherit',
-    borderColor: 'transparent',
   }
 };
 
@@ -122,74 +75,63 @@ export const CMessageBox: React.FC<CMessageBoxProps> = ({
   const isCustomType = type !== 'default';
 
   return (
-    <Dialog
+    <CDialog
       open={open}
       onClose={onClose}
       maxWidth={maxWidth}
-      fullWidth
-      PaperProps={{
-        sx: {
-          borderRadius: 3,
-          ...(isCustomType && {
-            borderTop: `6px solid ${config.iconColor}`,
-          })
-        }
-      }}
+      sx={isCustomType ? { borderTop: `6px solid ${config.iconColor}` } : undefined}
     >
       {isCustomType && (
-        <Box sx={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
-          pt: 3,
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          paddingTop: 24,
           color: config.iconColor
         }}>
           {config.icon}
-        </Box>
+        </div>
       )}
-      
+
       {title && (
-        <DialogTitle sx={{ 
+        <div className="orb-dialog-title" style={{
           textAlign: isCustomType ? 'center' : 'left',
-          pt: isCustomType ? 1 : 2
+          paddingTop: isCustomType ? 8 : 16
         }}>
           {title}
-        </DialogTitle>
+        </div>
       )}
-      
-      <DialogContent sx={{ textAlign: isCustomType ? 'center' : 'left' }}>
+
+      <div className="orb-dialog-content" style={{ textAlign: isCustomType ? 'center' : 'left' }}>
         {typeof message === 'string' ? (
-          <DialogContentText>{message}</DialogContentText>
+          <p style={{ margin: 0, color: 'var(--orb-muted)' }}>{message}</p>
         ) : (
           message
         )}
-      </DialogContent>
-      
-      <DialogActions sx={{ 
-        justifyContent: isCustomType ? 'center' : 'flex-end', 
-        pb: 3,
-        px: 3
+      </div>
+
+      <div className="orb-dialog-actions" style={{
+        display: 'flex',
+        justifyContent: isCustomType ? 'center' : 'flex-end',
+        gap: 8,
+        paddingBottom: 24,
+        paddingLeft: 24,
+        paddingRight: 24
       }}>
         {showCancel && (
-          <CButton onClick={onClose} variant="text" color="inherit">
+          <CButton onClick={onClose} variant="text">
             {effectiveCancelText}
           </CButton>
         )}
-        <CButton 
-          onClick={handleConfirm} 
-          variant="contained" 
-          sx={{ 
-            bgcolor: isCustomType ? config.iconColor : undefined,
-            '&:hover': {
-              bgcolor: isCustomType ? config.iconColor : undefined,
-              filter: 'brightness(0.9)'
-            }
-          }}
+        <CButton
+          onClick={handleConfirm}
+          variant="contained"
+          color={isCustomType && type === 'error' ? 'error' : 'primary'}
           autoFocus
         >
           {effectiveConfirmText}
         </CButton>
-      </DialogActions>
-    </Dialog>
+      </div>
+    </CDialog>
   );
 };
 

@@ -35,12 +35,12 @@
 - 当 `agentStatus` 未传时，会回退到 `isResponding` 推导（响应中 => `running`，否则 `idle`）。
 - `agentStatus` 只负责 `AgentPanel` 自身状态视觉。
 - `onHeaderPointerDown` 只把 header pointer 事件交给外层；拖拽、定位、吸附、resize 都不属于 `AgentPanel` 内部状态。
-- 浏览器边框柔光必须通过独立 `AIBrowserGlow active={isRunning}` 控制，不要把全局浏览器边框效果塞回 `AgentPanel`。
+- 视口边缘线必须通过独立 `AIBrowserGlow active={isRunning}` 控制，不要把全局浏览器边框效果塞回 `AgentPanel`。
 
 ## AIBrowserGlow contract
 
-- `AIBrowserGlow` 是 viewport 级别柔光层，应该由业务 AI 运行态控制。
-- 默认颜色是 RGB 三色；需要改色时只传 3 个颜色：`colors={['#ff3860', '#24e070', '#3090ff']}`。
+- `AIBrowserGlow` 是 viewport 级别的 2px primary 边缘线（ORBIS 规范，无彩色光晕），应该由业务 AI 运行态控制。
+- `colors` 保留为兼容：只传 3 个颜色时只有第一个生效；默认使用 `--orb-primary`。
 - `zIndex` 默认是 viewport 顶层级别；只有被宿主 overlay 遮挡时才覆盖。
 - AI 结束、失败、中断时必须把 `active` 改回 `false`。
 - 它不承载消息、输入、streaming、panel header 或 agent 状态文案。

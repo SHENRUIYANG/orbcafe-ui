@@ -1,26 +1,11 @@
 'use client';
 
+import { getOrbCompatMode } from '../../lib/orbis-compat';
+import { Alert, CButton, CCheckbox, CChip, CDialog, CDivider, CPaper, ChevronRightRoundedIcon, ExpandMoreRoundedIcon, useTheme } from '../../lib/orbis-compat';
+import { orbAlpha } from "../../lib/theme";
 import React from 'react';
-import {
-  Alert,
-  Box,
-  Button,
-  Checkbox,
-  Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  Paper,
-  Stack,
-  TextField,
-  Typography,
-  useMediaQuery,
-} from '@mui/material';
-import { alpha, useTheme } from '@mui/material/styles';
-import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded';
-import ChevronRightRoundedIcon from '@mui/icons-material/ChevronRightRounded';
+import { CStack, CTextField, CTypography } from "../Atoms";
+import { useMediaQuery } from "../../lib/hooks";
 import type { PTableProps } from './types';
 import { PSmartFilter } from './PSmartFilter';
 import { CTableToolbar } from '../StdReport/Components/CTableToolbar';
@@ -50,12 +35,12 @@ const getCellValue = (column: any, row: Record<string, any>) => {
 
 const renderCellValue = (value: React.ReactNode) => {
   if (React.isValidElement(value)) {
-    return <Box sx={{ display: 'inline-flex', alignItems: 'center' }}>{value}</Box>;
+    return <div sx={{ display: 'inline-flex', alignItems: 'center' }}>{value}</div>;
   }
   return (
-    <Typography sx={{ mt: 0.2, fontSize: '0.88rem', fontWeight: 800 }}>
+    <CTypography sx={{ mt: 0.2, fontSize: '0.88rem', fontWeight: 800 }}>
       {value}
-    </Typography>
+    </CTypography>
   );
 };
 
@@ -84,7 +69,7 @@ const PTableSummaryPanel = ({
   if (summaryColumns.length === 0) return null;
 
   return (
-    <Paper
+    <CPaper
       elevation={0}
       sx={{
         p: 1.5,
@@ -94,9 +79,9 @@ const PTableSummaryPanel = ({
         bgcolor: 'action.hover',
       }}
     >
-      <Stack spacing={1}>
-        <Typography sx={{ fontSize: '0.82rem', fontWeight: 800, color: 'text.secondary' }}>Summary</Typography>
-        <Box
+      <CStack spacing={1}>
+        <CTypography sx={{ fontSize: '0.82rem', fontWeight: 800, color: 'text.secondary' }}>Summary</CTypography>
+        <div
           sx={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(132px, 1fr))',
@@ -104,7 +89,7 @@ const PTableSummaryPanel = ({
           }}
         >
           {summaryColumns.map((column) => (
-            <Paper
+            <CPaper
               key={`summary-${column.id}`}
               elevation={0}
               sx={{
@@ -114,13 +99,13 @@ const PTableSummaryPanel = ({
                 borderColor: 'divider',
               }}
             >
-              <Typography sx={{ fontSize: '0.72rem', color: 'text.secondary' }}>{column.label}</Typography>
-              <Typography sx={{ mt: 0.25, fontSize: '0.96rem', fontWeight: 800 }}>{summaryRow[column.id]}</Typography>
-            </Paper>
+              <CTypography sx={{ fontSize: '0.72rem', color: 'text.secondary' }}>{column.label}</CTypography>
+              <CTypography sx={{ mt: 0.25, fontSize: '0.96rem', fontWeight: 800 }}>{summaryRow[column.id]}</CTypography>
+            </CPaper>
           ))}
-        </Box>
-      </Stack>
-    </Paper>
+        </div>
+      </CStack>
+    </CPaper>
   );
 };
 
@@ -199,7 +184,6 @@ export const PTable: React.FC<PTableProps> = (props) => {
     handleCloseContextMenu,
     toggleColumnVisibility,
     toggleGroupExpand,
-    toggleGroupField,
     handleExpandGroupRecursively,
     handleCollapseGroupRecursively,
     handleLayoutLoad,
@@ -222,13 +206,13 @@ export const PTable: React.FC<PTableProps> = (props) => {
     () => ({
       borderRadius: 999,
       fontWeight: 700,
-      borderColor: alpha(theme.palette.divider, theme.palette.mode === 'dark' ? 0.55 : 0.3),
+      borderColor: orbAlpha(theme.palette.divider, getOrbCompatMode() === 'dark' ? 0.55 : 0.3),
       bgcolor:
-        theme.palette.mode === 'dark'
-          ? alpha(theme.palette.common.white, 0.06)
-          : alpha(theme.palette.background.paper, 0.92),
+        getOrbCompatMode() === 'dark'
+          ? orbAlpha(theme.palette.common.white, 0.06)
+          : orbAlpha(theme.palette.background.paper, 0.92),
       color: theme.palette.text.primary,
-      '& .MuiChip-label': {
+      '& .orb-chip-label': {
         px: 1.05,
       },
     }),
@@ -237,11 +221,11 @@ export const PTable: React.FC<PTableProps> = (props) => {
   const groupActionChipSx = React.useMemo(
     () => ({
       ...subtleChipSx,
-      borderColor: alpha(theme.palette.primary.main, theme.palette.mode === 'dark' ? 0.42 : 0.24),
+      borderColor: orbAlpha(theme.palette.primary.main, getOrbCompatMode() === 'dark' ? 0.42 : 0.24),
       bgcolor:
-        theme.palette.mode === 'dark'
-          ? alpha(theme.palette.primary.main, 0.16)
-          : alpha(theme.palette.primary.main, 0.08),
+        getOrbCompatMode() === 'dark'
+          ? orbAlpha(theme.palette.primary.main, 0.16)
+          : orbAlpha(theme.palette.primary.main, 0.08),
     }),
     [subtleChipSx, theme],
   );
@@ -475,7 +459,6 @@ export const PTable: React.FC<PTableProps> = (props) => {
         grouping={grouping}
         setGrouping={setGrouping}
         columns={columns}
-        toggleGroupField={toggleGroupField}
       />
 
       <CTableColumnMenu
@@ -512,11 +495,11 @@ export const PTable: React.FC<PTableProps> = (props) => {
       resolvedOrientation === 'portrait' ? 'repeat(2, minmax(0, 1fr))' : 'repeat(auto-fit, minmax(140px, 1fr))';
     const rowTone =
       rowIndex % 2 === 0
-        ? alpha(theme.palette.primary.main, theme.palette.mode === 'dark' ? 0.09 : 0.04)
-        : alpha(theme.palette.primary.main, theme.palette.mode === 'dark' ? 0.05 : 0.022);
-    const subtleBorder = alpha(theme.palette.divider, 0.22);
+        ? orbAlpha(theme.palette.primary.main, getOrbCompatMode() === 'dark' ? 0.09 : 0.04)
+        : orbAlpha(theme.palette.primary.main, getOrbCompatMode() === 'dark' ? 0.05 : 0.022);
+    const subtleBorder = orbAlpha(theme.palette.divider, 0.22);
     return (
-      <Paper
+      <CPaper
         key={rowId}
         elevation={0}
         onClick={() => {
@@ -527,11 +510,11 @@ export const PTable: React.FC<PTableProps> = (props) => {
           p: rowHeight === 'compact' ? 1.25 : 1.5,
           borderRadius: 4,
           border: '0.5px solid',
-          borderColor: isSelected ? alpha(theme.palette.primary.main, 0.38) : subtleBorder,
+          borderColor: isSelected ? orbAlpha(theme.palette.primary.main, 0.38) : subtleBorder,
           background: isSelected
-            ? `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.13)}, ${alpha(theme.palette.primary.main, 0.06)})`
-            : `linear-gradient(135deg, ${rowTone}, ${alpha(theme.palette.primary.main, 0.015)})`,
-          boxShadow: isSelected ? `0 12px 30px ${alpha(theme.palette.primary.main, 0.2)}` : `0 3px 10px ${alpha(theme.palette.common.black, 0.045)}`,
+            ? `linear-gradient(135deg, ${orbAlpha(theme.palette.primary.main, 0.13)}, ${orbAlpha(theme.palette.primary.main, 0.06)})`
+            : `linear-gradient(135deg, ${rowTone}, ${orbAlpha(theme.palette.primary.main, 0.015)})`,
+          boxShadow: isSelected ? `0 12px 30px ${orbAlpha(theme.palette.primary.main, 0.2)}` : `0 3px 10px ${orbAlpha(theme.palette.common.black, 0.045)}`,
           cursor: 'pointer',
           position: 'relative',
           overflow: 'hidden',
@@ -546,11 +529,11 @@ export const PTable: React.FC<PTableProps> = (props) => {
             background: isSelected
               ? theme.palette.primary.main
               : rowIndex % 2 === 0
-                ? alpha(theme.palette.primary.main, 0.26)
-                : alpha(theme.palette.text.primary, 0.16),
+                ? orbAlpha(theme.palette.primary.main, 0.26)
+                : orbAlpha(theme.palette.text.primary, 0.16),
           },
           '&:hover': {
-            boxShadow: `0 10px 20px ${alpha(theme.palette.primary.main, 0.12)}`,
+            boxShadow: `0 10px 20px ${orbAlpha(theme.palette.primary.main, 0.12)}`,
             transform: 'translateY(-1px)',
           },
           '&:active': {
@@ -558,10 +541,10 @@ export const PTable: React.FC<PTableProps> = (props) => {
           },
         }}
       >
-        <Stack spacing={1.25}>
-          <Stack direction="row" spacing={1.25} alignItems="flex-start">
+        <CStack spacing={1.25}>
+          <CStack direction="row" spacing={1.25} alignItems="flex-start">
             {selectionMode ? (
-              <Checkbox
+              <CCheckbox
                 checked={isSelected}
                 onClick={(event) => event.stopPropagation()}
                 onChange={() => handleClick({} as any, row)}
@@ -569,17 +552,17 @@ export const PTable: React.FC<PTableProps> = (props) => {
               />
             ) : null}
 
-            <Box sx={{ flex: 1, minWidth: 0 }}>
+            <div sx={{ flex: 1, minWidth: 0 }}>
               {titleColumn ? (
-                <Typography sx={{ fontSize: '1rem', fontWeight: 900, lineHeight: 1.25 }}>
+                <CTypography sx={{ fontSize: '1rem', fontWeight: 900, lineHeight: 1.25 }}>
                   {getCellValue(titleColumn, row)}
-                </Typography>
+                </CTypography>
               ) : null}
 
               {subtitleColumns.length > 0 ? (
-                <Stack direction="row" spacing={0.75} useFlexGap flexWrap="wrap" sx={{ mt: 0.75 }}>
+                <CStack direction="row" spacing={0.75} useFlexGap flexWrap="wrap" sx={{ mt: 0.75 }}>
                   {subtitleColumns.map((column: any) => (
-                    <Chip
+                    <CChip
                       key={`${rowId}-${column.id}`}
                       label={`${column.label}: ${getCellText(column, row)}`}
                       size="small"
@@ -587,15 +570,15 @@ export const PTable: React.FC<PTableProps> = (props) => {
                       sx={subtleChipSx}
                     />
                   ))}
-                </Stack>
+                </CStack>
               ) : null}
-            </Box>
+            </div>
 
-            {cardActionSlot ? <Box onClick={(event) => event.stopPropagation()}>{cardActionSlot(row)}</Box> : null}
-          </Stack>
+            {cardActionSlot ? <div onClick={(event) => event.stopPropagation()}>{cardActionSlot(row)}</div> : null}
+          </CStack>
 
           {detailColumns.length > 0 ? (
-            <Box
+            <div
               sx={{
                 display: 'grid',
                 gridTemplateColumns: detailGridColumns,
@@ -603,40 +586,40 @@ export const PTable: React.FC<PTableProps> = (props) => {
               }}
             >
               {detailColumns.map((column: any) => (
-                <Paper
+                <CPaper
                   key={`${rowId}-${column.id}-detail`}
                   elevation={0}
                   sx={{
                     p: 1,
                     borderRadius: 3,
                     bgcolor:
-                      theme.palette.mode === 'dark'
-                        ? alpha(theme.palette.background.default, 0.7)
-                        : alpha(theme.palette.background.paper, 0.92),
+                      getOrbCompatMode() === 'dark'
+                        ? orbAlpha(theme.palette.background.default, 0.7)
+                        : orbAlpha(theme.palette.background.paper, 0.92),
                     border: '0.1px solid',
-                    borderColor: alpha(theme.palette.divider, 0.24),
+                    borderColor: orbAlpha(theme.palette.divider, 0.24),
                   }}
                 >
-                  <Typography sx={{ fontSize: '0.72rem', color: 'text.secondary' }}>{column.label}</Typography>
+                  <CTypography sx={{ fontSize: '0.72rem', color: 'text.secondary' }}>{column.label}</CTypography>
                   {renderCellValue(getCellValue(column, row))}
-                </Paper>
+                </CPaper>
               ))}
-            </Box>
+            </div>
           ) : null}
 
           {renderCardFooter ? (
             <>
-              <Divider />
-              <Box onClick={(event) => event.stopPropagation()}>{renderCardFooter(row)}</Box>
+              <CDivider />
+              <div onClick={(event) => event.stopPropagation()}>{renderCardFooter(row)}</div>
             </>
           ) : null}
-        </Stack>
-      </Paper>
+        </CStack>
+      </CPaper>
     );
   };
 
   return (
-    <Box
+    <div
       sx={{
         width: fullWidth ? '100%' : 'auto',
         mb: fitContainer ? 0 : 2,
@@ -653,7 +636,7 @@ export const PTable: React.FC<PTableProps> = (props) => {
       }}
     >
       {filterConfig ? (
-        <Box sx={{ mb: 2 }}>
+        <div sx={{ mb: 2 }}>
           <PSmartFilter
             {...filterConfig}
             onVariantLoad={(variant) => {
@@ -669,10 +652,10 @@ export const PTable: React.FC<PTableProps> = (props) => {
             serviceUrl={serviceUrl ?? filterConfig.serviceUrl}
             touchMode={resolvedOrientation === 'portrait' ? 'expanded' : 'comfortable'}
           />
-        </Box>
+        </div>
       ) : null}
 
-      <Paper
+      <CPaper
         sx={{
           width: fullWidth ? '100%' : 'auto',
           mb: fitContainer ? 0 : 2,
@@ -707,43 +690,43 @@ export const PTable: React.FC<PTableProps> = (props) => {
         }}
       >
         {showToolbar ? (
-          <Box
+          <div
             sx={{
-              '& .MuiToolbar-root': {
+              '& .orb-toolbar': {
                 minHeight: 60,
                 alignItems: { xs: 'flex-start', md: 'center' },
                 flexWrap: 'wrap',
                 rowGap: 1,
                 columnGap: 1,
               },
-              '& .MuiToolbar-root > :nth-of-type(1)': {
+              '& .orb-toolbar > :nth-of-type(1)': {
                 width: { xs: '100%', md: 'auto' },
-                '& .MuiTextField-root': {
+                '& .orb-fld': {
                   width: { xs: '100%', md: 300 },
                 },
               },
-              '& .MuiToolbar-root > :nth-of-type(2)': {
+              '& .orb-toolbar > :nth-of-type(2)': {
                 flexShrink: 0,
               },
-              '& .MuiToolbar-root > :nth-of-type(3)': {
+              '& .orb-toolbar > :nth-of-type(3)': {
                 display: { xs: 'none', md: 'block' },
               },
-              '& .MuiToolbar-root > :nth-of-type(4)': {
+              '& .orb-toolbar > :nth-of-type(4)': {
                 ml: 'auto',
                 justifyContent: 'flex-end',
                 flexWrap: 'wrap',
               },
-              '& .MuiInputBase-root': {
+              '& .orb-inp-adornment-wrap, & .orb-inp': {
                 minHeight: 46,
               },
-              '& .MuiIconButton-root': {
+              '& .orb-icon-btn': {
                 width: 40,
                 height: 40,
               },
-              '& .MuiTypography-root': {
+              '& .orb-body, & .orb-body-dense, & .orb-label, & .orb-meta': {
                 fontSize: '0.9rem',
               },
-              '& .MuiButtonBase-root': {
+              '& button': {
                 borderRadius: 2.5,
               },
             }}
@@ -779,10 +762,10 @@ export const PTable: React.FC<PTableProps> = (props) => {
               layoutManager={layoutManager}
               onOpenGraphReport={graphReportEnabled ? handleOpenGraphReport : undefined}
             />
-          </Box>
+          </div>
         ) : null}
 
-        <Box
+        <div
           sx={{
             flex: 1,
             minHeight: 0,
@@ -790,10 +773,10 @@ export const PTable: React.FC<PTableProps> = (props) => {
             p: 1.5,
           }}
         >
-          <Stack spacing={1.25}>
+          <CStack spacing={1.25}>
             {visibleRows.length === 0 && !loading ? (
               emptyState || (
-                <Paper
+                <CPaper
                   elevation={0}
                   sx={{
                     p: 4,
@@ -803,8 +786,8 @@ export const PTable: React.FC<PTableProps> = (props) => {
                     textAlign: 'center',
                   }}
                 >
-                  <Typography sx={{ fontSize: '0.92rem', color: 'text.secondary' }}>{t('common.noData')}</Typography>
-                </Paper>
+                  <CTypography sx={{ fontSize: '0.92rem', color: 'text.secondary' }}>{t('common.noData')}</CTypography>
+                </CPaper>
               )
             ) : null}
 
@@ -812,7 +795,7 @@ export const PTable: React.FC<PTableProps> = (props) => {
               if (item.type === 'group') {
                 const isExpanded = expandedGroups.has(item.id);
                 return (
-                  <Paper
+                  <CPaper
                     key={item.id}
                     elevation={0}
                     sx={{
@@ -822,7 +805,7 @@ export const PTable: React.FC<PTableProps> = (props) => {
                       bgcolor: 'action.hover',
                     }}
                   >
-                    <Box
+                    <div
                       component="button"
                       type="button"
                       onClick={() => toggleGroupExpand(item.id)}
@@ -843,17 +826,17 @@ export const PTable: React.FC<PTableProps> = (props) => {
                       }}
                     >
                       {isExpanded ? <ExpandMoreRoundedIcon /> : <ChevronRightRoundedIcon />}
-                      <Box sx={{ flex: 1, minWidth: 0 }}>
-                        <Typography sx={{ fontSize: '0.94rem', fontWeight: 800 }}>
+                      <div sx={{ flex: 1, minWidth: 0 }}>
+                        <CTypography sx={{ fontSize: '0.94rem', fontWeight: 800 }}>
                           {item.field}: {item.value}
-                        </Typography>
-                        <Typography sx={{ mt: 0.2, fontSize: '0.76rem', color: 'text.secondary' }}>
+                        </CTypography>
+                        <CTypography sx={{ mt: 0.2, fontSize: '0.76rem', color: 'text.secondary' }}>
                           {item.count} records
-                        </Typography>
-                      </Box>
+                        </CTypography>
+                      </div>
                       {grouping.length > 1 && item.level < grouping.length - 1 ? (
-                        <Stack direction="row" spacing={0.5}>
-                          <Chip
+                        <CStack direction="row" spacing={0.5}>
+                          <CChip
                             size="small"
                             label={t('table.group.expandAll')}
                             onClick={(event) => {
@@ -862,7 +845,7 @@ export const PTable: React.FC<PTableProps> = (props) => {
                             }}
                             sx={groupActionChipSx}
                           />
-                          <Chip
+                          <CChip
                             size="small"
                             label={t('table.group.collapseAll')}
                             onClick={(event) => {
@@ -871,10 +854,10 @@ export const PTable: React.FC<PTableProps> = (props) => {
                             }}
                             sx={groupActionChipSx}
                           />
-                        </Stack>
+                        </CStack>
                       ) : null}
-                    </Box>
-                  </Paper>
+                    </div>
+                  </CPaper>
                 );
               }
 
@@ -888,23 +871,23 @@ export const PTable: React.FC<PTableProps> = (props) => {
             ) : null}
 
             {loading ? (
-              <Typography sx={{ py: 1, fontSize: '0.84rem', color: 'text.secondary', textAlign: 'center' }}>
+              <CTypography sx={{ py: 1, fontSize: '0.84rem', color: 'text.secondary', textAlign: 'center' }}>
                 {t('common.loading')}
-              </Typography>
+              </CTypography>
             ) : null}
-          </Stack>
-        </Box>
-      </Paper>
+          </CStack>
+        </div>
+      </CPaper>
 
       {quickCreateEnabled ? (
-        <Dialog open={quickCreateOpen} onClose={() => !quickCreateSubmitting && setQuickCreateOpen(false)} fullWidth maxWidth="sm">
-          <DialogTitle sx={{ fontSize: '1rem', fontWeight: 800 }}>{quickCreate?.title || t('quickCreate.createWithTitle', { title })}</DialogTitle>
-          <DialogContent sx={{ pt: '8px !important' }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.25 }}>
+        <CDialog open={quickCreateOpen} onClose={() => !quickCreateSubmitting && setQuickCreateOpen(false)} fullWidth maxWidth="sm">
+          <div className="orb-dialog-title" sx={{ fontSize: '1rem', fontWeight: 800 }}>{quickCreate?.title || t('quickCreate.createWithTitle', { title })}</div>
+          <div className="orb-dialog-content" sx={{ pt: '8px !important' }}>
+            <div sx={{ display: 'flex', flexDirection: 'column', gap: 1.25 }}>
               {quickCreateColumns.map((column: any) => {
                 const type = column.type === 'number' || column.numeric ? 'number' : column.type === 'date' ? 'date' : 'text';
                 return (
-                  <TextField
+                  <CTextField
                     key={`quick-create-${column.id}`}
                     label={column.label || column.id}
                     value={quickCreateValues[column.id] ?? ''}
@@ -916,28 +899,28 @@ export const PTable: React.FC<PTableProps> = (props) => {
                 );
               })}
               {quickCreate?.description ? <Alert severity="info">{quickCreate.description}</Alert> : null}
-            </Box>
-          </DialogContent>
-          <DialogActions sx={{ px: 3, pb: 2 }}>
-            <Button onClick={() => setQuickCreateOpen(false)} disabled={quickCreateSubmitting}>
+            </div>
+          </div>
+          <div className="orb-dialog-actions" sx={{ px: 3, pb: 2 }}>
+            <CButton onClick={() => setQuickCreateOpen(false)} disabled={quickCreateSubmitting}>
               {quickCreate?.cancelLabel || t('common.cancel')}
-            </Button>
-            <Button onClick={handleSubmitQuickCreate} variant="contained" disabled={quickCreateSubmitting}>
+            </CButton>
+            <CButton onClick={handleSubmitQuickCreate} variant="contained" disabled={quickCreateSubmitting}>
               {quickCreate?.submitLabel || t('common.save')}
-            </Button>
-          </DialogActions>
-        </Dialog>
+            </CButton>
+          </div>
+        </CDialog>
       ) : null}
 
       {quickEditEnabled ? (
-        <Dialog open={quickEditOpen} onClose={() => !quickEditSubmitting && setQuickEditOpen(false)} fullWidth maxWidth="sm">
-          <DialogTitle sx={{ fontSize: '1rem', fontWeight: 800 }}>{quickEdit?.title || t('quickEdit.editWithTitle', { title })}</DialogTitle>
-          <DialogContent sx={{ pt: '8px !important' }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.25 }}>
+        <CDialog open={quickEditOpen} onClose={() => !quickEditSubmitting && setQuickEditOpen(false)} fullWidth maxWidth="sm">
+          <div className="orb-dialog-title" sx={{ fontSize: '1rem', fontWeight: 800 }}>{quickEdit?.title || t('quickEdit.editWithTitle', { title })}</div>
+          <div className="orb-dialog-content" sx={{ pt: '8px !important' }}>
+            <div sx={{ display: 'flex', flexDirection: 'column', gap: 1.25 }}>
               {quickEditColumns.map((column: any) => {
                 const type = column.type === 'number' || column.numeric ? 'number' : column.type === 'date' ? 'date' : 'text';
                 return (
-                  <TextField
+                  <CTextField
                     key={`quick-edit-${column.id}`}
                     label={column.label || column.id}
                     value={quickEditValues[column.id] ?? ''}
@@ -950,17 +933,17 @@ export const PTable: React.FC<PTableProps> = (props) => {
                 );
               })}
               {quickEdit?.description ? <Alert severity="info">{quickEdit.description}</Alert> : null}
-            </Box>
-          </DialogContent>
-          <DialogActions sx={{ px: 3, pb: 2 }}>
-            <Button onClick={() => setQuickEditOpen(false)} disabled={quickEditSubmitting}>
+            </div>
+          </div>
+          <div className="orb-dialog-actions" sx={{ px: 3, pb: 2 }}>
+            <CButton onClick={() => setQuickEditOpen(false)} disabled={quickEditSubmitting}>
               {quickEdit?.cancelLabel || t('common.cancel')}
-            </Button>
-            <Button onClick={handleSubmitQuickEdit} variant="contained" disabled={quickEditSubmitting || !selectedEditRow}>
+            </CButton>
+            <CButton onClick={handleSubmitQuickEdit} variant="contained" disabled={quickEditSubmitting || !selectedEditRow}>
               {quickEdit?.submitLabel || t('common.save')}
-            </Button>
-          </DialogActions>
-        </Dialog>
+            </CButton>
+          </div>
+        </CDialog>
       ) : null}
 
       {quickDeleteEnabled ? (
@@ -1020,6 +1003,6 @@ export const PTable: React.FC<PTableProps> = (props) => {
           }
         />
       ) : null}
-    </Box>
+    </div>
   );
 };

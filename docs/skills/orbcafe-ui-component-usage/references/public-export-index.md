@@ -1,13 +1,22 @@
 # Public Export Index (Source of Truth)
 
-Use only exports reachable from `src/index.ts`.
+Use only exports reachable from `src/index.ts`. All of the following are importable from `orbcafe-ui`.
 
 ## Direct exports from package entry
 
+- Theme / mode:
+  - `OrbisModeProvider`, `useOrbMode`, `useOrbTokens`
+  - `ORB_TOKENS`, `ORB_LIGHT`, `ORB_DARK`, `ORB_RADIUS`, `ORB_FONT_STACK`, `ORB_TRANSITION_FAST`
+- Icons:
+  - `SapIcon` family (`SapIcon`, `SapIconName`, `SapIconProps`, `createSapIcon`)
+  - Lucide-style aliases from `Icons/*` (e.g. `Search`, `Pin`, `Mail`, `Settings`, `LogOut`, `PackageCheck`, `Truck`, `Send`, `Copy`, `Edit`, `Delete`, `Plus`, `X`, ...)
+- Atoms (`Atoms/*`):
+  - `CButton`, `CTextField`, `CTextArea`, `CSelect`, `CCheckbox`, `CRadioGroup`, `CSwitch`, `CChip`, `CBadge`, `CAvatar`, `CAlert`, `CProgress`, `CSkeleton`, `CSpinner`, `CIconButton`, `CSegmentedControl`, `CTooltip`, `CMenu`, `CPaper`, `CDivider`, `CTypography`, `CStack`, `CDialog`, `CPopover`, `CTabs`, `CCalendar`, `CDatePicker`, `CFileUpload`
 - Navigation:
-  - `NavigationIsland`, `TreeMenu`, `button`, `useNavigationIsland`
+  - `NavigationIsland`, `NavigationIsland2`, `TreeMenu`, `Button`, `buttonVariants`, `useNavigationIsland`
+  - types: `TreeMenuItem`, `NavigationIslandProps`, `NavigationIslandDisplayMode`, `ButtonProps`
 - Modules:
-  - `StdReport/*`
+  - `StdReport/*` (incl. `CStandardPage`, `CTable`, `CSmartFilter`, `CLayoutManager`, `CVariantManager`, `CVariantManagement`, `useStandardReport`, `resolveVariantFilters`, `resolveVariantLayout`, `IVariantService`, `VariantMetadata`, `ReportColumn`, `ReportFilter`, `ReportMetadata`)
   - `GraphReport/*`
   - `CustomizeAgent/*`
   - `DetailInfo/*`
@@ -28,6 +37,7 @@ Use only exports reachable from `src/index.ts`.
   - `AINav/*`
   - `AgentUI/*`:
     - `AgentPanel`
+    - `FloatingAgentPanel`
     - `StdChat`
     - `CopilotChat`
     - `AIBrowserGlow`
@@ -59,7 +69,10 @@ Use only exports reachable from `src/index.ts`.
     - `type CTreeCompColumn`
     - `type CTreeCompPaneMode`
 - Shared:
-  - `i18n/*`
+  - `i18n/*` (`OrbcafeI18nProvider`, `useOrbcafeI18n`, `OrbcafeLocale`, ...)
+  - `GlobalMessage`, `showMessage`, `messageManager`, `type CMessageBoxType`
+  - `CMessageBox`, `CStatusBadge`, `CList` family, `CFilterField`
+  - `CLayoutManagement` (via `StdReport/*` re-export)
   - `CValueHelp`
   - `type CValueHelpProps`
   - `type CValueHelpColumn`
@@ -67,11 +80,11 @@ Use only exports reachable from `src/index.ts`.
   - `type CValueHelpSelectionValue`
   - `MarkdownRenderer` family from `lib/renderer/md_renderer`
   - `CPageTransition`
-  - `showMessage` API from `lib/message`
-  - `CMessageBox`
+  - `useMediaQuery`
 
 ## Non-public pattern to avoid
 
 - Do not import from `src/components/...` in consumer apps.
-- Do not instruct usage of Atoms/Molecules internals unless they are exported via package entry.
+- `Atoms/*` are now exported from the package entry, but they are low-level primitives; prefer module-level components (`CStandardPage`, `CTable`, `PTable`, `CAppPageLayout`) unless a single atom is explicitly needed.
+- `lib/orbis-compat/*` (MUI-compatible shims like `Box`, `Paper`, `Stack`) is internal; do not import it from consumer apps.
 - Do not tell consumers to import `CTable`, `CValueHelp`, `CPlanningGantt`, `AgentPanel`, or `CTreeComp` from their source directories; all are package-entry APIs.

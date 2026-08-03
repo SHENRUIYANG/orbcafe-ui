@@ -1,8 +1,7 @@
 'use client';
 
+import { useMediaQuery, useTheme } from '../../../lib/orbis-compat';
 import { useEffect, useMemo, useState } from 'react';
-import { useMediaQuery } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
 import type { POrientation } from '../types';
 
 export interface UsePadLayoutOptions {

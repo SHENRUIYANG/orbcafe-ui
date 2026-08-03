@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
-import { Box, useMediaQuery } from '@mui/material';
-import type { SxProps, Theme } from '@mui/material/styles';
+import { Box, useMediaQuery } from '../orbis-compat';
+import type { SxProps, Theme } from '../orbis-compat';
 
 export type PageTransitionVariant = 'none' | 'fade' | 'slide-up' | 'slide-left' | 'scale';
 

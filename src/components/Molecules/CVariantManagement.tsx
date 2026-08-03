@@ -1,30 +1,31 @@
+import { ArrowDropDownIcon, DeleteIcon, FormControlLabel, PlayArrowIcon, SaveIcon, StarBorderIcon, StarIcon } from '../../lib/orbis-compat';
 /**
  * @file 10_Frontend/components/sap/ui/Common/Molecules/CVariantManagement.tsx
- * 
+ *
  * @summary Core frontend CVariantManagement module for the ORBAI Core project
  * @author ORBAICODER
  * @version 1.0.0
  * @date 2025-01-19
- * 
+ *
  * @description
  * This file is responsible for:
  *  - Implementing CVariantManagement functionality within frontend workflows
  *  - Integrating with shared ORBAI Core application processes under frontend
- * 
+ *
  * @logic
  * 1. Import required dependencies and configuration
  * 2. Execute the primary logic for CVariantManagement
  * 3. Export the resulting APIs, hooks, or components for reuse
- * 
+ *
  * @changelog
  * V1.0.0 - 2025-01-19 - Initial creation
  */
 
 /**
  * File Overview
- * 
+ *
  * START CODING
- * 
+ *
  * --------------------------
  * SECTION 1: CVariantManagement Core Logic
  * Section overview and description.
@@ -34,29 +35,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import {
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  IconButton,
-  Menu,
-  MenuItem,
-  TextField,
-  Tooltip,
-  Typography,
-  Checkbox,
-  FormControlLabel,
-  Divider
-} from '@mui/material';
-import SaveIcon from '@mui/icons-material/Save';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
-import DeleteIcon from '@mui/icons-material/Delete';
-import StarIcon from '@mui/icons-material/Star';
-import StarBorderIcon from '@mui/icons-material/StarBorder';
-import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import { CButton, CDialog, CIconButton, CMenu, CTextField, CTooltip, CTypography, CCheckbox, CDivider } from "./../Atoms";
 
 // --- Interfaces ---
 
@@ -90,7 +69,7 @@ export interface CVariantManagementProps {
 
 /**
  * CVariantManagement (Component Variant Management)
- * 
+ *
  * A comprehensive molecule that replicates SAP GUI's Variant Management features.
  * It allows users to:
  * 1. Save current state (Search Criteria + Layout) as a Variant.
@@ -109,7 +88,7 @@ export const CVariantManagement: React.FC<CVariantManagementProps> = ({
   // --- State ---
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
-  
+
   // Save Dialog State
   const [newVariantName, setNewVariantName] = useState('');
   const [newVariantDesc, setNewVariantDesc] = useState('');
@@ -152,7 +131,7 @@ export const CVariantManagement: React.FC<CVariantManagementProps> = ({
 
   const handleSaveConfirm = () => {
     if (!newVariantName.trim()) return;
-    
+
     onSave({
       name: newVariantName,
       description: newVariantDesc,
@@ -162,11 +141,11 @@ export const CVariantManagement: React.FC<CVariantManagementProps> = ({
   };
 
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-        <Typography variant="body2" sx={{ fontWeight: 'bold', fontSize: '0.75rem' }}>Variant:</Typography>
-        <Box 
-            sx={{ 
+    <div sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+      <div sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <CTypography variant="body2" sx={{ fontWeight: 'bold', fontSize: '0.75rem' }}>Variant:</CTypography>
+        <div
+            sx={{
                 border: '1px solid',
                 borderColor: 'divider',
                 borderRadius: 1,
@@ -181,74 +160,74 @@ export const CVariantManagement: React.FC<CVariantManagementProps> = ({
             }}
             onClick={handleMenuOpen}
         >
-            <Typography variant="body2" sx={{ flexGrow: 1, mr: 1, fontSize: '0.75rem' }}>
+            <CTypography variant="body2" sx={{ flexGrow: 1, mr: 1, fontSize: '0.75rem' }}>
                 {currentVariant ? currentVariant.name : 'Select Variant'}
-            </Typography>
+            </CTypography>
             <ArrowDropDownIcon fontSize="small" color="action" />
-        </Box>
-      </Box>
+        </div>
+      </div>
 
       {/* Quick Actions */}
-      <Tooltip title={'Save as Variant...'}>
-        <IconButton onClick={handleOpenSaveDialog} size="small" color="primary">
+      <CTooltip title={'Save as Variant...'}>
+        <CIconButton onClick={handleOpenSaveDialog} size="small" color="primary">
           <SaveIcon />
-        </IconButton>
-      </Tooltip>
+        </CIconButton>
+      </CTooltip>
 
       {/* --- Dropdown Menu --- */}
-      <Menu
+      <CMenu
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
         onClose={handleMenuClose}
         PaperProps={{ sx: { width: 320, maxHeight: 400 } }}
       >
-        <MenuItem disabled>
-          <Typography variant="caption">{'Select a Variant to Load'}</Typography>
-        </MenuItem>
-        <Divider />
+        <option disabled>
+          <CTypography variant="caption">{'Select a Variant to Load'}</CTypography>
+        </option>
+        <CDivider />
         {variants.length === 0 && (
-          <MenuItem disabled>
-            <Typography variant="body2" color="text.secondary">{'No variants saved'}</Typography>
-          </MenuItem>
+          <option disabled>
+            <CTypography variant="body2" color="text.secondary">{'No variants saved'}</CTypography>
+          </option>
         )}
         {variants.map((variant) => (
-          <MenuItem 
-            key={variant.id} 
+          <option
+            key={variant.id}
             onClick={() => handleVariantSelect(variant)}
             selected={variant.id === currentVariantId}
           >
-            <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between' }}>
-                <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', mr: 1 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Typography variant="body2" fontWeight="bold" noWrap>
+            <div sx={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between' }}>
+                <div sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', mr: 1 }}>
+                    <div sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <CTypography variant="body2" fontWeight="bold" noWrap>
                             {variant.name}
-                        </Typography>
+                        </CTypography>
                         {variant.executeOnLoad && <PlayArrowIcon fontSize="small" color="success" sx={{ fontSize: 16 }} />}
-                    </Box>
+                    </div>
                     {variant.description && (
-                        <Typography variant="caption" color="text.secondary" noWrap>
+                        <CTypography variant="caption" color="text.secondary" noWrap>
                         {variant.description}
-                        </Typography>
+                        </CTypography>
                     )}
-                </Box>
+                </div>
 
-                <Box sx={{ display: 'flex', alignItems: 'center' }} onClick={(e) => e.stopPropagation()}>
-                    <Tooltip title={variant.isDefault ? 'Remove Default' : 'Set as Default'}>
-                        <IconButton 
-                            size="small" 
+                <div sx={{ display: 'flex', alignItems: 'center' }} onClick={(e) => e.stopPropagation()}>
+                    <CTooltip title={variant.isDefault ? 'Remove Default' : 'Set as Default'}>
+                        <CIconButton
+                            size="small"
                             onClick={(e) => {
                                 e.stopPropagation();
                                 onSetDefault(variant.id);
                             }}
                         >
                             {variant.isDefault ? <StarIcon fontSize="small" color="warning" /> : <StarBorderIcon fontSize="small" />}
-                        </IconButton>
-                    </Tooltip>
+                        </CIconButton>
+                    </CTooltip>
 
                     {variant.id !== 'STANDARD' && (
-                        <Tooltip title={'Delete'}>
-                            <IconButton 
-                                size="small" 
+                        <CTooltip title={'Delete'}>
+                            <CIconButton
+                                size="small"
                                 color="error"
                                 onClick={(e) => {
                                     e.stopPropagation();
@@ -256,21 +235,21 @@ export const CVariantManagement: React.FC<CVariantManagementProps> = ({
                                 }}
                             >
                                 <DeleteIcon fontSize="small" />
-                            </IconButton>
-                        </Tooltip>
+                            </CIconButton>
+                        </CTooltip>
                     )}
-                </Box>
-            </Box>
-          </MenuItem>
+                </div>
+            </div>
+          </option>
         ))}
-      </Menu>
+      </CMenu>
 
       {/* --- Save Dialog --- */}
-      <Dialog open={isSaveDialogOpen} onClose={() => setIsSaveDialogOpen(false)} maxWidth="xs" fullWidth>
-        <DialogTitle>{'Save Variant'}</DialogTitle>
-        <DialogContent>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
-            <TextField
+      <CDialog open={isSaveDialogOpen} onClose={() => setIsSaveDialogOpen(false)} maxWidth="xs" fullWidth>
+        <div className="orb-dialog-title">{'Save Variant'}</div>
+        <div className="orb-dialog-content">
+          <div sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
+            <CTextField
               label={'Variant Name'}
               value={newVariantName}
               onChange={(e) => setNewVariantName(e.target.value)}
@@ -280,63 +259,63 @@ export const CVariantManagement: React.FC<CVariantManagementProps> = ({
               helperText={"e.g., 'My Urgent Orders'"}
             />
             {variants.some(v => v.name === newVariantName) && (
-              <Typography variant="caption" color="warning.main" sx={{ ml: 1 }}>
+              <CTypography variant="caption" color="warning.main" sx={{ ml: 1 }}>
                 {'Warning: Existing variant will be overwritten'}
-              </Typography>
+              </CTypography>
             )}
-            <TextField
+            <CTextField
               label={'Description'}
               value={newVariantDesc}
               onChange={(e) => setNewVariantDesc(e.target.value)}
               fullWidth
               size="small"
             />
-            
-            <Typography variant="subtitle2" sx={{ mt: 1 }}>{'Options'}</Typography>
-            
+
+            <CTypography variant="subtitle2" sx={{ mt: 1 }}>{'Options'}</CTypography>
+
             <FormControlLabel
               control={
-                <Checkbox 
+                <CCheckbox
                   checked={saveOptions.isDefault}
                   onChange={(e) => setSaveOptions({...saveOptions, isDefault: e.target.checked})}
                 />
               }
               label={'Use as Default Variant'}
             />
-            
+
             <FormControlLabel
               control={
-                <Checkbox
+                <CCheckbox
                   checked={saveOptions.executeOnLoad}
                   onChange={(e) => setSaveOptions({ ...saveOptions, executeOnLoad: e.target.checked })}
                 />
               }
               label={
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <div sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                   <PlayArrowIcon fontSize="small" color="action" />
-                  <Typography variant="body2">{'Auto-Search'}</Typography>
-                </Box>
+                  <CTypography variant="body2">{'Auto-Search'}</CTypography>
+                </div>
               }
             />
 
             <FormControlLabel
               control={
-                <Checkbox 
+                <CCheckbox
                   checked={saveOptions.isPublic}
                   onChange={(e) => setSaveOptions({...saveOptions, isPublic: e.target.checked})}
                 />
               }
               label={'Public (Visible to all users)'}
             />
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setIsSaveDialogOpen(false)}>{'Cancel'}</Button>
-          <Button onClick={handleSaveConfirm} variant="contained" disabled={!newVariantName}>
+          </div>
+        </div>
+        <div className="orb-dialog-actions">
+          <CButton onClick={() => setIsSaveDialogOpen(false)}>{'Cancel'}</CButton>
+          <CButton onClick={handleSaveConfirm} variant="contained" disabled={!newVariantName}>
             {'Save'}
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Box>
+          </CButton>
+        </div>
+      </CDialog>
+    </div>
   );
 };

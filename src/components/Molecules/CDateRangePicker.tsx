@@ -1,30 +1,33 @@
+import { AdapterDayjs, ArrowForwardIcon, CButton, CChip, CDivider, CIconButton, CStack, CTextField, DateCalendar, LocalizationProvider, PickersDay, PickersDayProps, Popover, useTheme } from '../../lib/orbis-compat';
+import { SapIcon } from '../Icons';
 /**
+import {  CButton, CIconButton, CStack, CTextField, CChip, CDivider } from "../Atoms";
  * @file 10_Frontend/components/sap/ui/Common/Molecules/CDateRangePicker.tsx
- * 
+ *
  * @summary Core frontend CDateRangePicker module for the ORBAI Core project
  * @author ORBAICODER
  * @version 1.0.0
  * @date 2025-01-19
- * 
+ *
  * @description
  * This file is responsible for:
  *  - Implementing CDateRangePicker functionality within frontend workflows
  *  - Integrating with shared ORBAI Core application processes under frontend
- * 
+ *
  * @logic
  * 1. Import required dependencies and configuration
  * 2. Execute the primary logic for CDateRangePicker
  * 3. Export the resulting APIs, hooks, or components for reuse
- * 
+ *
  * @changelog
  * V1.0.0 - 2025-01-19 - Initial creation
  */
 
 /**
  * File Overview
- * 
+ *
  * START CODING
- * 
+ *
  * --------------------------
  * SECTION 1: CDateRangePicker Core Logic
  * Section overview and description.
@@ -34,26 +37,6 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Box,
-  Popover,
-  TextField,
-  InputAdornment,
-  IconButton,
-  Stack,
-  Chip,
-  Button,
-  Divider,
-  styled
-} from '@mui/material';
-import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
-import { PickersDay } from '@mui/x-date-pickers/PickersDay';
-import type { PickersDayProps } from '@mui/x-date-pickers/PickersDay';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import ClearIcon from '@mui/icons-material/Clear';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import dayjs, { Dayjs } from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
@@ -95,51 +78,29 @@ interface CustomPickerDayProps extends PickersDayProps {
   isStart?: boolean;
   isEnd?: boolean;
   isHovered?: boolean;
+  disableMargin?: boolean;
+  onMouseEnter?: () => void;
 }
 
-const CustomPickersDay = styled(PickersDay, {
-  shouldForwardProp: (prop) => 
-    prop !== 'isInRange' && 
-    prop !== 'isStart' && 
-    prop !== 'isEnd' && 
-    prop !== 'isHovered',
-})<CustomPickerDayProps>(({ theme, isInRange, isStart, isEnd, isHovered }) => ({
-  ...(isInRange && {
-    borderRadius: 0,
-    backgroundColor: theme.palette.primary.light,
-    color: theme.palette.primary.contrastText,
-    '&:hover': {
-      backgroundColor: theme.palette.primary.main,
-    },
-  }),
-  ...(isHovered && !isInRange && !isStart && !isEnd && {
-    borderRadius: 0,
-    backgroundColor: theme.palette.action.hover,
-    border: `1px dashed ${theme.palette.primary.main}`,
-  }),
-  ...(isStart && {
-    borderRadius: '50% 0 0 50%',
-    backgroundColor: theme.palette.primary.main,
-    color: theme.palette.primary.contrastText,
-    '&:hover': {
-      backgroundColor: theme.palette.primary.dark,
-    },
-  }),
-  ...(isEnd && {
-    borderRadius: '0 50% 50% 0',
-    backgroundColor: theme.palette.primary.main,
-    color: theme.palette.primary.contrastText,
-    '&:hover': {
-      backgroundColor: theme.palette.primary.dark,
-    },
-  }),
-  // Handle case where start == end (single day range)
-  ...(isStart && isEnd && {
-    borderRadius: '50%',
-  }),
-})) as React.ComponentType<CustomPickerDayProps>;
+const CustomPickersDay = ({ isInRange, isStart, isEnd, isHovered, disableMargin: _disableMargin, sx, ...props }: CustomPickerDayProps) => {
+  const theme = useTheme();
+  void _disableMargin;
+  return (
+    <PickersDay
+      {...props}
+      sx={[
+        ...(Array.isArray(sx) ? sx : sx ? [sx] : []),
+        isInRange ? { borderRadius: 0, backgroundColor: theme.palette.primary.light, color: theme.palette.primary.contrastText } : {},
+        isHovered && !isInRange && !isStart && !isEnd ? { borderRadius: 0, backgroundColor: theme.palette.action.hover, border: `1px dashed ${theme.palette.primary.main}` } : {},
+        isStart ? { borderRadius: '50% 0 0 50%', backgroundColor: theme.palette.primary.main, color: theme.palette.primary.contrastText } : {},
+        isEnd ? { borderRadius: '0 50% 50% 0', backgroundColor: theme.palette.primary.main, color: theme.palette.primary.contrastText } : {},
+        isStart && isEnd ? { borderRadius: '50%' } : {},
+      ]}
+    />
+  );
+};
 
-export const CDateRangePicker = ({ 
+export const CDateRangePicker = ({
   label,
   value = DEFAULT_VALUE,
   onChange,
@@ -157,7 +118,7 @@ export const CDateRangePicker = ({
   const [endInput, setEndInput] = useState('');
   const [startError, setStartError] = useState(false);
   const [endError, setEndError] = useState(false);
-  
+
   // Ref to track previous prop value for comparison
   const prevValueRef = React.useRef(value);
 
@@ -165,23 +126,23 @@ export const CDateRangePicker = ({
     // Check if the prop value has changed meaningfully from the previous prop value
     const [start, end] = value;
     const [prevStart, prevEnd] = prevValueRef.current;
-    
+
     // Defensive check: Ensure start/end are valid Dayjs objects before calling isSame
     const isDayjs = (d: any): d is Dayjs => d && typeof d.isSame === 'function';
 
-    const startChanged = !((start === null && prevStart === null) || 
+    const startChanged = !((start === null && prevStart === null) ||
         (isDayjs(start) && isDayjs(prevStart) && start.isSame(prevStart, 'day')));
-        
-    const endChanged = !((end === null && prevEnd === null) || 
+
+    const endChanged = !((end === null && prevEnd === null) ||
         (isDayjs(end) && isDayjs(prevEnd) && end.isSame(prevEnd, 'day')));
-    
+
     if (startChanged || endChanged) {
         setInternalValue(value);
         if (value[0] && isDayjs(value[0])) {
             setViewDate(value[0].locale(dayjsLocale));
         }
     }
-    
+
     // Update ref
     prevValueRef.current = value;
   }, [value, dayjsLocale]);
@@ -262,7 +223,7 @@ export const CDateRangePicker = ({
     } else {
       // We are picking the end date
       const startDate = nextValue[0];
-      
+
       if (startDate && newDate.isBefore(startDate)) {
         // If clicked date is before start date, make it the new start date
         nextValue = [newDate, null];
@@ -297,12 +258,6 @@ export const CDateRangePicker = ({
     setInternalValue(nextValue);
     setSelectionStep('start');
     setViewDate(today);
-  };
-
-  const handleReset = () => {
-    setInternalValue([null, null]);
-    setSelectionStep('start');
-    setViewDate(dayjs().locale(dayjsLocale));
   };
 
   const handleDone = () => {
@@ -352,8 +307,9 @@ export const CDateRangePicker = ({
   const formatDate = (date: Dayjs | null) => date ? date.locale(dayjsLocale).format('YYYY-MM-DD') : '';
 
   return (
-    <Box>
-      <TextField
+    <div className="orb-date-range-picker">
+      <CTextField
+        className="orb-date-range-field"
         label={effectiveLabel}
         value={internalValue[0] ? `${formatDate(internalValue[0])} - ${formatDate(internalValue[1])}` : ''}
         onClick={handleClick}
@@ -366,35 +322,20 @@ export const CDateRangePicker = ({
             readOnly: true,
             sx: {
                 fontSize: FILTER_FONT_SIZE,
-                '& .MuiOutlinedInput-input': {
+                '& .orb-inp': {
                     fontSize: FILTER_FONT_SIZE
                 },
                 paddingRight: '4px'
             },
             endAdornment: (
-                <InputAdornment position="end" sx={{ ml: 0 }}>
-                    {(internalValue[0] || internalValue[1]) && (
-                        <IconButton 
-                            size="small" 
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                handleReset();
-                            }}
-                            edge="end"
-                            sx={{ mr: 0.5, padding: '2px' }}
-                        >
-                            <ClearIcon sx={{ fontSize: '1rem' }} />
-                        </IconButton>
-                    )}
-                    <IconButton 
-                        size="small" 
-                        edge="end" 
-                        onClick={handleClick}
-                        sx={{ padding: '2px' }}
-                    >
-                        <CalendarMonthIcon sx={{ fontSize: '1rem' }} color="action" />
-                    </IconButton>
-                </InputAdornment>
+                <CIconButton
+                    className="orb-date-range-calendar-trigger"
+                    size="small"
+                    onClick={handleClick}
+                    tooltip={effectiveLabel}
+                >
+                    <SapIcon name="calendar" size={16} />
+                </CIconButton>
             )
         }}
       />
@@ -411,15 +352,12 @@ export const CDateRangePicker = ({
           vertical: 'top',
           horizontal: 'left',
         }}
-        slotProps={{
-            paper: {
-                sx: { display: 'flex', flexDirection: 'column', p: 0, width: 320 }
-            }
-        }}
+        className="orb-date-range-popover"
       >
-        <Box sx={{ p: 2, bgcolor: 'background.default', borderBottom: 1, borderColor: 'divider' }}>
-            <Stack direction="row" alignItems="center" spacing={1.5} justifyContent="space-between">
-                <TextField
+        <div className="orb-date-range-inputs">
+            <CStack className="orb-date-range-input-row" direction="row" alignItems="center" spacing={1.5} justifyContent="space-between">
+                <CTextField
+                    className="orb-date-range-manual-field"
                     label={t('dateRange.startDate')}
                     placeholder={MANUAL_INPUT_FORMAT}
                     value={startInput}
@@ -432,13 +370,13 @@ export const CDateRangePicker = ({
                         if (e.key === 'Enter') { e.preventDefault(); commitManualInput('start', startInput); }
                     }}
                     sx={{
-                        flex: 1,
-                        '& .MuiInputBase-input': { fontSize: FILTER_FONT_SIZE, py: 0.75 },
-                        '& .MuiInputLabel-root': { fontSize: FILTER_FONT_SIZE },
+                        '& .orb-inp': { fontSize: FILTER_FONT_SIZE, py: 0.75 },
+                        '& label': { fontSize: FILTER_FONT_SIZE },
                     }}
                 />
                 <ArrowForwardIcon color="action" fontSize="small" />
-                <TextField
+                <CTextField
+                    className="orb-date-range-manual-field"
                     label={t('dateRange.endDate')}
                     placeholder={MANUAL_INPUT_FORMAT}
                     value={endInput}
@@ -451,63 +389,63 @@ export const CDateRangePicker = ({
                         if (e.key === 'Enter') { e.preventDefault(); commitManualInput('end', endInput); }
                     }}
                     sx={{
-                        flex: 1,
-                        '& .MuiInputBase-input': { fontSize: FILTER_FONT_SIZE, py: 0.75 },
-                        '& .MuiInputLabel-root': { fontSize: FILTER_FONT_SIZE },
+                        '& .orb-inp': { fontSize: FILTER_FONT_SIZE, py: 0.75 },
+                        '& label': { fontSize: FILTER_FONT_SIZE },
                     }}
                 />
-            </Stack>
-        </Box>
+            </CStack>
+        </div>
 
-        <Box sx={{ p: 2, pb: 0 }}>
-            <Stack direction="row" spacing={1} justifyContent="center">
-            <Chip 
-                label={t('dateRange.today')} 
-                onClick={() => handleShortcut('today')} 
-                clickable 
+        <div className="orb-date-range-shortcuts">
+            <CStack direction="row" spacing={1} justifyContent="center">
+            <CChip
+                label={t('dateRange.today')}
+                onClick={() => handleShortcut('today')}
+                clickable
                 size="small"
                 variant="outlined"
             />
-            <Chip 
-                label={t('dateRange.thisWeek')} 
-                onClick={() => handleShortcut('week')} 
-                clickable 
+            <CChip
+                label={t('dateRange.thisWeek')}
+                onClick={() => handleShortcut('week')}
+                clickable
                 size="small"
                 variant="outlined"
             />
-            <Chip 
-                label={t('dateRange.thisMonth')} 
-                onClick={() => handleShortcut('month')} 
-                clickable 
+            <CChip
+                label={t('dateRange.thisMonth')}
+                onClick={() => handleShortcut('month')}
+                clickable
                 size="small"
                 variant="outlined"
             />
-            </Stack>
-        </Box>
+            </CStack>
+        </div>
 
-        <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={dayjsLocale}>
-          <DateCalendar
-              value={null}
-              referenceDate={viewDate}
-              onMonthChange={setViewDate}
-              onYearChange={setViewDate}
-              onChange={handleDateChange}
-              slots={{
-                  day: renderWeekPickerDay
-              }}
-              views={['year', 'month', 'day']}
-              openTo="day"
-              showDaysOutsideCurrentMonth
-              sx={{ m: 0 }}
-          />
-        </LocalizationProvider>
+        <div className="orb-date-range-calendar">
+          <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={dayjsLocale}>
+            <DateCalendar
+                value={null}
+                referenceDate={viewDate}
+                onMonthChange={setViewDate}
+                onYearChange={setViewDate}
+                onChange={handleDateChange}
+                slots={{
+                    day: renderWeekPickerDay
+                }}
+                views={['year', 'month', 'day']}
+                openTo="day"
+                showDaysOutsideCurrentMonth
+            />
+          </LocalizationProvider>
+        </div>
 
-        <Divider />
-        <Stack direction="row" justifyContent="flex-end" spacing={1} sx={{ p: 2 }}>
-            <Button size="small" onClick={handleCancel} color="inherit">{t('common.cancel')}</Button>
-            <Button size="small" variant="contained" onClick={handleDone}>{t('common.done')}</Button>
-        </Stack>
+        <CDivider />
+        <CStack direction="row" justifyContent="flex-end" spacing={1} sx={{ p: 2 }}>
+            <CButton size="small" onClick={handleCancel} color="inherit">{t('common.cancel')}</CButton>
+            <CButton size="small" variant="contained" onClick={handleDone}>{t('common.done')}</CButton>
+        </CStack>
       </Popover>
-    </Box>
+    </div>
   );
 };

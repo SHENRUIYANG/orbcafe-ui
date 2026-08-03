@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import type { ToolResultCardProps } from '../cardTypes'
-import { CheckCircle, Clock, XCircle, Loader2, ChevronDown, ChevronRight, Terminal, Box, X } from 'lucide-react'
+import { CheckCircle, Clock, XCircle, Loader2, ChevronDown, ChevronRight, Terminal, X } from '@/components/Icons'
 
 const ToolResultCard: React.FC<ToolResultCardProps> = ({
   title,
@@ -127,7 +127,7 @@ const ToolResultCard: React.FC<ToolResultCardProps> = ({
               className="flex items-center text-xs font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 mb-2"
             >
               {showParameters ? <ChevronDown className="w-3.5 h-3.5 mr-1" /> : <ChevronRight className="w-3.5 h-3.5 mr-1" />}
-              <Box className="w-3.5 h-3.5 mr-1.5" />
+              <div className="w-3.5 h-3.5 mr-1.5" />
               输入参数
             </button>
             

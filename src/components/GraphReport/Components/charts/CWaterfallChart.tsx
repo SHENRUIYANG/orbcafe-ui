@@ -1,4 +1,5 @@
-import { Box, Typography } from '@mui/material';
+import { CTypography } from '../../../Atoms';
+
 import type { GraphWaterfallDatum } from '../../types';
 
 export interface CWaterfallChartProps {
@@ -8,7 +9,7 @@ export interface CWaterfallChartProps {
 
 export const CWaterfallChart = ({ data, height = 240 }: CWaterfallChartProps) => {
   if (data.length === 0) {
-    return <Typography variant="body2" color="text.secondary">No data</Typography>;
+    return <CTypography variant="body2" muted>No data</CTypography>;
   }
 
   let running = 0;
@@ -31,8 +32,8 @@ export const CWaterfallChart = ({ data, height = 240 }: CWaterfallChartProps) =>
   const yFor = (v: number) => height - padding - ((v - min) / range) * (height - padding * 2);
 
   return (
-    <Box>
-      <Box component="svg" viewBox={`0 0 ${width} ${height}`} sx={{ width: '100%', height }}>
+    <div>
+      <div component="svg" viewBox={`0 0 ${width} ${height}`} style={{ width: '100%', height }}>
         <line x1={padding} y1={yFor(0)} x2={width - padding} y2={yFor(0)} stroke="rgba(148,163,184,0.4)" />
 
         {bars.map((bar, index) => {
@@ -57,15 +58,15 @@ export const CWaterfallChart = ({ data, height = 240 }: CWaterfallChartProps) =>
             </g>
           );
         })}
-      </Box>
+      </div>
 
-      <Box sx={{ mt: 1, display: 'grid', gridTemplateColumns: `repeat(${bars.length}, minmax(0, 1fr))`, gap: 1 }}>
+          <div sx={{ mt: 1, display: 'grid', gridTemplateColumns: `repeat(${bars.length}, minmax(0, 1fr))`, gap: 1 }}>
         {bars.map((bar) => (
-          <Typography key={bar.name} variant="caption" noWrap title={bar.name}>
+          <CTypography key={bar.name} variant="caption"  title={bar.name}>
             {bar.name}
-          </Typography>
+          </CTypography>
         ))}
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 };

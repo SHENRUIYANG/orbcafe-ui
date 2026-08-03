@@ -1,7 +1,7 @@
 'use client'
 
 import { type FC, useState, useEffect } from 'react'
-import { ThumbsDown, ThumbsUp } from 'lucide-react'
+import { ThumbsDown, ThumbsUp } from '@/components/Icons'
 import type { ChatItem, MessageRating } from '../../types'
 import UniversalContentRenderer from './ContentRenderer'
 import { MiniAnswerIsland, type MiniAnswerIslandButton } from './MiniAnswerIsland'

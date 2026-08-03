@@ -1,8 +1,9 @@
 'use client';
+import { getOrbCompatMode } from '../../lib/orbis-compat';
+import { useMediaQuery, useTheme } from '../../lib/orbis-compat';
+import {  CPaper, CStack, CTypography } from "../Atoms";
 
 import { useEffect, useState } from 'react';
-import { Box, Paper, Stack, Typography, useMediaQuery } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
 import { useRouter } from 'next/navigation';
 import type { PWorkloadNavItem, PWorkloadNavProps } from './types';
 
@@ -32,7 +33,7 @@ export const PWorkloadNav = ({ items, selectedId, orientation = 'auto', onItemSe
   const router = useRouter();
 
   return (
-    <Box
+    <div
       sx={{
         display: 'grid',
         gridTemplateColumns:
@@ -48,7 +49,7 @@ export const PWorkloadNav = ({ items, selectedId, orientation = 'auto', onItemSe
         const accent = item.color || (selected ? theme.palette.primary.main : theme.palette.divider);
 
         return (
-          <Paper
+          <CPaper
             key={item.id}
             elevation={0}
             sx={{
@@ -57,10 +58,10 @@ export const PWorkloadNav = ({ items, selectedId, orientation = 'auto', onItemSe
               border: '1px solid',
               borderColor: selected ? 'primary.main' : 'divider',
               boxShadow: selected ? '0 18px 40px rgba(37, 99, 235, 0.16)' : 'none',
-              bgcolor: theme.palette.mode === 'dark' ? 'rgba(30,41,59,0.6)' : 'background.paper',
+              bgcolor: getOrbCompatMode() === 'dark' ? 'rgba(30,41,59,0.6)' : 'background.paper',
             }}
           >
-            <Box
+            <div
               component="button"
               type="button"
               disabled={item.disabled}
@@ -80,9 +81,9 @@ export const PWorkloadNav = ({ items, selectedId, orientation = 'auto', onItemSe
                 color: 'text.primary',
               }}
             >
-              <Stack spacing={1.5} sx={{ height: '100%' }}>
-                <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
-                  <Box
+              <CStack spacing={1.5} sx={{ height: '100%' }}>
+                <CStack direction="row" justifyContent="space-between" alignItems="flex-start">
+                  <div
                     sx={{
                       width: 44,
                       height: 44,
@@ -94,14 +95,14 @@ export const PWorkloadNav = ({ items, selectedId, orientation = 'auto', onItemSe
                     }}
                   >
                     {item.icon || (
-                      <Typography sx={{ fontSize: '1rem', fontWeight: 900 }}>
+                      <CTypography sx={{ fontSize: '1rem', fontWeight: 900 }}>
                         {item.title.slice(0, 1).toUpperCase()}
-                      </Typography>
+                      </CTypography>
                     )}
-                  </Box>
+                  </div>
 
                   {item.badge !== undefined ? (
-                    <Box
+                    <div
                       sx={{
                         minWidth: 34,
                         px: 1,
@@ -115,28 +116,28 @@ export const PWorkloadNav = ({ items, selectedId, orientation = 'auto', onItemSe
                       }}
                     >
                       {item.badge}
-                    </Box>
+                    </div>
                   ) : null}
-                </Stack>
+                </CStack>
 
-                <Box sx={{ flex: 1, minWidth: 0 }}>
-                  <Typography sx={{ fontSize: '1rem', fontWeight: 800, lineHeight: 1.25 }}>{item.title}</Typography>
+                <div sx={{ flex: 1, minWidth: 0 }}>
+                  <CTypography sx={{ fontSize: '1rem', fontWeight: 800, lineHeight: 1.25 }}>{item.title}</CTypography>
                   {item.caption ? (
-                    <Typography sx={{ mt: 0.5, fontSize: '0.74rem', fontWeight: 700, color: 'text.secondary' }}>
+                    <CTypography sx={{ mt: 0.5, fontSize: '0.74rem', fontWeight: 700, color: 'text.secondary' }}>
                       {item.caption}
-                    </Typography>
+                    </CTypography>
                   ) : null}
                   {item.description ? (
-                    <Typography sx={{ mt: 0.75, fontSize: '0.84rem', lineHeight: 1.45, color: 'text.secondary' }}>
+                    <CTypography sx={{ mt: 0.75, fontSize: '0.84rem', lineHeight: 1.45, color: 'text.secondary' }}>
                       {item.description}
-                    </Typography>
+                    </CTypography>
                   ) : null}
-                </Box>
-              </Stack>
-            </Box>
-          </Paper>
+                </div>
+              </CStack>
+            </div>
+          </CPaper>
         );
       })}
-    </Box>
+    </div>
   );
 };

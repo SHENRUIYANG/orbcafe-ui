@@ -2,20 +2,19 @@
 
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Box, Chip, Paper, Stack, Typography } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
-import FactCheckOutlinedIcon from '@mui/icons-material/FactCheckOutlined';
-import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
-import RocketLaunchOutlinedIcon from '@mui/icons-material/RocketLaunchOutlined';
-import TaskAltOutlinedIcon from '@mui/icons-material/TaskAltOutlined';
 import {
   CAppPageLayout,
   CKanbanBoard,
   CPageTransition,
+  CPaper,
+  CStack,
+  CTypography,
+  useOrbMode,
   useKanbanBoard,
   type KanbanBucketDefinition,
   type KanbanCardRecord,
 } from 'orbcafe-ui';
+import { CircleCheckBig, ClipboardCheck, PackageSearch, Rocket } from 'orbcafe-ui';
 import { EXAMPLE_MENU } from './exampleNavigation';
 
 const bucketDefinitions: KanbanBucketDefinition[] = [
@@ -24,7 +23,7 @@ const bucketDefinitions: KanbanBucketDefinition[] = [
     title: 'Intake',
     description: 'Clarify scope and assign accountable owner.',
     accentColor: '#5B6CFF',
-    icon: <Inventory2OutlinedIcon fontSize="small" color="primary" />,
+    icon: <PackageSearch size={18} color="#2770ff" />,
     limit: 3,
   },
   {
@@ -32,7 +31,7 @@ const bucketDefinitions: KanbanBucketDefinition[] = [
     title: 'Execution',
     description: 'Push active delivery work with measurable progress.',
     accentColor: '#0F766E',
-    icon: <RocketLaunchOutlinedIcon fontSize="small" sx={{ color: '#0F766E' }} />,
+    icon: <Rocket size={18} color="#0F766E" />,
     limit: 4,
   },
   {
@@ -40,7 +39,7 @@ const bucketDefinitions: KanbanBucketDefinition[] = [
     title: 'Review',
     description: 'Business confirmation, sign-off and QA checks.',
     accentColor: '#D97706',
-    icon: <FactCheckOutlinedIcon fontSize="small" sx={{ color: '#D97706' }} />,
+    icon: <ClipboardCheck size={18} color="#D97706" />,
     limit: 2,
   },
   {
@@ -48,7 +47,7 @@ const bucketDefinitions: KanbanBucketDefinition[] = [
     title: 'Done',
     description: 'Released items and archived operational work.',
     accentColor: '#059669',
-    icon: <TaskAltOutlinedIcon fontSize="small" sx={{ color: '#059669' }} />,
+    icon: <CircleCheckBig size={18} color="#059669" />,
   },
 ];
 
@@ -113,7 +112,7 @@ const initialCards: KanbanCardRecord[] = [
     id: 'TASK-208',
     bucketId: 'execution',
     title: 'Prepare KPI narrative cards for steering dashboard',
-    summary: 'Align summary language with MUI graph report visuals and board cadence.',
+    summary: 'Align summary language with ORBIS graph report visuals and board cadence.',
     kicker: 'Executive View',
     priority: 'medium',
     progress: 52,
@@ -160,15 +159,14 @@ const initialCards: KanbanCardRecord[] = [
 ];
 
 const HeaderBrandLogo = () => {
-  const theme = useTheme();
-  const src = theme.palette.mode === 'dark' ? '/LOGO3.png' : '/LOGO2.png';
+  const mode = useOrbMode();
+  const src = mode === 'dark' ? '/LOGO3.png' : '/LOGO2.png';
 
   return (
-    <Box
-      component="img"
+    <img
       src={src}
       alt="ORBCAFE UI"
-      sx={{ width: 280, maxWidth: '32vw', height: 52, display: 'block', objectFit: 'contain', flexShrink: 0 }}
+      style={{ width: 280, maxWidth: '32vw', height: 52, display: 'block', objectFit: 'contain', flexShrink: 0 }}
     />
   );
 };
@@ -218,49 +216,53 @@ export default function KanbanExampleClient() {
   return (
     <CAppPageLayout
       appTitle=""
+      navigationVariant="v2"
+      searchPlacement="header"
       menuData={menuData}
       locale="en"
       localeLabel="EN"
       user={{ name: 'Ruiyang Shen', subtitle: 'ruiyang.shen@orbis.de', avatarSrc: '/orbcafe.png' }}
+      onUserRefresh={() => window.location.reload()}
+      onUserLogout={() => window.location.assign('/login')}
       logo={<HeaderBrandLogo />}
     >
       <CPageTransition transitionKey="kanban-demo" variant="fade" durationMs={180}>
-        <Box sx={{ height: 'calc(100vh - 120px)', overflow: 'auto', px: { xs: 1, md: 2 }, pb: 2 }}>
-          <Stack spacing={2}>
-            <Paper
-              sx={(theme) => ({
-                p: { xs: 1.6, md: 2 },
-                borderRadius: 4,
-                border: `1px solid ${theme.palette.divider}`,
-                background: theme.palette.mode === 'dark'
-                  ? 'linear-gradient(135deg, rgba(91,108,255,0.18), rgba(15,118,110,0.16))'
-                  : 'linear-gradient(135deg, rgba(91,108,255,0.10), rgba(15,118,110,0.10))',
-              })}
+        <div style={{ height: 'calc(100vh - 120px)', overflow: 'auto', padding: '16px 16px 16px' }}>
+          <CStack spacing={2}>
+            <CPaper
+              style={{
+                padding: 16,
+                borderRadius: 'var(--orb-r-container)',
+                border: '1px solid var(--orb-divider)',
+                background: 'linear-gradient(135deg, rgba(91,108,255,0.10), rgba(15,118,110,0.10))',
+              }}
             >
-              <Stack spacing={1.2}>
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1, flexWrap: 'wrap' }}>
-                  <Box>
-                    <Typography sx={{ fontSize: '1.25rem', fontWeight: 800 }}>Kanban Official Example</Typography>
-                    <Typography sx={{ mt: 0.4, color: 'text.secondary' }}>
+              <CStack spacing={1.2}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
+                  <div>
+                    <CTypography sx={{ fontSize: '1.25rem', fontWeight: 800 }}>Kanban Official Example</CTypography>
+                    <CTypography sx={{ marginTop: 4, color: 'var(--orb-muted)' }}>
                       Hook-first workflow board with independent bucket/card styles and DetailInfo routing.
-                    </Typography>
-                  </Box>
-                  <Chip color="primary" variant="outlined" label={moveNotice} sx={{ maxWidth: '100%', '& .MuiChip-label': { whiteSpace: 'normal' } }} />
-                </Box>
+                    </CTypography>
+                  </div>
+                  <span style={{ fontSize: '0.875rem', padding: '6px 12px', borderRadius: 16, border: '1px solid var(--orb-primary)', color: 'var(--orb-primary)', maxWidth: '100%', whiteSpace: 'normal' }}>
+                    {moveNotice}
+                  </span>
+                </div>
 
-                <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(4, minmax(0, 1fr))' }, gap: 1.2 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 10 }}>
                   {summaryItems.map((item) => (
-                    <Paper key={item.label} sx={{ p: 1.35, borderRadius: 3, border: '1px solid', borderColor: 'divider' }}>
-                      <Typography sx={{ fontSize: '0.76rem', color: 'text.secondary', textTransform: 'uppercase', letterSpacing: 0.35 }}>
+                    <CPaper key={item.label} sx={{ padding: 11, borderRadius: 'var(--orb-r-container)', border: '1px solid var(--orb-divider)' }}>
+                      <CTypography sx={{ fontSize: '0.76rem', color: 'var(--orb-muted)', textTransform: 'uppercase', letterSpacing: 0.35 }}>
                         {item.label}
-                      </Typography>
-                      <Typography sx={{ mt: 0.35, fontSize: '1.35rem', fontWeight: 800 }}>{item.value}</Typography>
-                      <Typography sx={{ mt: 0.35, fontSize: '0.76rem', color: 'text.secondary' }}>{item.note}</Typography>
-                    </Paper>
+                      </CTypography>
+                      <CTypography sx={{ marginTop: 3, fontSize: '1.35rem', fontWeight: 800 }}>{item.value}</CTypography>
+                      <CTypography sx={{ marginTop: 3, fontSize: '0.76rem', color: 'var(--orb-muted)' }}>{item.note}</CTypography>
+                    </CPaper>
                   ))}
-                </Box>
-              </Stack>
-            </Paper>
+                </div>
+              </CStack>
+            </CPaper>
 
             <CKanbanBoard
               {...kanban.boardProps}
@@ -276,28 +278,28 @@ export default function KanbanExampleClient() {
               }}
             />
 
-            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(3, minmax(0, 1fr))' }, gap: 1.2 }}>
-              <Paper sx={{ p: 1.5, borderRadius: 3, border: '1px solid', borderColor: 'divider' }}>
-                <Typography sx={{ fontSize: '0.82rem', fontWeight: 800 }}>Hook</Typography>
-                <Typography sx={{ mt: 0.6, fontSize: '0.78rem', color: 'text.secondary', lineHeight: 1.6 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 10 }}>
+              <CPaper sx={{ padding: 12, borderRadius: 'var(--orb-r-container)', border: '1px solid var(--orb-divider)' }}>
+                <CTypography sx={{ fontSize: '0.82rem', fontWeight: 800 }}>Hook</CTypography>
+                <CTypography sx={{ marginTop: 5, fontSize: '0.78rem', color: 'var(--orb-muted)', lineHeight: 1.6 }}>
                   Use `useKanbanBoard` to own the board model and feed `boardProps` directly into `CKanbanBoard`.
-                </Typography>
-              </Paper>
-              <Paper sx={{ p: 1.5, borderRadius: 3, border: '1px solid', borderColor: 'divider' }}>
-                <Typography sx={{ fontSize: '0.82rem', fontWeight: 800 }}>Tool</Typography>
-                <Typography sx={{ mt: 0.6, fontSize: '0.78rem', color: 'text.secondary', lineHeight: 1.6 }}>
+                </CTypography>
+              </CPaper>
+              <CPaper sx={{ padding: 12, borderRadius: 'var(--orb-r-container)', border: '1px solid var(--orb-divider)' }}>
+                <CTypography sx={{ fontSize: '0.82rem', fontWeight: 800 }}>Tool</CTypography>
+                <CTypography sx={{ marginTop: 5, fontSize: '0.78rem', color: 'var(--orb-muted)', lineHeight: 1.6 }}>
                   `moveKanbanCard` and `createKanbanBoardModel` are pure helpers for reducers, optimistic updates and server sync.
-                </Typography>
-              </Paper>
-              <Paper sx={{ p: 1.5, borderRadius: 3, border: '1px solid', borderColor: 'divider' }}>
-                <Typography sx={{ fontSize: '0.82rem', fontWeight: 800 }}>Skill</Typography>
-                <Typography sx={{ mt: 0.6, fontSize: '0.78rem', color: 'text.secondary', lineHeight: 1.6 }}>
+                </CTypography>
+              </CPaper>
+              <CPaper sx={{ padding: 12, borderRadius: 'var(--orb-r-container)', border: '1px solid var(--orb-divider)' }}>
+                <CTypography sx={{ fontSize: '0.82rem', fontWeight: 800 }}>Skill</CTypography>
+                <CTypography sx={{ marginTop: 5, fontSize: '0.78rem', color: 'var(--orb-muted)', lineHeight: 1.6 }}>
                   Route future Kanban requests through `skills/orbcafe-kanban-detail/SKILL.md` for examples-first usage.
-                </Typography>
-              </Paper>
-            </Box>
-          </Stack>
-        </Box>
+                </CTypography>
+              </CPaper>
+            </div>
+          </CStack>
+        </div>
       </CPageTransition>
     </CAppPageLayout>
   );

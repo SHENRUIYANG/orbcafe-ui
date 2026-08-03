@@ -1,30 +1,31 @@
+import { ArrowRightAltIcon, CCheckbox, CDivider, CListItemText, Grid, InputAdornment, KeyboardArrowDownIcon, KeyboardArrowUpIcon, Popover, SearchIcon, SettingsIcon } from '../../lib/orbis-compat';
 /**
  * @file 10_Frontend/components/sap/ui/Common/Structures/CSmartFilter.tsx
- * 
+ *
  * @summary Core frontend CSmartFilter module for the ORBAI Core project
  * @author ORBAICODER
  * @version 1.0.0
  * @date 2025-01-19
- * 
+ *
  * @description
  * This file is responsible for:
  *  - Implementing CSmartFilter functionality within frontend workflows
  *  - Integrating with shared ORBAI Core application processes under frontend
- * 
+ *
  * @logic
  * 1. Import required dependencies and configuration
  * 2. Execute the primary logic for CSmartFilter
  * 3. Export the resulting APIs, hooks, or components for reuse
- * 
+ *
  * @changelog
  * V1.0.0 - 2025-01-19 - Initial creation
  */
 
 /**
  * File Overview
- * 
+ *
  * START CODING
- * 
+ *
  * --------------------------
  * SECTION 1: CSmartFilter Core Logic
  * Section overview and description.
@@ -35,7 +36,7 @@
 
 /**
  * CSmartFilter.tsx
- * 
+ *
  * A comprehensive filter component with:
  * - Collapsible filter fields
  * - Variant management (save/load filter presets)
@@ -44,29 +45,8 @@
  */
 
 import { useState, useEffect } from 'react';
-import { 
-    Box, 
-    Paper, 
-    Grid, 
-    TextField, 
-    InputAdornment, 
-    IconButton, 
-    Button,
-    Collapse, 
-    Menu, 
-    MenuItem, 
-    Checkbox, 
-    ListItemText, 
-    Divider,
-    Tooltip,
-    Popover,
-    ListSubheader
-} from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import SettingsIcon from '@mui/icons-material/Settings';
-import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import ArrowRightAltIcon from '@mui/icons-material/ArrowRightAlt';
+import { CButton, CIconButton, CSelect, CSpinner, CTextField, CTooltip, CMenu, CPaper } from "../Atoms";
+import { SapIcon } from '../Icons';
 import { CVariantManagement, type VariantMetadata } from './Components/CVariantManagement';
 import { CVariantManager, type IVariantService } from './CVariantManager';
 import { CDateRangePicker } from '../Molecules/CDateRangePicker';
@@ -108,7 +88,7 @@ export interface CSmartFilterProps {
     fields: FilterField[];
     filters: Record<string, FilterValue>;
     onFilterChange: (newFilters: Record<string, FilterValue>) => void;
-    
+
     // Variant Props
     variants?: VariantMetadata[];
     currentVariantId?: string;
@@ -163,32 +143,30 @@ const OPERATOR_TOOLTIP_KEYS: Record<string, string> = {
     'between': 'smartFilter.operator.between',
 };
 
-const TEXT_OPERATORS: TextOperator[] = ['equals', 'contains', 'notContains', 'wildcard'];
+const TEXT_OPERATORS: FilterOperator[] = ['contains', 'notContains', '>', '>=', '<', '<=', 'equals'];
 const NUMBER_OPERATORS: NumberOperator[] = ['=', '!=', '>', '<', '>=', '<=', 'between'];
 
 // --- Helper Component: FilterInput ---
 
 const FONT_SIZE_SMALL = '0.85rem';
 
-const FilterInput = ({ 
-    field, 
-    value, 
-    onChange 
-}: { 
-    field: FilterField; 
-    value: FilterValue; 
-    onChange: (val: FilterValue) => void; 
+const FilterInput = ({
+    field,
+    value,
+    onChange
+}: {
+    field: FilterField;
+    value: FilterValue;
+    onChange: (val: FilterValue) => void;
 }) => {
     const { t } = useOrbcafeI18n();
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [rangeAnchorEl, setRangeAnchorEl] = useState<null | HTMLElement>(null); // For number between
-    
+    const [multiSelectAnchorEl, setMultiSelectAnchorEl] = useState<null | HTMLElement>(null);
+
     // Temporary state for number range inputs
     const [minVal, setMinVal] = useState('');
     const [maxVal, setMaxVal] = useState('');
-
-    // Manage focus state to control startAdornment visibility
-    const [focused, setFocused] = useState(false);
 
     // Search text state for multi-select
     const [searchText, setSearchText] = useState('');
@@ -213,7 +191,7 @@ const FilterInput = ({
     };
 
     const handleOperatorClick = (event: React.MouseEvent<HTMLElement>) => {
-        setAnchorEl(event.currentTarget);
+        setAnchorEl(anchorEl ? null : event.currentTarget);
     };
 
     const handleOperatorSelect = (op: FilterOperator) => {
@@ -232,7 +210,7 @@ const FilterInput = ({
             MenuProps: {
                 PaperProps: {
                     sx: {
-                        '& .MuiMenuItem-root': {
+                        '& .orb-menu-item, & option': {
                             fontSize: FONT_SIZE_SMALL,
                             paddingTop: '4px',
                             paddingBottom: '4px',
@@ -283,13 +261,13 @@ const FilterInput = ({
             setRangeAnchorEl(null);
         };
 
-        const displayValue = Array.isArray(currentValue) 
+        const displayValue = Array.isArray(currentValue)
             ? `${currentValue[0] || ''} - ${currentValue[1] || ''}`
             : '';
 
         return (
             <>
-                <TextField
+                <CTextField
                     {...commonTextFieldProps}
                     label={field.label}
                     value={displayValue}
@@ -298,40 +276,40 @@ const FilterInput = ({
                         ...commonTextFieldProps.InputProps,
                         startAdornment: (
                             <InputAdornment position="start">
-                                <Tooltip title={getTooltip('between')}>
-                                    <IconButton 
-                                        size="small" 
+                                <CTooltip title={getTooltip('between')}>
+                                    <CIconButton
+                                        size="small"
                                         onClick={handleOperatorClick}
                                         sx={{ width: 24, height: 24, fontSize: FONT_SIZE_SMALL }}
                                     >
                                         {OPERATOR_LABELS['between']}
-                                    </IconButton>
-                                </Tooltip>
+                                    </CIconButton>
+                                </CTooltip>
                             </InputAdornment>
                         ),
                         readOnly: true,
                     }}
-                    onClick={(e: React.MouseEvent<HTMLElement>) => setRangeAnchorEl(e.currentTarget)}
+                    onClick={(e: React.MouseEvent<HTMLElement>) => setRangeAnchorEl(rangeAnchorEl ? null : e.currentTarget)}
                 />
-                
+
                 {/* Operator Menu */}
-                <Menu
+                <CMenu
                     anchorEl={anchorEl}
                     open={Boolean(anchorEl)}
                     onClose={() => setAnchorEl(null)}
-                    PaperProps={{ sx: { '& .MuiMenuItem-root': { fontSize: FONT_SIZE_SMALL, minHeight: 'auto', py: 0.5 } } }}
+                    PaperProps={{ sx: { '& .orb-menu-item, & option': { fontSize: FONT_SIZE_SMALL, minHeight: 'auto', py: 0.5 } } }}
                 >
                     {NUMBER_OPERATORS.map(op => (
-                        <MenuItem 
-                            key={op} 
+                        <option
+                            key={op}
                             selected={op === currentOperator}
                             onClick={() => handleOperatorSelect(op)}
                         >
-                            <Box sx={{ width: 24, display: 'inline-block', fontWeight: 'bold' }}>{OPERATOR_LABELS[op]}</Box>
-                            <ListItemText primary={getTooltip(op)} primaryTypographyProps={{ fontSize: FONT_SIZE_SMALL }} />
-                        </MenuItem>
+                            <div sx={{ width: 24, display: 'inline-block', fontWeight: 'bold' }}>{OPERATOR_LABELS[op]}</div>
+                            <CListItemText primary={getTooltip(op)} primaryTypographyProps={{ fontSize: FONT_SIZE_SMALL }} />
+                        </option>
                     ))}
-                </Menu>
+                </CMenu>
 
                 {/* Range Popover */}
                 <Popover
@@ -340,10 +318,10 @@ const FilterInput = ({
                     onClose={() => setRangeAnchorEl(null)}
                     anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
                 >
-                    <Box sx={{ p: 2, display: 'flex', gap: 1, alignItems: 'center' }}>
-                        <TextField 
-                            size="small" 
-                            label={t('smartFilter.min')} 
+                    <div sx={{ p: 2, display: 'flex', gap: 1, alignItems: 'center' }}>
+                        <CTextField
+                            size="small"
+                            label={t('smartFilter.min')}
                             type="number"
                             value={minVal}
                             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMinVal(e.target.value)}
@@ -352,9 +330,9 @@ const FilterInput = ({
                             InputProps={{ sx: { fontSize: FONT_SIZE_SMALL } }}
                         />
                         <ArrowRightAltIcon color="action" />
-                        <TextField 
-                            size="small" 
-                            label={t('smartFilter.max')} 
+                        <CTextField
+                            size="small"
+                            label={t('smartFilter.max')}
                             type="number"
                             value={maxVal}
                             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMaxVal(e.target.value)}
@@ -362,8 +340,8 @@ const FilterInput = ({
                             InputLabelProps={{ sx: { fontSize: FONT_SIZE_SMALL } }}
                             InputProps={{ sx: { fontSize: FONT_SIZE_SMALL } }}
                         />
-                        <Button variant="contained" size="small" onClick={handleRangeConfirm}>{t('common.ok')}</Button>
-                    </Box>
+                        <CButton variant="contained" size="small" onClick={handleRangeConfirm}>{t('common.ok')}</CButton>
+                    </div>
                 </Popover>
             </>
         );
@@ -392,138 +370,156 @@ const FilterInput = ({
     // 4. Select Input
     if (type === 'select') {
         return (
-            <TextField
-                {...commonTextFieldProps}
-                select
+            <CSelect
+                size="small"
+                fullWidth
                 label={field.label}
                 value={currentValue || ''}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChange({ ...value, value: e.target.value, operator: 'equals' })}
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => onChange({ ...value, value: e.target.value, operator: 'equals' })}
             >
-                <MenuItem value="">
-                    <em>{t('common.none')}</em>
-                </MenuItem>
+                <option value="">
+                    {t('common.none')}
+                </option>
                 {field.options?.map((option) => (
-                    <MenuItem key={option.value} value={option.value}>
+                    <option key={option.value} value={option.value}>
                         {option.label}
-                    </MenuItem>
+                    </option>
                 ))}
-            </TextField>
+            </CSelect>
         );
     }
 
     // 5. Multi-Select Input
     if (type === 'multi-select') {
         const selectedValues = Array.isArray(currentValue) ? currentValue : [];
-        
+
         // Filter options based on debounced search text
-        const filteredOptions = field.options?.filter(option => 
+        const filteredOptions = field.options?.filter(option =>
             option.label.toLowerCase().includes(debouncedSearchText.toLowerCase())
         ) || [];
 
+        const getLabel = (optionValue: any) => field.options?.find((option) => option.value === optionValue)?.label || optionValue;
+        const selectedLabels = selectedValues.map(getLabel);
+        const displayValue = selectedLabels.length === 0
+            ? t('common.none')
+            : selectedLabels.length > 2
+                ? `${selectedLabels.slice(0, 2).join(', ')} +${selectedLabels.length - 2}`
+                : selectedLabels.join(', ');
+        const closeMultiSelect = () => {
+            setMultiSelectAnchorEl(null);
+            setSearchText('');
+            setDebouncedSearchText('');
+        };
+        const toggleValue = (optionValue: any) => {
+            const nextValues = selectedValues.includes(optionValue)
+                ? selectedValues.filter((selectedValue) => selectedValue !== optionValue)
+                : [...selectedValues, optionValue];
+            onChange({ ...value, value: nextValues, operator: 'anyOf' });
+        };
+
         return (
-            <TextField
-                {...commonTextFieldProps}
-                select
-                label={field.label}
-                value={selectedValues}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChange({ ...value, value: e.target.value, operator: 'anyOf' })}
-                SelectProps={{
-                    ...commonTextFieldProps.SelectProps,
-                    multiple: true,
-                    onClose: () => {
-                        setSearchText('');
-                        setDebouncedSearchText('');
-                    }, // Clear search on close
-                    renderValue: (selected: any) => {
-                         if (!Array.isArray(selected) || selected.length === 0) return <em>{t('common.none')}</em>;
-                         // Map values back to labels if possible
-                         const getLabel = (val: any) => field.options?.find(o => o.value === val)?.label || val;
-                         // Truncate if too long
-                         const labels = (selected as string[]).map(getLabel);
-                         if (labels.length > 2) {
-                             return `${labels.slice(0, 2).join(', ')} +${labels.length - 2}`;
-                         }
-                         return labels.join(', ');
-                    }
-                }}
-            >
-                <ListSubheader>
-                    <TextField
-                        size="small"
-                        autoFocus
-                        placeholder={t('smartFilter.searchPlaceholder')}
-                        fullWidth
-                        InputProps={{
-                            startAdornment: (
-                                <InputAdornment position="start">
-                                    <SearchIcon fontSize="small" />
-                                </InputAdornment>
-                            ),
-                            sx: { fontSize: FONT_SIZE_SMALL }
-                        }}
-                        value={searchText}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchText(e.target.value)}
-                        onKeyDown={(e: React.KeyboardEvent) => {
-                            if (e.key !== 'Escape') {
-                                e.stopPropagation();
-                            }
-                        }}
-                        onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                    />
-                </ListSubheader>
-                {filteredOptions.length > 0 ? (
-                    filteredOptions.map((option) => (
-                        <MenuItem key={option.value} value={option.value}>
-                            <Checkbox checked={selectedValues.indexOf(option.value) > -1} size="small" />
-                            <ListItemText primary={option.label} primaryTypographyProps={{ fontSize: FONT_SIZE_SMALL }} />
-                        </MenuItem>
-                    ))
-                ) : (
-                    <MenuItem disabled>
-                        <ListItemText primary={t('smartFilter.noOptionsFound')} primaryTypographyProps={{ fontSize: FONT_SIZE_SMALL }} />
-                    </MenuItem>
-                )}
-            </TextField>
+            <div className="orb-fld">
+                <label>{field.label}</label>
+                <CButton
+                    variant="outlined"
+                    size="small"
+                    onClick={(event) => setMultiSelectAnchorEl(multiSelectAnchorEl ? null : event.currentTarget)}
+                    sx={{ width: '100%', minHeight: 36, justifyContent: 'space-between', fontSize: FONT_SIZE_SMALL, fontWeight: 400 }}
+                >
+                    <span sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{displayValue}</span>
+                    <KeyboardArrowDownIcon fontSize="small" />
+                </CButton>
+                <CMenu
+                    anchorEl={multiSelectAnchorEl}
+                    open={Boolean(multiSelectAnchorEl)}
+                    onClose={closeMultiSelect}
+                    PaperProps={{ sx: { width: 280, maxHeight: 340, overflowY: 'auto', p: 0.5 } }}
+                >
+                    <div onClick={(event) => event.stopPropagation()} sx={{ display: 'grid', gap: 0.35 }}>
+                        <CTextField
+                            size="small"
+                            autoFocus
+                            placeholder={t('smartFilter.searchPlaceholder')}
+                            fullWidth
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <SearchIcon fontSize="small" />
+                                    </InputAdornment>
+                                ),
+                                sx: { fontSize: FONT_SIZE_SMALL }
+                            }}
+                            value={searchText}
+                            onChange={(event) => setSearchText(event.target.value)}
+                            onKeyDown={(event) => event.stopPropagation()}
+                        />
+                        {filteredOptions.length > 0 ? filteredOptions.map((option) => {
+                            const checked = selectedValues.includes(option.value);
+                            return (
+                                <div
+                                    key={String(option.value)}
+                                    role="option"
+                                    aria-selected={checked}
+                                    tabIndex={0}
+                                    className={`orb-menu-item ${checked ? 'orb-selected' : ''}`}
+                                    onClick={() => toggleValue(option.value)}
+                                    onKeyDown={(event) => {
+                                        if (event.key === 'Enter' || event.key === ' ') {
+                                            event.preventDefault();
+                                            toggleValue(option.value);
+                                        }
+                                    }}
+                                >
+                                    <CCheckbox checked={checked} size="small" inputProps={{ tabIndex: -1 }} sx={{ pointerEvents: 'none' }} />
+                                    <CListItemText primary={option.label} />
+                                </div>
+                            );
+                        }) : (
+                            <div className="orb-menu-item" aria-disabled="true">{t('smartFilter.noOptionsFound')}</div>
+                        )}
+                    </div>
+                </CMenu>
+            </div>
         );
     }
 
     // 6. Standard Text/Number Input
     const operators = type === 'number' ? NUMBER_OPERATORS : TEXT_OPERATORS;
-    
-    const showAdornment = focused || (currentValue !== undefined && currentValue !== '' && currentValue !== null) || Boolean(anchorEl);
+
+    const showAdornment = true;
 
     return (
         <>
-             <TextField 
+             <CTextField
                 {...commonTextFieldProps}
+                className="orb-filter-operator-field"
                 label={field.label}
                 sx={{ minWidth: '120px' }}
                 value={currentValue || ''}
                 type={type === 'number' ? 'number' : 'text'}
                 onChange={(e) => onChange({ ...value, value: e.target.value, operator: currentOperator })}
-                onFocus={() => setFocused(true)}
-                onBlur={() => setFocused(false)}
                 InputProps={{
                     ...commonTextFieldProps.InputProps,
                     startAdornment: showAdornment ? (
                         <InputAdornment position="start">
-                            <Tooltip title={getTooltip(currentOperator)}>
-                                <IconButton 
+                            <CTooltip title={getTooltip(currentOperator)}>
+                                <CIconButton
+                                    className="orb-filter-operator-trigger"
                                     size="small"
                                     onClick={handleOperatorClick}
                                     onMouseDown={(e) => e.preventDefault()} // Prevent blur
-                                    sx={{ 
-                                        width: 24, 
-                                        height: 24, 
-                                        fontSize: FONT_SIZE_SMALL, 
+                                    sx={{
+                                        width: 24,
+                                        height: 24,
+                                        fontSize: FONT_SIZE_SMALL,
                                         fontWeight: 'bold',
                                         color: 'primary.main',
                                         bgcolor: 'action.hover'
                                     }}
                                 >
                                     {OPERATOR_LABELS[currentOperator]}
-                                </IconButton>
-                            </Tooltip>
+                                </CIconButton>
+                            </CTooltip>
                         </InputAdornment>
                     ) : null,
                     endAdornment: (field.hasSearchIcon) ? (
@@ -533,23 +529,23 @@ const FilterInput = ({
                     ) : undefined
                 }}
             />
-            <Menu
+            <CMenu
                 anchorEl={anchorEl}
                 open={Boolean(anchorEl)}
                 onClose={() => setAnchorEl(null)}
-                PaperProps={{ sx: { '& .MuiMenuItem-root': { fontSize: FONT_SIZE_SMALL, minHeight: 'auto', py: 0.5 } } }}
+                PaperProps={{ sx: { '& .orb-menu-item, & option': { fontSize: FONT_SIZE_SMALL, minHeight: 'auto', py: 0.5 } } }}
             >
                 {operators.map(op => (
-                    <MenuItem 
-                        key={op} 
+                    <option
+                        key={op}
                         selected={op === currentOperator}
                         onClick={() => handleOperatorSelect(op)}
                     >
-                        <Box sx={{ width: 24, display: 'inline-block', fontWeight: 'bold' }}>{OPERATOR_LABELS[op]}</Box>
-                        <ListItemText primary={getTooltip(op)} primaryTypographyProps={{ fontSize: FONT_SIZE_SMALL }} />
-                    </MenuItem>
+                        <span className="orb-filter-operator-symbol">{OPERATOR_LABELS[op]}</span>
+                        <CListItemText primary={getTooltip(op)} primaryTypographyProps={{ fontSize: FONT_SIZE_SMALL }} />
+                    </option>
                 ))}
-            </Menu>
+            </CMenu>
         </>
     );
 };
@@ -557,7 +553,7 @@ const FilterInput = ({
 
 /**
  * CSmartFilter Component
- * 
+ *
  * Renders a filter bar with "Go" button, variant management, and "Adapt Filters" capability.
  */
 export const CSmartFilter = ({
@@ -642,9 +638,13 @@ export const CSmartFilter = ({
     };
 
     return (
-        <Paper sx={{ mb: 0, display: 'flex', flexDirection: 'column', overflow: 'visible', position: 'relative' }}>
+        <CPaper
+            className={`orb-smart-filter ${isExpanded ? 'orb-smart-filter-expanded' : 'orb-smart-filter-collapsed'}`}
+            sx={{ mb: 0, display: 'flex', flexDirection: 'column', overflow: 'visible', position: 'relative' }}
+        >
+            {isExpanded ? <>
             {/* Header: Variants + Settings */}
-            <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div className="orb-smart-filter-header">
                 {appId ? (
                     <CVariantManager
                         appId={appId}
@@ -659,7 +659,7 @@ export const CSmartFilter = ({
                         currentVariantId={currentVariantId}
                     />
                 ) : (
-                    <CVariantManagement 
+                    <CVariantManagement
                         variants={variants}
                         currentVariantId={currentVariantId}
                         onLoad={onVariantLoad}
@@ -678,12 +678,13 @@ export const CSmartFilter = ({
                         onSetDefault={onVariantSetDefault!}
                     />
                 )}
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <div className="orb-smart-filter-actions">
                     {/* Add Filter Button */}
-                    <Tooltip title={t('smartFilter.addFilters')}>
-                        <Button 
-                            onClick={(e) => setSettingsAnchorEl(e.currentTarget)} 
-                            size="small" 
+                    <CTooltip title={t('smartFilter.addFilters')}>
+                        <CButton
+                            className="orb-smart-filter-adapt"
+                            onClick={(e) => setSettingsAnchorEl(settingsAnchorEl ? null : e.currentTarget)}
+                            size="small"
                             color="primary"
                             startIcon={<SettingsIcon fontSize="small" />}
                             sx={{
@@ -694,18 +695,18 @@ export const CSmartFilter = ({
                             }}
                         >
                             {t('smartFilter.adaptFilters')}
-                        </Button>
-                    </Tooltip>
-                    <Button 
-                        variant="contained" 
-                        size="small" 
+                        </CButton>
+                    </CTooltip>
+                    <CIconButton
+                        className="orb-smart-filter-go"
+                        tooltip={t('smartFilter.go')}
+                        aria-label={t('smartFilter.go')}
                         onClick={onSearch}
                         disabled={loading}
-                        sx={{ minWidth: '52px', fontWeight: 'bold', fontSize: FONT_SIZE_SMALL }}
                     >
-                        {loading ? t('common.loading') : t('smartFilter.go')}
-                    </Button>
-                    <Menu
+                        {loading ? <CSpinner size={16} /> : <SapIcon name="play" size={16} />}
+                    </CIconButton>
+                    <CMenu
                         anchorEl={settingsAnchorEl}
                         open={Boolean(settingsAnchorEl)}
                         onClose={() => setSettingsAnchorEl(null)}
@@ -716,7 +717,7 @@ export const CSmartFilter = ({
                                     width: '25ch',
                                 },
                                 sx: {
-                                    '& .MuiMenuItem-root': {
+                                    '& .orb-menu-item, & option': {
                                         fontSize: FONT_SIZE_SMALL,
                                         minHeight: 32,
                                     },
@@ -724,27 +725,26 @@ export const CSmartFilter = ({
                             }
                         }}
                     >
-                        <MenuItem disabled>
-                            <ListItemText primary={t('smartFilter.visibleFilters')} primaryTypographyProps={{ fontSize: FONT_SIZE_SMALL }} />
-                        </MenuItem>
-                        <Divider />
+                        <option disabled>
+                            <CListItemText primary={t('smartFilter.visibleFilters')} primaryTypographyProps={{ fontSize: FONT_SIZE_SMALL }} />
+                        </option>
+                        <CDivider />
                         {fields.map(field => (
-                            <MenuItem key={field.id} onClick={() => toggleFieldVisibility(field.id)}>
-                                <Checkbox checked={visibleFields.includes(field.id)} size="small" />
-                                <ListItemText primary={field.label} primaryTypographyProps={{ fontSize: FONT_SIZE_SMALL }} />
-                            </MenuItem>
+                            <option key={field.id} onClick={() => toggleFieldVisibility(field.id)}>
+                                <CCheckbox checked={visibleFields.includes(field.id)} size="small" />
+                                <CListItemText primary={field.label} primaryTypographyProps={{ fontSize: FONT_SIZE_SMALL }} />
+                            </option>
                         ))}
-                    </Menu>
-                </Box>
-            </Box>
+                    </CMenu>
+                </div>
+            </div>
 
             {/* Filter Grid */}
-            <Collapse in={isExpanded}>
-                <Box sx={{ px: 2, pb: 2 }}>
+                <div className="orb-smart-filter-grid">
                     <Grid container spacing={2} columns={{ xs: 2, sm: 3, md: 4, lg: 6 }}>
                         {fields.filter(f => visibleFields.includes(f.id)).map(field => (
                             <Grid key={field.id} size={1}>
-                                <FilterInput 
+                                <FilterInput
                                     field={field}
                                     value={filters[field.id] || { value: '', operator: field.type === 'number' ? '=' : 'equals' }}
                                     onChange={(val) => handleFilterChange(field.id, val)}
@@ -752,24 +752,17 @@ export const CSmartFilter = ({
                             </Grid>
                         ))}
                     </Grid>
-                </Box>
-            </Collapse>
+                </div>
+            </> : null}
 
             {/* Expand/Collapse Handle */}
-            <Box 
-                sx={{ 
-                    position: 'absolute', 
-                    bottom: 0, 
-                    left: '50%', 
-                    transform: 'translate(-50%, 50%)',
-                    zIndex: 10
-                }}
-            >
-                <IconButton 
+            <div className="orb-smart-filter-toggle">
+                <CIconButton
+                    className="orb-smart-filter-toggle-button"
                     size="small"
                     onClick={() => setIsExpanded(!isExpanded)}
-                    sx={{ 
-                        bgcolor: 'background.paper', 
+                    sx={{
+                        bgcolor: 'background.paper',
                         boxShadow: 2,
                         border: '1px solid',
                         borderColor: 'divider',
@@ -778,12 +771,12 @@ export const CSmartFilter = ({
                         minWidth: TABLE_CONTROL_BUTTON_SIZE,
                         minHeight: 0,
                         p: 0,
-                        '&:hover': { bgcolor: 'background.paper' } 
+                        '&:hover': { bgcolor: 'background.paper' }
                     }}
                 >
-                    {isExpanded ? <KeyboardArrowUpIcon sx={{ fontSize: TABLE_CONTROL_ICON_SIZE }} color="action" /> : <KeyboardArrowDownIcon sx={{ fontSize: TABLE_CONTROL_ICON_SIZE }} color="action" />}
-                </IconButton>
-            </Box>
-        </Paper>
+                    {isExpanded ? <KeyboardArrowUpIcon className="orb-smart-filter-toggle-icon" sx={{ fontSize: TABLE_CONTROL_ICON_SIZE }} color="action" /> : <KeyboardArrowDownIcon className="orb-smart-filter-toggle-icon" sx={{ fontSize: TABLE_CONTROL_ICON_SIZE }} color="action" />}
+                </CIconButton>
+            </div>
+        </CPaper>
     );
 };

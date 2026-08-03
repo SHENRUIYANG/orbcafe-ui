@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ORBCAFE × ORBIS — Login Reference</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./orbis-reference.css">
+<style>
+  /* login specimen styles */
+  .lg-frame{max-width:1180px;margin:0 auto;border:1px solid #dbdbdb;border-radius:var(--r);overflow:hidden;display:grid;grid-template-columns:5fr 7fr;min-height:620px;box-shadow:var(--shadow-2)}
+  .lg-brand{
+    position:relative;background:#01091a;color:#ffffff;padding:44px 44px 36px;
+    display:flex;flex-direction:column;overflow:hidden;
+    background-image:
+      repeating-linear-gradient(45deg,rgba(255,255,255,.05) 0 1px,transparent 1px 64px),
+      repeating-linear-gradient(-45deg,rgba(255,255,255,.05) 0 1px,transparent 1px 64px);
+  }
+  .lg-dia{position:absolute;transform:rotate(45deg);border:1px solid rgba(255,255,255,.14);border-radius:6px;pointer-events:none}
+  .lg-dia.d1{width:230px;height:230px;right:-70px;bottom:-60px}
+  .lg-dia.d2{width:140px;height:140px;right:120px;bottom:80px;border-color:rgba(255,255,255,.09)}
+  .lg-dia.d3{width:76px;height:76px;right:60px;bottom:170px;background:rgba(21,65,148,.35);border-color:rgba(255,255,255,.2)}
+  .lg-brand .logo-slot{border-color:rgba(255,255,255,.4);color:rgba(255,255,255,.7);align-self:flex-start}
+  .lg-claim{margin-top:auto;position:relative}
+  .lg-rule{width:48px;height:2px;background:#fc4c02;border-radius:2px;margin-bottom:18px}
+  .lg-claim h2{font:600 30px/1.25 var(--font);color:#ffffff;max-width:300px}
+  .lg-claim p{margin-top:10px;font:300 14px/1.55 var(--font);color:rgba(255,255,255,.7);max-width:320px}
+  .lg-meta{margin-top:36px;font:500 10px/1.6 var(--font);letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.45)}
+  .lg-form{background:#ffffff;display:flex;align-items:center;justify-content:center;padding:48px 32px}
+  .lg-card{width:100%;max-width:360px;display:flex;flex-direction:column;gap:16px}
+  .lg-over{font:500 10px/1 var(--font);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+  .lg-card h1{font:600 24px/1.25 var(--font);color:var(--fg)}
+  .lg-sub{font:300 14px/1.5 var(--font);color:var(--muted);margin-top:-10px}
+  .lg-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .lg-link{font:500 13px/1.4 var(--font);color:var(--link);text-decoration:none}
+  .lg-link:hover{text-decoration:underline}
+  .lg-div{display:flex;align-items:center;gap:12px;font:500 10px/1 var(--font);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  .lg-div::before,.lg-div::after{content:"";flex:1;height:1px;background:var(--border)}
+  .lg-foot{font:300 11px/1.5 var(--font);color:var(--muted);text-align:center}
+  .full{width:100%;justify-content:center}
+  .ann{display:inline-flex;align-self:flex-start;font:500 10px/1 var(--font);letter-spacing:.06em;text-transform:uppercase;color:var(--primary);background:var(--p50);border-radius:6px;padding:4px 8px;margin-top:-8px}
+  .demo-focus{border-color:var(--primary) !important;box-shadow:0 0 0 3px var(--focus-ring)}
+
+  /* mobile frame */
+  .lg-mob{width:390px;max-width:100%;margin:0 auto;border:1px solid #dbdbdb;border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow-2)}
+  .lg-mob-brand{position:relative;background:#01091a;color:#ffffff;padding:22px 24px;overflow:hidden;
+    background-image:
+      repeating-linear-gradient(45deg,rgba(255,255,255,.05) 0 1px,transparent 1px 56px),
+      repeating-linear-gradient(-45deg,rgba(255,255,255,.05) 0 1px,transparent 1px 56px);}
+  .lg-mob-brand .logo-slot{border-color:rgba(255,255,255,.4);color:rgba(255,255,255,.7);padding:7px 12px}
+  .lg-mob-brand h2{font:600 18px/1.3 var(--font);margin-top:14px;display:flex;align-items:center;gap:12px}
+  .lg-mob-brand h2::before{content:"";width:24px;height:2px;background:#fc4c02;border-radius:2px;flex:none}
+  .lg-mob-brand .lg-dia.d4{width:120px;height:120px;right:-40px;top:-30px}
+  .lg-mob-form{background:#ffffff;padding:24px;display:flex;flex-direction:column;gap:14px}
+  .lg-mob-form h1{font:600 20px/1.3 var(--font);color:var(--fg)}
+
+  /* state matrix */
+  .mx{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
+  .mx-col{border:1px solid var(--border);border-radius:var(--r);padding:20px;background:var(--canvas);display:flex;flex-direction:column;gap:14px}
+  .mx-col h4{font:600 13px/1.3 var(--font);color:var(--fg)}
+  .mx-row{display:flex;align-items:center;gap:14px}
+  .mx-row .tag{width:88px;flex:none;font:500 11px/1.3 var(--font);color:var(--muted)}
+  .btn-hover{background:var(--p600) !important}
+  .btn-active{background:var(--p700) !important;box-shadow:none !important}
+  .btn-ring{box-shadow:0 0 0 3px var(--focus-ring), var(--shadow-1) !important}
+  .btn-loading{pointer-events:none}
+  @media (max-width:900px){
+    .lg-frame{grid-template-columns:1fr;min-height:0}
+    .lg-brand{min-height:220px;padding:32px 28px}
+    .lg-claim h2{font-size:22px}
+  }
+</style>
+</head>
+<body>
+
+<header class="doc-head" data-od-id="doc-header">
+  <div class="wrap">
+    <h1>ORBCAFE <b>×</b> ORBIS — Login reference</h1>
+    <p>Standalone authentication entry, restyled to the ORBIS campaign language. Every form, validation state, callback, mode and breakpoint of the current page is retained — this is a focused color/type/texture pass. The logo slot stays host-supplied; the brand texture is pure CSS.</p>
+    <nav class="doc-nav" data-od-id="doc-nav">
+      <a class="file" href="./orbcafe-orbis-design-reference.html">← Core reference</a>
+      <a class="file" href="./orbcafe-orbis-modules-reference.html">← Modules reference</a>
+      <a class="file" href="./design-handoff.md">→ design-handoff.md</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+<!-- ============ DESKTOP ============ -->
+<section id="desktop" data-od-id="section-login-desktop">
+  <div class="sec-h">
+    <h2>1 — Desktop composition</h2>
+    <p>Two columns, unchanged from the current page: dark campaign brand panel (canvas #01091a, CSS diamond lattice, one 2px orange rule) beside a quiet white form surface. Password field is shown in its focus state on purpose.</p>
+  </div>
+  <div class="lg-frame mode-light" data-od-id="login-desktop">
+    <div class="lg-brand">
+      <span class="lg-dia d1"></span><span class="lg-dia d2"></span><span class="lg-dia d3"></span>
+      <span class="logo-slot">Host logo</span>
+      <div class="lg-claim">
+        <div class="lg-rule"></div>
+        <h2>We digitalize you.</h2>
+        <p>One sign-in for planning, production and analytics across your value chain.</p>
+      </div>
+      <div class="lg-meta">ORBCAFE · Enterprise manufacturing suite</div>
+    </div>
+    <div class="lg-form">
+      <div class="lg-card">
+        <span class="lg-over">ORBCAFE — Enterprise suite</span>
+        <h1>Sign in</h1>
+        <p class="lg-sub">Use your corporate account to continue.</p>
+        <div class="alert alert-error" data-od-id="login-notice"><div><b>Invalid email or password.</b><span>2 attempts remaining before the account is locked.</span></div></div>
+        <div class="fld"><label for="lg-email">Email</label><input id="lg-email" class="inp" type="email" value="m.koch@example.com" autocomplete="username"></div>
+        <div class="fld"><label for="lg-pw">Password</label><input id="lg-pw" class="inp demo-focus" type="password" value="••••••••••" autocomplete="current-password"></div>
+        <span class="ann">Focus state shown</span>
+        <div class="lg-row">
+          <label class="chk"><input type="checkbox" checked>Remember me</label>
+          <a class="lg-link" href="#desktop">Forgot password?</a>
+        </div>
+        <button class="btn btn-primary btn-lg full" data-od-id="login-submit">Sign in</button>
+        <div class="lg-div">or</div>
+        <button class="btn btn-neutral btn-lg full">Continue with corporate SSO</button>
+        <p class="lg-foot">Protected by corporate single sign-on.<br>Register and password-reset modes keep this same skin.</p>
+      </div>
+    </div>
+  </div>
+  <p class="note">Orange appears exactly once — the 2px × 48px rule above the claim. Diamonds: 45°-rotated squares with 1px white borders at 9–20% alpha plus one primary fill at 35% alpha; lattice: two repeating 1px linear gradients at ±45°, 64px pitch, white at 5%.</p>
+</section>
+
+<!-- ============ MOBILE ============ -->
+<section id="mobile" data-od-id="section-login-mobile">
+  <div class="sec-h">
+    <h2>2 — Narrow mobile (390px)</h2>
+    <p>Below 900px the brand panel collapses to a compact header strip; the form keeps its order, fields go full width, every target stays ≥ 44px. The info notice variant is shown here.</p>
+  </div>
+  <div class="lg-mob mode-light" data-od-id="login-mobile">
+    <div class="lg-mob-brand">
+      <span class="lg-dia d4"></span>
+      <span class="logo-slot">Host logo</span>
+      <h2>We digitalize you.</h2>
+    </div>
+    <div class="lg-mob-form">
+      <h1>Sign in</h1>
+      <div class="alert alert-info"><div><b>Password expires in 5 days.</b><span>You can change it after signing in.</span></div></div>
+      <div class="fld"><label for="lm-email">Email</label><input id="lm-email" class="inp" type="email" placeholder="name@company.com" autocomplete="username"></div>
+      <div class="fld"><label for="lm-pw">Password</label><input id="lm-pw" class="inp" type="password" placeholder="Password" autocomplete="current-password"></div>
+      <button class="btn btn-primary btn-lg full">Sign in</button>
+      <div class="lg-row" style="justify-content:center"><a class="lg-link" href="#mobile">Forgot password?</a></div>
+      <div class="lg-div">or</div>
+      <button class="btn btn-neutral btn-lg full">Corporate SSO</button>
+    </div>
+  </div>
+  <p class="note">Mobile brand strip: 22–24px padding, claim at 18px with the 2px orange rule inline before it; lattice pitch drops to 56px. No diamond cluster behind the form — the form column stays clean.</p>
+</section>
+
+<!-- ============ STATES ============ -->
+<section id="states" data-od-id="section-login-states">
+  <div class="sec-h">
+    <h2>3 — State matrix</h2>
+    <p>Static specimens of the interactive states (hover/focus are also live on the real controls above). Loading swaps the label for a spinner + text, width stays fixed.</p>
+  </div>
+  <div class="mode-pair stack">
+    <div class="panel mode-light">
+      <div class="mx">
+        <div class="mx-col" data-od-id="states-buttons">
+          <h4>Primary action</h4>
+          <div class="mx-row"><span class="tag">Normal</span><button class="btn btn-primary btn-lg">Sign in</button></div>
+          <div class="mx-row"><span class="tag">Hover</span><button class="btn btn-primary btn-lg btn-hover">Sign in</button></div>
+          <div class="mx-row"><span class="tag">Active</span><button class="btn btn-primary btn-lg btn-active">Sign in</button></div>
+          <div class="mx-row"><span class="tag">Focus</span><button class="btn btn-primary btn-lg btn-ring">Sign in</button></div>
+          <div class="mx-row"><span class="tag">Loading</span><button class="btn btn-primary btn-lg btn-loading"><span class="spin" style="border-color:rgba(255,255,255,.35);border-top-color:#ffffff"></span>Signing in…</button></div>
+          <div class="mx-row"><span class="tag">Disabled</span><button class="btn btn-primary btn-lg" disabled>Sign in</button></div>
+        </div>
+        <div class="mx-col" data-od-id="states-inputs">
+          <h4>Fields</h4>
+          <div class="mx-row"><span class="tag">Normal</span><input class="inp" placeholder="name@company.com" aria-label="Email normal"></div>
+          <div class="mx-row"><span class="tag">Focus</span><input class="inp demo-focus" value="m.koch@example.com" aria-label="Email focused"></div>
+          <div class="mx-row"><span class="tag">Error</span><div class="fld is-error" style="min-width:0;flex:1"><input class="inp" value="m.koch@" aria-label="Email error"><span class="fld-msg">Enter a valid email address.</span></div></div>
+          <div class="mx-row"><span class="tag">Disabled</span><input class="inp" value="Locked by admin" disabled aria-label="Email disabled"></div>
+        </div>
+        <div class="mx-col" data-od-id="states-notices">
+          <h4>Notices</h4>
+          <div class="alert alert-info"><div><b>Signed out.</b><span>Your session ended after 30 minutes of inactivity.</span></div></div>
+          <div class="alert alert-warning"><div><b>Password expires in 5 days.</b><span>Change it after signing in.</span></div></div>
+          <div class="alert alert-error"><div><b>Invalid email or password.</b><span>2 attempts remaining.</span></div></div>
+          <div class="mx-row"><span class="tag">Link</span><a class="lg-link" href="#states">Forgot password?</a></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="note">Dark-mode variant of the page (form on #0a1526, fields on raised surface, links #91a8d1, identical layout) is specified in design-handoff.md §7 — the brand panel is already dark and unchanged.</p>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">ORBCAFE × ORBIS visual adaptation · design stage only — no production code. Back to <a href="./orbcafe-orbis-design-reference.html" style="color:#154194">core reference</a> · <a href="./orbcafe-orbis-modules-reference.html" style="color:#154194">modules reference</a> · <a href="./design-handoff.md" style="color:#154194">design-handoff.md</a></div>
+</footer>
+
+</body>
+</html>

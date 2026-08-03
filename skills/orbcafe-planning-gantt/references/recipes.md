@@ -216,20 +216,19 @@ const planning = usePlanningGantt({ tasks });
 ## Recipe 4: Add custom tools to the left of standard controls
 
 ```tsx
-import { Button } from '@mui/material';
-import MailOutlineIcon from '@mui/icons-material/MailOutline';
+import { CButton, Mail } from 'orbcafe-ui'; // V2 MUI-free：使用库内 CButton 与内置图标（如 Mail 不存在时可用 CButton 文本/自定义图标）
 
 <CPlanningGantt
   {...planning.planningGanttProps}
   extraTools={
-    <Button
+    <CButton
       size="small"
-      variant="outlined"
-      startIcon={<MailOutlineIcon fontSize="small" />}
+      variant="secondary"
+      startIcon={<Mail />}
       onClick={() => sendPlanMail()}
     >
       Send email
-    </Button>
+    </CButton>
   }
 />;
 ```

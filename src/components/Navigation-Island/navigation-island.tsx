@@ -36,31 +36,17 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { 
+  FolderTree,
+  PanelLeftOpen,
+  PanelRight,
   Pin,
   Search
-} from 'lucide-react'
+} from '@/components/Icons'
 import { TreeMenu, TreeMenuItem } from './tree-menu'
 import { useOrbcafeI18n } from '../../i18n'
+import type { NavigationIslandProps } from './navigation-island.types'
 
-export type NavigationIslandDisplayMode = 'fixed' | 'floating'
-
-export interface NavigationIslandProps {
-  collapsed: boolean
-  onToggle: () => void
-  className?: string
-  maxHeight?: number
-  menuData?: TreeMenuItem[]
-  colorMode?: 'light' | 'dark'
-  displayMode?: NavigationIslandDisplayMode
-  onDisplayModeChange?: (mode: NavigationIslandDisplayMode) => void
-  showDisplayModeToggle?: boolean
-  enablePinning?: boolean
-  pinStorageKey?: string
-  pinnedItemIds?: string[]
-  defaultPinnedItemIds?: string[]
-  onPinnedItemIdsChange?: (ids: string[]) => void
-  pinnedSectionTitle?: string
-}
+export type { NavigationIslandDisplayMode, NavigationIslandProps } from './navigation-island.types'
 
 const DEFAULT_PIN_STORAGE_KEY = 'orbcafe:navigation-island:pinned-items'
 const PINNED_SECTION_ID = 'orbcafe-navigation-pinned'
@@ -109,9 +95,6 @@ export const NavigationIsland: React.FC<NavigationIslandProps> = ({
   const { t } = useOrbcafeI18n()
   const isDark = colorMode === 'dark'
   const isFloating = displayMode === 'floating'
-  const modeArcId = React.useId().replace(/:/g, '')
-  const modeArcGradientId = `orbcafe-nav-mode-arc-${modeArcId}`
-  const modeArcGlowId = `orbcafe-nav-mode-glow-${modeArcId}`
   const router = useRouter()
 
   // -------------
@@ -394,7 +377,7 @@ export const NavigationIsland: React.FC<NavigationIslandProps> = ({
       <nav className={`flex-1 pb-4 transition-all duration-500 ease-in-out overflow-y-auto min-h-0 ${collapsed ? 'px-1' : 'px-2'}`}>
         {filteredMenuData.length === 0 ? (
           <div className="flex items-center justify-center py-8 text-gray-500 text-sm">
-            {collapsed ? '📂' : (searchTerm ? t('navigation.noMatch') : t('navigation.noAccessibleApp'))}
+            {collapsed ? <FolderTree className="h-5 w-5" /> : (searchTerm ? t('navigation.noMatch') : t('navigation.noAccessibleApp'))}
           </div>
         ) : (
           <>
@@ -468,8 +451,8 @@ export const NavigationIsland: React.FC<NavigationIslandProps> = ({
                       {category.icon || (
                         <div className={`w-6 h-6 rounded text-xs flex items-center justify-center font-medium ${
                           isDark
-                            ? 'bg-[#90caf9] text-[#0b0b0b]'
-                            : 'bg-[#1976d2] text-white'
+                            ? 'bg-[#91a8d1] text-[#0b0b0b]'
+                            : 'bg-[#154194] text-white'
                         }`}>
                           {category.title?.charAt(0) || '?'}
                         </div>
@@ -523,70 +506,18 @@ export const NavigationIsland: React.FC<NavigationIslandProps> = ({
         <button
           type="button"
           onClick={handleDisplayModeToggle}
-          className="absolute -bottom-5 left-1/2 z-30 flex h-11 -translate-x-1/2 items-end justify-center rounded-full bg-transparent px-2 pb-1 transition-opacity duration-200 hover:opacity-95 focus:outline-none focus:ring-2 focus:ring-cyan-400/70"
-          style={{
-            width: '62px',
-            touchAction: 'manipulation',
-          }}
+          className={`absolute -bottom-4 left-1/2 z-30 flex h-9 w-9 -translate-x-1/2 items-center justify-center rounded-full border shadow-md transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400/70 ${
+            isDark
+              ? 'border-slate-700 bg-slate-900 text-slate-300 hover:bg-slate-800'
+              : 'border-slate-200 bg-white text-slate-600 hover:bg-blue-50 hover:text-blue-700'
+          }`}
+          style={{ touchAction: 'manipulation' }}
           title={isFloating ? t('navigation.mode.switchToFixed') : t('navigation.mode.switchToFloating')}
           aria-label={isFloating ? t('navigation.mode.switchToFixed') : t('navigation.mode.switchToFloating')}
         >
-          <svg
-            aria-hidden="true"
-            viewBox="0 0 118 34"
-            preserveAspectRatio="none"
-            className="h-[34px] w-full overflow-visible"
-          >
-            <defs>
-              <linearGradient id={modeArcGradientId} x1="0" x2="1" y1="0" y2="0">
-                <stop offset="0%" stopColor="#21BCFF" />
-                <stop offset="52%" stopColor="#7C3AED" />
-                <stop offset="100%" stopColor="#F59E0B" />
-              </linearGradient>
-              <filter id={modeArcGlowId} x="-70%" y="-180%" width="240%" height="460%">
-                <feGaussianBlur stdDeviation="8.5" result="coloredBlur" />
-                <feMerge>
-                  <feMergeNode in="coloredBlur" />
-                  <feMergeNode in="SourceGraphic" />
-                </feMerge>
-              </filter>
-            </defs>
-            <path
-              d="M8 4 C27 21 91 21 110 4"
-              fill="none"
-              stroke={`url(#${modeArcGradientId})`}
-              strokeLinecap="round"
-              strokeWidth="18"
-              opacity={isFloating ? 0.28 : 0.20}
-              filter={`url(#${modeArcGlowId})`}
-            />
-            <path
-              d="M8 4 C27 21 91 21 110 4"
-              fill="none"
-              stroke={`url(#${modeArcGradientId})`}
-              strokeLinecap="round"
-              strokeWidth="12"
-              opacity={isFloating ? 0.40 : 0.30}
-              filter={`url(#${modeArcGlowId})`}
-            />
-            <path
-              d="M8 4 C27 21 91 21 110 4"
-              fill="none"
-              stroke={`url(#${modeArcGradientId})`}
-              strokeLinecap="round"
-              strokeWidth="6"
-              opacity={isFloating ? 0.34 : 0.25}
-              filter={`url(#${modeArcGlowId})`}
-            />
-            <path
-              d="M8 4 C27 21 91 21 110 4"
-              fill="none"
-              stroke={`url(#${modeArcGradientId})`}
-              strokeLinecap="round"
-              strokeWidth="1"
-              opacity={isFloating ? 0.28 : 0.18}
-            />
-          </svg>
+          {isFloating
+            ? <PanelLeftOpen className="h-4 w-4" />
+            : <PanelRight className="h-4 w-4" />}
         </button>
       )}
     </div>

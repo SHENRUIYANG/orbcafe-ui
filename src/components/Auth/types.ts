@@ -1,5 +1,4 @@
-import type { ReactNode } from 'react';
-import type { SxProps, Theme } from '@mui/material/styles';
+import type { CSSProperties, ReactNode } from 'react';
 
 export type AuthPageMode = 'login' | 'register' | 'forgot';
 
@@ -25,6 +24,8 @@ export interface AuthPageCopy {
   productName?: string;
   headline?: string;
   subheadline?: string;
+  /** Small uppercase line at the bottom of the brand panel. */
+  brandMeta?: string;
   loginTitle?: string;
   loginSubtitle?: string;
   registerTitle?: string;
@@ -43,5 +44,6 @@ export interface CAuthPageProps {
   loading?: boolean;
   logo?: ReactNode;
   copy?: AuthPageCopy;
-  sx?: SxProps<Theme>;
+  /** Inline style override on the root frame. */
+  sx?: CSSProperties;
 }

@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { oneDark, oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism'
 import { useTheme } from 'next-themes'
-import { Clipboard, Check } from 'lucide-react'
+import { Clipboard, Check } from '@/components/Icons'
 import { cn } from '../../lib/utils'
 
 export interface CodeBlockProps {

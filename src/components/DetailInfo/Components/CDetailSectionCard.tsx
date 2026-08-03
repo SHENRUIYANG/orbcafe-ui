@@ -1,6 +1,6 @@
 'use client';
+import {  CPaper, CTypography } from "../../Atoms";
 
-import { Box, Paper, Typography } from '@mui/material';
 import type { ReactNode } from 'react';
 import type { DetailInfoSection } from '../types';
 
@@ -21,9 +21,9 @@ const highlightText = (text: string, query: string): ReactNode => {
   return (
     <>
       {text.slice(0, idx)}
-      <Box component="mark" sx={{ bgcolor: 'warning.light', color: 'warning.contrastText', px: 0.15, borderRadius: 0.4 }}>
+      <div component="mark" sx={{ bgcolor: 'warning.light', color: 'warning.contrastText', px: 0.15, borderRadius: 0.4 }}>
         {text.slice(idx, idx + q.length)}
-      </Box>
+      </div>
       {text.slice(idx + q.length)}
     </>
   );
@@ -33,12 +33,12 @@ export const CDetailSectionCard = ({ section, highlightQuery = '' }: CDetailSect
   const columns = section.columns || 2;
 
   return (
-    <Paper variant="outlined" sx={{ p: 1.8, borderRadius: 2 }}>
-      <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1.4 }}>
+    <CPaper variant="outlined" sx={{ p: 1.8, borderRadius: 2 }}>
+      <CTypography variant="subtitle1" sx={{ fontWeight: 700, mb: 1.4 }}>
         {section.title}
-      </Typography>
+      </CTypography>
 
-      <Box
+      <div
         sx={{
           display: 'grid',
           gap: 1.15,
@@ -54,17 +54,17 @@ export const CDetailSectionCard = ({ section, highlightQuery = '' }: CDetailSect
             : null;
 
           return (
-            <Box key={field.id} sx={{ minWidth: 0 }}>
-              <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+            <div key={field.id} sx={{ minWidth: 0 }}>
+              <CTypography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
                 {highlightText(field.label, highlightQuery)}
-              </Typography>
-              <Typography component="div" variant="body2" sx={{ mt: 0.2, fontWeight: 500, wordBreak: 'break-word' }}>
+              </CTypography>
+              <CTypography component="div" variant="body2" sx={{ mt: 0.2, fontWeight: 500, wordBreak: 'break-word' }}>
                 {stringValue ? highlightText(stringValue, highlightQuery) : field.value}
-              </Typography>
-            </Box>
+              </CTypography>
+            </div>
           );
         })}
-      </Box>
-    </Paper>
+      </div>
+    </CPaper>
   );
 };

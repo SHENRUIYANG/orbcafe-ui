@@ -162,21 +162,19 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
       )
     },
 
-    code({ inline, className: codeClassName, children, ...props }: any) {
+    code({ className: codeClassName, children, ...props }: any) {
       const match = /language-([\w-]+)/.exec(codeClassName || '')
       const language = match ? match[1] : ''
-      if (inline) {
-        return (
-          <code
-            className="font-mono text-sm bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded text-red-600 dark:text-red-400"
-            {...props}
-          >
-            {children}
-          </code>
-        )
+      const rawContent = String(children)
+      // react-markdown v9 no longer passes `inline`; a code element is inline
+      // when it has no language class and no line break (CommonMark inline code).
+      const isInlineCode = !match && !rawContent.includes('\n')
+      if (isInlineCode) {
+        // styled by orbis.css `.markdown-body code`
+        return <code>{children}</code>
       }
 
-      const codeContent = String(children).replace(/\n$/, '')
+      const codeContent = rawContent.replace(/\n$/, '')
 
       if (enableMermaid && language === 'mermaid') {
         return (
@@ -280,7 +278,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
   }), [propTheme, size, enableMermaid, enableCodeHighlight, cardHooks, messageId])
   
   return (
-    <div className={cn("markdown-body prose dark:prose-invert max-w-none", className)}>
+    <div className={cn("markdown-body max-w-none", className)}>
       <ReactMarkdown
         remarkPlugins={[remarkGfm, remarkMath]}
         rehypePlugins={[rehypeKatex, rehypeRaw]}

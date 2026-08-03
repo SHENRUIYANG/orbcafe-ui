@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import type { ErrorCardProps } from '../cardTypes'
-import { AlertCircle, ChevronDown, ChevronRight, RotateCw, X } from 'lucide-react'
+import { AlertCircle, ChevronDown, ChevronRight, RotateCw, X } from '@/components/Icons'
 
 const ErrorCard: React.FC<ErrorCardProps> = ({
   title = '发生错误',

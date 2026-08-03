@@ -287,7 +287,7 @@ Use it before reading a module README in detail.
   - `type AuthRegisterPayload`
   - `type AuthForgotPasswordPayload`
 - Preferred pattern:
-  - login entry page: `useAuthPage + CAuthPage` at `examples/app/page.tsx`
+  - login entry page: `useAuthPage + CAuthPage` at `examples/app/login/page.tsx`
 - Hooks:
   - Public hook exists:
     - `useAuthPage`
@@ -300,7 +300,7 @@ Use it before reading a module README in detail.
   - optional `logo` and `copy`
 - Canonical example:
   - `examples/app/_components/AuthExampleClient.tsx`
-  - `examples/app/page.tsx`
+  - `examples/app/login/page.tsx`
 - Verify:
   - login fake submit shows success
   - register fake submit shows success
@@ -308,7 +308,7 @@ Use it before reading a module README in detail.
   - callback promise toggles loading and clears it
 - Common failure modes:
   - treating demo callbacks as real authentication
-  - not wrapping app with MUI providers
+  - not wrapping app with `OrbisModeProvider` + `GlobalMessage` providers (V2 is MUI-free)
   - importing from internal component paths
   - claiming ORBCAFE UI owns tokens/sessions/cookies instead of the host auth service
 

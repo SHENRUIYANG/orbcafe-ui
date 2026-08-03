@@ -18,7 +18,10 @@ description: Build ORBCAFE authentication entry pages with CAuthPage/useAuthPage
 先检查宿主 `package.json`，缺失或版本不兼容时才安装：
 
 ```bash
-npm install orbcafe-ui @mui/material@^7.3.9 @mui/icons-material@^7.3.9 @mui/x-date-pickers@^8.27.2 @emotion/react@^11.14.0 @emotion/styled@^11.14.1 dayjs@^1.11.20 lucide-react@^0.575.0 tailwind-merge@^3.5.0 clsx@^2.1.1 class-variance-authority@^0.7.1 @radix-ui/react-slot@^1.2.4
+npm install orbcafe-ui
+# ORBCAFE UI v2 是 MUI-free；不要安装 @mui/*、@emotion/*、lucide-react。
+# 组件使用 Tailwind utility classes，宿主需要 Tailwind v4：
+npm install -D tailwindcss @tailwindcss/postcss
 ```
 
 本仓库联调：
@@ -31,7 +34,7 @@ npm run dev
 ```
 
 参考实现：
-- `examples/app/page.tsx`
+- `examples/app/login/page.tsx`
 - `examples/app/_components/AuthExampleClient.tsx`
 - `src/components/Auth/README.md`
 - `src/components/Auth/Hooks/README.md`
@@ -52,4 +55,4 @@ npm run dev
 - `CAuthPage` 支持 `logo` 和 `copy` 自定义，用于产品名、headline、subheadline 和各 mode 文案。
 - demo 里可以接受固定用户名密码或直接跳转，但真实项目必须把 callback 接到宿主认证服务，并明确 token/session/cookie 不由 ORBCAFE UI 管理。
 - examples 中 login 成功后回到 dashboard `/`；不要把登录后默认写死到 `/std-report`。
-- 首屏作为 examples 入口时优先放在 `examples/app/page.tsx`，不要再加 marketing landing page。
+- 登录页示例放在 `examples/app/login/page.tsx`；`examples/app/page.tsx` 是 examples 首页（导航岛 demo），不是登录页。

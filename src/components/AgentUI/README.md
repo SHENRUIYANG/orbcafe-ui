@@ -2,10 +2,10 @@
 
 `AgentUI` 是 ORBCAFE 里用于聊天类交互的标准 UI 层。当前最核心的三个布局组件是：
 
-- `AgentPanel`: 带 header 的工作台聊天面板，支持状态展示。
+- `AgentPanel`: 带 header（AI 头像 + 状态点 + 副标题）的工作台聊天面板，ORBIS 设计语言（无光晕/霓虹，工作状态靠动效表达）。
 - `StdChat`: 标准聊天容器，适合整页、卡片页、抽屉页。
 - `CopilotChat`: Copilot 浮窗内容容器，适合右下角助手、可拖拽面板、悬浮问答入口。
-- `AIBrowserGlow`: 独立的浏览器边框柔光层，适合 AI 运行时由业务状态直接调用。
+- `AIBrowserGlow`: AI 运行时在浏览器视口边缘显示 2px primary 描边（ORBIS 规范，无彩色光晕）。
 
 这三个组件共用同一套消息渲染、流式输出、Markdown/卡片解析和事件回调能力。区别主要在布局壳和交互方式。
 
@@ -78,7 +78,7 @@ src/components/AgentUI/
 | `ContentRenderer` | `components/core/ContentRenderer.tsx` | 统一决定文本、Markdown、卡片内容怎么渲染 |
 | `DynamicCardRenderer` | `components/core/DynamicCardRenderer.tsx` | 解析消息中的卡片 JSON，映射到具体卡片组件 |
 | `InputArea` | `components/core/InputArea.tsx` | 标准输入框，支持发送、停止、文件、语音入口等交互 |
-| `AIBrowserGlow` | `components/core/AIBrowserGlow.tsx` | 独立浏览器边框柔光层，由业务在 AI 运行时用 `active` 控制 |
+| `AIBrowserGlow` | `components/core/AIBrowserGlow.tsx` | 浏览器视口 2px primary 边缘线，由业务在 AI 运行时用 `active` 控制 |
 | `cardHooks` | `components/cardTypes.ts` | 将卡片点击、关闭、动作按钮等事件回传给业务层 |
 
 ### 标准能力
@@ -206,12 +206,14 @@ interface AgentUICardHookEvent {
 
 `AgentPanel` 是带 header 的工作台聊天面板，内部封装 `StdChat`，适合整页 Agent 工作台场景。
 
-它在 `StdChat` 基础上额外提供：
+它在 `StdChat` 基础上额外提供（ORBIS 设计语言）：
 
-- 标题和描述
+- 头部：圆形 `AI` 头像 + 标题 + 副标题（状态点 + 描述文案）
 - header actions 插槽
-- 状态标记（文案 + dot）
-- 状态化视觉反馈（面板状态点 + 面板状态边框）
+- 状态点动画：running/pending 时 primary 圆点脉冲（动效表达工作态，不用颜色/光晕）
+- 工作状态行：running/pending 时在消息流尾部显示 primary spinner + 状态文案
+
+样式使用自写 `orb-*` 类（`orb-agent-panel/header/avatar/title/subtitle/dot/status-line/spinner/caret`，见 `src/styles/orbis.css`），不依赖 CSS Modules。
 
 实现文件：`src/components/AgentUI/layout/agent-panel.tsx`
 
@@ -225,6 +227,8 @@ export interface AgentPanelProps extends StdChatProps {
   description?: string
   headerActions?: React.ReactNode
   agentStatus?: AgentPanelStatus
+  /** running/pending 时在消息流尾部显示的工作状态行文案（spinner + 文本）。 */
+  statusText?: React.ReactNode
 }
 ```
 
@@ -233,7 +237,8 @@ export interface AgentPanelProps extends StdChatProps {
 - 展示型面板：直接用默认值（`showInput` 默认为 `false`）。
 - 可输入面板：显式传 `showInput={true}` 并传入 `onSend`。
 - 状态展示：优先传 `agentStatus`；若不传，会回退为 `isResponding ? 'running' : 'idle'`。
-- 浏览器边框柔光不要写进 `AgentPanel`，使用独立的 `AIBrowserGlow active={isRunning}`。
+- 工作状态行：`running/pending` 时自动出现，可用 `statusText` 提供具体文案。
+- 浏览器视口边缘线不要写进 `AgentPanel`，使用独立的 `AIBrowserGlow active={isRunning}`。
 
 ### 最小用法（展示型）
 
@@ -256,13 +261,15 @@ const [status, setStatus] = useState<AgentPanelStatus>('idle')
 
 ## AIBrowserGlow
 
-`AIBrowserGlow` 是独立基础组件，不依赖 `AgentPanel`。业务只需要在 AI 工作时渲染或打开它：
+`AIBrowserGlow` 是独立基础组件，不依赖 `AgentPanel`。按 ORBIS 规范它只画一条 2px primary 视口边缘线（无彩色光晕、无颜色 wash），AI 运行时打开，结束/失败/中断时关闭：
 
 ```tsx
 import { AIBrowserGlow } from 'orbcafe-ui'
 
-<AIBrowserGlow active={isResponding} colors={['#ff3860', '#24e070', '#3090ff']} />
+<AIBrowserGlow active={isResponding} />
 ```
+
+> `colors` 属性保留为兼容：只有第一个颜色会被用作边缘线颜色；默认使用 ORBIS primary（`--orb-primary`）。
 
 ### `examples/app/aipanel` 的效果是怎么实现的
 
@@ -273,8 +280,8 @@ import { AIBrowserGlow } from 'orbcafe-ui'
 1. `messages`：单一消息源。
 2. `isResponding`：模拟任务执行中。
 3. `status`：`idle/running/success/error/pending` 手动或自动切换。
-4. 通过 `Trigger Agent Run` 按钮模拟一次任务执行并回填 assistant 消息。
-5. 面板状态视觉由 `agentStatus` 自动联动；浏览器边框柔光由 `AIBrowserGlow` 单独控制。
+4. 通过 `Trigger Agent Run` 按钮或输入框发送 `test`（快速测试）触发一次任务执行并回填样例回复。
+5. 面板状态视觉由 `agentStatus` 自动联动（状态点 + spinner 工作状态行）；视口边缘线由独立 `AIBrowserGlow` 控制。
 
 ## StdChat
 

@@ -2,10 +2,13 @@
 
 import { useMemo, useState } from 'react';
 import dayjs from 'dayjs';
-import { Box, Button, Chip, Paper, Stack, Typography } from '@mui/material';
-import { alpha, type Theme } from '@mui/material/styles';
 import {
   CPageTransition,
+  CButton,
+  CChip,
+  CPaper,
+  CStack,
+  CTypography,
   PAppPageLayout,
   PBarcodeScanner,
   PNumericKeypad,
@@ -23,7 +26,7 @@ import {
   TabletSmartphone,
   Truck,
   Warehouse,
-} from 'lucide-react';
+} from 'orbcafe-ui';
 import { EXAMPLE_MENU } from './exampleNavigation';
 
 type WorkloadId = 'receiving' | 'picking' | 'packing' | 'dispatch';
@@ -162,25 +165,6 @@ const createEmptyFilters = (): Record<string, FilterValueShape> => ({
   status: { value: [], operator: 'anyOf' },
   shipDate: { value: [null, null], operator: 'between' },
   plannedQty: { value: '', operator: '>=' },
-});
-
-const getPanelSurfaceSx = (theme: Theme) => ({
-  border: '1px solid',
-  borderColor: alpha(theme.palette.divider, theme.palette.mode === 'dark' ? 0.95 : 1),
-  bgcolor:
-    theme.palette.mode === 'dark'
-      ? alpha(theme.palette.background.paper, 0.84)
-      : theme.palette.background.paper,
-  color: theme.palette.text.primary,
-});
-
-const getMutedChipSx = (theme: Theme) => ({
-  color: theme.palette.text.primary,
-  borderColor: alpha(theme.palette.divider, theme.palette.mode === 'dark' ? 0.5 : 0.28),
-  bgcolor:
-    theme.palette.mode === 'dark'
-      ? alpha(theme.palette.common.white, 0.06)
-      : alpha(theme.palette.background.paper, 0.92),
 });
 
 const compareNumber = (sourceValue: number, operator: string, filterValue: any) => {
@@ -340,12 +324,12 @@ export default function PadExampleClient() {
       {
         id: 'status',
         label: 'Status',
-        render: (value: TaskStatus) => <Chip size="small" label={value} color={statusColorMap[value]} variant="outlined" />,
+        render: (value: TaskStatus) => <CChip size="small" label={value} color={statusColorMap[value]} variant="outlined" />,
       },
       {
         id: 'priority',
         label: 'Priority',
-        render: (value: TaskPriority) => <Chip size="small" label={value} color={priorityColorMap[value]} />,
+        render: (value: TaskPriority) => <CChip size="small" label={value} color={priorityColorMap[value]} />,
       },
       { id: 'shipDate', label: 'Ship Date' },
       { id: 'truck', label: 'Truck' },
@@ -410,64 +394,60 @@ export default function PadExampleClient() {
       localeOptions={['en', 'zh', 'fr', 'de', 'ja', 'ko']}
       onLocaleChange={(newLocale) => setLocale(newLocale as OrbcafeLocale)}
       user={{ name: 'Pad Operator', subtitle: 'warehouse.touch@orbcafe.dev', avatarSrc: '/orbcafe.png' }}
-      actionSlot={<Chip label={i18nText.localeLabel} color="primary" />}
+      actionSlot={<CChip label={i18nText.localeLabel} color="primary" />}
       portraitBottomSlot={
-        <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
-          <Chip icon={<ShieldCheck size={14} />} label={lastAction} color="primary" variant="outlined" />
-        </Stack>
+        <CStack direction="row" spacing={1} useFlexGap flexWrap="wrap">
+          <CChip icon={<ShieldCheck size={14} />} label={lastAction} color="primary" variant="outlined" />
+        </CStack>
       }
     >
       <CPageTransition transitionKey="pad-demo-example" variant="fade" durationMs={180}>
-        <Stack spacing={2} sx={{ minHeight: '100%' }}>
-          <Paper
-            sx={(theme) => ({
-              p: { xs: 1.5, md: 2 },
-              borderRadius: 4,
-              border: `1px solid ${theme.palette.divider}`,
-              color: theme.palette.text.primary,
-              background:
-                theme.palette.mode === 'dark'
-                  ? 'linear-gradient(135deg, rgba(37,99,235,0.18), rgba(15,118,110,0.16))'
-                  : 'linear-gradient(135deg, rgba(37,99,235,0.10), rgba(15,118,110,0.10))',
-            })}
+        <CStack spacing={2} sx={{ minHeight: '100%' }}>
+          <CPaper
+            style={{
+              padding: 16,
+              borderRadius: 16,
+              border: '1px solid var(--orb-divider)',
+              background: 'linear-gradient(135deg, rgba(37,99,235,0.10), rgba(15,118,110,0.10))',
+            }}
           >
-            <Stack spacing={1.25}>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1, flexWrap: 'wrap' }}>
-                <Box>
-                  <Typography sx={{ fontSize: '1.2rem', fontWeight: 900 }}>Touch-first execution cockpit</Typography>
-                  <Typography sx={{ mt: 0.5, color: 'text.secondary' }}>
+            <CStack spacing={1.25}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
+                <div>
+                  <CTypography sx={{ fontSize: '1.2rem', fontWeight: 900 }}>Touch-first execution cockpit</CTypography>
+                  <CTypography sx={{ marginTop: 4, color: 'var(--orb-muted)' }}>
                     Full Pad example with navigation shell, workload switcher, touch report, local variant/layout persistence, and live keypad updates.
-                  </Typography>
-                </Box>
-                <Chip color="primary" variant="outlined" label={lastAction} sx={{ maxWidth: '100%', '& .MuiChip-label': { whiteSpace: 'normal' } }} />
-              </Box>
+                  </CTypography>
+                </div>
+                <CChip color="primary" variant="outlined" label={lastAction} sx={{ maxWidth: '100%' }} />
+              </div>
 
-              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr 1fr', xl: 'repeat(4, minmax(0, 1fr))' }, gap: 1.2 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 10 }}>
                 {summaryCards.map((item) => (
-                  <Paper
+                  <CPaper
                     key={item.label}
-                    sx={(theme) => ({
-                      p: 1.35,
-                      borderRadius: 3,
-                      ...getPanelSurfaceSx(theme),
-                    })}
+                    style={{
+                      padding: 11,
+                      borderRadius: 12,
+                      border: '1px solid var(--orb-divider)',
+                    }}
                   >
-                    <Typography sx={{ fontSize: '0.76rem', color: 'text.secondary', textTransform: 'uppercase', letterSpacing: 0.35 }}>
+                    <CTypography sx={{ fontSize: '0.76rem', color: 'var(--orb-muted)', textTransform: 'uppercase', letterSpacing: 0.35 }}>
                       {item.label}
-                    </Typography>
-                    <Typography sx={{ mt: 0.35, fontSize: '1.3rem', fontWeight: 900 }}>{item.value}</Typography>
-                    <Typography sx={{ mt: 0.35, fontSize: '0.76rem', color: 'text.secondary' }}>{item.note}</Typography>
-                  </Paper>
+                    </CTypography>
+                    <CTypography sx={{ marginTop: 3, fontSize: '1.3rem', fontWeight: 900 }}>{item.value}</CTypography>
+                    <CTypography sx={{ marginTop: 3, fontSize: '0.76rem', color: 'var(--orb-muted)' }}>{item.note}</CTypography>
+                  </CPaper>
                 ))}
-              </Box>
-            </Stack>
-          </Paper>
+              </div>
+            </CStack>
+          </CPaper>
 
-          <Box
-            sx={{
+          <div
+            style={{
               display: 'grid',
-              gridTemplateColumns: { xs: '1fr', xl: 'minmax(0, 1.45fr) minmax(360px, 0.75fr)' },
-              gap: 2,
+              gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 360px), 1fr))',
+              gap: 16,
               alignItems: 'start',
             }}
           >
@@ -497,7 +477,7 @@ export default function PadExampleClient() {
                 },
               }}
               extraTools={
-                <Button
+                <CButton
                   size="small"
                   variant="outlined"
                   onClick={() => {
@@ -506,7 +486,7 @@ export default function PadExampleClient() {
                   }}
                 >
                   Reset Filters
-                </Button>
+                </CButton>
               }
               quickCreate={{
                 enabled: true,
@@ -570,39 +550,36 @@ export default function PadExampleClient() {
               cardTitleField="title"
               cardSubtitleFields={['taskId', 'zone', 'assignee', 'status']}
               cardActionSlot={(row) => (
-                <Chip size="small" label={row.priority} color={priorityColorMap[row.priority as TaskPriority]} />
+                <CChip size="small" label={row.priority} color={priorityColorMap[row.priority as TaskPriority]} />
               )}
               renderCardFooter={(row) => (
-                <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
-                  <Chip size="small" variant="outlined" label={`Truck ${row.truck}`} sx={(theme) => getMutedChipSx(theme)} />
-                  <Chip size="small" variant="outlined" label={`Ship ${row.shipDate}`} sx={(theme) => getMutedChipSx(theme)} />
-                  <Chip size="small" variant="outlined" label={row.customer} sx={(theme) => getMutedChipSx(theme)} />
-                </Stack>
+                <CStack direction="row" spacing={1} useFlexGap flexWrap="wrap">
+                  <CChip size="small" variant="outlined" label={`Truck ${row.truck}`} sx={{ fontSize: "0.875rem", color: "var(--orb-muted)" }} />
+                  <CChip size="small" variant="outlined" label={`Ship ${row.shipDate}`} sx={{ fontSize: "0.875rem", color: "var(--orb-muted)" }} />
+                  <CChip size="small" variant="outlined" label={row.customer} sx={{ fontSize: "0.875rem", color: "var(--orb-muted)" }} />
+                </CStack>
               )}
               onRowClick={handleSelectTask}
             />
 
-            <Stack spacing={2}>
-              <Paper
-                sx={(theme) => ({
-                  p: 2,
-                  borderRadius: 4,
-                  ...getPanelSurfaceSx(theme),
-                  background:
-                    theme.palette.mode === 'dark'
-                      ? 'linear-gradient(135deg, rgba(30,41,59,0.92), rgba(15,23,42,0.92))'
-                      : 'linear-gradient(135deg, rgba(239,246,255,1), rgba(224,242,254,0.86))',
-                })}
+            <CStack spacing={2}>
+              <CPaper
+                style={{
+                  padding: 16,
+                  borderRadius: 16,
+                  border: '1px solid var(--orb-divider)',
+                  background: 'linear-gradient(135deg, rgba(239,246,255,1), rgba(224,242,254,0.86))',
+                }}
               >
-                <Stack spacing={1.25}>
-                  <Box>
-                    <Typography sx={{ fontSize: '1rem', fontWeight: 900 }}>Camera barcode trigger</Typography>
-                    <Typography sx={{ mt: 0.35, fontSize: '0.84rem', color: 'text.secondary' }}>
+                <CStack spacing={1.25}>
+                  <div>
+                    <CTypography sx={{ fontSize: '1rem', fontWeight: 900 }}>Camera barcode trigger</CTypography>
+                    <CTypography sx={{ marginTop: 3, fontSize: '0.84rem', color: 'var(--orb-muted)' }}>
                       Open the scanner dialog, read a barcode, then push the result into the touch filter workflow.
-                    </Typography>
-                  </Box>
+                    </CTypography>
+                  </div>
 
-                  <Button
+                  <CButton
                     variant="contained"
                     size="large"
                     startIcon={<ScanLine size={18} />}
@@ -610,62 +587,59 @@ export default function PadExampleClient() {
                     sx={{
                       minHeight: 56,
                       alignSelf: 'flex-start',
-                      px: 2.5,
-                      borderRadius: 3,
+                      padding: '0 20px',
+                      borderRadius: 12,
                       fontWeight: 800,
                     }}
                   >
                     Open camera scanner
-                  </Button>
+                  </CButton>
 
                   {lastScannedCode ? (
-                    <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
-                      <Chip color="success" variant="filled" label={`Last scan: ${lastScannedCode}`} />
-                      <Chip
-                        variant="outlined"
-                        label={`Keyword filter: ${String(filters.keyword?.value || '')}`}
-                        sx={(theme) => getMutedChipSx(theme)}
-                      />
-                    </Stack>
+                    <CStack direction="row" spacing={1} useFlexGap flexWrap="wrap">
+                      <span style={{ fontSize: '0.875rem', padding: '4px 12px', borderRadius: 16, backgroundColor: 'var(--orb-success-bg)', color: 'var(--orb-success)' }}>
+                        Last scan: {lastScannedCode}
+                      </span>
+                      <span style={{ fontSize: '0.875rem', padding: '4px 12px', borderRadius: 16, border: '1px solid var(--orb-divider)', color: 'var(--orb-muted)' }}>
+                        Keyword filter: {String(filters.keyword?.value || '')}
+                      </span>
+                    </CStack>
                   ) : null}
-                </Stack>
-              </Paper>
+                </CStack>
+              </CPaper>
 
-              <Paper
-                sx={(theme) => ({
-                  p: 2,
-                  borderRadius: 4,
-                  ...getPanelSurfaceSx(theme),
-                })}
+              <CPaper
+                style={{
+                  padding: 16,
+                  borderRadius: 16,
+                  border: '1px solid var(--orb-divider)',
+                }}
               >
-                <Stack spacing={1.25}>
-                  <Box>
-                    <Typography sx={{ fontSize: '1rem', fontWeight: 900 }}>Selected task keypad</Typography>
-                    <Typography sx={{ mt: 0.35, fontSize: '0.84rem', color: 'text.secondary' }}>
+                <CStack spacing={1.25}>
+                  <div>
+                    <CTypography sx={{ fontSize: '1rem', fontWeight: 900 }}>Selected task keypad</CTypography>
+                    <CTypography sx={{ marginTop: 3, fontSize: '0.84rem', color: 'var(--orb-muted)' }}>
                       Tap any row card in the pad table, then use the keypad to overwrite its confirmed quantity.
-                    </Typography>
-                  </Box>
+                    </CTypography>
+                  </div>
 
                   {selectedTask ? (
-                    <Paper
-                      elevation={0}
-                      sx={(theme) => ({
-                        p: 1.25,
-                        borderRadius: 3,
-                        bgcolor: theme.palette.mode === 'dark' ? 'rgba(15,23,42,0.6)' : 'action.hover',
-                        border: '1px solid',
-                        borderColor: alpha(theme.palette.divider, theme.palette.mode === 'dark' ? 0.8 : 1),
-                        color: theme.palette.text.primary,
-                      })}
+                    <CPaper
+                      style={{
+                        padding: 10,
+                        borderRadius: 12,
+                        backgroundColor: 'var(--orb-surface)',
+                        border: '1px solid var(--orb-divider)',
+                      }}
                     >
-                      <Typography sx={{ fontSize: '0.76rem', color: 'text.secondary' }}>{selectedTask.taskId}</Typography>
-                      <Typography sx={{ mt: 0.3, fontSize: '0.96rem', fontWeight: 900 }}>{selectedTask.title}</Typography>
-                      <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" sx={{ mt: 1 }}>
-                        <Chip size="small" label={`Zone ${selectedTask.zone}`} sx={(theme) => getMutedChipSx(theme)} />
-                        <Chip size="small" label={`Planned ${selectedTask.plannedQty}`} sx={(theme) => getMutedChipSx(theme)} />
-                        <Chip size="small" label={`Current ${selectedTask.confirmedQty}`} color="primary" variant="outlined" />
-                      </Stack>
-                    </Paper>
+                      <CTypography sx={{ fontSize: '0.76rem', color: 'var(--orb-muted)' }}>{selectedTask.taskId}</CTypography>
+                      <CTypography sx={{ marginTop: 2, fontSize: '0.96rem', fontWeight: 900 }}>{selectedTask.title}</CTypography>
+                      <CStack direction="row" spacing={1} useFlexGap flexWrap="wrap" sx={{ marginTop: 8 }}>
+                        <CChip size="small" label={`Zone ${selectedTask.zone}`} sx={{ fontSize: "0.875rem", color: "var(--orb-muted)" }} />
+                        <CChip size="small" label={`Planned ${selectedTask.plannedQty}`} sx={{ fontSize: "0.875rem", color: "var(--orb-muted)" }} />
+                        <CChip size="small" label={`Current ${selectedTask.confirmedQty}`} color="primary" variant="outlined" />
+                      </CStack>
+                    </CPaper>
                   ) : null}
 
                   <PNumericKeypad
@@ -675,35 +649,35 @@ export default function PadExampleClient() {
                     onChange={setKeypadValue}
                     onSubmit={handleSubmitKeypad}
                   />
-                </Stack>
-              </Paper>
+                </CStack>
+              </CPaper>
 
-              <Paper
-                sx={(theme) => ({
-                  p: 2,
-                  borderRadius: 4,
-                  ...getPanelSurfaceSx(theme),
-                })}
+              <CPaper
+                style={{
+                  padding: 16,
+                  borderRadius: 16,
+                  border: '1px solid var(--orb-divider)',
+                }}
               >
-                <Stack spacing={1}>
-                  <Typography sx={{ fontSize: '0.96rem', fontWeight: 900 }}>What this page demonstrates</Typography>
-                  <Typography sx={{ fontSize: '0.84rem', color: 'text.secondary', lineHeight: 1.6 }}>
-                    1. `PAppPageLayout`: left navigation, top workload cards, responsive pad shell.
-                  </Typography>
-                  <Typography sx={{ fontSize: '0.84rem', color: 'text.secondary', lineHeight: 1.6 }}>
+                <CStack spacing={1}>
+                  <CTypography sx={{ fontSize: '0.96rem', fontWeight: 900 }}>What this page demonstrates</CTypography>
+                  <CTypography sx={{ fontSize: '0.84rem', color: 'var(--orb-muted)', lineHeight: 1.6 }}>
+                    1. `CAppPageLayout`: left navigation, top workload cards, responsive pad shell.
+                  </CTypography>
+                  <CTypography sx={{ fontSize: '0.84rem', color: 'var(--orb-muted)', lineHeight: 1.6 }}>
                     2. `PTable`: touch row cards with the same layout, variant, grouping, summary, export and quick action plumbing as `CTable`.
-                  </Typography>
-                  <Typography sx={{ fontSize: '0.84rem', color: 'text.secondary', lineHeight: 1.6 }}>
+                  </CTypography>
+                  <CTypography sx={{ fontSize: '0.84rem', color: 'var(--orb-muted)', lineHeight: 1.6 }}>
                     3. `PNumericKeypad`: real input that writes back into the currently selected task.
-                  </Typography>
-                  <Typography sx={{ fontSize: '0.84rem', color: 'text.secondary', lineHeight: 1.6 }}>
+                  </CTypography>
+                  <CTypography sx={{ fontSize: '0.84rem', color: 'var(--orb-muted)', lineHeight: 1.6 }}>
                     4. `PBarcodeScanner`: camera-based barcode trigger with manual-entry fallback and callback wiring.
-                  </Typography>
-                </Stack>
-              </Paper>
-            </Stack>
-          </Box>
-        </Stack>
+                  </CTypography>
+                </CStack>
+              </CPaper>
+            </CStack>
+          </div>
+        </CStack>
       </CPageTransition>
 
       <PBarcodeScanner

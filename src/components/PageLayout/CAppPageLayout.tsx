@@ -2,17 +2,19 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { PointerEvent as ReactPointerEvent } from 'react';
-import { Box } from '@mui/material';
-import { createTheme, ThemeProvider } from '@mui/material';
 import { NavigationIsland } from '../Navigation-Island/navigation-island';
+import { NavigationIsland2 } from '../Navigation-Island/navigation-island2';
 import { CAppHeader, CAppHeaderSearch } from './Components/CAppHeader';
 import { usePageLayout } from './Hooks/usePageLayout';
 import type { CAppPageLayoutProps } from './types';
-import { OrbcafeI18nProvider } from '../../i18n';
+import { OrbcafeI18nProvider, type OrbcafeLocale } from '../../i18n';
+import { OrbisModeProvider } from '../../lib/theme';
 
 const FLOATING_NAV_INSET = 12;
 const FLOATING_NAV_COLLAPSED_WIDTH = 56;
 const FLOATING_NAV_EXPANDED_WIDTH = 234;
+const LOCALE_STORAGE_KEY = 'orbcafe:page-layout-locale';
+const SUPPORTED_LOCALES: readonly OrbcafeLocale[] = ['en', 'zh', 'fr', 'de', 'ja', 'ko'];
 
 const createNavigationPinStorageKey = (appTitle: string) =>
   `orbcafe:page-layout:${appTitle.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'app'}:pinned-navigation-items`;
@@ -52,6 +54,7 @@ export const CAppPageLayout = ({
   localeOptions,
   onLocaleChange,
   user,
+  onUserRefresh,
   onUserSetting,
   onUserLogout,
   userMenuItems,
@@ -64,6 +67,7 @@ export const CAppPageLayout = ({
   rightHeaderSlot,
   leftHeaderSlot,
   contentSx,
+  navigationVariant = 'classic',
   navigationMode,
   defaultNavigationMode = 'fixed',
   onNavigationModeChange,
@@ -80,6 +84,8 @@ export const CAppPageLayout = ({
   const [mode, setMode] = useState<'light' | 'dark' | 'system'>('system');
   const [systemMode, setSystemMode] = useState<'light' | 'dark'>('light');
   const [hydrated, setHydrated] = useState(false);
+  const [internalLocale, setInternalLocale] = useState<OrbcafeLocale>(locale);
+  const [localeHydrated, setLocaleHydrated] = useState(false);
   const [navigationModeHydrated, setNavigationModeHydrated] = useState(false);
   const [internalNavigationMode, setInternalNavigationMode] = useState(defaultNavigationMode);
   const [floatingNavigationPosition, setFloatingNavigationPosition] = useState<FloatingNavigationPosition>({
@@ -91,9 +97,13 @@ export const CAppPageLayout = ({
   const [isDraggingFloatingNavigation, setIsDraggingFloatingNavigation] = useState(false);
   const floatingNavigationRef = useRef<HTMLDivElement | null>(null);
   const floatingNavigationDragRef = useRef<FloatingNavigationDragState | null>(null);
+  const isLocaleControlled = onLocaleChange !== undefined;
+  const effectiveLocale = isLocaleControlled ? locale : internalLocale;
+  const localeOptionsKey = localeOptions?.join('|') ?? '';
   const isNavigationModeControlled = navigationMode !== undefined;
   const effectiveNavigationMode = navigationMode ?? internalNavigationMode;
   const isFloatingNavigation = effectiveNavigationMode === 'floating';
+  const NavigationIslandComponent = navigationVariant === 'v2' ? NavigationIsland2 : NavigationIsland;
   const showHeaderSearch = searchPlacement === 'header';
   const effectiveMode: 'light' | 'dark' =
     mode === 'system' ? (hydrated ? systemMode : 'light') : mode;
@@ -126,6 +136,34 @@ export const CAppPageLayout = ({
       // ignore storage access failures
     }
   }, [hydrated, mode]);
+
+  useEffect(() => {
+    if (isLocaleControlled) {
+      setLocaleHydrated(true);
+      return;
+    }
+
+    try {
+      const savedLocale = window.localStorage.getItem(LOCALE_STORAGE_KEY) as OrbcafeLocale | null;
+      const availableLocales = localeOptions ?? SUPPORTED_LOCALES;
+      if (savedLocale && SUPPORTED_LOCALES.includes(savedLocale) && availableLocales.includes(savedLocale)) {
+        setInternalLocale(savedLocale);
+      }
+    } catch {
+      // ignore storage access failures
+    } finally {
+      setLocaleHydrated(true);
+    }
+  }, [isLocaleControlled, localeOptionsKey]);
+
+  useEffect(() => {
+    if (isLocaleControlled || !localeHydrated) return;
+    try {
+      window.localStorage.setItem(LOCALE_STORAGE_KEY, effectiveLocale);
+    } catch {
+      // ignore storage access failures
+    }
+  }, [effectiveLocale, isLocaleControlled, localeHydrated]);
 
   useEffect(() => {
     if (isNavigationModeControlled) {
@@ -165,16 +203,6 @@ export const CAppPageLayout = ({
     }
   }, [effectiveMode]);
 
-  const theme = useMemo(
-    () =>
-      createTheme({
-        palette: {
-          mode: effectiveMode,
-        },
-      }),
-    [effectiveMode],
-  );
-
   const setEffectiveNavigationMode = useCallback(
     (nextMode: typeof effectiveNavigationMode) => {
       if (!isNavigationModeControlled) {
@@ -183,6 +211,16 @@ export const CAppPageLayout = ({
       onNavigationModeChange?.(nextMode);
     },
     [isNavigationModeControlled, onNavigationModeChange],
+  );
+
+  const setEffectiveLocale = useCallback(
+    (nextLocale: OrbcafeLocale) => {
+      if (!isLocaleControlled) {
+        setInternalLocale(nextLocale);
+      }
+      onLocaleChange?.(nextLocale);
+    },
+    [isLocaleControlled, onLocaleChange],
   );
 
   const { navigationIslandProps, navigationMaxHeight } = usePageLayout({
@@ -357,21 +395,19 @@ export const CAppPageLayout = ({
   }, [clampFloatingNavigationPosition, isFloatingNavigation, navigationIsCollapsed, navigationMaxHeight]);
 
   return (
-    <ThemeProvider theme={theme}>
-      <OrbcafeI18nProvider locale={locale}>
-        <Box
-        sx={(theme) => ({
-          minHeight: '100vh',
-          width: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-          overflowX: 'hidden',
-          background:
-            theme.palette.mode === 'dark'
-              ? 'linear-gradient(180deg, #0A0A0A 0%, #141414 55%, #1A1A1A 100%)'
-              : theme.palette.background.default,
-        })}
-      >
+    <OrbisModeProvider mode={mode}>
+      <OrbcafeI18nProvider locale={effectiveLocale}>
+        <div
+          className="orb-root"
+          style={{
+            minHeight: '100vh',
+            width: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            overflowX: 'hidden',
+            background: 'var(--orb-canvas)',
+          }}
+        >
         <CAppHeader
           appTitle={appTitle}
           logo={logo}
@@ -379,11 +415,12 @@ export const CAppPageLayout = ({
           onToggleMode={() =>
             setMode((prev) => (prev === 'system' ? 'dark' : prev === 'dark' ? 'light' : 'system'))
           }
-          locale={locale}
-          localeLabel={localeLabel}
+          locale={effectiveLocale}
+          localeLabel={isLocaleControlled || effectiveLocale === locale ? localeLabel : undefined}
           localeOptions={localeOptions}
-          onLocaleChange={onLocaleChange}
+          onLocaleChange={setEffectiveLocale}
           user={user}
+          onUserRefresh={onUserRefresh}
           onUserSetting={onUserSetting}
           onUserLogout={onUserLogout}
           userMenuItems={userMenuItems}
@@ -396,52 +433,30 @@ export const CAppPageLayout = ({
         />
 
         {searchPlacement === 'floating' && (
-          <Box
-            sx={[
-              (theme) => ({
-                position: 'fixed',
-                left: { xs: 12, sm: 'auto' },
-                right: { xs: 12, md: 24 },
-                bottom: { xs: 12, md: 24 },
-                width: { xs: 'auto', sm: 540 },
-                maxWidth: 'calc(100vw - 24px)',
-                zIndex: theme.zIndex.modal + 30,
-                pointerEvents: 'auto',
-                filter:
-                  theme.palette.mode === 'dark'
-                    ? 'drop-shadow(0 18px 42px rgba(0,0,0,0.58))'
-                    : 'drop-shadow(0 18px 36px rgba(15,23,42,0.18))',
-              }),
-              ...(Array.isArray(floatingSearchSx)
-                ? floatingSearchSx
-                : floatingSearchSx
-                  ? [floatingSearchSx]
-                  : []),
-            ]}
-          >
+          <div className="orb-float-search" style={floatingSearchSx}>
             <CAppHeaderSearch
               searchPlaceholder={searchPlaceholder}
               onSearch={onSearch}
               onSearchAdd={onSearchAdd}
               maxWidth="100%"
             />
-          </Box>
+          </div>
         )}
 
-        <Box sx={{ flex: 1, minHeight: 0, minWidth: 0, display: 'flex', overflowX: 'hidden', position: 'relative' }}>
+        <div style={{ flex: 1, minHeight: 0, minWidth: 0, display: 'flex', overflowX: 'hidden', position: 'relative' }}>
           {showNavigation && !isFloatingNavigation && (
-            <Box
-              sx={{
-                pt: 1.5,
-                pb: 1.5,
-                pl: 1.5,
-                pr: navigationIsCollapsed ? 0.5 : 1.5,
+            <div
+              style={{
+                paddingTop: 12,
+                paddingBottom: 12,
+                paddingLeft: 12,
+                paddingRight: navigationIsCollapsed ? 4 : 12,
                 display: 'flex',
                 alignItems: 'flex-start',
                 flexShrink: 0,
               }}
             >
-              <NavigationIsland
+              <NavigationIslandComponent
                 {...navigationIslandProps}
                 maxHeight={navigationMaxHeight}
                 colorMode={effectiveMode}
@@ -449,21 +464,21 @@ export const CAppPageLayout = ({
                 onDisplayModeChange={setEffectiveNavigationMode}
                 showDisplayModeToggle={showNavigationModeToggle && navigationIsCollapsed}
               />
-            </Box>
+            </div>
           )}
 
           {showNavigation && isFloatingNavigation && (
-            <Box
+            <div
               ref={floatingNavigationRef}
               onPointerDown={handleFloatingNavigationPointerDown}
               onPointerMove={handleFloatingNavigationPointerMove}
               onPointerUp={finishFloatingNavigationDrag}
               onPointerCancel={finishFloatingNavigationDrag}
-              sx={(theme) => ({
+              style={{
                 position: 'absolute',
                 top: floatingNavigationPosition.y,
                 left: floatingNavigationLeft,
-                zIndex: theme.zIndex.drawer + 5,
+                zIndex: 1205,
                 display: 'flex',
                 alignItems: 'flex-start',
                 cursor: navigationIsCollapsed
@@ -472,9 +487,9 @@ export const CAppPageLayout = ({
                 touchAction: navigationIsCollapsed ? 'none' : 'auto',
                 userSelect: isDraggingFloatingNavigation ? 'none' : undefined,
                 transition: isDraggingFloatingNavigation ? 'none' : 'left 180ms ease-out, top 180ms ease-out',
-              })}
+              }}
             >
-              <NavigationIsland
+              <NavigationIslandComponent
                 {...navigationIslandProps}
                 maxHeight={navigationMaxHeight}
                 colorMode={effectiveMode}
@@ -482,27 +497,27 @@ export const CAppPageLayout = ({
                 onDisplayModeChange={setEffectiveNavigationMode}
                 showDisplayModeToggle={showNavigationModeToggle && navigationIsCollapsed}
               />
-            </Box>
+            </div>
           )}
 
-          <Box
-            sx={{
+          <div
+            style={{
               flex: 1,
               minWidth: 0,
               minHeight: 0,
               overflow: 'auto',
-              pt: 1.5,
-              pb: 1.5,
-              pr: 1.5,
-              pl: showNavigation && !isFloatingNavigation && navigationIsCollapsed ? 0.5 : 1.5,
+              paddingTop: 12,
+              paddingBottom: 12,
+              paddingRight: 12,
+              paddingLeft: showNavigation && !isFloatingNavigation && navigationIsCollapsed ? 4 : 12,
               ...contentSx,
             }}
           >
             {children}
-          </Box>
-        </Box>
-        </Box>
+          </div>
+        </div>
+        </div>
       </OrbcafeI18nProvider>
-    </ThemeProvider>
+    </OrbisModeProvider>
   );
 };

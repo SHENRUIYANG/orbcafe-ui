@@ -57,8 +57,10 @@ import {
 'use client';
 
 import { useMemo, useState } from 'react';
-import { Box, Button, Chip } from '@mui/material';
+import { CButton, CChip, CStack } from 'orbcafe-ui';
 import { PAppPageLayout, PBarcodeScanner, PNumericKeypad, PTable, usePadLayout, usePadRecordEditor } from 'orbcafe-ui';
+
+// V2 的图标从包入口导入（如 PackageCheck / Truck），不依赖 lucide-react。
 
 type Row = { id: string; title: string; confirmedQty: number; zone: string; status: string };
 
@@ -81,7 +83,7 @@ export default function Demo() {
     () => [
       { id: 'title', label: 'Task' },
       { id: 'zone', label: 'Zone' },
-      { id: 'status', label: 'Status', render: (value: string) => <Chip size="small" label={value} /> },
+      { id: 'status', label: 'Status', render: (value: string) => <CChip size="small" label={value} /> },
       { id: 'confirmedQty', label: 'Confirmed', numeric: true },
     ],
     [],
@@ -95,7 +97,7 @@ export default function Demo() {
       onNavOpenChange={setNavigationOpen}
       menuData={[{ id: 'pad', title: 'Pad', href: '/pad' }]}
     >
-      <Box sx={{ display: 'grid', gap: 16 }}>
+      <CStack spacing={2}>
         <PTable
           title="Execution Queue"
           columns={columns}
@@ -109,15 +111,15 @@ export default function Demo() {
           onChange={setEditorValue}
           onSubmit={() => applyEditorValue(setRows)}
         />
-        <Button variant="contained" onClick={() => setScannerOpen(true)}>
+        <CButton variant="primary" onClick={() => setScannerOpen(true)}>
           Open scanner
-        </Button>
+        </CButton>
         <PBarcodeScanner
           open={scannerOpen}
           onClose={() => setScannerOpen(false)}
           onDetected={(result) => console.log(result.rawValue)}
         />
-      </Box>
+      </CStack>
     </PAppPageLayout>
   );
 }

@@ -1,9 +1,7 @@
 'use client';
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { CAppPageLayout, CPageTransition, CStandardPage, useStandardReport, type OrbcafeLocale, type ReportMetadata } from 'orbcafe-ui';
-import { Box, Chip } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
+import { CAppPageLayout, CChip, CPageTransition, CStandardPage, useOrbMode, useStandardReport, type OrbcafeLocale, type ReportMetadata } from 'orbcafe-ui';
 import Link from 'next/link';
 import { EXAMPLE_MENU } from './exampleNavigation';
 
@@ -293,15 +291,14 @@ const EXAMPLE_TEXT: Record<OrbcafeLocale, {
 };
 
 const HeaderBrandLogo = () => {
-    const theme = useTheme();
-    const src = theme.palette.mode === 'dark' ? '/LOGO3.png' : '/LOGO2.png';
+    const mode = useOrbMode();
+    const src = mode === 'dark' ? '/LOGO3.png' : '/LOGO2.png';
 
     return (
-        <Box
-            component="img"
+        <img
             src={src}
             alt="ORBCAFE UI"
-            sx={{ width: 280, maxWidth: '32vw', height: 52, display: 'block', objectFit: 'contain', flexShrink: 0 }}
+            style={{ width: 280, maxWidth: '32vw', height: 52, display: 'block', objectFit: 'contain', flexShrink: 0 }}
         />
     );
 };
@@ -414,7 +411,7 @@ export default function StdReportExample() {
                 render: (value: StatusValue) => {
                     const color = value === 'active' ? 'success' : value === 'pending' ? 'warning' : 'default';
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    return <Chip label={statusLabelMap[value] || value} color={color as any} size="small" variant="outlined" />;
+                    return <CChip label={statusLabelMap[value] || value} color={color as any} size="small" variant="outlined" />;
                 }
             },
             { id: 'date', label: i18nText.columnDate, minWidth: 150 },
@@ -538,19 +535,23 @@ export default function StdReportExample() {
     return (
         <CAppPageLayout
             appTitle=""
+            navigationVariant="v2"
+            searchPlacement="header"
             menuData={menuData}
             locale={locale}
             localeLabel={i18nText.localeLabel}
             onLocaleChange={setLocale}
             user={{ name: 'Ruiyang Shen', subtitle: 'ruiyang.shen@orbis.de', avatarSrc: '/orbcafe.png' }}
+            onUserRefresh={() => window.location.reload()}
+            onUserLogout={() => window.location.assign('/login')}
             logo={<HeaderBrandLogo />}
         >
             <CPageTransition transitionKey="std-report" variant="fade" durationMs={180}>
-                <Box sx={{ height: 'calc(100vh - 120px)' }}>
+                <div style={{ height: 'calc(100vh - 120px)' }}>
                     <CStandardPage {...pagePropsWithCustomAction} id="std-report-example-page">
                         {/* Optional children for dialogs etc. */}
                     </CStandardPage>
-                </Box>
+                </div>
             </CPageTransition>
         </CAppPageLayout>
     );

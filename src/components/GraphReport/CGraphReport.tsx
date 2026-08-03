@@ -1,8 +1,5 @@
-import { Box, Button, Chip, Dialog, IconButton, InputBase, Stack, Typography } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
-import MicNoneOutlinedIcon from '@mui/icons-material/MicNoneOutlined';
-import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
-import SendOutlinedIcon from '@mui/icons-material/SendOutlined';
+import { CButton, CChip, CDialog, CIconButton, CStack, CTypography } from '../../components/Atoms';
+import { X, Mic, Settings, SendHorizontal } from '@/components/Icons';
 import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
 import type { GraphReportConfig, GraphReportFieldMapping, GraphReportInteractionState, GraphReportModel } from './types';
@@ -82,67 +79,61 @@ export const CGraphReport = ({
   };
 
   return (
-    <Dialog open={open} onClose={onClose} fullScreen>
-      <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', bgcolor: 'background.default' }}>
-        <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
-          <Stack direction={{ xs: 'column', lg: 'row' }} alignItems={{ xs: 'stretch', lg: 'center' }} justifyContent="space-between" spacing={1.5}>
-            <Stack direction="row" spacing={1.25} alignItems="center" sx={{ flexWrap: 'wrap' }}>
-              <Typography variant="h5" fontWeight={800}>
+    <CDialog open={open} onClose={onClose} fullWidth maxWidth={1400} hideCloseButton>
+      <div style={{ height: '80vh', display: 'flex', flexDirection: 'column', background: 'var(--orb-canvas)' }}>
+        <div style={{ padding: 16, borderBottom: '1px solid var(--orb-border)' }}>
+          <CStack direction="row" alignItems="center" justifyContent="space-between" spacing={12}>
+            <CStack direction="row" spacing={10} alignItems="center" sx={{ flexWrap: 'wrap' }}>
+              <CTypography variant="h3" sx={{ fontWeight: 800 }}>
                 {model.title}
-              </Typography>
-              <Chip size="small" label={t('graph.records', { count: model.kpis.totalRecords })} />
+              </CTypography>
+              <CChip label={t('graph.records', { count: model.kpis.totalRecords })} />
               {hasInteraction && activeFilters.primaryDimension && (
-                <Chip
-                  size="small"
-                  variant="outlined"
+                <CChip
+                  tone="outline"
                   label={`${interaction?.fieldMapping.primaryDimension}: ${activeFilters.primaryDimension}`}
                   onDelete={() => interaction?.onClearFilter('primaryDimension')}
                 />
               )}
               {hasInteraction && activeFilters.secondaryDimension && (
-                <Chip
-                  size="small"
-                  variant="outlined"
+                <CChip
+                  tone="outline"
                   label={`${interaction?.fieldMapping.secondaryDimension}: ${activeFilters.secondaryDimension}`}
                   onDelete={() => interaction?.onClearFilter('secondaryDimension')}
                 />
               )}
               {hasInteraction && activeFilters.status && (
-                <Chip
-                  size="small"
-                  variant="outlined"
+                <CChip
+                  tone="outline"
                   label={`${interaction?.fieldMapping.status}: ${activeFilters.status}`}
                   onDelete={() => interaction?.onClearFilter('status')}
                 />
               )}
               {hasInteraction && hasActiveFilters && (
-                <Button size="small" onClick={() => interaction?.onClearAll()}>
+                <CButton size="small" variant="ghost" onClick={() => interaction?.onClearAll()}>
                   Clear
-                </Button>
+                </CButton>
               )}
-            </Stack>
-            <Stack direction="row" spacing={1.25} alignItems="center" sx={{ width: { xs: '100%', lg: 'auto' } }}>
+            </CStack>
+            <CStack direction="row" spacing={10} alignItems="center">
               {aiEnabled && (
-                <Box
-                  sx={{
+                <div
+                  style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 1,
-                    px: 1.2,
-                    py: 0.4,
+                    gap: 8,
+                    padding: '6px 10px',
                     borderRadius: 999,
-                    border: '1px solid',
-                    borderColor: 'divider',
-                    bgcolor: 'background.paper',
-                    minWidth: { xs: 0, lg: 520 },
-                    flex: { xs: 1, lg: '0 0 auto' },
+                    border: '1px solid var(--orb-border)',
+                    background: 'var(--orb-surface)',
+                    minWidth: 320,
                   }}
                 >
-                  <IconButton size="small" onClick={aiAssistant?.onVoiceInput}>
-                    <MicNoneOutlinedIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
-                  </IconButton>
-                  <InputBase
-                    fullWidth
+                  <CIconButton size="small" onClick={aiAssistant?.onVoiceInput}>
+                    <Mic size={16} strokeWidth={1.8} />
+                  </CIconButton>
+                  <input
+                    className="orb-inp orb-inp-dense"
                     value={aiPrompt}
                     onChange={(event) => setAiPrompt(event.target.value)}
                     onKeyDown={(event) => {
@@ -152,24 +143,24 @@ export const CGraphReport = ({
                       }
                     }}
                     placeholder={aiPlaceholder}
-                    sx={{ fontSize: '0.9rem' }}
+                    style={{ fontSize: 14, border: 'none', background: 'transparent', flex: 1, minWidth: 0 }}
                   />
-                  <IconButton size="small" onClick={handleSubmitAiPrompt} disabled={submitting || !aiPrompt.trim()}>
-                    <SendOutlinedIcon sx={{ fontSize: 18 }} />
-                  </IconButton>
-                  <IconButton size="small" onClick={() => setSettingsOpen(true)}>
-                    <SettingsOutlinedIcon sx={{ fontSize: 18 }} />
-                  </IconButton>
-                </Box>
+                  <CIconButton size="small" onClick={handleSubmitAiPrompt} disabled={submitting || !aiPrompt.trim()}>
+                    <SendHorizontal size={16} strokeWidth={1.8} />
+                  </CIconButton>
+                  <CIconButton size="small" onClick={() => setSettingsOpen(true)}>
+                    <Settings size={16} strokeWidth={1.8} />
+                  </CIconButton>
+                </div>
               )}
-              <IconButton onClick={onClose}>
-                <CloseIcon />
-              </IconButton>
-            </Stack>
-          </Stack>
-        </Box>
+              <CIconButton onClick={onClose}>
+                <X size={18} strokeWidth={2} />
+              </CIconButton>
+            </CStack>
+          </CStack>
+        </div>
 
-        <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1.5, overflow: 'auto', minHeight: 0 }}>
+        <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 12, overflow: 'auto', minHeight: 0 }}>
           <CGraphKpiCards kpis={model.kpis} />
           <CGraphCharts
             billableByPrimary={model.charts.billableByPrimary}
@@ -188,7 +179,7 @@ export const CGraphReport = ({
           />
           {extraCharts}
           {tableContent}
-        </Box>
+        </div>
 
         <CCustomizeAgent
           open={settingsOpen}
@@ -202,7 +193,7 @@ export const CGraphReport = ({
           defaultAnalysisTemplateId={aiAssistant?.defaultAnalysisTemplateId}
           defaultResponseTemplateId={aiAssistant?.defaultResponseTemplateId}
         />
-      </Box>
-    </Dialog>
+      </div>
+    </CDialog>
   );
 };

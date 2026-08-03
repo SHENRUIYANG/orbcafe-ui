@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Typography } from '@mui/material';
+import {  CTypography } from "../../Atoms";
 
 export interface CPageLayoutProps {
     title: string;
@@ -9,15 +9,15 @@ export interface CPageLayoutProps {
 
 export const CPageLayout = ({ title, hideHeader, children }: CPageLayoutProps) => {
     return (
-        <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+        <div sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
             {!hideHeader && (
-                <Box sx={{ mb: 2 }}>
-                    <Typography variant="h4">{title}</Typography>
-                </Box>
+                <div sx={{ mb: 2 }}>
+                    <CTypography variant="h4">{title}</CTypography>
+                </div>
             )}
-            <Box sx={{ flex: 1, overflow: 'hidden' }}>
+            <div sx={{ flex: 1, overflow: 'hidden' }}>
                 {children}
-            </Box>
-        </Box>
+            </div>
+        </div>
     );
 };

@@ -1,21 +1,9 @@
+import { getOrbCompatMode } from '../../lib/orbis-compat';
+import { AccountTreeIcon, AddIcon, Box, KeyboardArrowDownIcon, KeyboardDoubleArrowLeftOutlinedIcon, KeyboardDoubleArrowRightOutlinedIcon, SplitscreenOutlinedIcon, SxProps, Theme, useTheme } from '../../lib/orbis-compat';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
-import {
-  Box,
-  Divider,
-  Stack,
-  Typography,
-  alpha,
-  useTheme,
-} from '@mui/material';
-import AccountTreeIcon from '@mui/icons-material/AccountTree';
-import AddIcon from '@mui/icons-material/Add';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import KeyboardDoubleArrowLeftOutlinedIcon from '@mui/icons-material/KeyboardDoubleArrowLeftOutlined';
-import KeyboardDoubleArrowRightOutlinedIcon from '@mui/icons-material/KeyboardDoubleArrowRightOutlined';
-import SplitscreenOutlinedIcon from '@mui/icons-material/SplitscreenOutlined';
-import type { SxProps, Theme } from '@mui/material/styles';
-import { CIconButton } from '../Atoms/CIconButton';
+import { CIconButton, CSegmentedControl, CStack, CTypography, CDivider } from "../Atoms";
+import { orbAlpha } from "../../lib/theme";
 import { CTable } from '../StdReport/CTable';
 import type { CSmartFilterProps } from '../StdReport/CSmartFilter';
 
@@ -182,16 +170,16 @@ export const CTreeComp = <TNode extends CTreeCompNode = CTreeCompNode>({
               id: 'label',
               label: 'Name',
               render: (node) => (
-                <Stack spacing={0.3}>
-                  <Typography sx={{ fontSize: 15, fontWeight: 700, lineHeight: 1.15 }}>
+                <CStack spacing={0.3}>
+                  <CTypography sx={{ fontSize: 15, fontWeight: 700, lineHeight: 1.15 }}>
                     {node.label}
-                  </Typography>
+                  </CTypography>
                   {node.subtitle && (
-                    <Typography sx={{ fontSize: 13, color: 'text.secondary', lineHeight: 1.2 }}>
+                    <CTypography sx={{ fontSize: 13, color: 'text.secondary', lineHeight: 1.2 }}>
                       {node.subtitle}
-                    </Typography>
+                    </CTypography>
                   )}
-                </Stack>
+                </CStack>
               ),
             },
           ],
@@ -335,8 +323,8 @@ export const CTreeComp = <TNode extends CTreeCompNode = CTreeCompNode>({
     let secondFrame = 0;
     firstFrame = window.requestAnimationFrame(() => {
       secondFrame = window.requestAnimationFrame(() => {
-        const selectedRow = rootRef.current?.querySelector('.MuiTableRow-root.Mui-selected') as HTMLElement | null;
-        const tableContainer = selectedRow?.closest('.MuiTableContainer-root') as HTMLElement | null;
+        const selectedRow = rootRef.current?.querySelector('tr.orb-selected') as HTMLElement | null;
+        const tableContainer = selectedRow?.closest('.orb-table-container') as HTMLElement | null;
         if (selectedRow && tableContainer) {
           const containerRect = tableContainer.getBoundingClientRect();
           const rowRect = selectedRow.getBoundingClientRect();
@@ -405,7 +393,7 @@ export const CTreeComp = <TNode extends CTreeCompNode = CTreeCompNode>({
           const expanded = Boolean(row.__expanded);
 
           return (
-            <Stack
+            <CStack
               direction="row"
               alignItems="center"
               spacing={1}
@@ -438,7 +426,7 @@ export const CTreeComp = <TNode extends CTreeCompNode = CTreeCompNode>({
                 }}
               />
               <Box sx={{ minWidth: 0 }}>{content}</Box>
-            </Stack>
+            </CStack>
           );
         },
       })),
@@ -489,44 +477,26 @@ export const CTreeComp = <TNode extends CTreeCompNode = CTreeCompNode>({
   };
 
   const paneControls = detail ? (
-    <Box
+    <CSegmentedControl<CTreeCompPaneMode>
+      aria-label="Tree pane layout"
+      value={paneMode}
+      options={[
+        { value: 'tree', label: 'Expand tree', icon: <KeyboardDoubleArrowRightOutlinedIcon fontSize="small" /> },
+        { value: 'split', label: 'Split evenly', icon: <SplitscreenOutlinedIcon fontSize="small" /> },
+        { value: 'detail', label: 'Expand detail', icon: <KeyboardDoubleArrowLeftOutlinedIcon fontSize="small" /> },
+      ]}
+      onValueChange={(nextMode) => {
+        if (nextMode === 'split') setEvenSplit();
+        else setPaneMode(nextMode);
+      }}
       sx={{
         position: 'absolute',
         top: 13,
         right: 56,
         zIndex: 3,
-        display: 'flex',
-        gap: 0.25,
-        p: 0.5,
-        borderRadius: 2,
-        backgroundColor: alpha(theme.palette.background.paper, 0.9),
-        border: `1px solid ${theme.palette.divider}`,
-        boxShadow: `0 8px 22px ${alpha(theme.palette.common.black, theme.palette.mode === 'dark' ? 0.28 : 0.1)}`,
         backdropFilter: 'blur(10px)',
       }}
-    >
-      <CIconButton
-        tooltip="Expand tree"
-        onClick={() => setPaneMode('tree')}
-        color={paneMode === 'tree' ? 'primary' : 'default'}
-      >
-        <KeyboardDoubleArrowRightOutlinedIcon fontSize="small" />
-      </CIconButton>
-      <CIconButton
-        tooltip="Split evenly"
-        onClick={setEvenSplit}
-        color={paneMode === 'split' ? 'primary' : 'default'}
-      >
-        <SplitscreenOutlinedIcon fontSize="small" />
-      </CIconButton>
-      <CIconButton
-        tooltip="Expand detail"
-        onClick={() => setPaneMode('detail')}
-        color={paneMode === 'detail' ? 'primary' : 'default'}
-      >
-        <KeyboardDoubleArrowLeftOutlinedIcon fontSize="small" />
-      </CIconButton>
-    </Box>
+    />
   ) : null;
 
   return (
@@ -538,10 +508,10 @@ export const CTreeComp = <TNode extends CTreeCompNode = CTreeCompNode>({
         height: '100%',
         minHeight: 0,
         border: `1px solid ${theme.palette.divider}`,
-        borderRadius: 2,
+        borderRadius: 'var(--orb-r-container)',
         overflow: 'hidden',
         backgroundColor: 'background.paper',
-        boxShadow: `0 18px 42px ${alpha(theme.palette.common.black, theme.palette.mode === 'dark' ? 0.24 : 0.08)}`,
+        boxShadow: `0 18px 42px ${orbAlpha(theme.palette.common.black, getOrbCompatMode() === 'dark' ? 0.24 : 0.08)}`,
         ...sx,
       }}
     >
@@ -570,32 +540,32 @@ export const CTreeComp = <TNode extends CTreeCompNode = CTreeCompNode>({
             willChange: 'opacity, transform',
           }}
         >
-          <Stack
+          <CStack
             direction="row"
             alignItems="center"
             justifyContent="space-between"
             spacing={2}
             sx={{ px: 2, py: 1.5, minHeight: 74, borderBottom: `1px solid ${theme.palette.divider}` }}
           >
-            <Stack direction="row" alignItems="center" spacing={1.4} sx={{ minWidth: 0 }}>
+            <CStack direction="row" alignItems="center" spacing={1.4} sx={{ minWidth: 0 }}>
               <AccountTreeIcon sx={{ color: 'primary.main', fontSize: 28 }} />
               <Box sx={{ minWidth: 0 }}>
-                <Typography sx={{ fontSize: 20, fontWeight: 750, lineHeight: 1.12 }} noWrap>
+                <CTypography sx={{ fontSize: 20, fontWeight: 750, lineHeight: 1.12 }} noWrap>
                   {title}
-                </Typography>
+                </CTypography>
                 {subtitle && (
-                  <Typography sx={{ fontSize: 14, color: 'text.secondary', mt: 0.3 }} noWrap>
+                  <CTypography sx={{ fontSize: 14, color: 'text.secondary', mt: 0.3 }} noWrap>
                     {subtitle}
-                  </Typography>
+                  </CTypography>
                 )}
               </Box>
-            </Stack>
+            </CStack>
             {headerAction !== undefined ? headerAction : (
               <CIconButton tooltip="Add node" color="default">
                 <AddIcon fontSize="small" />
               </CIconButton>
             )}
-          </Stack>
+          </CStack>
 
           <Box sx={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
             <CTable
@@ -648,7 +618,7 @@ export const CTreeComp = <TNode extends CTreeCompNode = CTreeCompNode>({
             width: '100%',
             cursor: showSplitter ? 'col-resize' : 'default',
             backgroundColor: showSplitter
-              ? alpha(theme.palette.text.primary, theme.palette.mode === 'dark' ? 0.16 : 0.08)
+              ? orbAlpha(theme.palette.text.primary, getOrbCompatMode() === 'dark' ? 0.16 : 0.08)
               : 'transparent',
             opacity: showSplitter ? 1 : 0,
             pointerEvents: showSplitter ? 'auto' : 'none',
@@ -656,7 +626,7 @@ export const CTreeComp = <TNode extends CTreeCompNode = CTreeCompNode>({
             transition: `opacity ${PANE_TRANSITION}, background-color 120ms ease`,
             '&:hover': {
               backgroundColor: showSplitter
-                ? alpha(theme.palette.primary.main, theme.palette.mode === 'dark' ? 0.35 : 0.18)
+                ? orbAlpha(theme.palette.primary.main, getOrbCompatMode() === 'dark' ? 0.35 : 0.18)
                 : 'transparent',
             },
           }}
@@ -676,8 +646,8 @@ export const CTreeComp = <TNode extends CTreeCompNode = CTreeCompNode>({
             willChange: 'opacity, transform',
           }}
         >
-          <Box sx={{ p: 2, pb: 1.25, minHeight: 74, display: 'flex', alignItems: 'flex-end' }}>
-            <Divider sx={{ width: '100%' }} />
+          <Box sx={{ px: 2, pt: 2, minHeight: 74, display: 'flex', alignItems: 'flex-end' }}>
+            <CDivider sx={{ width: '100%' }} />
           </Box>
           <Box sx={{ flex: 1, minHeight: 0, overflow: 'auto', px: 2, pb: 2 }}>
             {renderDetail()}

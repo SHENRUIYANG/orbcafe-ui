@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react'
 import { CopilotChat, type ChatMessage, type AgentUICardHookEvent } from 'orbcafe-ui'
-import { MessageCircle } from 'lucide-react'
+import { MessageCircle } from 'orbcafe-ui'
 
 type Corner = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'
 

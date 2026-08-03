@@ -1,8 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Box, Collapse, IconButton, Stack, Typography } from '@mui/material';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { Box, Collapse, ExpandMoreRoundedIcon, IconButton, Stack, Typography } from '../orbis-compat';
 
 export interface ThinkBlockProps {
   content: string;
@@ -34,7 +33,7 @@ export const ThinkBlock = ({
           onClick={() => setExpanded((prev) => !prev)}
           sx={{ transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform .15s ease' }}
         >
-          <ExpandMoreIcon fontSize="inherit" />
+          <ExpandMoreRoundedIcon fontSize="inherit" />
         </IconButton>
         <Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic' }}>
           {title}{isStreaming ? ' ...' : ''}

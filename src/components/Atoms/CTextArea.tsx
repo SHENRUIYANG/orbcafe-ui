@@ -1,47 +1,90 @@
-/**
- * @file 10_Frontend/components/sap/ui/Common/Atoms/CTextArea.tsx
- * 
- * @summary Core frontend CTextArea module for the ORBAI Core project
- * @author ORBAICODER
- * @version 1.0.0
- * @date 2025-01-19
- * 
- * @description
- * This file is responsible for:
- *  - Implementing CTextArea functionality within frontend workflows
- *  - Integrating with shared ORBAI Core application processes under frontend
- * 
- * @logic
- * 1. Import required dependencies and configuration
- * 2. Execute the primary logic for CTextArea
- * 3. Export the resulting APIs, hooks, or components for reuse
- * 
- * @changelog
- * V1.0.0 - 2025-01-19 - Initial creation
- */
+'use client';
 
-/**
- * File Overview
- * 
- * START CODING
- * 
- * --------------------------
- * SECTION 1: CTextArea Core Logic
- * Section overview and description.
- * --------------------------
- */
+import { forwardRef, useId } from 'react';
+import type { ChangeEvent, ReactNode, TextareaHTMLAttributes } from 'react';
+import { resolveOrbSx } from '../../lib/orbis-compat/sx';
+import type { OrbSxProps } from '../../lib/orbis-compat/sx';
 
-import { TextField } from '@mui/material';
-import type { TextFieldProps } from '@mui/material';
+export interface CTextAreaProps {
+  label?: ReactNode;
+  value?: string;
+  defaultValue?: string;
+  onChange?: (event: ChangeEvent<HTMLTextAreaElement>) => void;
+  placeholder?: string;
+  disabled?: boolean;
+  readOnly?: boolean;
+  rows?: number;
+  minRows?: number;
+  maxRows?: number;
+  /** Compatibility flag for callers migrated from multiline text fields. */
+  multiline?: boolean;
+  error?: boolean | string;
+  helperText?: ReactNode;
+  fullWidth?: boolean;
+  name?: string;
+  id?: string;
+  inputProps?: TextareaHTMLAttributes<HTMLTextAreaElement>;
+  sx?: OrbSxProps;
+  className?: string;
+}
 
-export const CTextArea = (props: TextFieldProps) => {
-  return (
-    <TextField
-      {...props}
-      multiline
-      minRows={3}
-      fullWidth
-      variant="outlined"
-    />
-  );
-};
+export const CTextArea = forwardRef<HTMLTextAreaElement, CTextAreaProps>(
+  (
+    {
+      label,
+      value,
+      defaultValue,
+      onChange,
+      placeholder,
+      disabled,
+      readOnly,
+      rows,
+      minRows = 3,
+      multiline: _multiline,
+      error,
+      helperText,
+      fullWidth = true,
+      name,
+      id,
+      inputProps,
+      sx,
+      className,
+    },
+    ref,
+  ) => {
+    const autoId = useId();
+    const areaId = id ?? `orb-ta-${autoId}`;
+    const errorMessage = typeof error === 'string' ? error : undefined;
+    const message = errorMessage ?? helperText;
+    void _multiline;
+
+    const resolved = resolveOrbSx(sx, `orb-fld ${error ? 'orb-is-error' : ''} ${className ?? ''}`, { width: fullWidth ? '100%' : undefined });
+
+    return (
+      <div
+        className={resolved.className}
+        style={resolved.style}
+      >
+        {label && <label htmlFor={areaId}>{label}</label>}
+        <textarea
+          ref={ref}
+          id={areaId}
+          className="orb-inp"
+          value={value}
+          defaultValue={defaultValue}
+          onChange={onChange}
+          placeholder={placeholder}
+          disabled={disabled}
+          readOnly={readOnly}
+          rows={rows ?? minRows}
+          name={name}
+          aria-invalid={Boolean(error)}
+          {...inputProps}
+        />
+        {message && <span className="orb-fld-msg">{message}</span>}
+      </div>
+    );
+  },
+);
+
+CTextArea.displayName = 'CTextArea';

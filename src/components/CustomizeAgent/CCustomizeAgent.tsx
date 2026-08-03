@@ -1,19 +1,7 @@
 'use client';
 
+import { CButton, CDialog, CIconButton, CStack, CTypography, CloseIcon } from '../../lib/orbis-compat';
 import { useEffect, useState } from 'react';
-import {
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  IconButton,
-  MenuItem,
-  Stack,
-  Typography,
-} from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
 import { CTextField } from '../Atoms/CTextField';
 import { CTextArea } from '../Atoms/CTextArea';
 import type {
@@ -82,20 +70,20 @@ export const CCustomizeAgent = ({
   };
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="lg">
-      <DialogTitle sx={{ pr: 7, pb: 2.2 }}>
-        <Typography variant="h5" sx={{ fontWeight: 800 }}>AI Settings</Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+    <CDialog open={open} onClose={onClose} fullWidth maxWidth="lg">
+      <div className="orb-dialog-title" sx={{ pr: 7, pb: 2.2 }}>
+        <CTypography variant="h5" sx={{ fontWeight: 800 }}>AI Settings</CTypography>
+        <CTypography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
           Configure LLM settings and editable agent prompts by language.
-        </Typography>
-        <IconButton onClick={onClose} sx={{ position: 'absolute', right: 12, top: 12 }}>
+        </CTypography>
+        <CIconButton onClick={onClose} sx={{ position: 'absolute', right: 12, top: 12 }}>
           <CloseIcon />
-        </IconButton>
-      </DialogTitle>
+        </CIconButton>
+      </div>
 
-      <DialogContent sx={{ pt: '18px !important' }}>
-        <Stack spacing={2.2}>
-          <Box
+      <div className="orb-dialog-content" sx={{ pt: '18px !important' }}>
+        <CStack spacing={2.2}>
+          <div
             sx={{
               mt: 0.8,
               display: 'grid',
@@ -106,7 +94,7 @@ export const CCustomizeAgent = ({
               },
             }}
           >
-            <Box>
+            <div>
               <CTextField
                 size="small"
                 value={draft.baseUrl}
@@ -114,9 +102,9 @@ export const CCustomizeAgent = ({
                 fullWidth
                 label="Base URL"
               />
-            </Box>
+            </div>
 
-            <Box>
+            <div>
               <CTextField
                 size="small"
                 type="password"
@@ -125,9 +113,9 @@ export const CCustomizeAgent = ({
                 fullWidth
                 label="API Key"
               />
-            </Box>
+            </div>
 
-            <Box>
+            <div>
               <CTextField
                 size="small"
                 value={draft.model}
@@ -137,12 +125,12 @@ export const CCustomizeAgent = ({
                 label="Model"
               >
                 {modelOptions.map((item) => (
-                  <MenuItem key={item} value={item}>{item}</MenuItem>
+                  <option key={item} value={item}>{item}</option>
                 ))}
               </CTextField>
-            </Box>
+            </div>
 
-            <Box>
+            <div>
               <CTextField
                 size="small"
                 value={draft.promptLang}
@@ -152,13 +140,13 @@ export const CCustomizeAgent = ({
                 label="Prompt Lang"
               >
                 {promptLangOptions.map((item) => (
-                  <MenuItem key={item} value={item}>{item}</MenuItem>
+                  <option key={item} value={item}>{item}</option>
                 ))}
               </CTextField>
-            </Box>
-          </Box>
+            </div>
+          </div>
 
-          <Box
+          <div
             sx={{
               display: 'flex',
               flexDirection: 'column',
@@ -173,9 +161,9 @@ export const CCustomizeAgent = ({
               select
               label="Analysis Template"
             >
-              <MenuItem value="">Default</MenuItem>
+              <option value="">Default</option>
               {analysisTemplateOptions.map((item) => (
-                <MenuItem key={item.id} value={item.id}>{item.label}</MenuItem>
+                <option key={item.id} value={item.id}>{item.label}</option>
               ))}
             </CTextField>
             <CTextArea
@@ -185,7 +173,7 @@ export const CCustomizeAgent = ({
               onChange={(event) => setField('analysisPrompt', event.target.value)}
               fullWidth
               label="Analysis Prompt"
-              sx={{ '& .MuiInputBase-root': { fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace' } }}
+              sx={{ '& textarea': { fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace' } }}
             />
 
             <CTextField
@@ -196,9 +184,9 @@ export const CCustomizeAgent = ({
               select
               label="Response Template"
             >
-              <MenuItem value="">Default</MenuItem>
+              <option value="">Default</option>
               {responseTemplateOptions.map((item) => (
-                <MenuItem key={item.id} value={item.id}>{item.label}</MenuItem>
+                <option key={item.id} value={item.id}>{item.label}</option>
               ))}
             </CTextField>
             <CTextArea
@@ -208,18 +196,18 @@ export const CCustomizeAgent = ({
               onChange={(event) => setField('responsePrompt', event.target.value)}
               fullWidth
               label="Response Prompt"
-              sx={{ '& .MuiInputBase-root': { fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace' } }}
+              sx={{ '& textarea': { fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace' } }}
             />
-          </Box>
-        </Stack>
-      </DialogContent>
+          </div>
+        </CStack>
+      </div>
 
-      <DialogActions sx={{ px: 3, pb: 2.5, pt: 1.2, gap: 1 }}>
-        <Button variant="outlined" onClick={onClose}>Cancel</Button>
-        <Button variant="contained" onClick={handleSaveAll} disabled={!onSaveAll || savingAll}>
+      <div className="orb-dialog-actions" sx={{ px: 3, pb: 2.5, pt: 1.2, gap: 1 }}>
+        <CButton variant="outlined" onClick={onClose}>Cancel</CButton>
+        <CButton variant="contained" onClick={handleSaveAll} disabled={!onSaveAll || savingAll}>
           Save
-        </Button>
-      </DialogActions>
-    </Dialog>
+        </CButton>
+      </div>
+    </CDialog>
   );
 };

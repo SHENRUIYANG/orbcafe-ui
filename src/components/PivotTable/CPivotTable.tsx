@@ -1,36 +1,9 @@
 'use client';
 
+import { getOrbCompatMode } from '../../lib/orbis-compat';
+import { CDivider, CPaper, CSelect, DeleteOutlineIcon, FormControl, KeyboardArrowDownIcon, KeyboardArrowRightIcon, Portal, SaveIcon, Switch } from '../../lib/orbis-compat';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {
-  Button,
-  Box,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  FormControl,
-  IconButton,
-  MenuItem,
-  Paper,
-  Portal,
-  Select,
-  Stack,
-  Switch,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TextField,
-  Tooltip,
-  Typography,
-} from '@mui/material';
-import SaveIcon from '@mui/icons-material/Save';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import { CButton, CDialog, CIconButton, CTextField, CTooltip, CTypography, CStack } from "../Atoms";
 import {
   DndContext,
   DragOverlay,
@@ -911,7 +884,7 @@ export const CPivotTable: React.FC<CPivotTableProps> = ({
 
       return (
         <FormControl size="small" sx={{ minWidth: 98 }}>
-          <Select
+          <CSelect
             value={item.aggregation}
             onChange={(event) => setAggregationForValue(item.tokenId, event.target.value as PivotAggregation)}
             onClick={(event) => event.stopPropagation()}
@@ -919,17 +892,17 @@ export const CPivotTable: React.FC<CPivotTableProps> = ({
             sx={{
               fontSize: '0.72rem',
               height: 26,
-              '& .MuiSelect-select': {
+              '& select.orb-inp': {
                 py: 0.35,
               },
             }}
           >
             {allowed.map((aggregation) => (
-              <MenuItem key={aggregation} value={aggregation} sx={{ fontSize: '0.75rem' }}>
+              <option key={aggregation} value={aggregation} sx={{ fontSize: '0.75rem' }}>
                 {getAggregationLabel(aggregation)}
-              </MenuItem>
+              </option>
             ))}
-          </Select>
+          </CSelect>
         </FormControl>
       );
     },
@@ -1335,7 +1308,7 @@ export const CPivotTable: React.FC<CPivotTableProps> = ({
   const tableHeaderActions = useMemo(
     () => (
       <>
-        <Button
+        <CButton
           size="small"
           variant="text"
           onClick={handleExpandAllRows}
@@ -1343,8 +1316,8 @@ export const CPivotTable: React.FC<CPivotTableProps> = ({
           sx={{ minWidth: 'auto', px: 0.8, fontSize: '0.72rem' }}
         >
           {t('pivot.table.expandRowsAll')}
-        </Button>
-        <Button
+        </CButton>
+        <CButton
           size="small"
           variant="text"
           onClick={handleCollapseAllRows}
@@ -1352,9 +1325,9 @@ export const CPivotTable: React.FC<CPivotTableProps> = ({
           sx={{ minWidth: 'auto', px: 0.8, fontSize: '0.72rem' }}
         >
           {t('pivot.table.collapseRowsAll')}
-        </Button>
-        <Divider orientation="vertical" flexItem />
-        <Button
+        </CButton>
+        <CDivider orientation="vertical" flexItem />
+        <CButton
           size="small"
           variant="text"
           onClick={handleExpandAllColumns}
@@ -1362,8 +1335,8 @@ export const CPivotTable: React.FC<CPivotTableProps> = ({
           sx={{ minWidth: 'auto', px: 0.8, fontSize: '0.72rem' }}
         >
           {t('pivot.table.expandColumnsAll')}
-        </Button>
-        <Button
+        </CButton>
+        <CButton
           size="small"
           variant="text"
           onClick={handleCollapseAllColumns}
@@ -1371,7 +1344,7 @@ export const CPivotTable: React.FC<CPivotTableProps> = ({
           sx={{ minWidth: 'auto', px: 0.8, fontSize: '0.72rem' }}
         >
           {t('pivot.table.collapseColumnsAll')}
-        </Button>
+        </CButton>
       </>
     ),
     [
@@ -1413,81 +1386,81 @@ export const CPivotTable: React.FC<CPivotTableProps> = ({
   };
 
   return (
-    <Paper
+    <CPaper
       sx={(theme) => ({
         p: { xs: 1.2, md: 2 },
-        borderRadius: 4,
+        borderRadius: 'var(--orb-r-container)',
         border: `1px solid ${theme.palette.divider}`,
         bgcolor: 'background.paper',
-        boxShadow: theme.palette.mode === 'dark' ? 'none' : '0 12px 28px rgba(15, 23, 42, 0.08)',
+        boxShadow: getOrbCompatMode() === 'dark' ? 'none' : '0 12px 28px rgba(15, 23, 42, 0.08)',
         display: 'flex',
         flexDirection: 'column',
         gap: 2,
       })}
     >
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1.5, flexWrap: 'wrap' }}>
-        <Box>
-          <Typography sx={{ fontSize: '1.05rem', fontWeight: 800 }}>{resolvedTitle}</Typography>
-          <Typography sx={{ fontSize: '0.78rem', color: 'text.secondary' }}>{t('pivot.subtitle.default')}</Typography>
-        </Box>
+      <div sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1.5, flexWrap: 'wrap' }}>
+        <div>
+          <CTypography sx={{ fontSize: '1.05rem', fontWeight: 800 }}>{resolvedTitle}</CTypography>
+          <CTypography sx={{ fontSize: '0.78rem', color: 'text.secondary' }}>{t('pivot.subtitle.default')}</CTypography>
+        </div>
 
-        <Stack direction="row" spacing={1.5} alignItems="center">
+        <CStack direction="row" spacing={1.5} alignItems="center">
           {shouldRenderPresetToolbar && (
             <>
               <FormControl size="small" sx={{ minWidth: 200 }}>
-                <Select
+                <CSelect
                   value={activePresetId}
                   displayEmpty
                   onChange={(event) => handlePresetChange(String(event.target.value))}
                   sx={{ fontSize: '0.75rem', height: 32 }}
                 >
-                  <MenuItem value="" sx={{ fontSize: '0.75rem', color: 'text.secondary' }}>
+                  <option value="" sx={{ fontSize: '0.75rem', color: 'text.secondary' }}>
                     {t('pivot.preset.selectPlaceholder')}
-                  </MenuItem>
+                  </option>
                   {presetList.map((preset) => (
-                    <MenuItem key={preset.id} value={preset.id} sx={{ fontSize: '0.75rem' }}>
+                    <option key={preset.id} value={preset.id} sx={{ fontSize: '0.75rem' }}>
                       {preset.name}
-                    </MenuItem>
+                    </option>
                   ))}
-                </Select>
+                </CSelect>
               </FormControl>
 
-              <Tooltip title={t('pivot.preset.save')}>
-                <IconButton size="small" onClick={handleOpenSavePresetDialog} aria-label={t('pivot.preset.save')}>
+              <CTooltip title={t('pivot.preset.save')}>
+                <CIconButton size="small" onClick={handleOpenSavePresetDialog} aria-label={t('pivot.preset.save')}>
                   <SaveIcon sx={{ fontSize: 18 }} />
-                </IconButton>
-              </Tooltip>
+                </CIconButton>
+              </CTooltip>
 
-              <Tooltip title={t('pivot.preset.delete')}>
+              <CTooltip title={t('pivot.preset.delete')}>
                 <span>
-                  <IconButton
+                  <CIconButton
                     size="small"
                     onClick={handleDeletePreset}
                     disabled={!activePresetId}
                     aria-label={t('pivot.preset.delete')}
                   >
                     <DeleteOutlineIcon sx={{ fontSize: 18 }} />
-                  </IconButton>
+                  </CIconButton>
                 </span>
-              </Tooltip>
+              </CTooltip>
 
-              <Divider flexItem orientation="vertical" />
+              <CDivider flexItem orientation="vertical" />
             </>
           )}
 
-          <Typography sx={{ fontSize: '0.74rem', color: 'text.secondary' }}>
+          <CTypography sx={{ fontSize: '0.74rem', color: 'text.secondary' }}>
             {t('pivot.records')}: <strong>{rows.length.toLocaleString()}</strong> / {t('pivot.afterFilter')}:{' '}
             <strong>{filteredRows.length.toLocaleString()}</strong>
-          </Typography>
-          <Divider flexItem orientation="vertical" />
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6 }}>
-            <Typography sx={{ fontSize: '0.74rem' }}>{t('pivot.grandTotal')}</Typography>
+          </CTypography>
+          <CDivider flexItem orientation="vertical" />
+          <div sx={{ display: 'flex', alignItems: 'center', gap: 0.6 }}>
+            <CTypography sx={{ fontSize: '0.74rem' }}>{t('pivot.grandTotal')}</CTypography>
             <Switch size="small" checked={showGrandTotal} onChange={(event) => setShowGrandTotal(event.target.checked)} />
-          </Box>
-        </Stack>
-      </Box>
+          </div>
+        </CStack>
+      </div>
 
-      <Divider />
+      <CDivider />
 
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
         <PivotConfiguratorPanel
@@ -1549,23 +1522,23 @@ export const CPivotTable: React.FC<CPivotTableProps> = ({
         headerActions={tableHeaderActions}
       >
         {pivotPreview === null ? (
-          <Box sx={{ py: 5, px: { xs: 1.2, md: 1.6 }, textAlign: 'center' }}>
-            <Typography sx={{ fontSize: '0.86rem', color: 'text.secondary' }}>{resolvedEmptyText}</Typography>
-          </Box>
+          <div sx={{ py: 5, px: { xs: 1.2, md: 1.6 }, textAlign: 'center' }}>
+            <CTypography sx={{ fontSize: '0.86rem', color: 'text.secondary' }}>{resolvedEmptyText}</CTypography>
+          </div>
         ) : (
-          <TableContainer sx={{ maxHeight: maxPreviewHeight }}>
-            <Table size="small" stickyHeader>
-              <TableHead>
+          <div sx={{ maxHeight: maxPreviewHeight }}>
+            <table className="orb-tbl" size="small" stickyHeader>
+              <thead>
                 {(columnHeaderRows.length > 0 ? columnHeaderRows : [[]]).map((headerRow, rowIndex) => (
-                  <TableRow key={`pivot-header-row-${rowIndex}`}>
+                  <tr key={`pivot-header-row-${rowIndex}`}>
                     {rowIndex === 0 && (
-                      <TableCell
+                      <td
                         rowSpan={Math.max(columnHeaderRows.length, 1)}
                         sx={(theme) => ({
                           fontWeight: 800,
                           fontSize: '0.76rem',
                           color: 'text.primary',
-                          bgcolor: theme.palette.mode === 'dark' ? '#000000' : '#f5f5f5',
+                          bgcolor: getOrbCompatMode() === 'dark' ? '#000000' : '#f5f5f5',
                           borderBottom: `1px solid ${theme.palette.divider}`,
                           pl: 2,
                           minWidth: 220,
@@ -1573,7 +1546,7 @@ export const CPivotTable: React.FC<CPivotTableProps> = ({
                         })}
                       >
                         {rowFields.length > 0 ? rowFields.map((id) => fieldMap.get(id)?.label).join(' > ') : t('pivot.table.dimensions')}
-                      </TableCell>
+                      </td>
                     )}
 
                     {(headerRow.length > 0 ? headerRow : visibleColumns.map((column) => ({
@@ -1584,7 +1557,7 @@ export const CPivotTable: React.FC<CPivotTableProps> = ({
                       expandable: false,
                       expanded: false,
                     }))).map((cell) => (
-                      <TableCell
+                      <td
                         key={cell.key}
                         align="center"
                         colSpan={cell.colSpan}
@@ -1593,15 +1566,15 @@ export const CPivotTable: React.FC<CPivotTableProps> = ({
                           fontWeight: 800,
                           fontSize: '0.75rem',
                           color: 'text.primary',
-                          bgcolor: theme.palette.mode === 'dark' ? '#000000' : '#f5f5f5',
+                          bgcolor: getOrbCompatMode() === 'dark' ? '#000000' : '#f5f5f5',
                           borderBottom: `1px solid ${theme.palette.divider}`,
                           minWidth: 148,
                           verticalAlign: 'middle',
                         })}
                       >
-                        <Box sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 0.4 }}>
+                        <div sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 0.4 }}>
                           {cell.expandable && (
-                            <IconButton
+                            <CIconButton
                               size="small"
                               onClick={() => handleToggleColumn(cell.key)}
                               sx={{ p: 0.1, ml: -0.3 }}
@@ -1611,17 +1584,17 @@ export const CPivotTable: React.FC<CPivotTableProps> = ({
                               ) : (
                                 <KeyboardArrowRightIcon sx={{ fontSize: 16 }} />
                               )}
-                            </IconButton>
+                            </CIconButton>
                           )}
-                          <Box component="span">{cell.label}</Box>
-                        </Box>
-                      </TableCell>
+                          <div component="span">{cell.label}</div>
+                        </div>
+                      </td>
                     ))}
-                  </TableRow>
+                  </tr>
                 ))}
-              </TableHead>
+              </thead>
 
-              <TableBody>
+              <tbody>
                 {pivotPreview.rowTree.map((node) => (
                   <PivotRowRenderer
                     key={node.key}
@@ -1652,16 +1625,16 @@ export const CPivotTable: React.FC<CPivotTableProps> = ({
                     }}
                   />
                 )}
-              </TableBody>
-            </Table>
-          </TableContainer>
+              </tbody>
+            </table>
+          </div>
         )}
       </PivotSectionCard>
 
-      <Dialog open={isSavePresetDialogOpen} onClose={() => setIsSavePresetDialogOpen(false)} maxWidth="xs" fullWidth>
-        <DialogTitle>{t('pivot.preset.saveDialogTitle')}</DialogTitle>
-        <DialogContent>
-          <TextField
+      <CDialog open={isSavePresetDialogOpen} onClose={() => setIsSavePresetDialogOpen(false)} maxWidth="xs" fullWidth>
+        <div className="orb-dialog-title">{t('pivot.preset.saveDialogTitle')}</div>
+        <div className="orb-dialog-content">
+          <CTextField
             autoFocus
             fullWidth
             margin="dense"
@@ -1675,14 +1648,14 @@ export const CPivotTable: React.FC<CPivotTableProps> = ({
               }
             }}
           />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setIsSavePresetDialogOpen(false)}>{t('common.cancel')}</Button>
-          <Button variant="contained" onClick={handleSavePreset} disabled={!presetNameDraft.trim()}>
+        </div>
+        <div className="orb-dialog-actions">
+          <CButton onClick={() => setIsSavePresetDialogOpen(false)}>{t('common.cancel')}</CButton>
+          <CButton variant="contained" onClick={handleSavePreset} disabled={!presetNameDraft.trim()}>
             {t('common.save')}
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Paper>
+          </CButton>
+        </div>
+      </CDialog>
+    </CPaper>
   );
 };

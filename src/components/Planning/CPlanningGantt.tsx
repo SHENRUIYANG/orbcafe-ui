@@ -1,25 +1,11 @@
 'use client';
 
+import { getOrbCompatMode } from '../../lib/orbis-compat';
+import { AccountTreeIcon, KeyboardDoubleArrowLeftOutlinedIcon, KeyboardDoubleArrowRightOutlinedIcon, SortIcon, SplitscreenOutlinedIcon, ViewColumnIcon, useTheme } from '../../lib/orbis-compat';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { DragEvent } from 'react';
 import dayjs, { Dayjs } from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
-import {
-  Box,
-  IconButton,
-  LinearProgress,
-  MenuItem,
-  Select,
-  Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableRow,
-  Tooltip,
-  Typography,
-  useTheme,
-} from '@mui/material';
 import {
   DndContext,
   PointerSensor,
@@ -29,19 +15,15 @@ import {
   type DragEndEvent,
 } from '@dnd-kit/core';
 import { restrictToHorizontalAxis } from '@dnd-kit/modifiers';
-import AccountTreeIcon from '@mui/icons-material/AccountTree';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
-import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
-import KeyboardDoubleArrowLeftOutlinedIcon from '@mui/icons-material/KeyboardDoubleArrowLeftOutlined';
-import KeyboardDoubleArrowRightOutlinedIcon from '@mui/icons-material/KeyboardDoubleArrowRightOutlined';
-import SplitscreenOutlinedIcon from '@mui/icons-material/SplitscreenOutlined';
-import SortIcon from '@mui/icons-material/Sort';
-import ViewColumnIcon from '@mui/icons-material/ViewColumn';
 import { CChip } from '../Atoms/CChip';
 import { CIconButton } from '../Atoms/CIconButton';
 import { CPaper } from '../Atoms/CPaper';
 import { CSelect } from '../Atoms/CSelect';
+import { CSegmentedControl } from '../Atoms/CSegmentedControl';
+import { CStack } from '../Atoms/CStack';
+import { CTypography } from '../Atoms/CTypography';
+import { CTooltip } from '../Atoms/CTooltip';
+import { CProgress } from '../Atoms/CProgress';
 import {
   CTableColumnMenu,
   CTableGroupMenu,
@@ -49,12 +31,12 @@ import {
   CTableSortDialog,
 } from '../StdReport/Components/CTableMenu';
 import { CTableHead as CSmartTableHead } from '../StdReport/Components/CTableHead';
+import { CTableBody as CSmartTableBody } from '../StdReport/Components/CTableBody';
+import { CTablePager } from '../StdReport/Components/CTablePager';
+import { CTableToolbarSearch } from '../StdReport/Components/CTableToolbarSearch';
 import {
-  TABLE_CONTROL_BUTTON_SIZE,
-  TABLE_CONTROL_ICON_SIZE,
   TABLE_GROUP_CONTROL_COLUMN_WIDTH,
-  tableControlIconButtonSx,
-  tableGroupControlCellSx,
+  tableToolbarIconButtonSx,
 } from '../StdReport/Components/ctableControlSx';
 import { CLayoutManager } from '../StdReport/CLayoutManager';
 import { useCTable } from '../StdReport/Hooks/CTable/useCTable';
@@ -101,12 +83,11 @@ const scaleOptions: Array<{ value: PlanningGanttScale; label: string; width: num
   { value: 'month', label: 'Month', width: 104 },
 ];
 
-const HEADER_HEIGHT = 56;
+const HEADER_HEIGHT = 36;
 const ROW_HEIGHT = 58;
 const SPLITTER_WIDTH = 8;
 const MIN_TABLE_WIDTH = 260;
 const MIN_TIMELINE_WIDTH = 320;
-const TOOLBAR_FONT_SIZE = '0.85rem';
 const PANE_TRANSITION = '220ms cubic-bezier(0.2, 0, 0, 1)';
 
 const statusConfig: Record<string, { label: string; color: 'default' | 'primary' | 'success' | 'warning' | 'error' | 'info' }> = {
@@ -308,10 +289,10 @@ export const CPlanningGantt = ({
         label: 'Task',
         minWidth: 260,
         render: (_value: string, row: PlanningTableRow) => (
-          <Stack spacing={0.2}>
-            <Typography sx={{ fontSize: 15, fontWeight: 700, lineHeight: 1.2 }}>{row.title}</Typography>
-            <Typography sx={{ fontSize: 13, color: 'text.secondary' }}>{row.titleSub}</Typography>
-          </Stack>
+          <CStack spacing={0.2}>
+            <CTypography sx={{ fontSize: 15, fontWeight: 700, lineHeight: 1.2 }}>{row.title}</CTypography>
+            <CTypography sx={{ fontSize: 13, color: 'text.secondary' }}>{row.titleSub}</CTypography>
+          </CStack>
         ),
       },
       { id: 'owner', label: 'Owner', minWidth: 170 },
@@ -329,12 +310,12 @@ export const CPlanningGantt = ({
         minWidth: 140,
         numeric: true,
         render: (value: number) => (
-          <Stack spacing={0.6}>
-            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+          <CStack spacing={0.6}>
+            <CTypography variant="caption" sx={{ color: 'text.secondary' }}>
               {value}%
-            </Typography>
-            <LinearProgress variant="determinate" value={value} sx={{ height: 6, borderRadius: 999 }} />
-          </Stack>
+            </CTypography>
+            <CProgress variant="determinate" value={value} sx={{ height: 6, borderRadius: 999 }} />
+          </CStack>
         ),
       },
       { id: 'startDate', label: 'Start', minWidth: 120 },
@@ -415,13 +396,6 @@ export const CPlanningGantt = ({
     />
   ) : null;
   const timelineRows = ctable.visibleRows as Array<any>;
-  const totalPages = ctable.rowsPerPage === -1
-    ? 1
-    : Math.max(1, Math.ceil(ctable.totalDisplayCount / ctable.rowsPerPage));
-  const currentPage = Math.max(0, Math.min(ctable.page, totalPages - 1));
-  const displayPage = Math.min(currentPage + 1, totalPages);
-  const canGoPrev = currentPage > 0;
-  const canGoNext = currentPage < totalPages - 1 && ctable.rowsPerPage !== -1;
 
   useEffect(() => {
     const nextIds = flatTasks.map((task) => task.id);
@@ -808,13 +782,13 @@ export const CPlanningGantt = ({
     const measureTableGeometry = () => {
       if (cancelled) return;
       const headerEl = tableEl.querySelector('thead');
-      const rows = Array.from(tableEl.querySelectorAll('tbody tr[data-planning-row-key]')) as HTMLTableRowElement[];
+    const rows = Array.from(tableEl.querySelectorAll('tbody tr[data-ctable-row-key]')) as HTMLTableRowElement[];
       if (rows.length === 0) return;
 
       const nextHeaderHeight = headerEl?.getBoundingClientRect().height || HEADER_HEIGHT;
       const nextMap: Record<string, number> = {};
       rows.forEach((row) => {
-        const key = row.dataset.planningRowKey;
+        const key = row.dataset.ctableRowKey;
         if (key) nextMap[key] = row.getBoundingClientRect().height;
       });
 
@@ -873,7 +847,7 @@ export const CPlanningGantt = ({
 
     const observedRows = new WeakSet<Element>();
     const observeAllRows = () => {
-      tableEl.querySelectorAll('tbody tr[data-planning-row-key]').forEach((row) => {
+      tableEl.querySelectorAll('tbody tr[data-ctable-row-key]').forEach((row) => {
         if (!observedRows.has(row)) {
           resizeObserver.observe(row);
           observedRows.add(row);
@@ -908,6 +882,7 @@ export const CPlanningGantt = ({
 
   return (
     <CPaper
+      className="orb-ctable-surface orb-planning-gantt"
       elevation={0}
       sx={{
         m: 0,
@@ -916,159 +891,107 @@ export const CPlanningGantt = ({
         flexDirection: 'column',
         minHeight: 0,
         overflow: 'hidden',
-        borderRadius: 3,
+        borderRadius: 'var(--orb-r-container)',
         border: `1px solid ${theme.palette.divider}`,
-        backgroundColor: theme.palette.background.paper,
         ...sx,
       }}
     >
-      <Stack
-        direction={{ xs: 'column', md: 'row' }}
-        justifyContent="space-between"
-        alignItems={{ xs: 'stretch', md: 'center' }}
-        spacing={2}
-        sx={{ px: 2, py: 1.75, borderBottom: `1px solid ${theme.palette.divider}` }}
-      >
-        <Stack
-          direction="row"
-          spacing={0.75}
-          alignItems="center"
-          sx={{ p: 0.5, borderRadius: 2, backgroundColor: 'action.hover', minHeight: 38 }}
-        >
-          <Typography sx={{ fontSize: TOOLBAR_FONT_SIZE, color: 'text.secondary', whiteSpace: 'nowrap' }}>
-            {t('table.toolbar.itemsPerPage')}
-          </Typography>
-          <Select
-            size="small"
-            variant="standard"
-            value={ctable.rowsPerPage}
-            disableUnderline
-            onChange={(event) => ctable.setRowsPerPage(Number(event.target.value))}
-            sx={{
-              fontSize: TOOLBAR_FONT_SIZE,
-              fontWeight: 600,
-              color: 'text.primary',
-              minWidth: 64,
-              height: TABLE_CONTROL_BUTTON_SIZE,
-              display: 'flex',
-              alignItems: 'center',
-              '& .MuiSelect-select': {
-                py: 0,
-                pl: 0.75,
-                pr: '22px !important',
-                minHeight: `${TABLE_CONTROL_BUTTON_SIZE}px !important`,
-                height: TABLE_CONTROL_BUTTON_SIZE,
-                display: 'flex',
-                alignItems: 'center',
-                boxSizing: 'border-box',
-              },
-              '& .MuiSelect-icon': {
-                right: 0,
-                fontSize: TABLE_CONTROL_ICON_SIZE,
-                color: 'text.primary',
-              },
+      <div className="orb-table-toolbar orb-planning-table-toolbar" role="toolbar" aria-label={t('table.title.default')}>
+        <div className="orb-table-toolbar-primary">
+          <CTableToolbarSearch
+            value={ctable.filterText}
+            onChange={(value) => {
+              ctable.setFilterText(value);
+              ctable.setPage(0);
             }}
-          >
-            {rowsPerPageOptions.map((option) => (
-              <MenuItem key={`planning-rows-per-page-${option}`} value={option} sx={{ fontSize: TOOLBAR_FONT_SIZE }}>
-                {option === -1 ? t('common.all') : option}
-              </MenuItem>
-            ))}
-          </Select>
-          <IconButton
-            size="small"
-            onClick={() => ctable.setPage(Math.max(currentPage - 1, 0))}
-            disabled={!canGoPrev}
-            sx={{ ...tableControlIconButtonSx, color: 'text.primary' }}
-          >
-            <KeyboardArrowLeftIcon />
-          </IconButton>
-          <Typography sx={{ fontSize: TOOLBAR_FONT_SIZE, fontWeight: 600, minWidth: 88, textAlign: 'center', color: 'text.primary' }}>
-            {t('table.toolbar.pageOf', { current: displayPage, total: totalPages })}
-          </Typography>
-          <IconButton
-            size="small"
-            onClick={() => ctable.setPage(Math.min(currentPage + 1, totalPages - 1))}
-            disabled={!canGoNext}
-            sx={{ ...tableControlIconButtonSx, color: 'text.primary' }}
-          >
-            <KeyboardArrowRightIcon />
-          </IconButton>
-        </Stack>
+          />
 
-          <Stack direction="row" spacing={1} alignItems="center" sx={{ flexWrap: 'wrap' }}>
-            {extraToolNodes.length > 0 && (
-              <Stack direction="row" spacing={0.75} alignItems="center">
+          <CTablePager
+            rowsPerPage={ctable.rowsPerPage}
+            rowsPerPageOptions={rowsPerPageOptions}
+            page={ctable.page}
+            count={ctable.totalDisplayCount}
+            onRowsPerPageChange={ctable.setRowsPerPage}
+            onPageChange={ctable.setPage}
+          />
+
+          {extraToolNodes.length > 0 && (
+            <div className="orb-table-toolbar-custom">
               {extraToolNodes.map((node, idx) => (
-                <Box key={`planning-extra-tool-${idx}`} sx={{ display: 'flex', alignItems: 'center' }}>
+                <div key={`planning-extra-tool-${idx}`} className="orb-planning-extra-tool">
                   {node}
-                </Box>
+                </div>
               ))}
-            </Stack>
+            </div>
           )}
-          <Stack direction="row" spacing={0.25} sx={{ p: 0.5, borderRadius: 2, backgroundColor: 'action.hover' }}>
-            <CIconButton tooltip="Column visibility" onClick={(event) => ctable.setAnchorEl(event.currentTarget)} color="default">
-              <ViewColumnIcon fontSize="small" />
-            </CIconButton>
-            <CIconButton tooltip="Group by" onClick={(event) => ctable.setGroupAnchorEl(event.currentTarget)} color="default">
-              <AccountTreeIcon fontSize="small" />
-            </CIconButton>
-            <CIconButton
-              tooltip="Sort by..."
-              onClick={() => setSortDialogOpen(true)}
-              color={ctable.sortBy.length > 0 || ctable.orderBy ? 'primary' : 'default'}
-            >
+
+          <span className="orb-table-toolbar-spacer" />
+
+          <div className="orb-table-toolbar-actions">
+            <div className="orb-table-tool-group">
+              <CIconButton
+                className="orb-table-tool-button"
+                tooltip="Column visibility"
+                onClick={(event) => ctable.setAnchorEl(event.currentTarget)}
+                sx={tableToolbarIconButtonSx}
+              >
+                <ViewColumnIcon fontSize="small" />
+              </CIconButton>
+              <CIconButton
+                className="orb-table-tool-button"
+                tooltip="Group by"
+                onClick={(event) => ctable.setGroupAnchorEl(event.currentTarget)}
+                sx={tableToolbarIconButtonSx}
+              >
+                <AccountTreeIcon fontSize="small" />
+              </CIconButton>
+              <CIconButton
+                className={`orb-table-tool-button ${ctable.sortBy.length > 0 || ctable.orderBy ? 'orb-is-active' : ''}`}
+                tooltip="Sort by..."
+                active={ctable.sortBy.length > 0 || Boolean(ctable.orderBy)}
+                onClick={() => setSortDialogOpen(true)}
+                sx={tableToolbarIconButtonSx}
+              >
                 <SortIcon fontSize="small" />
               </CIconButton>
-            </Stack>
-            {layoutManager && (
-              <Stack direction="row" spacing={0.25} sx={{ p: 0.5, borderRadius: 2, backgroundColor: 'action.hover' }}>
-                {layoutManager}
-              </Stack>
-            )}
-          <Stack direction="row" spacing={0.25} sx={{ p: 0.5, borderRadius: 2, backgroundColor: 'action.hover' }}>
-            <CIconButton
-              tooltip="Expand task table"
-              onClick={() => setExpandedPane('table')}
-              color={expandedPane === 'table' ? 'primary' : 'default'}
-            >
-              <KeyboardDoubleArrowRightOutlinedIcon fontSize="small" />
-            </CIconButton>
-            <CIconButton
-              tooltip="Split evenly"
-              onClick={setEvenSplit}
-              color={expandedPane === null && splitMode === 'even' ? 'primary' : 'default'}
-            >
-              <SplitscreenOutlinedIcon fontSize="small" />
-            </CIconButton>
-            <CIconButton
-              tooltip="Expand timeline"
-              onClick={() => setExpandedPane('timeline')}
-              color={expandedPane === 'timeline' ? 'primary' : 'default'}
-            >
-              <KeyboardDoubleArrowLeftOutlinedIcon fontSize="small" />
-            </CIconButton>
-          </Stack>
-          <Box sx={{ minWidth: 120 }}>
-            <CSelect
-              label=""
-              value={scale}
-              options={scaleOptions.map((item) => ({ value: item.value, label: item.label }))}
-              onChange={(event) => onScaleChange?.(event.target.value as PlanningGanttScale)}
-              sx={{
-                '& .MuiSelect-select': { fontSize: '0.92rem', py: 0.65 },
-                '& .MuiSvgIcon-root': { fontSize: 20 },
-              }}
-            />
-          </Box>
-        </Stack>
-      </Stack>
+            </div>
+
+            {layoutManager && <div className="orb-table-tool-group">{layoutManager}</div>}
+
+            <div className="orb-table-tool-group orb-planning-pane-controls">
+              <CSegmentedControl<'table' | 'split' | 'timeline'>
+                aria-label="Planning pane layout"
+                size="small"
+                value={expandedPane ?? (splitMode === 'even' ? 'split' : null)}
+                options={[
+                  { value: 'table', label: 'Expand task table', icon: <KeyboardDoubleArrowRightOutlinedIcon fontSize="small" /> },
+                  { value: 'split', label: 'Split evenly', icon: <SplitscreenOutlinedIcon fontSize="small" /> },
+                  { value: 'timeline', label: 'Expand timeline', icon: <KeyboardDoubleArrowLeftOutlinedIcon fontSize="small" /> },
+                ]}
+                onValueChange={(nextMode) => {
+                  if (nextMode === 'split') setEvenSplit();
+                  else setExpandedPane(nextMode);
+                }}
+              />
+            </div>
+
+            <div className="orb-table-tool-group orb-planning-scale-control">
+              <CSelect
+                label=""
+                value={scale}
+                options={scaleOptions.map((item) => ({ value: item.value, label: item.label }))}
+                onChange={(event) => onScaleChange?.(event.target.value as PlanningGanttScale)}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
 
       {tableRows.length === 0 ? (
-        <Box sx={{ minHeight: 240, display: 'grid', placeItems: 'center', color: 'text.secondary' }}>{emptyLabel}</Box>
+        <div sx={{ minHeight: 240, display: 'grid', placeItems: 'center', color: 'text.secondary' }}>{emptyLabel}</div>
       ) : (
-        <Box sx={{ overflow: 'hidden', flex: 1, minHeight: 0 }}>
-          <Box
+        <div sx={{ overflow: 'hidden', flex: 1, minHeight: 0 }}>
+          <div
             ref={splitLayoutRef}
             sx={{
               height: '100%',
@@ -1078,7 +1001,7 @@ export const CPlanningGantt = ({
               transition: `grid-template-columns ${PANE_TRANSITION}`,
             }}
           >
-            <TableContainer
+            <div
               data-planning-scroll-pane="table"
               ref={tableScrollRef}
               onScroll={() => syncVerticalScroll('table')}
@@ -1107,13 +1030,11 @@ export const CPlanningGantt = ({
                   }
                 }}
               >
-                <Table
-                  size="small"
-                  stickyHeader
+                <table className="orb-tbl orb-ctable orb-planning-table"
                   sx={{
                     tableLayout: 'fixed',
                     width: tableWidth,
-                    '& thead .MuiTableCell-root': {
+                    '& thead th': {
                       height: HEADER_HEIGHT,
                       py: 0,
                       lineHeight: 1.15,
@@ -1144,109 +1065,55 @@ export const CPlanningGantt = ({
                     onColumnResize={ctable.handleColumnResize}
                     enableColumnReorder
                   />
-                  <TableBody>
-                    {timelineRows.map((entry) => {
-                      const entryKey = getTimelineEntryKey(entry);
-                      if (entry.type === 'group') {
-                        return (
-                          <TableRow
-                            key={entry.id}
-                            data-planning-row-key={entryKey}
-                            sx={{ height: ROW_HEIGHT, backgroundColor: theme.palette.action.hover }}
-                          >
-                            {ctable.grouping.length > 0 && (
-                              <TableCell
-                                sx={{
-                                  ...tableGroupControlCellSx,
-                                  height: ROW_HEIGHT,
-                                  borderBottom: `1px solid ${theme.palette.divider}`,
-                                }}
-                              >
-                                <IconButton size="small" onClick={() => ctable.toggleGroupExpand(entry.id)} sx={tableControlIconButtonSx}>
-                                  {entry.isExpanded ? <KeyboardArrowDownIcon /> : <KeyboardArrowRightIcon />}
-                                </IconButton>
-                              </TableCell>
-                            )}
-                            <TableCell
-                              colSpan={ctable.visibleColumns.length}
-                              sx={{
-                                height: ROW_HEIGHT,
-                                py: 0,
-                                borderBottom: `1px solid ${theme.palette.divider}`,
-                              }}
-                            >
-                              <Typography sx={{ fontSize: 13, fontWeight: 700 }}>
-                                {entry.field}: {entry.value} ({entry.count})
-                              </Typography>
-                            </TableCell>
-                          </TableRow>
-                        );
-                      }
-
-                      const row = (entry.data || entry) as PlanningTableRow;
-                      const isSelected = row.id === selectedTaskId;
+                  <CSmartTableBody
+                    visibleRows={timelineRows}
+                    columns={ctable.columns}
+                    visibleColumns={ctable.visibleColumns}
+                    selected={selectedTaskId ? [selectedTaskId] : []}
+                    expandedGroups={ctable.expandedGroups}
+                    toggleGroupExpand={ctable.toggleGroupExpand}
+                    handleExpandGroupRecursively={ctable.handleExpandGroupRecursively}
+                    handleCollapseGroupRecursively={ctable.handleCollapseGroupRecursively}
+                    isGroupFullyExpanded={ctable.isGroupFullyExpanded}
+                    grouping={ctable.grouping}
+                    rowKeyProp="id"
+                    page={ctable.page}
+                    rowsPerPage={ctable.rowsPerPage}
+                    emptyLabel={emptyLabel}
+                    handleClick={(_event, row) => {
+                      onTaskSelect?.(taskMap.get(row.id) || (row as unknown as PlanningTaskRecord));
+                    }}
+                    getRowDataKey={({ entry }) => getTimelineEntryKey(entry)}
+                    getGroupRowProps={() => ({
+                      style: { height: ROW_HEIGHT },
+                    })}
+                    getRowProps={({ data }) => {
+                      const row = data as PlanningTableRow;
                       const isDraggable = canDragTask(row.id);
                       const isDragging = rowDragState.activeId === row.id;
                       const isDropTarget = rowDragState.overId === row.id && canDropOnTask(rowDragState.activeId, row.id);
-                      return (
-                        <TableRow
-                          key={row.id}
-                          data-planning-row-key={entryKey}
-                          draggable={isDraggable}
-                          hover
-                          selected={isSelected}
-                          onDragStart={(event) => startRowDrag(event, row)}
-                          onDragOver={(event) => moveRowDragOver(event, row.id)}
-                          onDragEnter={(event) => moveRowDragOver(event, row.id)}
-                          onDrop={(event) => dropRow(event, row.id)}
-                          onDragEnd={endRowDrag}
-                          onClick={() => onTaskSelect?.(taskMap.get(row.id) || (row as unknown as PlanningTaskRecord))}
-                          sx={{
-                            cursor: isDragging ? 'grabbing' : isDraggable ? 'grab' : onTaskSelect ? 'pointer' : 'default',
-                            height: ROW_HEIGHT,
-                            opacity: isDragging ? 0.56 : 1,
-                            '& .MuiTableCell-root': isDropTarget
-                              ? {
-                                  borderTop: `2px solid ${theme.palette.primary.main}`,
-                                }
-                              : undefined,
-                            transition: 'background-color 120ms ease, opacity 120ms ease',
-                          }}
-                        >
-                          {ctable.grouping.length > 0 && (
-                            <TableCell
-                              sx={{
-                                ...tableGroupControlCellSx,
-                                height: ROW_HEIGHT,
-                                borderBottom: `1px solid ${theme.palette.divider}`,
-                              }}
-                            />
-                          )}
-                          {(ctable.columns || [])
-                            .filter((column: any) => ctable.visibleColumns.includes(column.id))
-                            .map((column: any) => (
-                              <TableCell
-                                key={`${row.id}-${column.id}`}
-                                sx={{
-                                  width: ctable.columnWidths?.[column.id] || column.minWidth || 100,
-                                  height: ROW_HEIGHT,
-                                  py: 0,
-                                  overflow: 'hidden',
-                                  borderBottom: `1px solid ${theme.palette.divider}`,
-                                }}
-                              >
-                                {column.render ? column.render(row[column.id as keyof PlanningTableRow], row) : String(row[column.id as keyof PlanningTableRow] ?? '-')}
-                              </TableCell>
-                            ))}
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
+                      return {
+                        draggable: isDraggable,
+                        className: isDropTarget ? 'orb-is-drop-target' : undefined,
+                        style: {
+                          cursor: isDragging ? 'grabbing' : isDraggable ? 'grab' : onTaskSelect ? 'pointer' : 'default',
+                          height: ROW_HEIGHT,
+                          opacity: isDragging ? 0.56 : 1,
+                          transition: 'background-color 120ms ease, opacity 120ms ease',
+                        },
+                        onDragStart: (event) => startRowDrag(event, row),
+                        onDragOver: (event) => moveRowDragOver(event, row.id),
+                        onDragEnter: (event) => moveRowDragOver(event, row.id),
+                        onDrop: (event) => dropRow(event, row.id),
+                        onDragEnd: endRowDrag,
+                      };
+                    }}
+                  />
+                </table>
               </DndContext>
-            </TableContainer>
+            </div>
 
-            <Box
+            <div
               onPointerDown={showSplitter ? startResize : undefined}
               role="separator"
               aria-orientation="vertical"
@@ -1257,7 +1124,7 @@ export const CPlanningGantt = ({
                 pointerEvents: showSplitter ? 'auto' : 'none',
                 borderLeft: showSplitter ? `1px solid ${theme.palette.divider}` : '0 solid transparent',
                 borderRight: showSplitter ? `1px solid ${theme.palette.divider}` : '0 solid transparent',
-                backgroundColor: theme.palette.mode === 'dark' ? 'rgba(148,163,184,0.10)' : 'rgba(15,23,42,0.04)',
+                backgroundColor: getOrbCompatMode() === 'dark' ? 'rgba(148,163,184,0.10)' : 'rgba(15,23,42,0.04)',
                 transition: `width ${PANE_TRANSITION}, opacity ${PANE_TRANSITION}, background-color 120ms ease`,
                 position: 'relative',
                 '&:hover': {
@@ -1275,7 +1142,7 @@ export const CPlanningGantt = ({
               }}
             />
 
-            <Box
+            <div
               sx={{
                 minWidth: 0,
                 overflow: 'hidden',
@@ -1285,14 +1152,15 @@ export const CPlanningGantt = ({
                 transition: `opacity ${PANE_TRANSITION}, transform ${PANE_TRANSITION}`,
               }}
             >
-              <Box
+              <div
                 data-planning-scroll-pane="timeline"
                 ref={timelineScrollRef}
                 onScroll={() => syncVerticalScroll('timeline')}
                 sx={{ width: '100%', height: bodyHeight, overflowX: 'auto', overflowY: 'auto' }}
               >
-                <Box sx={{ width: '100%', minWidth: timelineMinWidth || '100%' }}>
-                  <Box
+                <div sx={{ width: '100%', minWidth: timelineMinWidth || '100%' }}>
+                  <div
+                    className="orb-planning-timeline-header"
                     sx={{
                       display: 'grid',
                       gridTemplateColumns: timelineGridTemplateColumns,
@@ -1302,11 +1170,10 @@ export const CPlanningGantt = ({
                       position: 'sticky',
                       top: 0,
                       zIndex: 2,
-                      backgroundColor: theme.palette.background.paper,
                     }}
                   >
                     {units.map((unit) => (
-                      <Box
+                      <div
                         key={unit.key}
                         title={unit.title}
                         sx={{
@@ -1322,7 +1189,7 @@ export const CPlanningGantt = ({
                         }}
                       >
                         {unit.contextLabel && (
-                          <Typography
+                          <CTypography
                             component="span"
                             sx={{
                               maxWidth: '100%',
@@ -1336,9 +1203,9 @@ export const CPlanningGantt = ({
                             }}
                           >
                             {unit.contextLabel}
-                          </Typography>
+                          </CTypography>
                         )}
-                        <Typography
+                        <CTypography
                           component="span"
                           sx={{
                             maxWidth: '100%',
@@ -1351,26 +1218,26 @@ export const CPlanningGantt = ({
                           }}
                         >
                           {unit.label}
-                        </Typography>
-                      </Box>
+                        </CTypography>
+                      </div>
                     ))}
-                  </Box>
+                  </div>
 
-                  <Stack sx={{ position: 'relative' }}>
+                  <CStack sx={{ position: 'relative' }}>
                     {timelineRows.map((entry) => {
                       const entryKey = getTimelineEntryKey(entry);
                       const rowHeight = rowHeightMap[entryKey] ?? ROW_HEIGHT;
                       if (entry.type === 'group') {
                         return (
-                          <Box
+                          <div
                             key={entry.id}
+                            className="orb-planning-timeline-row orb-table-group-row"
                             data-planning-timeline-row-key={entryKey}
                             sx={{
                               position: 'relative',
                               height: rowHeight,
                               boxSizing: 'border-box',
                               borderBottom: `1px solid ${theme.palette.divider}`,
-                              backgroundColor: theme.palette.action.hover,
                             }}
                           />
                         );
@@ -1390,8 +1257,9 @@ export const CPlanningGantt = ({
                       const barColor = row.color ?? (row.statusTone === 'blocked' ? theme.palette.error.main : theme.palette.primary.main);
 
                       return (
-                        <Box
+                        <div
                           key={row.id}
+                          className={`orb-planning-timeline-row ${selected ? 'orb-is-selected' : ''}`}
                           data-planning-timeline-row-key={entryKey}
                           draggable={isDraggable}
                           onDragStart={(event) => startRowDrag(event, row)}
@@ -1420,7 +1288,7 @@ export const CPlanningGantt = ({
                               zIndex: 3,
                             },
                             backgroundImage:
-                              theme.palette.mode === 'dark'
+                              getOrbCompatMode() === 'dark'
                                 ? 'linear-gradient(90deg, rgba(148,163,184,0.08) 1px, transparent 1px)'
                                 : 'linear-gradient(90deg, rgba(15,23,42,0.06) 1px, transparent 1px)',
                             backgroundSize: timelineGridBackgroundSize,
@@ -1428,8 +1296,8 @@ export const CPlanningGantt = ({
                             transition: 'opacity 120ms ease',
                           }}
                         >
-                          <Tooltip title={`${row.title}: ${rowStart.format('MMM D HH:mm')} - ${rowEnd.format('MMM D HH:mm')}`}>
-                            <Box
+                          <CTooltip title={`${row.title}: ${rowStart.format('MMM D HH:mm')} - ${rowEnd.format('MMM D HH:mm')}`}>
+                            <div
                               sx={{
                                 position: 'absolute',
                                 left: `${left}%`,
@@ -1438,13 +1306,13 @@ export const CPlanningGantt = ({
                                 height: 24,
                                 borderRadius: 999,
                                 overflow: 'hidden',
-                                backgroundColor: theme.palette.mode === 'dark' ? 'rgba(148,163,184,0.18)' : 'rgba(15,23,42,0.10)',
+                                backgroundColor: getOrbCompatMode() === 'dark' ? 'rgba(148,163,184,0.18)' : 'rgba(15,23,42,0.10)',
                                 outline: selected ? `2px solid ${theme.palette.warning.main}` : 'none',
                                 outlineOffset: 2,
                               }}
                             >
-                              <Box sx={{ height: '100%', width: `${progress}%`, backgroundColor: barColor }} />
-                              <Typography
+                              <div sx={{ height: '100%', width: `${progress}%`, backgroundColor: barColor }} />
+                              <CTypography
                                 sx={{
                                   position: 'absolute',
                                   inset: 0,
@@ -1461,18 +1329,18 @@ export const CPlanningGantt = ({
                                 }}
                               >
                                 {row.code}
-                              </Typography>
-                            </Box>
-                          </Tooltip>
-                        </Box>
+                              </CTypography>
+                            </div>
+                          </CTooltip>
+                        </div>
                       );
                     })}
-                  </Stack>
-                </Box>
-              </Box>
-            </Box>
-          </Box>
-        </Box>
+                  </CStack>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
       <CTableGroupMenu
@@ -1481,7 +1349,6 @@ export const CPlanningGantt = ({
         grouping={ctable.grouping}
         setGrouping={ctable.setGrouping}
         columns={ctable.columns}
-        toggleGroupField={ctable.toggleGroupField}
       />
       <CTableColumnMenu
         anchorEl={ctable.anchorEl}

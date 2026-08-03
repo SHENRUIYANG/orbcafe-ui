@@ -68,11 +68,7 @@ import { StdChat, type ChatMessage } from 'orbcafe-ui'
 ```tsx
 import { AIBrowserGlow } from 'orbcafe-ui'
 
-<AIBrowserGlow
-  active={isResponding}
-  colors={['#ff3860', '#24e070', '#3090ff']}
-  zIndex={2147483000}
-/>
+<AIBrowserGlow active={isResponding} />
 ```
 
 最小状态切换：

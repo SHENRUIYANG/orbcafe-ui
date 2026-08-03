@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { Plus, Mic } from 'lucide-react'
+import { Plus, Mic } from '@/components/Icons'
 import { ChatMessage, type ChatMessage as ChatMessageType, type AssistantActionContext } from '../components/core/ChatMessage'
 import { cn } from '../lib/utils'
 import type { AgentUICardHooks } from '../components/cardTypes'
