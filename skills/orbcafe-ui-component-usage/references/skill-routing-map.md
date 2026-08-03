@@ -13,7 +13,7 @@
 - Build app shell/header/navigation/i18n/layout transitions:
   - `orbcafe-layout-navigation`
 - Build Navigation Island pin/favorites, menu nesting, fixed/floating nav mode, or TreeMenu behavior:
-  - `orbcafe-layout-navigation`, and read `references/navigation-island.md` inside that skill.
+  - `orbcafe-layout-navigation`, and read `skills/orbcafe-layout-navigation/references/navigation-island.md`.
 - Build pivot analytics or voice navigation:
   - `orbcafe-pivot-ainav`
 - Build iPad/pad touch workflow shell, touch table, keypad writeback, or orientation adaptation:

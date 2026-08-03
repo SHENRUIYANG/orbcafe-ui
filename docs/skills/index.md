@@ -7,6 +7,7 @@ Published AI-agent skills and reference files.
 - [SKILL.md](orbcafe-ui-component-usage/SKILL.md)
 - [references/component-glossary-i18n.md](orbcafe-ui-component-usage/references/component-glossary-i18n.md)
 - [references/component-map.md](orbcafe-ui-component-usage/references/component-map.md)
+- [references/ctree.md](orbcafe-ui-component-usage/references/ctree.md)
 - [references/implementation-recipes.md](orbcafe-ui-component-usage/references/implementation-recipes.md)
 - [references/integration-baseline.md](orbcafe-ui-component-usage/references/integration-baseline.md)
 - [references/module-contracts.md](orbcafe-ui-component-usage/references/module-contracts.md)
@@ -67,6 +68,7 @@ Published AI-agent skills and reference files.
 
 - [SKILL.md](orbcafe-layout-navigation/SKILL.md)
 - [references/guardrails.md](orbcafe-layout-navigation/references/guardrails.md)
+- [references/navigation-island.md](orbcafe-layout-navigation/references/navigation-island.md)
 - [references/patterns.md](orbcafe-layout-navigation/references/patterns.md)
 
 ## orbcafe-pivot-ainav
