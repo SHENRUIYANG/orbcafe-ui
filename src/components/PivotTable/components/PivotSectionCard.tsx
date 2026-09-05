@@ -1,8 +1,6 @@
-import { getOrbCompatMode } from '../../../lib/orbis-compat';
 import { Collapse, KeyboardArrowUpIcon, SxProps, Theme } from '../../../lib/orbis-compat';
 import React from 'react';
 import {  CIconButton, CPaper, CTypography } from "../../Atoms";
-import { orbAlpha } from "../../../lib/theme";
 
 interface PivotSectionCardProps {
   title: string;
@@ -37,26 +35,30 @@ export const PivotSectionCard: React.FC<PivotSectionCardProps> = ({
         borderRadius: 'var(--orb-r-container)',
         border: `1px solid ${theme.palette.divider}`,
         overflow: 'hidden',
-        bgcolor: orbAlpha(theme.palette.background.paper, 0.95),
+        bgcolor: 'var(--orb-surface)',
+        boxShadow: 'var(--orb-shadow-1)',
       })}
     >
       <div
         sx={(theme) => ({
           px: bodyPaddingX,
-          py: 1,
+          py: 1.15,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
           gap: 1,
+          bgcolor: 'var(--orb-canvas)',
           borderBottom: !collapsed ? `1px solid ${theme.palette.divider}` : 'none',
         })}
       >
         <div sx={{ minWidth: 0, flex: 1 }}>
-          <CTypography sx={{ fontSize: '0.9rem', fontWeight: 800 }}>{title}</CTypography>
+          <CTypography component="div" sx={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--orb-fg-strong)' }}>{title}</CTypography>
           <CTypography
+            component="div"
             sx={{
-              fontSize: '0.74rem',
-              color: 'text.secondary',
+              fontSize: '0.75rem',
+              fontWeight: 400,
+              color: 'var(--orb-fg)',
               whiteSpace: 'nowrap',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
@@ -74,19 +76,22 @@ export const PivotSectionCard: React.FC<PivotSectionCardProps> = ({
             onClick={onToggleCollapse}
             sx={(theme) => ({
               border: `1px solid ${theme.palette.divider}`,
-              bgcolor: orbAlpha(theme.palette.background.paper, 0.88),
-              width: 28,
-              height: 28,
+              bgcolor: 'var(--orb-canvas)',
+              color: 'var(--orb-primary)',
+              width: 24,
+              height: 24,
+              padding: 0,
               borderRadius: 999,
               flexShrink: 0,
               '&:hover': {
-                bgcolor: getOrbCompatMode() === 'dark' ? orbAlpha(theme.palette.primary.main, 0.18) : orbAlpha(theme.palette.primary.main, 0.08),
+                bgcolor: 'var(--orb-p50)',
+                borderColor: 'var(--orb-p200)',
               },
             })}
           >
             <KeyboardArrowUpIcon
+              size={13}
               sx={{
-                fontSize: 16,
                 transition: 'transform 220ms cubic-bezier(0.2, 0, 0, 1)',
                 transform: collapsed ? 'rotate(180deg)' : 'rotate(0deg)',
               }}

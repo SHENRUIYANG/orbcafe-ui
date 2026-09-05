@@ -34,7 +34,7 @@ export const CWaterfallChart = ({ data, height = 240 }: CWaterfallChartProps) =>
   return (
     <div>
       <div component="svg" viewBox={`0 0 ${width} ${height}`} style={{ width: '100%', height }}>
-        <line x1={padding} y1={yFor(0)} x2={width - padding} y2={yFor(0)} stroke="rgba(148,163,184,0.4)" />
+        <line x1={padding} y1={yFor(0)} x2={width - padding} y2={yFor(0)} style={{ stroke: 'var(--orb-chart-grid)' }} />
 
         {bars.map((bar, index) => {
           const cellWidth = (width - padding * 2) / bars.length;
@@ -44,14 +44,14 @@ export const CWaterfallChart = ({ data, height = 240 }: CWaterfallChartProps) =>
           const bottom = yFor(Math.min(bar.start, bar.end));
           const color =
             bar.type === 'total'
-              ? '#42A5F5'
+              ? 'var(--orb-chart-1)'
               : bar.delta >= 0
-                ? '#66BB6A'
-                : '#EF5350';
+                ? 'var(--orb-chart-positive)'
+                : 'var(--orb-chart-negative)';
 
           return (
             <g key={bar.name}>
-              <rect x={x} y={top} width={barWidth} height={Math.max(bottom - top, 4)} rx={6} fill={color} />
+              <rect x={x} y={top} width={barWidth} height={Math.max(bottom - top, 4)} rx={6} style={{ fill: color }} />
               <text x={x + barWidth / 2} y={top - 6} textAnchor="middle" fill="currentColor" fontSize="11">
                 {bar.end.toFixed(1)}
               </text>

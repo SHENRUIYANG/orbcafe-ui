@@ -12,10 +12,34 @@ Published copy of `src/components/PageLayout/README.md`.
 import { CAppPageLayout } from 'orbcafe-ui';
 
 <CAppPageLayout
+  appId="customer-portal"
   appTitle="ORBCAFE UI"
   menuData={[{ id: 'std', title: 'Standard Report', href: '/std-report' }]}
+  logo={<img src="/brand/logo.svg" alt="Customer Portal" width={36} height={36} />}
   user={{ name: 'Ruiyang Shen' }}
   onUserLogout={() => auth.logout()}
+>
+  <div>Page Content</div>
+</CAppPageLayout>
+```
+
+`appId` 应在整个应用中保持不变，用于隔离主题、语言、导航模式和 pin 偏好。`appTitle` 可以按语言或页面变化，不应再承担持久化身份。
+
+## 主题受控接入
+
+宿主已有自己的主题状态时，使用 `mode` / `onModeChange` 同步，不需要监听 DOM attribute：
+
+```tsx
+import { useState } from 'react';
+import { CAppPageLayout, type OrbModeSetting } from 'orbcafe-ui';
+
+const [mode, setMode] = useState<OrbModeSetting>('system');
+
+<CAppPageLayout
+  appId="customer-portal"
+  appTitle="Customer Portal"
+  mode={mode}
+  onModeChange={setMode}
 >
   <div>Page Content</div>
 </CAppPageLayout>
@@ -73,6 +97,10 @@ import { LogOut, Settings } from 'orbcafe-ui';
 
 | Name | Type | Description |
 | --- | --- | --- |
+| `appId` | `string` | 推荐设置的稳定应用标识；用于生成应用级持久化 key，不随标题或语言变化。 |
+| `mode` | `'light' \| 'dark' \| 'system'` | 受控主题设置。 |
+| `defaultMode` | `'light' \| 'dark' \| 'system'` | 非受控主题初始值；默认 `'system'`。 |
+| `onModeChange` | `(mode) => void` | Header 请求切换主题后的回调。与 `mode` 一起使用可同步宿主设计系统。 |
 | `user` | `{ name; subtitle?; avatarText?; avatarSrc? }` | 控制头像与用户名展示；不传时不显示用户菜单。 |
 | `onUserSetting` | `() => void` | 默认 `Setting` 点击回调。 |
 | `onUserLogout` | `() => void` | 默认 `Logout` 点击回调。 |
@@ -83,7 +111,7 @@ import { LogOut, Settings } from 'orbcafe-ui';
 | `locale` | `'en' \| 'zh' \| 'fr' \| 'de' \| 'ja' \| 'ko'` | 受控模式下的当前语言；未传 `onLocaleChange` 时作为初始语言，之后由 Layout 管理。 |
 | `onLocaleChange` | `(locale) => void` | 可选的受控语言回调；不传时 Header 仍可切换语言，并自动保存用户选择。 |
 | `enableNavigationPinning` | `boolean` | 是否允许菜单 pin 到顶部；默认 `true`。 |
-| `navigationPinStorageKey` | `string` | 非受控模式下的 localStorage key；不传时按 `appTitle` 生成。 |
+| `navigationPinStorageKey` | `string` | 非受控模式下的 localStorage key；优先显式值，其次按 `appId` 生成，最后兼容按 `appTitle` 生成。 |
 | `pinnedNavigationItemIds` | `string[]` | 受控模式下已 pin 的菜单项 id。 |
 | `defaultPinnedNavigationItemIds` | `string[]` | 非受控模式的默认 pin 项。 |
 | `onPinnedNavigationItemIdsChange` | `(ids: string[]) => void` | pin/unpin 后回传新的 id 列表。 |
@@ -91,9 +119,10 @@ import { LogOut, Settings } from 'orbcafe-ui';
 
 ## 说明
 
-- 支持 light/dark/system 主题切换。
+- 支持 light/dark/system 主题切换，也支持由宿主受控。
 - Header 语言菜单默认可用；非受控模式会使用共享的 localStorage 偏好，刷新或进入其他非受控页面后继续沿用所选语言。
-- Header logo、用户信息、左右扩展插槽可配置。
+- Header logo、用户信息、左右扩展插槽可配置；未传 `logo` 时显示离线内置图标，不请求宿主静态文件，传 `logo={null}` 可隐藏。
 - Header AI 输入条是显式 opt-in：需要顶部输入框时传 `searchPlacement="header"`；需要跟随 AI Panel 浮动时传 `searchPlacement="floating"` 和 `floatingSearchSx`。
 - Navigation Island 默认允许 pin 叶子菜单项，pin 后会在顶部出现收藏分组；分组节点自身不会被 pin。
+- localStorage pin 状态会在客户端挂载后恢复。要求首帧完全稳定时，应从服务端用户配置/cookie 初始化并使用 `pinnedNavigationItemIds` 受控模式。
 - 详细设计说明见同目录 `pagelayout.md`。

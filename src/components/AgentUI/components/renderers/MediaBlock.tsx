@@ -80,9 +80,9 @@ export const MediaBlock: React.FC<MediaBlockProps> = ({
     if (hasError) {
       return (
         <div className="flex flex-col items-center justify-center min-h-[150px] text-center">
-          <ExclamationCircleIcon className="w-12 h-12 text-red-500 mb-2" />
-          <p className="text-base font-medium text-red-500 mb-1">加载失败</p>
-          <p className="text-sm text-gray-500 dark:text-gray-400">无法加载媒体文件</p>
+          <ExclamationCircleIcon className="w-12 h-12 text-[var(--orb-status-error)] mb-2" />
+          <p className="text-base font-medium text-[var(--orb-status-error)] mb-1">加载失败</p>
+          <p className="text-sm text-[var(--orb-muted)]">无法加载媒体文件</p>
         </div>
       )
     }
@@ -91,7 +91,7 @@ export const MediaBlock: React.FC<MediaBlockProps> = ({
       return (
         <div className="relative text-center">
           {isLoading && (
-            <div className="flex flex-col items-center justify-center min-h-[150px] text-gray-500 dark:text-gray-400">
+            <div className="flex flex-col items-center justify-center min-h-[150px] text-[var(--orb-muted)]">
               <PhotoIcon className="w-12 h-12 mb-2" />
               <p className="text-sm mt-2">加载中...</p>
             </div>
@@ -142,34 +142,34 @@ export const MediaBlock: React.FC<MediaBlockProps> = ({
 
     // Default to document
     return (
-      <div className="flex items-center gap-4 p-4 rounded-lg bg-gray-100 dark:bg-gray-700">
-        <div className="flex items-center text-blue-500">
+      <div className="flex items-center gap-4 p-4 rounded-lg bg-[var(--orb-surface)]">
+        <div className="flex items-center text-[var(--orb-primary)]">
           <DocumentIcon className="w-8 h-8" />
         </div>
         <div className="flex-1">
-          <p className="text-base font-medium text-gray-700 dark:text-gray-200 mb-1">{filename}</p>
-          {size && <p className="text-sm text-gray-500 dark:text-gray-400">{formatFileSize(size)}</p>}
+          <p className="text-base font-medium text-[var(--orb-fg)] mb-1">{filename}</p>
+          {size && <p className="text-sm text-[var(--orb-muted)]">{formatFileSize(size)}</p>}
         </div>
       </div>
     )
   }
 
   return (
-    <div className={`my-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm overflow-hidden ${className}`}>
-      <div className="flex justify-between items-center px-5 py-4 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50">
+    <div className={`my-4 rounded-xl border border-[var(--orb-border)] bg-[var(--orb-canvas)] shadow-sm overflow-hidden ${className}`}>
+      <div className="flex justify-between items-center px-5 py-4 border-b border-[var(--orb-border)] bg-[var(--orb-surface)]">
         <div className="flex items-center gap-3 flex-1 min-w-0">
-          <div className="flex items-center text-emerald-500">
+          <div className="flex items-center text-[var(--orb-status-success)]">
             {renderIcon()}
           </div>
           <div className="flex flex-col min-w-0">
-            <span className="text-base font-medium text-gray-700 dark:text-gray-200 whitespace-nowrap overflow-hidden text-overflow-ellipsis">
+            <span className="text-base font-medium text-[var(--orb-fg)] whitespace-nowrap overflow-hidden text-overflow-ellipsis">
               {filename}
             </span>
-            {size && <span className="text-xs text-gray-500 dark:text-gray-400">{formatFileSize(size)}</span>}
+            {size && <span className="text-xs text-[var(--orb-muted)]">{formatFileSize(size)}</span>}
           </div>
           {isStreaming && (
             <div className="flex items-center">
-              <div className="w-4 h-4 border-2 border-gray-200 border-t-emerald-500 rounded-full animate-spin"></div>
+              <div className="w-4 h-4 border-2 border-[var(--orb-border)] border-t-emerald-500 rounded-full animate-spin"></div>
             </div>
           )}
         </div>
@@ -178,7 +178,7 @@ export const MediaBlock: React.FC<MediaBlockProps> = ({
           {type === 'image' && (
             <button
               onClick={handlePreview}
-              className="flex items-center justify-center w-8 h-8 border-none rounded-md bg-transparent text-gray-500 dark:text-gray-400 cursor-pointer transition-all hover:bg-gray-200 dark:hover:bg-gray-600 hover:text-gray-700 dark:hover:text-gray-200"
+              className="flex items-center justify-center w-8 h-8 border-none rounded-md bg-transparent text-[var(--orb-muted)] cursor-pointer transition-all hover:bg-[var(--orb-hover)] hover:text-[var(--orb-fg)]"
               title="预览"
             >
               <EyeIcon className="w-4 h-4" />
@@ -186,7 +186,7 @@ export const MediaBlock: React.FC<MediaBlockProps> = ({
           )}
           <button
             onClick={handleDownload}
-            className="flex items-center justify-center w-8 h-8 border-none rounded-md bg-transparent text-gray-500 dark:text-gray-400 cursor-pointer transition-all hover:bg-gray-200 dark:hover:bg-gray-600 hover:text-gray-700 dark:hover:text-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center justify-center w-8 h-8 border-none rounded-md bg-transparent text-[var(--orb-muted)] cursor-pointer transition-all hover:bg-[var(--orb-hover)] hover:text-[var(--orb-fg)] disabled:opacity-50 disabled:cursor-not-allowed"
             title="下载"
             disabled={isStreaming || hasError}
           >
@@ -207,7 +207,7 @@ export const MediaBlock: React.FC<MediaBlockProps> = ({
           <div className="relative max-w-[90vw] max-h-[90vh]">
             <img src={url} alt={filename} className="max-w-full max-h-full object-contain" />
             <button 
-              className="absolute -top-10 -right-10 w-8 h-8 border-none rounded-full bg-white/20 text-white text-2xl cursor-pointer flex items-center justify-center hover:bg-white/30 transition-colors"
+              className="absolute -top-10 -right-10 w-8 h-8 border-none rounded-full bg-[color-mix(in_oklch,var(--orb-inverse-fg)_20%,transparent)] text-[var(--orb-inverse-fg)] text-2xl cursor-pointer flex items-center justify-center hover:bg-[color-mix(in_oklch,var(--orb-inverse-fg)_30%,transparent)] transition-colors"
               onClick={(e) => {
                 e.stopPropagation()
                 setIsPreviewOpen(false)

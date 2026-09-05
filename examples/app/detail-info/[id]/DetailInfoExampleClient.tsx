@@ -2,7 +2,8 @@
 
 import { useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { CAppPageLayout, CChip, CDetailInfoPage, CPageTransition, useOrbMode } from 'orbcafe-ui';
+import { CChip, CDetailInfoPage, CPageTransition, useOrbMode } from 'orbcafe-ui';
+import { ExamplePageLayout } from '../../_components/ExamplePageLayout';
 import { buildExampleMenu } from '../../_components/exampleNavigation';
 
 const buildRows = (id: string) => ([
@@ -117,7 +118,8 @@ export default function DetailInfoExampleClient({
     : 'Standard Detail Page Demo (Info Blocks + Tabs + Table + Search/AI)';
 
   return (
-    <CAppPageLayout
+    <ExamplePageLayout
+      appId="orbcafe-examples"
       appTitle=""
       navigationVariant="v2"
       searchPlacement="header"
@@ -232,6 +234,6 @@ export default function DetailInfoExampleClient({
           />
         </div>
       </CPageTransition>
-    </CAppPageLayout>
+    </ExamplePageLayout>
   );
 }

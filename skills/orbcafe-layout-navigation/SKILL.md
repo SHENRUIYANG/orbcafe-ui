@@ -74,5 +74,6 @@ npm run dev
 - `CAppPageLayout` 是首选接入口；只有自定义 shell 时才直接使用 `NavigationIsland + useNavigationIsland`。
 - `navigationMode` / `defaultNavigationMode` 控制 fixed/floating；不要在页面层重写一个独立浮动导航系统。
 - `CPageTransition` 持续使用 `160-260ms`，仅用 transform/opacity 变换，性能更稳。
-- `Providers` 层集中挂载 `OrbisModeProvider + GlobalMessage`（V2 MUI-free），避免每页重复配置；`CAppPageLayout` 已内部渲染这两个 Provider，独立页面才需要手动包裹。
+- `Providers` 层只挂载一个 `GlobalMessage`；独立页面需要 `OrbisModeProvider`。`CAppPageLayout` 内部已有 mode provider，并通过 `mode/onModeChange` 与宿主主题同步。
+- 为 `CAppPageLayout` 设置稳定的应用级 `appId`，不要让本地化或页面级 `appTitle` 决定 pin 持久化命名空间。
 - 如无明确需求，建议不改全局样式文件（如 `app/globals.css`、`styles.css`、tailwind 主题变量）；优先通过组件 props、`sx`、现有 theme 扩展完成调整。

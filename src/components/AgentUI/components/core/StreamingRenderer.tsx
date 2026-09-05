@@ -96,7 +96,7 @@ const StreamingMarkdown: React.FC<StreamingMarkdownProps> = ({
           className="streaming-hint"
           style={{
             fontSize: '9px',
-            color: '#999',
+            color: 'var(--orb-muted)',
             marginTop: '8px',
             fontStyle: 'italic',
             opacity: 0.7

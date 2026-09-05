@@ -56,7 +56,7 @@ export const TableCard: FC<{ data: any }> = ({ data }) => {
 
   if (tableConfig.rows.length === 0) {
     return (
-        <div className="w-full my-4 p-4 border border-dashed border-gray-300 rounded text-center text-gray-500">
+        <div className="w-full my-4 p-4 border border-dashed border-[var(--orb-border)] rounded text-center text-[var(--orb-muted)]">
             暂无表格数据
         </div>
     )

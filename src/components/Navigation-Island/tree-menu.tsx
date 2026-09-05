@@ -121,7 +121,7 @@ export function TreeMenu({
   if (!items || !Array.isArray(items)) {
     return (
       <div className={cn('tree-menu', className)}>
-        <div className="text-sm text-gray-500 p-2">{t('navigation.noItems')}</div>
+        <div className="text-sm text-[var(--orb-muted)] p-2">{t('navigation.noItems')}</div>
       </div>
     )
   }
@@ -154,7 +154,7 @@ export function TreeMenu({
               <div
                 className={cn(
                   'absolute left-0 top-2 bottom-2 w-[3px] rounded-r-full z-10',
-                  isDark ? 'bg-[#91a8d1]' : 'bg-[#154194]',
+                  'bg-[var(--orb-nav-active-fg)]',
                 )}
               />
             )}
@@ -166,17 +166,17 @@ export function TreeMenu({
                 level > 0 ? 'gap-1' : 'gap-2',
                 hasChildren && isExpanded && !isActive
                   ? (isDark
-                      ? 'bg-white/5 text-gray-100 hover:bg-white/8'
-                      : 'bg-slate-50/70 text-slate-800 hover:bg-slate-100/80')
+                      ? 'bg-[color-mix(in_oklch,var(--orb-inverse-fg)_5%,transparent)] text-[var(--orb-fg)] hover:bg-[color-mix(in_oklch,var(--orb-inverse-fg)_8%,transparent)]'
+                      : 'bg-[color-mix(in_oklch,var(--orb-surface)_70%,transparent)] text-[var(--orb-fg)] hover:bg-[var(--orb-surface)]')
                   : '',
                 level >= 2 ? 'min-h-9 py-1.5 rounded-md' : level > 0 ? 'min-h-10 rounded-lg' : 'rounded-lg',
                 isActive
                   ? (isDark
-                      ? 'bg-transparent text-[#91a8d1] hover:bg-gray-800/35'
-                      : 'bg-transparent text-[#154194] hover:bg-gray-100/60')
+                      ? 'bg-transparent text-[var(--orb-nav-active-fg)] hover:bg-[color-mix(in_oklch,var(--orb-surface-2)_35%,transparent)]'
+                      : 'bg-transparent text-[var(--orb-nav-active-fg)] hover:bg-[color-mix(in_oklch,var(--orb-surface)_60%,transparent)]')
                   : (isDark
-                      ? 'hover:bg-gray-800/50 text-gray-300'
-                      : 'hover:bg-gray-100/50 text-gray-700')
+                      ? 'hover:bg-[color-mix(in_oklch,var(--orb-surface-2)_50%,transparent)] text-[var(--orb-fg)]'
+                      : 'hover:bg-[color-mix(in_oklch,var(--orb-surface)_50%,transparent)] text-[var(--orb-fg)]')
               )}
               style={{
                 paddingLeft: `${itemPaddingLeft}px`,
@@ -189,10 +189,10 @@ export function TreeMenu({
                   "flex-shrink-0 transition-transform duration-200",
                   isExpanded && "rotate-90",
                   isActive
-                    ? (isDark ? 'text-[#91a8d1]' : 'text-[#154194]')
+                    ? 'text-[var(--orb-nav-active-fg)]'
                     : (isDark
-                        ? "text-gray-500 group-hover:text-gray-300"
-                        : "text-gray-400 group-hover:text-gray-600")
+                        ? "text-[var(--orb-muted)] group-hover:text-[var(--orb-fg)]"
+                        : "text-[var(--orb-muted)] group-hover:text-[var(--orb-muted)]")
                 )}>
                   <ChevronRight className="h-4 w-4" />
                 </div>
@@ -202,10 +202,10 @@ export function TreeMenu({
                 <div className={cn(
                   "flex h-4 w-4 flex-shrink-0 items-center justify-center transition-colors duration-200",
                   isActive
-                    ? (isDark ? 'text-[#91a8d1]' : 'text-[#154194]')
+                    ? 'text-[var(--orb-nav-active-fg)]'
                     : (isDark
-                        ? "text-gray-500 group-hover:text-gray-300"
-                        : "text-gray-400 group-hover:text-gray-600")
+                        ? "text-[var(--orb-muted)] group-hover:text-[var(--orb-fg)]"
+                        : "text-[var(--orb-muted)] group-hover:text-[var(--orb-muted)]")
                 )}>
                   {item.icon}
                 </div>
@@ -222,8 +222,8 @@ export function TreeMenu({
                   <div className={cn(
                     "text-xs truncate transition-colors duration-200",
                     isActive
-                      ? (isDark ? 'text-[#91a8d1]/70' : 'text-[#154194]/75')
-                      : (isDark ? "text-gray-400" : "text-gray-500")
+                      ? (isDark ? 'text-[color-mix(in_oklch,var(--orb-nav-active-fg)_70%,transparent)]' : 'text-[color-mix(in_oklch,var(--orb-nav-active-fg)_75%,transparent)]')
+                      : "text-[var(--orb-muted)]"
                   )} title={item.description}>
                     {item.description}
                   </div>

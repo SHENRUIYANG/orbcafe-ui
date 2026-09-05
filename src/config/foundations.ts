@@ -1,8 +1,3 @@
-export const BRAND_COLORS = {
-  primary: '#000000', // Default black
-  primaryHover: '#333333',
-};
-
 export const INTERACTIVE_VARIANTS = {
   primary: "bg-primary text-primary-foreground hover:bg-primary/90",
   outline: "border border-input bg-background hover:bg-accent hover:text-accent-foreground",

@@ -30,6 +30,7 @@ Make a nice table page with filters.
 | User asks for | Canonical module | Skill to use |
 | --- | --- | --- |
 | table, report, list page, filters, variants, layouts | `CStandardPage`, `CSmartFilter`, `CTable`, `useStandardReport` | `skills/orbcafe-stdreport-workflow` |
+| store/catalog card page, app-store grid, card detail panel | `CCardPage`, `CCardGrid`, `CCardDetailPanel`, `useCardPage` | `skills/orbcafe-cardpage-workflow` |
 | F4, value help, search help, lookup, master data picker | `CValueHelp`, SmartFilter `type: 'value-help'` | `skills/orbcafe-ui-component-usage/references/value-help.md` plus the target module skill |
 | planning, production plan, Gantt, table/timeline split | `CPlanningLayout`, `CPlanningGantt`, `usePlanningLayout` | `skills/orbcafe-planning-gantt` |
 | pad, tablet, warehouse touch UI, scanner, keypad | `PAppPageLayout`, `PTable`, `PSmartFilter`, `PBarcodeScanner` | `skills/orbcafe-pad-workflow` |

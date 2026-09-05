@@ -59,6 +59,7 @@ const componentSources = [
   "src/components/StdReport/README.md",
   "src/components/StdReport/Hooks/README.md",
   "src/components/StdReport/stdreport.md",
+  "src/components/CardPage/README.md",
   "src/components/Planning/README.md",
   "src/components/Planning/Hooks/README.md",
   "src/components/Pad/README.md",
@@ -105,6 +106,7 @@ const skillSources = [
   "skills/orbcafe-ui-component-usage/references/implementation-recipes.md",
   "skills/orbcafe-ui-component-usage/references/integration-baseline.md",
   "skills/orbcafe-ui-component-usage/references/module-contracts.md",
+  "skills/orbcafe-ui-component-usage/references/module-contracts.json",
   "skills/orbcafe-ui-component-usage/references/public-api-guardrails.md",
   "skills/orbcafe-ui-component-usage/references/public-export-index.md",
   "skills/orbcafe-ui-component-usage/references/skill-routing-map.md",
@@ -114,6 +116,11 @@ const skillSources = [
   "skills/orbcafe-stdreport-workflow/references/component-selection.md",
   "skills/orbcafe-stdreport-workflow/references/guardrails.md",
   "skills/orbcafe-stdreport-workflow/references/recipes.md",
+  "skills/orbcafe-cardpage-workflow/README.md",
+  "skills/orbcafe-cardpage-workflow/SKILL.md",
+  "skills/orbcafe-cardpage-workflow/references/component-selection.md",
+  "skills/orbcafe-cardpage-workflow/references/guardrails.md",
+  "skills/orbcafe-cardpage-workflow/references/recipes.md",
   "skills/orbcafe-planning-gantt/README.md",
   "skills/orbcafe-planning-gantt/SKILL.md",
   "skills/orbcafe-planning-gantt/references/guardrails.md",
@@ -144,6 +151,7 @@ const skillSources = [
   "skills/orbcafe-pivot-ainav/references/domain-patterns.md",
   "skills/orbcafe-pivot-ainav/references/guardrails.md",
   "skills/orbcafe-pivot-ainav/references/recipes.md",
+  "skills/orbcafe-brand-theme/SKILL.md",
 ];
 
 ensureDir(docs);
@@ -153,6 +161,8 @@ const indexContent = read("README.md")
   .replace(/docs\/EXAMPLES\.md/g, "EXAMPLES.md")
   .replace(/docs\/VIBE_CODING\.md/g, "VIBE_CODING.md")
   .replace(/examples\/README\.md/g, "guides/examples-app.md")
+  .replace(/MIGRATION_V2\.md/g, "guides/v2-migration.md")
+  .replace(/BRAND_THEMING\.md/g, "guides/brand-theming.md")
   .replace(/skills\/orbcafe-ui-component-usage\/references\/module-contracts\.md/g, "skills/orbcafe-ui-component-usage/references/module-contracts.md")
   .replace(/src\/components\/StdReport\/README\.md/g, "components/StdReport.md")
   .replace(/src\/components\/Molecules\/README\.md/g, "components/Molecules.md")
@@ -182,6 +192,8 @@ write(
 );
 
 copy("CHANGELOG.md", "docs/CHANGELOG.md");
+copy("MIGRATION_V2.md", "docs/guides/v2-migration.md");
+copy("BRAND_THEMING.md", "docs/guides/brand-theming.md");
 copy("examples/README.md", "docs/guides/examples-app.md", (content) =>
   addPublishedHeader("examples/README.md", "Examples App", content),
 );
@@ -232,6 +244,8 @@ write(
   [
     "# Guides",
     "",
+    "- [Migrate from v1 to v2](v2-migration.md)",
+    "- [Brand theming (Open Design → ORBCAFE)](brand-theming.md)",
     "- [Examples app](examples-app.md)",
     "- [Official examples walkthrough](../EXAMPLES.md)",
     "- [Vibe coding with ORBCAFE UI](../VIBE_CODING.md)",

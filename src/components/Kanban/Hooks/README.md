@@ -8,6 +8,7 @@
 - 处理卡片跨 bucket / 同 bucket 重排
 - 对外暴露 `boardProps`，可直接传给 `CKanbanBoard`
 - 支持在拖拽完成后触发业务回调
+- 提供新增和重命名 bucket 的受控 actions
 
 ### 最小示例
 
@@ -43,6 +44,8 @@ const kanban = useKanbanBoard({
 | `actions.replaceModel` | `(model \| updater) => void` | 整体替换模型 |
 | `actions.moveCard` | `(cardId, toBucketId, targetIndex?) => event` | 程序化移动卡片 |
 | `actions.updateCard` | `(cardId, updater) => void` | 更新单张卡片 |
+| `actions.addBucket` | `(bucket) => boolean` | 新增 bucket；ID 重复或标题为空时返回 `false` |
+| `actions.renameBucket` | `(bucketId, title) => boolean` | 重命名 bucket；未发生变化时返回 `false` |
 | `actions.getCard` | `(cardId) => lookup` | 查找卡片所在 bucket |
 | `boardProps` | `UseKanbanBoardBindings` | 可直接透传给 `CKanbanBoard` |
 

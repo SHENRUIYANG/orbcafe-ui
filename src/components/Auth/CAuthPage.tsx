@@ -126,7 +126,7 @@ export const CAuthPage = ({
             height: 76,
             right: 60,
             bottom: 170,
-            background: 'rgba(21,65,148,.35)',
+            background: 'color-mix(in oklch, var(--orb-primary) 35%, transparent)',
             borderColor: 'rgba(255,255,255,.2)',
           }}
         />

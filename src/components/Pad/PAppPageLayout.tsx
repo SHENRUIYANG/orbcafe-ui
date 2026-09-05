@@ -9,6 +9,7 @@ import { PNavIsland } from './PNavIsland';
 import { PWorkloadNav } from './PWorkloadNav';
 import { CAppHeader } from '../PageLayout/Components/CAppHeader';
 import { OrbcafeI18nProvider } from '../../i18n';
+import { OrbisModeProvider } from '../../lib/theme';
 
 export const PAppPageLayout = ({
   appTitle,
@@ -148,7 +149,8 @@ export const PAppPageLayout = ({
   );
 
   return (
-    <OrbcafeI18nProvider locale={locale}>
+    <OrbisModeProvider mode={mode}>
+      <OrbcafeI18nProvider locale={locale}>
         <div
           sx={[
             (t) => ({
@@ -157,7 +159,7 @@ export const PAppPageLayout = ({
               flexDirection: 'column',
               background:
                 t.palette.mode === 'dark'
-                  ? 'linear-gradient(180deg, #0A0A0A 0%, #141414 55%, #1A1A1A 100%)'
+                  ? 'linear-gradient(180deg, var(--orb-canvas) 0%, var(--orb-surface) 55%, var(--orb-surface-2) 100%)'
                   : t.palette.background.default,
             }),
             ...(Array.isArray(containerSx) ? containerSx : [containerSx]),
@@ -242,7 +244,7 @@ export const PAppPageLayout = ({
                     border: '1px solid',
                     borderColor: 'divider',
                     bgcolor:
-                      mode === 'dark' ? 'rgba(15,23,42,0.72)' : 'rgba(255,255,255,0.72)',
+                      'color-mix(in oklch, var(--orb-canvas) 72%, transparent)',
                     backdropFilter: 'blur(12px)',
                     color: 'text.primary',
                   }}
@@ -260,6 +262,7 @@ export const PAppPageLayout = ({
             </>
           ) : null}
         </div>
-    </OrbcafeI18nProvider>
+      </OrbcafeI18nProvider>
+    </OrbisModeProvider>
   );
 };

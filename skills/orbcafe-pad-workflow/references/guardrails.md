@@ -1,5 +1,12 @@
 # Pad Guardrails
 
+## Device Scope
+
+1. 只验收 Pad/iPad 尺寸以及 Pad 横竖屏，不把更窄 viewport 视为 ORBCAFE Pad 的适配目标。
+2. 不为手机、小屏或移动应用添加 ORBCAFE UI breakpoint、压缩布局或兼容承诺。
+3. 这类需求统一改用 [`doushabao-ui`](https://www.npmjs.com/package/doushabao-ui)，不要继续套用 `P*`/`C*` 组件。
+4. 验证时不要把浏览器缩到手机宽度，不运行 handset/mobile 模拟、手机截图或小屏响应式测试。
+
 ## Interaction Safety
 
 1. 不要让覆盖层拦截点击：

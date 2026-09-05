@@ -1,8 +1,8 @@
-import { getOrbCompatMode } from '../../../lib/orbis-compat';
-import { CloseIcon, DragIndicatorIcon } from '../../../lib/orbis-compat';
+import { CloseIcon } from '../../../lib/orbis-compat';
 import React from 'react';
 import {  CIconButton, CPaper, CTypography } from "../../Atoms";
 import { useSortable } from '@dnd-kit/sortable';
+import { PivotDragHandle } from './PivotDragHandle';
 
 interface SortableZoneTokenUIProps {
   label: string;
@@ -43,13 +43,19 @@ export const SortableZoneTokenUI: React.FC<SortableZoneTokenUIProps> = ({
         p: 1,
         borderRadius: 'var(--orb-r-container)',
         border: '1px solid',
-        borderColor: 'divider',
-        bgcolor: getOrbCompatMode() === 'dark' ? '#111111' : 'background.paper',
+        borderColor: 'var(--orb-border)',
+        bgcolor: 'var(--orb-canvas)',
+        boxShadow: 'var(--orb-shadow-1)',
         touchAction: 'none',
         opacity: isDragging ? 0 : 1,
+        transition: 'border-color 140ms ease, background-color 140ms ease, transform 140ms ease',
+        '&:hover': {
+          borderColor: 'var(--orb-p200)',
+          bgcolor: 'var(--orb-p50)',
+        },
       }}
     >
-      <div sx={{ display: 'flex', alignItems: 'center', gap: 0.8 }}>
+      <div sx={{ display: 'flex', alignItems: 'center', gap: 0.9 }}>
         <div
           {...attributes}
           {...listeners}
@@ -57,18 +63,20 @@ export const SortableZoneTokenUI: React.FC<SortableZoneTokenUIProps> = ({
             display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'center',
-            p: 0.25,
-            borderRadius: 1,
-            bgcolor: getOrbCompatMode() === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(17, 24, 39, 0.08)',
+            width: 24,
+            height: 24,
+            borderRadius: 'var(--orb-r)',
+            bgcolor: 'var(--orb-p50)',
+            border: '1px solid var(--orb-p100)',
             cursor: 'grab',
           }}
         >
-          <DragIndicatorIcon sx={{ fontSize: 15, color: 'text.secondary' }} />
+          <PivotDragHandle size={13} subtle />
         </div>
 
-        <div sx={{ minWidth: 0, flex: 1 }}>
-          <CTypography sx={{ fontSize: '0.8rem', fontWeight: 700, lineHeight: 1.2 }}>{label}</CTypography>
-          {caption && <CTypography sx={{ fontSize: '0.7rem', color: 'text.secondary', lineHeight: 1.2 }}>{caption}</CTypography>}
+        <div sx={{ minWidth: 0, flex: 1, display: 'flex', flexDirection: 'column', gap: 0.15 }}>
+          <CTypography component="div" sx={{ fontSize: '0.82rem', fontWeight: 700, lineHeight: 1.2, color: 'var(--orb-fg-strong)' }}>{label}</CTypography>
+          {caption && <CTypography component="div" sx={{ fontSize: '0.72rem', fontWeight: 400, color: 'var(--orb-fg)', lineHeight: 1.2 }}>{caption}</CTypography>}
         </div>
 
         {trailing}
@@ -80,9 +88,9 @@ export const SortableZoneTokenUI: React.FC<SortableZoneTokenUIProps> = ({
               event.stopPropagation();
               onRemove();
             }}
-            sx={{ p: 0.2 }}
+            sx={{ width: 24, height: 24, p: 0 }}
           >
-            <CloseIcon sx={{ fontSize: 16 }} />
+            <CloseIcon size={13} />
           </CIconButton>
         )}
       </div>

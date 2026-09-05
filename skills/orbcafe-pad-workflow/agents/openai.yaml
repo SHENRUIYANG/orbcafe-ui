@@ -1,4 +1,4 @@
 interface:
   display_name: "ORBCAFE Pad Workflow"
-  short_description: "Implement touch-first tablet UI with lookup and scan workflows"
-  default_prompt: "Use $orbcafe-pad-workflow to implement this tablet touch workflow with the official Next.js examples baseline and ORBCAFE Pad components, including PSmartFilter/CValueHelp lookup fields when needed."
+  short_description: "Build Pad touch workflows; exclude phone and small-screen UI"
+  default_prompt: "Use $orbcafe-pad-workflow for a Pad/iPad touch workflow, verify only Pad landscape and portrait viewports, never run phone or small-screen QA, and route those targets to doushabao-ui."

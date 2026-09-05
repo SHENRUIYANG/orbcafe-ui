@@ -9,6 +9,33 @@ The library is designed for two audiences at once:
 
 ![ORBCAFE UI examples home](images/examples/home.png)
 
+## License
+
+ORBCAFE UI is **source-available** software under the [ORBCAFE UI Community License](LICENSE), with commercial licenses available for commercial product use.
+
+Free for:
+
+- Personal use, education, and research
+- Development, testing, evaluation, and prototypes
+- Internal business applications (ERP portals, dashboards, AI agents, internal tools — any company size)
+- Community projects and free demos/templates
+
+A commercial license is required when ORBCAFE UI is used in:
+
+- Commercial SaaS or commercial software products
+- Paid customer delivery projects (consulting, outsourcing, system integration)
+- OEM / white-label products, redistribution, or resale
+- Commercial templates and commercial UI libraries built on ORBCAFE UI
+- Low-code / no-code platforms, UI builders, and design-system platforms
+
+> **Build for yourself — free. Build software for customers — commercial license.**
+
+For commercial licensing, see [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Versions of ORBCAFE UI published before v3.0.0 remain available under the MIT License.
+
+### 授权说明（中文摘要）
+
+ORBCAFE UI 采用 **Community License + Commercial License** 双授权模式。对个人使用、学习教育、开发测试、企业内部应用以及社区项目免费；当 ORBCAFE UI 成为商业 SaaS、商业软件产品、收费客户项目交付、OEM / White Label、商业模板、UI Builder / Low-Code 产品的一部分，或被再发行、二次销售时，需要取得商业授权。原则很简单：**给自己或自己公司做 — 免费；给客户做软件 — 需要商业授权。**
+
 ## Highlights
 
 | Area | What you get |
@@ -41,7 +68,9 @@ The library is designed for two audiences at once:
 
 ## Install
 
-Install the package. `orbcafe-ui@2` is **MUI-free** — the runtime dependencies (Radix primitives, `class-variance-authority`, `tailwind-merge`, `clsx`, `dayjs`, ...) ship with the package, so you do **not** need `@mui/*`, `@emotion/*`, or `lucide-react`:
+> Upgrading from v1? Version 2 was a breaking MUI-to-ORBIS migration — follow the [v2 migration guide](guides/v2-migration.md) first. Version 3 keeps the v2 API; the major bump marks the switch from MIT to the Community License (see [License](#license)).
+
+Install the package. `orbcafe-ui@3` is **MUI-free** — the runtime dependencies (Radix primitives, `class-variance-authority`, `tailwind-merge`, `clsx`, `dayjs`, ...) ship with the package, so you do **not** need `@mui/*`, `@emotion/*`, or `lucide-react`:
 
 ```bash
 npm install orbcafe-ui
@@ -52,6 +81,10 @@ Tailwind v4 is required to compile the utility classes used by the components:
 ```bash
 npm install -D tailwindcss @tailwindcss/postcss
 ```
+
+Brand theming is optional. The default ORBIS theme and packaged theme overrides
+work without Open Design; see [guides/brand-theming.md](guides/brand-theming.md) for built-in
+packs and the optional `orbcafe-theme` CLI workflow.
 
 ## Required App Setup
 
@@ -73,17 +106,9 @@ When developing inside this repo, the examples app also scans the source package
 @source "../../src";
 ```
 
-Tailwind v3 fallback:
-
-```js
-module.exports = {
-  content: ["./node_modules/orbcafe-ui/dist/**/*.{js,mjs}"],
-};
-```
-
 ### Providers
 
-Wrap your app with the ORBCAFE providers used by the official examples. V2 is MUI-free — there is no MUI `ThemeProvider`/`CssBaseline`/`LocalizationProvider`:
+Mount `GlobalMessage` once at the application layer. Add `OrbisModeProvider` there when standalone ORBCAFE surfaces or the host design system share the same mode. V2 is MUI-free, so there is no ORBCAFE requirement for MUI `ThemeProvider`, `CssBaseline`, or `LocalizationProvider`:
 
 ```tsx
 'use client';
@@ -102,7 +127,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
 }
 ```
 
-> `CAppPageLayout` / `PAppPageLayout` already render `OrbisModeProvider` + `GlobalMessage` internally; the explicit providers above are only required for standalone surfaces (e.g. a login page without the app shell). Dark mode is applied automatically by toggling the `orb-dark` class on `<html>`.
+> `CAppPageLayout` / `PAppPageLayout` render their own `OrbisModeProvider`, but `GlobalMessage` must be mounted once by the host. `CAppPageLayout` supports controlled `mode` / `onModeChange` for synchronizing another design system. Dark mode is applied automatically by toggling the `orb-dark` class on `<html>`.
 
 ## Run The Official Examples
 
@@ -172,7 +197,7 @@ When using Codex or another AI coding agent with ORBCAFE UI, ask it to follow th
 
 1. Route the request through `skills/orbcafe-ui-component-usage`.
 2. Map natural names like "table", "F4", "pad table", "planning Gantt", or "copilot" to canonical exports.
-3. Check the target module skill, for example `orbcafe-stdreport-workflow`, `orbcafe-planning-gantt`, `orbcafe-pad-workflow`, or `orbcafe-agentui-chat`.
+3. Check the target module skill, for example `orbcafe-stdreport-workflow`, `orbcafe-cardpage-workflow`, `orbcafe-planning-gantt`, `orbcafe-pad-workflow`, or `orbcafe-agentui-chat`.
 4. Import only from `orbcafe-ui`.
 5. Validate against the official Next.js examples.
 

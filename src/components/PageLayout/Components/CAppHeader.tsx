@@ -174,18 +174,8 @@ export const CAppHeader = ({
       <div className="orb-app-header-brand">
         {leftSlot}
         {logo === null ? null : logo || (
-          <div className="orb-logo-slot">
-            <img
-              src="/orbcafe.png"
-              alt="ORBCAFE Logo"
-              style={{
-                width: 44,
-                height: 44,
-                display: 'block',
-                objectFit: 'contain',
-                flexShrink: 0,
-              }}
-            />
+          <div className="orb-app-header-default-logo" aria-label="ORBCAFE">
+            <SapIcon name="product" size={20} />
           </div>
         )}
         {appTitle && (

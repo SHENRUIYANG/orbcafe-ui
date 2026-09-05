@@ -1,9 +1,7 @@
 'use client';
 
-import { useMemo } from 'react';
 import dayjs from 'dayjs';
 import {
-  CAppPageLayout,
   CButton,
   CStack,
   CPlanningLayout,
@@ -13,6 +11,7 @@ import {
   type PlanningTaskRecord,
   usePlanningLayout,
 } from 'orbcafe-ui';
+import { ExamplePageLayout } from './ExamplePageLayout';
 import { EXAMPLE_MENU } from './exampleNavigation';
 
 type DemoPlanningTaskRecord = PlanningTaskRecord & {
@@ -163,7 +162,8 @@ export default function PlanningExampleClient() {
   const menuData = EXAMPLE_MENU;
 
   return (
-    <CAppPageLayout
+    <ExamplePageLayout
+      appId="orbcafe-examples"
       appTitle=""
       navigationVariant="v2"
       searchPlacement="header"
@@ -202,6 +202,6 @@ export default function PlanningExampleClient() {
           </CStack>
         </div>
       </CPageTransition>
-    </CAppPageLayout>
+    </ExamplePageLayout>
   );
 }

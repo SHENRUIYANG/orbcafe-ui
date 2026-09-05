@@ -2,13 +2,11 @@
 
 import { useMemo, useState, type ComponentProps } from 'react';
 import {
-  CAppPageLayout,
   CChip,
   CDetailInfoPage,
   CPageTransition,
   CStack,
   CTypography,
-  CPaper,
   CTreeComp,
   useOrbMode,
   type CTreeCompColumn,
@@ -16,6 +14,7 @@ import {
   type FilterField,
   type FilterValue,
 } from 'orbcafe-ui';
+import { ExamplePageLayout } from './ExamplePageLayout';
 import { EXAMPLE_MENU } from './exampleNavigation';
 
 type CostKind = 'Assembly' | 'Material' | 'External' | 'Labor' | 'Overhead';
@@ -591,7 +590,8 @@ export default function CTreeExampleClient() {
   );
 
   return (
-    <CAppPageLayout
+    <ExamplePageLayout
+      appId="orbcafe-examples"
       appTitle=""
       navigationVariant="v2"
       searchPlacement="header"
@@ -648,6 +648,6 @@ export default function CTreeExampleClient() {
           />
         </div>
       </CPageTransition>
-    </CAppPageLayout>
+    </ExamplePageLayout>
   );
 }

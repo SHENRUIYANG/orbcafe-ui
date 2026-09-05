@@ -1,6 +1,6 @@
 # Kanban Tools
 
-`Kanban` 模块公开了 3 个纯函数 tools，适合做受控状态、后端同步和单元测试。
+`Kanban` 模块公开了 5 个纯函数 tools，适合做受控状态、后端同步和单元测试。
 
 ## `createKanbanBoardModel`
 
@@ -35,6 +35,15 @@ const nextModel = moveKanbanCard(model, {
   toBucketId: 'in-progress',
   targetIndex: 0,
 });
+```
+
+## `addKanbanBucket` / `renameKanbanBucket`
+
+以纯函数方式新增或重命名 bucket；无效 ID、重复 ID 或空标题会返回原 model。
+
+```tsx
+const withBucket = addKanbanBucket(model, { id: 'review', title: 'Review' });
+const renamed = renameKanbanBucket(withBucket, 'review', 'Business Review');
 ```
 
 ### 适用场景

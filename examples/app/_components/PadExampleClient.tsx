@@ -15,15 +15,15 @@ import {
   PTable,
   type OrbcafeLocale,
   type PWorkloadNavItem,
+  type FilterField,
+  type FilterValue,
+  type VariantMetadata,
 } from 'orbcafe-ui';
 import {
-  ClipboardList,
   PackageCheck,
   PackageSearch,
-  ReceiptText,
   ScanLine,
   ShieldCheck,
-  TabletSmartphone,
   Truck,
   Warehouse,
 } from 'orbcafe-ui';
@@ -33,10 +33,7 @@ type WorkloadId = 'receiving' | 'picking' | 'packing' | 'dispatch';
 type TaskStatus = 'Queued' | 'Picking' | 'Ready' | 'Blocked';
 type TaskPriority = 'Critical' | 'High' | 'Medium' | 'Low';
 
-interface FilterValueShape {
-  value: any;
-  operator: string;
-}
+type FilterValueShape = FilterValue;
 
 interface PadTaskRecord {
   id: string;
@@ -167,7 +164,7 @@ const createEmptyFilters = (): Record<string, FilterValueShape> => ({
   plannedQty: { value: '', operator: '>=' },
 });
 
-const compareNumber = (sourceValue: number, operator: string, filterValue: any) => {
+const compareNumber = (sourceValue: number, operator: string, filterValue: unknown) => {
   const rangeFilter = Array.isArray(filterValue) ? filterValue.map((item) => Number(item)) : null;
   const numericFilter = Array.isArray(filterValue) ? Number(filterValue[0] ?? 0) : Number(filterValue);
   switch (operator) {
@@ -208,7 +205,7 @@ const matchesText = (sourceValue: string, operator: string, filterValue: string)
   }
 };
 
-const matchesDateRange = (sourceValue: string, filterValue: any) => {
+const matchesDateRange = (sourceValue: string, filterValue: unknown) => {
   if (!Array.isArray(filterValue) || filterValue.length !== 2) return true;
   const [start, end] = filterValue;
   const current = dayjs(sourceValue);
@@ -350,8 +347,8 @@ export default function PadExampleClient() {
     setLastAction(`Header search updated to "${query}".`);
   };
 
-  const handleSelectTask = (row: Record<string, any>) => {
-    const task = row as PadTaskRecord;
+  const handleSelectTask = (row: Record<string, unknown>) => {
+    const task = row as unknown as PadTaskRecord;
     setSelectedTaskId(task.id);
     setKeypadValue(String(task.confirmedQty));
     setLastAction(`Selected ${task.taskId} for keypad confirmation.`);
@@ -464,7 +461,7 @@ export default function PadExampleClient() {
               filterConfig={{
                 appId: 'examples-pad-execution',
                 tableKey: 'execution-queue',
-                fields: filterFields as any,
+                fields: filterFields as FilterField[],
                 filters,
                 onFilterChange: (nextFilters: Record<string, FilterValueShape>) => {
                   setFilters(nextFilters);
@@ -472,7 +469,7 @@ export default function PadExampleClient() {
                 onSearch: () => {
                   setLastAction(`Applied filters to ${workloadItems.find((item) => item.id === activeWorkload)?.title}.`);
                 },
-                onVariantLoad: (variant: any) => {
+                onVariantLoad: (variant: VariantMetadata) => {
                   setLastAction(`Loaded view "${variant.name}".`);
                 },
               }}

@@ -98,7 +98,11 @@ export interface CKanbanBucketProps {
   highlighted?: boolean;
   children?: ReactNode;
   emptyLabel?: string;
+  height?: number | string;
+  /** @deprecated Use `height` to define the bucket viewport. */
   maxHeight?: number | string;
+  onRename?: (title: string) => void;
+  renameLabel?: string;
   sx?: SxProps<Theme>;
 }
 
@@ -106,8 +110,19 @@ export interface CKanbanBoardProps {
   model: KanbanBoardModel;
   onCardMove?: (event: KanbanCardMoveEvent) => void;
   onCardClick?: (context: KanbanCardClickContext) => void;
+  cardFilter?: (card: KanbanCardRecord, bucket: KanbanBucketDefinition) => boolean;
+  onBucketAdd?: () => void;
+  onBucketRename?: (bucketId: string, title: string) => void;
+  addBucketLabel?: string;
   minBucketWidth?: number;
+  bucketHeight?: number | string;
+  /** @deprecated Use `bucketHeight`; retained for backward compatibility. */
   bucketMaxHeight?: number | string;
+  searchable?: boolean;
+  searchValue?: string;
+  defaultSearchValue?: string;
+  onSearchValueChange?: (value: string) => void;
+  searchPlaceholder?: string;
   emptyBucketLabel?: string;
   sx?: SxProps<Theme>;
 }

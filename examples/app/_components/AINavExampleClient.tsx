@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
-import { CAINavProvider, CAppPageLayout, CPageTransition, CPaper, CStack, CButton, CTypography, CTextField, CAlert, useOrbMode, useAINav } from 'orbcafe-ui';
+import React, { useState } from 'react';
+import { CAINavProvider, CPageTransition, CPaper, CStack, CButton, CTypography, CTextField, CAlert, useOrbMode, useAINav } from 'orbcafe-ui';
+import { ExamplePageLayout } from './ExamplePageLayout';
 import { EXAMPLE_MENU } from './exampleNavigation';
 
 const HeaderBrandLogo = () => {
@@ -77,7 +78,8 @@ export default function AINavExampleClient() {
         setLastEvent(`Error @ ${new Date().toLocaleTimeString()}`);
       }}
     >
-      <CAppPageLayout
+      <ExamplePageLayout
+        appId="orbcafe-examples"
         appTitle=""
         navigationVariant="v2"
         searchPlacement="header"
@@ -119,7 +121,7 @@ export default function AINavExampleClient() {
             </CPaper>
           </div>
         </CPageTransition>
-      </CAppPageLayout>
+      </ExamplePageLayout>
     </CAINavProvider>
   );
 }

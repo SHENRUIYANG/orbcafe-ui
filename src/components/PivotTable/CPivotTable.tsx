@@ -1391,17 +1391,17 @@ export const CPivotTable: React.FC<CPivotTableProps> = ({
         p: { xs: 1.2, md: 2 },
         borderRadius: 'var(--orb-r-container)',
         border: `1px solid ${theme.palette.divider}`,
-        bgcolor: 'background.paper',
-        boxShadow: getOrbCompatMode() === 'dark' ? 'none' : '0 12px 28px rgba(15, 23, 42, 0.08)',
+        bgcolor: 'var(--orb-canvas)',
+        boxShadow: 'var(--orb-shadow-2)',
         display: 'flex',
         flexDirection: 'column',
-        gap: 2,
+        gap: 2.25,
       })}
     >
       <div sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1.5, flexWrap: 'wrap' }}>
-        <div>
-          <CTypography sx={{ fontSize: '1.05rem', fontWeight: 800 }}>{resolvedTitle}</CTypography>
-          <CTypography sx={{ fontSize: '0.78rem', color: 'text.secondary' }}>{t('pivot.subtitle.default')}</CTypography>
+        <div sx={{ minWidth: 0, display: 'flex', flexDirection: 'column', gap: 0.35 }}>
+          <CTypography component="div" sx={{ fontSize: '1.08rem', fontWeight: 700, lineHeight: 1.25, color: 'var(--orb-fg-strong)' }}>{resolvedTitle}</CTypography>
+          <CTypography component="div" sx={{ fontSize: '0.8rem', fontWeight: 400, color: 'var(--orb-fg)' }}>{t('pivot.subtitle.default')}</CTypography>
         </div>
 
         <CStack direction="row" spacing={1.5} alignItems="center">
@@ -1426,8 +1426,13 @@ export const CPivotTable: React.FC<CPivotTableProps> = ({
               </FormControl>
 
               <CTooltip title={t('pivot.preset.save')}>
-                <CIconButton size="small" onClick={handleOpenSavePresetDialog} aria-label={t('pivot.preset.save')}>
-                  <SaveIcon sx={{ fontSize: 18 }} />
+                <CIconButton
+                  size="small"
+                  onClick={handleOpenSavePresetDialog}
+                  aria-label={t('pivot.preset.save')}
+                  sx={{ width: 28, height: 28, p: 0 }}
+                >
+                  <SaveIcon size={15} />
                 </CIconButton>
               </CTooltip>
 
@@ -1438,8 +1443,9 @@ export const CPivotTable: React.FC<CPivotTableProps> = ({
                     onClick={handleDeletePreset}
                     disabled={!activePresetId}
                     aria-label={t('pivot.preset.delete')}
+                    sx={{ width: 28, height: 28, p: 0 }}
                   >
-                    <DeleteOutlineIcon sx={{ fontSize: 18 }} />
+                    <DeleteOutlineIcon size={15} />
                   </CIconButton>
                 </span>
               </CTooltip>
@@ -1448,13 +1454,13 @@ export const CPivotTable: React.FC<CPivotTableProps> = ({
             </>
           )}
 
-          <CTypography sx={{ fontSize: '0.74rem', color: 'text.secondary' }}>
+          <CTypography component="div" sx={{ fontSize: '0.75rem', fontWeight: 400, color: 'var(--orb-fg)' }}>
             {t('pivot.records')}: <strong>{rows.length.toLocaleString()}</strong> / {t('pivot.afterFilter')}:{' '}
             <strong>{filteredRows.length.toLocaleString()}</strong>
           </CTypography>
           <CDivider flexItem orientation="vertical" />
           <div sx={{ display: 'flex', alignItems: 'center', gap: 0.6 }}>
-            <CTypography sx={{ fontSize: '0.74rem' }}>{t('pivot.grandTotal')}</CTypography>
+            <CTypography component="div" sx={{ fontSize: '0.75rem', fontWeight: 500, color: 'var(--orb-fg-strong)' }}>{t('pivot.grandTotal')}</CTypography>
             <Switch size="small" checked={showGrandTotal} onChange={(event) => setShowGrandTotal(event.target.checked)} />
           </div>
         </CStack>
@@ -1523,7 +1529,7 @@ export const CPivotTable: React.FC<CPivotTableProps> = ({
       >
         {pivotPreview === null ? (
           <div sx={{ py: 5, px: { xs: 1.2, md: 1.6 }, textAlign: 'center' }}>
-            <CTypography sx={{ fontSize: '0.86rem', color: 'text.secondary' }}>{resolvedEmptyText}</CTypography>
+            <CTypography component="div" sx={{ fontSize: '0.86rem', fontWeight: 400, color: 'var(--orb-fg)' }}>{resolvedEmptyText}</CTypography>
           </div>
         ) : (
           <div sx={{ maxHeight: maxPreviewHeight }}>
@@ -1538,7 +1544,7 @@ export const CPivotTable: React.FC<CPivotTableProps> = ({
                           fontWeight: 800,
                           fontSize: '0.76rem',
                           color: 'text.primary',
-                          bgcolor: getOrbCompatMode() === 'dark' ? '#000000' : '#f5f5f5',
+                          bgcolor: getOrbCompatMode() === 'dark' ? 'var(--orb-canvas)' : 'var(--orb-surface)',
                           borderBottom: `1px solid ${theme.palette.divider}`,
                           pl: 2,
                           minWidth: 220,
@@ -1566,7 +1572,7 @@ export const CPivotTable: React.FC<CPivotTableProps> = ({
                           fontWeight: 800,
                           fontSize: '0.75rem',
                           color: 'text.primary',
-                          bgcolor: getOrbCompatMode() === 'dark' ? '#000000' : '#f5f5f5',
+                          bgcolor: getOrbCompatMode() === 'dark' ? 'var(--orb-canvas)' : 'var(--orb-surface)',
                           borderBottom: `1px solid ${theme.palette.divider}`,
                           minWidth: 148,
                           verticalAlign: 'middle',
@@ -1577,12 +1583,12 @@ export const CPivotTable: React.FC<CPivotTableProps> = ({
                             <CIconButton
                               size="small"
                               onClick={() => handleToggleColumn(cell.key)}
-                              sx={{ p: 0.1, ml: -0.3 }}
+                              sx={{ width: 22, height: 22, p: 0, ml: -0.2 }}
                             >
                               {cell.expanded ? (
-                                <KeyboardArrowDownIcon sx={{ fontSize: 16 }} />
+                                <KeyboardArrowDownIcon size={12} />
                               ) : (
-                                <KeyboardArrowRightIcon sx={{ fontSize: 16 }} />
+                                <KeyboardArrowRightIcon size={12} />
                               )}
                             </CIconButton>
                           )}

@@ -147,14 +147,14 @@ export const PivotScatterChart: React.FC<PivotScatterChartProps> = ({
               bgcolor: alpha(theme.palette.background.default, 0.35),
             })}
           >
-            <CTypography sx={{ fontSize: '0.78rem', fontWeight: 700 }} noWrap title={item.name}>
+            <CTypography component="div" sx={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--orb-fg-strong)' }} noWrap title={item.name}>
               {item.name}
             </CTypography>
-            <CTypography sx={{ fontSize: '0.72rem', color: 'text.secondary' }}>
+            <CTypography component="div" sx={{ fontSize: '0.72rem', color: 'var(--orb-fg)' }}>
               {primaryLabel}: {formatPrimaryValue(item.primaryValue)}
             </CTypography>
             {secondaryLabel && (
-              <CTypography sx={{ fontSize: '0.72rem', color: 'text.secondary' }}>
+              <CTypography component="div" sx={{ fontSize: '0.72rem', color: 'var(--orb-fg)' }}>
                 {secondaryLabel}: {(formatSecondaryValue ?? formatPrimaryValue)(item.secondaryValue ?? 0)}
               </CTypography>
             )}

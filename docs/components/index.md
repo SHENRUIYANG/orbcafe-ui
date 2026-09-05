@@ -9,6 +9,7 @@ Published component and hook documentation collected from the source tree.
 | StdReport | [StdReport.md](StdReport.md) | `src/components/StdReport/README.md` |
 | StdReport Hooks | [StdReport-Hooks.md](StdReport-Hooks.md) | `src/components/StdReport/Hooks/README.md` |
 | StdReport stdreport | [StdReport-stdreport.md](StdReport-stdreport.md) | `src/components/StdReport/stdreport.md` |
+| CardPage | [CardPage.md](CardPage.md) | `src/components/CardPage/README.md` |
 | Planning | [Planning.md](Planning.md) | `src/components/Planning/README.md` |
 | Planning Hooks | [Planning-Hooks.md](Planning-Hooks.md) | `src/components/Planning/Hooks/README.md` |
 | Pad | [Pad.md](Pad.md) | `src/components/Pad/README.md` |

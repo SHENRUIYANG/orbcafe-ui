@@ -1,4 +1,4 @@
-import { DragIndicatorIcon, FilterListIcon, FunctionsIcon, TableRowsIcon, ViewColumnIcon } from '../../../lib/orbis-compat';
+import { FilterListIcon, FunctionsIcon, TableRowsIcon, ViewColumnIcon } from '../../../lib/orbis-compat';
 import React from 'react';
 import {  CStack, CTypography } from "../../Atoms";
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
@@ -9,12 +9,13 @@ import { FieldPaletteToken } from './FieldPaletteToken';
 import { PivotSectionCard } from './PivotSectionCard';
 import { SortableZoneToken } from './SortableZoneToken';
 import { useOrbcafeI18n } from '../../../i18n';
+import { PivotDragHandle } from './PivotDragHandle';
 
 const zoneIconMap: Record<AxisZone | 'values', React.ReactNode> = {
-  rows: <TableRowsIcon fontSize="small" />,
-  columns: <ViewColumnIcon fontSize="small" />,
-  filters: <FilterListIcon fontSize="small" />,
-  values: <FunctionsIcon fontSize="small" />,
+  rows: <TableRowsIcon size={16} sx={{ color: 'var(--orb-primary)' }} />,
+  columns: <ViewColumnIcon size={16} sx={{ color: 'var(--orb-primary)' }} />,
+  filters: <FilterListIcon size={16} sx={{ color: 'var(--orb-primary)' }} />,
+  values: <FunctionsIcon size={16} sx={{ color: 'var(--orb-accent)' }} />,
 };
 
 interface PivotConfiguratorPanelProps {
@@ -80,11 +81,11 @@ export const PivotConfiguratorPanel: React.FC<PivotConfiguratorPanelProps> = ({
           title={t('pivot.fieldList')}
           hint={t('pivot.availableDimensions')}
           itemCount={availableFields.length}
-          icon={<DragIndicatorIcon sx={{ fontSize: 16, color: 'text.secondary' }} />}
+          icon={<PivotDragHandle size={18} subtle />}
         >
           <CStack spacing={0.8} sx={{ maxHeight: 400, overflowY: 'auto', pr: 0.5 }}>
             {availableFields.length === 0 && (
-              <CTypography sx={{ fontSize: '0.74rem', color: 'text.secondary', py: 1 }}>{t('pivot.allFieldsInUse')}</CTypography>
+              <CTypography component="div" sx={{ fontSize: '0.74rem', fontWeight: 400, color: 'var(--orb-fg)', py: 1 }}>{t('pivot.allFieldsInUse')}</CTypography>
             )}
             {availableFields.map((field) => (
               <FieldPaletteToken

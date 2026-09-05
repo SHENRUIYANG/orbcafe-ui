@@ -1,5 +1,7 @@
 # Pad Patterns
 
+These patterns target Pad/iPad-sized screens only. Do not add handset breakpoints or present them as phone layouts; use [`doushabao-ui`](https://www.npmjs.com/package/doushabao-ui) for phone, small-screen, or mobile-app work.
+
 ## Pattern 1: Complete Pad App Layout
 
 This is the standard, best-practice structure for a Pad application based on `PadExampleClient.tsx`.

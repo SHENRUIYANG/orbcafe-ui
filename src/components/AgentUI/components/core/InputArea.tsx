@@ -23,7 +23,7 @@ const STYLES = {
     'placeholder:text-[var(--orb-muted,#8c8c8c)] placeholder:font-normal',
     'text-[var(--orb-fg,#555555)] selection:bg-[var(--orb-p100,#e4e9f5)]',
     'focus:ring-0 focus:outline-none focus:border-none focus:shadow-none',
-    'min-h-[44px] max-h-[12em] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600'
+    'min-h-[44px] max-h-[12em] overflow-y-auto scrollbar-thin scrollbar-thumb-[var(--orb-border)]'
   ),
 
   filePreviewArea: 'px-4 pt-3 pb-1 flex flex-wrap gap-2',
@@ -51,7 +51,7 @@ const STYLES = {
   buttonDisabled: 'cursor-not-allowed opacity-50 bg-[var(--orb-disabled-bg,#f5f5f5)] border border-[var(--orb-border,#dbdbdb)]',
 
   sendButton: cn(
-    'cursor-pointer bg-[var(--orb-primary,#154194)] hover:bg-[var(--orb-p600,#0e2d63)] text-white shadow-none active:scale-95'
+    'cursor-pointer bg-[var(--orb-primary,#154194)] hover:bg-[var(--orb-p600,#0e2d63)] text-[var(--orb-on-primary)] shadow-none active:scale-95'
   ),
 
   sendButtonDisabled: cn(
@@ -59,7 +59,7 @@ const STYLES = {
   ),
 
   stopButton: cn(
-    'cursor-pointer bg-[var(--orb-err,#c43f02)] hover:opacity-90 text-white shadow-none active:scale-95'
+    'cursor-pointer bg-[var(--orb-err,#c43f02)] hover:opacity-90 text-[var(--orb-on-primary)] shadow-none active:scale-95'
   )
 } as const
 
@@ -302,11 +302,11 @@ export const InputArea: React.FC<InputAreaProps> = ({
             <div className={STYLES.filePreviewArea}>
               {files.map((file, index) => (
                 <div key={`${file.name}-${index}`} className={STYLES.fileTag}>
-                  <InsertDriveFile sx={{ fontSize: 16 }} className="text-blue-500" />
+                  <InsertDriveFile sx={{ fontSize: 16 }} className="text-[var(--orb-primary)]" />
                   <span className="truncate max-w-[150px]">{file.name}</span>
                   <button 
                     onClick={() => removeFile(index)}
-                    className="ml-1 hover:text-red-500 focus:outline-none"
+                    className="ml-1 hover:text-[var(--orb-status-error)] focus:outline-none"
                     type="button"
                   >
                     <Close sx={{ fontSize: 16 }} />

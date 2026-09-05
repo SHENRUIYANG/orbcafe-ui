@@ -1,19 +1,23 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  CAppPageLayout,
   CKanbanBoard,
+  CIconButton,
   CPageTransition,
-  CPaper,
-  CStack,
+  CSmartFilter,
   CTypography,
+  ChevronDown,
+  ChevronUp,
   useOrbMode,
   useKanbanBoard,
+  type FilterField,
+  type FilterValue,
   type KanbanBucketDefinition,
   type KanbanCardRecord,
 } from 'orbcafe-ui';
+import { ExamplePageLayout } from './ExamplePageLayout';
 import { CircleCheckBig, ClipboardCheck, PackageSearch, Rocket } from 'orbcafe-ui';
 import { EXAMPLE_MENU } from './exampleNavigation';
 
@@ -22,32 +26,32 @@ const bucketDefinitions: KanbanBucketDefinition[] = [
     id: 'intake',
     title: 'Intake',
     description: 'Clarify scope and assign accountable owner.',
-    accentColor: '#5B6CFF',
-    icon: <PackageSearch size={18} color="#2770ff" />,
+    accentColor: 'var(--orb-chart-1)',
+    icon: <PackageSearch size={18} />,
     limit: 3,
   },
   {
     id: 'execution',
     title: 'Execution',
     description: 'Push active delivery work with measurable progress.',
-    accentColor: '#0F766E',
-    icon: <Rocket size={18} color="#0F766E" />,
+    accentColor: 'var(--orb-chart-2)',
+    icon: <Rocket size={18} />,
     limit: 4,
   },
   {
     id: 'review',
     title: 'Review',
     description: 'Business confirmation, sign-off and QA checks.',
-    accentColor: '#D97706',
-    icon: <ClipboardCheck size={18} color="#D97706" />,
+    accentColor: 'var(--orb-chart-5)',
+    icon: <ClipboardCheck size={18} />,
     limit: 2,
   },
   {
     id: 'done',
     title: 'Done',
     description: 'Released items and archived operational work.',
-    accentColor: '#059669',
-    icon: <CircleCheckBig size={18} color="#059669" />,
+    accentColor: 'var(--orb-chart-4)',
+    icon: <CircleCheckBig size={18} />,
   },
 ];
 
@@ -158,6 +162,25 @@ const initialCards: KanbanCardRecord[] = [
   },
 ];
 
+const selectedFilterValues = (filters: Record<string, FilterValue>, id: string): string[] => {
+  const value = filters[id]?.value;
+  if (!value) return [];
+  return (Array.isArray(value) ? value : [value]).map(String);
+};
+
+const cardMatchesFilters = (card: KanbanCardRecord, filters: Record<string, FilterValue>) => {
+  const buckets = selectedFilterValues(filters, 'bucket');
+  const priorities = selectedFilterValues(filters, 'priority');
+  const assignees = selectedFilterValues(filters, 'assignee');
+  const tags = selectedFilterValues(filters, 'tag');
+
+  if (buckets.length > 0 && !buckets.includes(card.bucketId)) return false;
+  if (priorities.length > 0 && (!card.priority || !priorities.includes(card.priority))) return false;
+  if (assignees.length > 0 && (!card.assignee || !assignees.includes(card.assignee.name))) return false;
+  if (tags.length > 0 && !card.tags?.some((tag) => tags.includes(tag.id))) return false;
+  return true;
+};
+
 const HeaderBrandLogo = () => {
   const mode = useOrbMode();
   const src = mode === 'dark' ? '/LOGO3.png' : '/LOGO2.png';
@@ -174,6 +197,9 @@ const HeaderBrandLogo = () => {
 export default function KanbanExampleClient() {
   const router = useRouter();
   const [moveNotice, setMoveNotice] = useState('Drag cards across buckets or open any card into Detail Info.');
+  const [filters, setFilters] = useState<Record<string, FilterValue>>({});
+  const [appliedFilters, setAppliedFilters] = useState<Record<string, FilterValue>>({});
+  const [kpisExpanded, setKpisExpanded] = useState(true);
 
   const kanban = useKanbanBoard({
     initialBuckets: bucketDefinitions,
@@ -184,37 +210,86 @@ export default function KanbanExampleClient() {
     },
   });
 
-  const totalCards = useMemo(
-    () => kanban.model.buckets.reduce((sum, bucket) => sum + bucket.cards.length, 0),
-    [kanban.model],
+  const filterFields = useMemo<FilterField[]>(() => {
+    const cards = kanban.model.buckets.flatMap((bucket) => bucket.cards);
+    const assignees = [...new Set(cards.flatMap((card) => card.assignee?.name ? [card.assignee.name] : []))];
+    const tags = [...new Map(cards.flatMap((card) => card.tags ?? []).map((tag) => [tag.id, tag])).values()];
+
+    return [
+      {
+        id: 'bucket',
+        label: 'Bucket',
+        type: 'multi-select',
+        options: kanban.model.buckets.map((bucket) => ({ label: bucket.title, value: bucket.id })),
+      },
+      {
+        id: 'priority',
+        label: 'Priority',
+        type: 'multi-select',
+        options: [
+          { label: 'Critical', value: 'critical' },
+          { label: 'High', value: 'high' },
+          { label: 'Medium', value: 'medium' },
+          { label: 'Low', value: 'low' },
+        ],
+      },
+      {
+        id: 'assignee',
+        label: 'Assignee',
+        type: 'multi-select',
+        options: assignees.map((name) => ({ label: name, value: name })),
+      },
+      {
+        id: 'tag',
+        label: 'Tag',
+        type: 'multi-select',
+        options: tags.map((tag) => ({ label: tag.label, value: tag.id })),
+      },
+    ];
+  }, [kanban.model]);
+
+  const cardFilter = useCallback(
+    (card: KanbanCardRecord) => cardMatchesFilters(card, appliedFilters),
+    [appliedFilters],
   );
-  const doneCount = useMemo(
-    () => kanban.model.buckets.find((bucket) => bucket.id === 'done')?.cards.length ?? 0,
-    [kanban.model],
+
+  const visibleCards = useMemo(
+    () => kanban.model.buckets.flatMap((bucket) => bucket.cards).filter((card) => cardMatchesFilters(card, appliedFilters)),
+    [appliedFilters, kanban.model],
   );
-  const reviewCount = useMemo(
-    () => kanban.model.buckets.find((bucket) => bucket.id === 'review')?.cards.length ?? 0,
-    [kanban.model],
-  );
-  const criticalCount = useMemo(
-    () => kanban.model.buckets.flatMap((bucket) => bucket.cards).filter((card) => card.priority === 'critical').length,
-    [kanban.model],
-  );
+  const totalCards = visibleCards.length;
+  const doneCount = visibleCards.filter((card) => card.bucketId === 'done').length;
+  const reviewCount = visibleCards.filter((card) => card.bucketId === 'review').length;
+  const criticalCount = visibleCards.filter((card) => card.priority === 'critical').length;
 
   const summaryItems = useMemo(
     () => [
-      { label: 'Total Cards', value: totalCards, note: 'All workflow items' },
-      { label: 'Ready For Review', value: reviewCount, note: 'Business validation queue' },
-      { label: 'Released', value: `${Math.round((doneCount / Math.max(totalCards, 1)) * 100)}%`, note: `${doneCount} cards in done` },
-      { label: 'Critical', value: criticalCount, note: 'Immediate attention required' },
+      { label: 'Total Cards', value: totalCards, note: 'All workflow items', color: 'var(--orb-primary)' },
+      { label: 'Ready For Review', value: reviewCount, note: 'Business validation queue', color: 'var(--orb-chart-2)' },
+      { label: 'Released', value: `${Math.round((doneCount / Math.max(totalCards, 1)) * 100)}%`, note: `${doneCount} cards in done`, color: 'var(--orb-chart-4)' },
+      { label: 'Critical', value: criticalCount, note: 'Immediate attention required', color: 'var(--orb-err)' },
     ],
     [criticalCount, doneCount, reviewCount, totalCards],
   );
 
+  const handleBucketAdd = () => {
+    let sequence = kanban.model.buckets.length + 1;
+    while (kanban.model.buckets.some((bucket) => bucket.id === `bucket-${sequence}`)) sequence += 1;
+    const title = `New bucket ${sequence}`;
+    const added = kanban.actions.addBucket({
+      id: `bucket-${sequence}`,
+      title,
+      description: 'New workflow stage.',
+      accentColor: `var(--orb-chart-${((sequence - 1) % 5) + 1})`,
+    });
+    if (added) setMoveNotice(`${title} added. Use the edit button to rename it.`);
+  };
+
   const menuData = EXAMPLE_MENU;
 
   return (
-    <CAppPageLayout
+    <ExamplePageLayout
+      appId="orbcafe-examples"
       appTitle=""
       navigationVariant="v2"
       searchPlacement="header"
@@ -227,80 +302,155 @@ export default function KanbanExampleClient() {
       logo={<HeaderBrandLogo />}
     >
       <CPageTransition transitionKey="kanban-demo" variant="fade" durationMs={180}>
-        <div style={{ height: 'calc(100vh - 120px)', overflow: 'auto', padding: '16px 16px 16px' }}>
-          <CStack spacing={2}>
-            <CPaper
+        <div
+          style={{
+            boxSizing: 'border-box',
+            height: 'calc(100vh - 120px)',
+            minHeight: 0,
+            overflow: 'hidden',
+            padding: '16px 16px 16px',
+          }}
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, height: '100%', minHeight: 0 }}>
+            <section
               style={{
-                padding: 16,
-                borderRadius: 'var(--orb-r-container)',
-                border: '1px solid var(--orb-divider)',
-                background: 'linear-gradient(135deg, rgba(91,108,255,0.10), rgba(15,118,110,0.10))',
+                minWidth: 0,
+                padding: '4px 0',
               }}
             >
-              <CStack spacing={1.2}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
-                  <div>
-                    <CTypography sx={{ fontSize: '1.25rem', fontWeight: 800 }}>Kanban Official Example</CTypography>
-                    <CTypography sx={{ marginTop: 4, color: 'var(--orb-muted)' }}>
-                      Hook-first workflow board with independent bucket/card styles and DetailInfo routing.
-                    </CTypography>
-                  </div>
-                  <span style={{ fontSize: '0.875rem', padding: '6px 12px', borderRadius: 16, border: '1px solid var(--orb-primary)', color: 'var(--orb-primary)', maxWidth: '100%', whiteSpace: 'normal' }}>
-                    {moveNotice}
-                  </span>
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+                <div style={{ minWidth: 0 }}>
+                  <CTypography component="div" sx={{ fontSize: 19, fontWeight: 600, lineHeight: 1.3 }}>Kanban Official Example</CTypography>
+                  <CTypography component="div" sx={{ marginTop: 3, fontSize: 13, color: 'var(--orb-muted)' }}>
+                    Hook-first workflow board with independent bucket/card styles and DetailInfo routing.
+                  </CTypography>
                 </div>
+                <span
+                  style={{
+                    maxWidth: '100%',
+                    padding: '5px 9px',
+                    border: '1px solid var(--orb-p100)',
+                    borderRadius: 'var(--orb-r)',
+                    background: 'var(--orb-p50)',
+                    color: 'var(--orb-link)',
+                    font: '500 12px/1.35 var(--orb-font)',
+                    whiteSpace: 'normal',
+                  }}
+                >
+                  {moveNotice}
+                </span>
+              </div>
+            </section>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 10 }}>
-                  {summaryItems.map((item) => (
-                    <CPaper key={item.label} sx={{ padding: 11, borderRadius: 'var(--orb-r-container)', border: '1px solid var(--orb-divider)' }}>
-                      <CTypography sx={{ fontSize: '0.76rem', color: 'var(--orb-muted)', textTransform: 'uppercase', letterSpacing: 0.35 }}>
-                        {item.label}
-                      </CTypography>
-                      <CTypography sx={{ marginTop: 3, fontSize: '1.35rem', fontWeight: 800 }}>{item.value}</CTypography>
-                      <CTypography sx={{ marginTop: 3, fontSize: '0.76rem', color: 'var(--orb-muted)' }}>{item.note}</CTypography>
-                    </CPaper>
-                  ))}
-                </div>
-              </CStack>
-            </CPaper>
-
-            <CKanbanBoard
-              {...kanban.boardProps}
-              bucketMaxHeight="calc(100vh - 360px)"
-              onCardClick={({ card, bucket }) => {
-                const params = new URLSearchParams({
-                  source: 'kanban',
-                  bucket: bucket.id,
-                  bucketTitle: bucket.title,
-                  backHref: '/kanban',
-                });
-                router.push(`/detail-info/${card.id}?${params.toString()}`);
-              }}
-            />
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 10 }}>
-              <CPaper sx={{ padding: 12, borderRadius: 'var(--orb-r-container)', border: '1px solid var(--orb-divider)' }}>
-                <CTypography sx={{ fontSize: '0.82rem', fontWeight: 800 }}>Hook</CTypography>
-                <CTypography sx={{ marginTop: 5, fontSize: '0.78rem', color: 'var(--orb-muted)', lineHeight: 1.6 }}>
-                  Use `useKanbanBoard` to own the board model and feed `boardProps` directly into `CKanbanBoard`.
-                </CTypography>
-              </CPaper>
-              <CPaper sx={{ padding: 12, borderRadius: 'var(--orb-r-container)', border: '1px solid var(--orb-divider)' }}>
-                <CTypography sx={{ fontSize: '0.82rem', fontWeight: 800 }}>Tool</CTypography>
-                <CTypography sx={{ marginTop: 5, fontSize: '0.78rem', color: 'var(--orb-muted)', lineHeight: 1.6 }}>
-                  `moveKanbanCard` and `createKanbanBoardModel` are pure helpers for reducers, optimistic updates and server sync.
-                </CTypography>
-              </CPaper>
-              <CPaper sx={{ padding: 12, borderRadius: 'var(--orb-r-container)', border: '1px solid var(--orb-divider)' }}>
-                <CTypography sx={{ fontSize: '0.82rem', fontWeight: 800 }}>Skill</CTypography>
-                <CTypography sx={{ marginTop: 5, fontSize: '0.78rem', color: 'var(--orb-muted)', lineHeight: 1.6 }}>
-                  Route future Kanban requests through `skills/orbcafe-kanban-detail/SKILL.md` for examples-first usage.
-                </CTypography>
-              </CPaper>
+            <div style={{ paddingBottom: 4 }}>
+              <CSmartFilter
+                appId="orbcafe-examples-kanban"
+                tableKey="kanban-board"
+                fields={filterFields}
+                filters={filters}
+                onFilterChange={setFilters}
+                onVariantLoad={() => undefined}
+                onSearch={() => setAppliedFilters(filters)}
+              />
             </div>
-          </CStack>
+
+            <section style={{ minWidth: 0 }}>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  minHeight: 28,
+                  marginBottom: kpisExpanded ? 6 : 0,
+                }}
+              >
+                <CTypography component="div" sx={{ fontSize: 12, fontWeight: 600, color: 'var(--orb-muted)', textTransform: 'uppercase' }}>
+                  Board summary
+                </CTypography>
+                <CIconButton
+                  size="small"
+                  tooltip={kpisExpanded ? 'Collapse KPIs' : 'Expand KPIs'}
+                  aria-label={kpisExpanded ? 'Collapse KPIs' : 'Expand KPIs'}
+                  aria-expanded={kpisExpanded}
+                  onClick={() => setKpisExpanded((expanded) => !expanded)}
+                >
+                  {kpisExpanded ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
+                </CIconButton>
+              </div>
+
+              {kpisExpanded && (
+                <div style={{ overflowX: 'auto' }}>
+                  <div
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(4, minmax(190px, 1fr))',
+                      minWidth: 760,
+                      overflow: 'hidden',
+                      border: '1px solid var(--orb-divider)',
+                      borderRadius: 'var(--orb-r-container)',
+                      background: 'var(--orb-canvas)',
+                    }}
+                  >
+                    {summaryItems.map((item) => (
+                      <div
+                        key={item.label}
+                        style={{
+                          display: 'grid',
+                          gridTemplateColumns: 'auto minmax(0, 1fr)',
+                          gridTemplateRows: 'auto auto',
+                          alignItems: 'center',
+                          columnGap: 12,
+                          minHeight: 72,
+                          padding: '10px 16px',
+                          borderRight: item.label === 'Critical' ? 'none' : '1px solid var(--orb-divider)',
+                        }}
+                      >
+                        <CTypography
+                          component="div"
+                          numeric
+                          sx={{ gridRow: '1 / span 2', minWidth: 38, fontSize: 24, fontWeight: 600, lineHeight: 1, color: item.color }}
+                        >
+                          {item.value}
+                        </CTypography>
+                        <CTypography component="div" sx={{ alignSelf: 'end', fontSize: 11, fontWeight: 500, color: 'var(--orb-fg)', textTransform: 'uppercase' }}>
+                          {item.label}
+                        </CTypography>
+                        <CTypography component="div" noWrap sx={{ alignSelf: 'start', fontSize: 12, color: 'var(--orb-muted)' }}>
+                          {item.note}
+                        </CTypography>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </section>
+
+            <div style={{ flex: '1 1 0%', minWidth: 0, minHeight: 0, overflow: 'hidden' }}>
+              <CKanbanBoard
+                {...kanban.boardProps}
+                searchable
+                bucketHeight="100%"
+                cardFilter={cardFilter}
+                onBucketAdd={handleBucketAdd}
+                onBucketRename={(bucketId, title) => {
+                  if (kanban.actions.renameBucket(bucketId, title)) {
+                    setMoveNotice(`Bucket renamed to ${title}.`);
+                  }
+                }}
+                onCardClick={({ card, bucket }) => {
+                  const params = new URLSearchParams({
+                    source: 'kanban',
+                    bucket: bucket.id,
+                    bucketTitle: bucket.title,
+                    backHref: '/kanban',
+                  });
+                  router.push(`/detail-info/${card.id}?${params.toString()}`);
+                }}
+              />
+            </div>
+          </div>
         </div>
       </CPageTransition>
-    </CAppPageLayout>
+    </ExamplePageLayout>
   );
 }

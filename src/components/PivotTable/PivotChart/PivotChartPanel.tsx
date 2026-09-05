@@ -125,7 +125,7 @@ export const PivotChartPanel: React.FC<PivotChartPanelProps> = ({
           }}
         >
           <FormControl size="small" sx={{ minWidth: 0, width: '100%' }}>
-            <CTypography sx={{ fontSize: '0.68rem', color: 'text.secondary', mb: 0.45 }}>
+            <CTypography component="div" sx={{ fontSize: '0.7rem', fontWeight: 500, color: 'var(--orb-fg)', mb: 0.45 }}>
               {t('pivot.chart.dimension')}
             </CTypography>
             <CSelect
@@ -142,7 +142,7 @@ export const PivotChartPanel: React.FC<PivotChartPanelProps> = ({
           </FormControl>
 
           <FormControl size="small" sx={{ minWidth: 0, width: '100%' }}>
-            <CTypography sx={{ fontSize: '0.68rem', color: 'text.secondary', mb: 0.45 }}>
+            <CTypography component="div" sx={{ fontSize: '0.7rem', fontWeight: 500, color: 'var(--orb-fg)', mb: 0.45 }}>
               {t('pivot.chart.primaryMeasure')}
             </CTypography>
             <CSelect
@@ -159,7 +159,7 @@ export const PivotChartPanel: React.FC<PivotChartPanelProps> = ({
           </FormControl>
 
           <FormControl size="small" sx={{ minWidth: 0, width: '100%' }}>
-            <CTypography sx={{ fontSize: '0.68rem', color: 'text.secondary', mb: 0.45 }}>
+            <CTypography component="div" sx={{ fontSize: '0.7rem', fontWeight: 500, color: 'var(--orb-fg)', mb: 0.45 }}>
               {t('pivot.chart.secondaryMeasure')}
             </CTypography>
             <CSelect
@@ -181,7 +181,7 @@ export const PivotChartPanel: React.FC<PivotChartPanelProps> = ({
           </FormControl>
 
           <FormControl size="small" sx={{ minWidth: 0, width: '100%' }}>
-            <CTypography sx={{ fontSize: '0.68rem', color: 'text.secondary', mb: 0.45 }}>
+            <CTypography component="div" sx={{ fontSize: '0.7rem', fontWeight: 500, color: 'var(--orb-fg)', mb: 0.45 }}>
               {t('pivot.chart.chartType')}
             </CTypography>
             <CSelect
@@ -209,15 +209,15 @@ export const PivotChartPanel: React.FC<PivotChartPanelProps> = ({
       <div>
         {!selectedDimension ? (
           <div sx={{ py: 5, textAlign: 'center' }}>
-            <CTypography sx={{ fontSize: '0.86rem', color: 'text.secondary' }}>{t('pivot.chart.emptyNoDimension')}</CTypography>
+            <CTypography component="div" sx={{ fontSize: '0.86rem', fontWeight: 400, color: 'var(--orb-fg)' }}>{t('pivot.chart.emptyNoDimension')}</CTypography>
           </div>
         ) : !primaryValue ? (
           <div sx={{ py: 5, textAlign: 'center' }}>
-            <CTypography sx={{ fontSize: '0.86rem', color: 'text.secondary' }}>{t('pivot.chart.emptyNoValue')}</CTypography>
+            <CTypography component="div" sx={{ fontSize: '0.86rem', fontWeight: 400, color: 'var(--orb-fg)' }}>{t('pivot.chart.emptyNoValue')}</CTypography>
           </div>
         ) : chartData.length === 0 ? (
           <div sx={{ py: 5, textAlign: 'center' }}>
-            <CTypography sx={{ fontSize: '0.86rem', color: 'text.secondary' }}>{t('pivot.chart.emptyNoData')}</CTypography>
+            <CTypography component="div" sx={{ fontSize: '0.86rem', fontWeight: 400, color: 'var(--orb-fg)' }}>{t('pivot.chart.emptyNoData')}</CTypography>
           </div>
         ) : chartType === 'scatter' ? (
           <PivotScatterChart

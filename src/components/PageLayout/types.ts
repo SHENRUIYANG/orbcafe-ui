@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import type { NavigationIslandDisplayMode } from '../Navigation-Island/navigation-island.types';
 import type { TreeMenuItem } from '../Navigation-Island/tree-menu';
 import type { OrbcafeLocale } from '../../i18n';
+import type { OrbModeSetting } from '../../lib/theme';
 
 export interface CAppHeaderUser {
   name: string;
@@ -46,6 +47,8 @@ export interface CAppHeaderProps {
 }
 
 export interface CAppPageLayoutProps {
+  /** Stable application identity used to namespace persisted layout preferences. */
+  appId?: string;
   appTitle: string;
   menuData?: TreeMenuItem[];
   children: ReactNode;
@@ -56,6 +59,12 @@ export interface CAppPageLayoutProps {
   localeOptions?: OrbcafeLocale[];
   /** Controls locale externally. When omitted, the layout switches and persists locale internally. */
   onLocaleChange?: (locale: OrbcafeLocale) => void;
+  /** Controlled ORBIS color-mode setting. */
+  mode?: OrbModeSetting;
+  /** Initial color-mode setting for uncontrolled usage. Defaults to system. */
+  defaultMode?: OrbModeSetting;
+  /** Called after the header color-mode action requests a new setting. */
+  onModeChange?: (mode: OrbModeSetting) => void;
   user?: CAppHeaderUser;
   onUserRefresh?: () => void;
   onUserSetting?: () => void;

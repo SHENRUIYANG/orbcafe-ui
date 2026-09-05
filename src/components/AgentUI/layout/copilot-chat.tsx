@@ -76,7 +76,7 @@ export const CopilotChat: React.FC<CopilotChatProps> = ({
   }, [handleSend, isComposing])
 
   return (
-    <div className={cn("relative flex h-full w-full min-h-[460px] min-w-[340px] flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-none dark:border-gray-800 dark:bg-gray-900", className)}>
+    <div className={cn("relative flex h-full w-full min-h-[460px] min-w-[340px] flex-col overflow-hidden rounded-3xl border border-[var(--orb-border)] bg-[var(--orb-canvas)] shadow-none dark:bg-[var(--orb-surface-2)]", className)}>
       {onCollapse && (
         <button
           onClick={onCollapse}
@@ -92,7 +92,7 @@ export const CopilotChat: React.FC<CopilotChatProps> = ({
         >
           <span
             className={cn(
-              'block h-4 w-4 border-[#21BCFF]',
+              'block h-4 w-4 border-[var(--orb-ai-accent)]',
               outerCorner === 'top-left' && 'rounded-tl-full border-l-[3px] border-t-[3px]',
               outerCorner === 'top-right' && 'rounded-tr-full border-r-[3px] border-t-[3px]',
               outerCorner === 'bottom-left' && 'rounded-bl-full border-b-[3px] border-l-[3px]',
@@ -102,16 +102,16 @@ export const CopilotChat: React.FC<CopilotChatProps> = ({
         </button>
       )}
       <div
-        className="flex items-center justify-between border-b border-gray-100 px-4 py-3 dark:border-gray-800"
+        className="flex items-center justify-between border-b border-[var(--orb-border)] px-4 py-3"
         onPointerDown={onHeaderPointerDown}
       >
         <div className="flex items-center">
-          <h3 className="text-base font-semibold tracking-tight text-gray-900 dark:text-gray-100">{title}</h3>
+          <h3 className="text-base font-semibold tracking-tight text-[var(--orb-fg)]">{title}</h3>
         </div>
         <div />
       </div>
 
-      <div className="flex-1 overflow-y-auto px-3 py-3 space-y-5 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600">
+      <div className="flex-1 overflow-y-auto px-3 py-3 space-y-5 scrollbar-thin scrollbar-thumb-[var(--orb-border)]">
         {messages.map((msg, index) => {
           const isLastAssistant = msg.type === 'assistant' && index === messages.length - 1
           const assistantActions: AssistantActionContext | undefined = msg.type === 'assistant' ? {
@@ -135,10 +135,10 @@ export const CopilotChat: React.FC<CopilotChatProps> = ({
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="border-t border-gray-100 px-3 py-3 dark:border-gray-800">
-        <div className="flex items-center gap-2 rounded-xl border border-blue-300/80 bg-white px-2 py-1.5 dark:bg-gray-900">
+      <div className="border-t border-[var(--orb-border)] px-3 py-3">
+        <div className="flex items-center gap-2 rounded-xl border border-[var(--orb-p300)] bg-[var(--orb-canvas)] px-2 py-1.5 dark:bg-[var(--orb-surface-2)]">
           <button
-            className="flex h-8 w-8 items-center justify-center rounded-full text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200"
+            className="flex h-8 w-8 items-center justify-center rounded-full text-[var(--orb-muted)] transition-colors hover:bg-[var(--orb-surface)] hover:text-[var(--orb-fg)] dark:text-[var(--orb-muted)] dark:hover:bg-[var(--orb-surface-2)]"
             onClick={onPlusClick}
             type="button"
             aria-label="Add"
@@ -146,7 +146,7 @@ export const CopilotChat: React.FC<CopilotChatProps> = ({
             <Plus className="h-4 w-4" />
           </button>
           <input
-            className="h-7 flex-1 border-none bg-transparent text-sm text-gray-800 outline-none placeholder:text-gray-400 dark:text-gray-100 dark:placeholder:text-gray-500"
+            className="h-7 flex-1 border-none bg-transparent text-sm text-[var(--orb-fg)] outline-none placeholder:text-[var(--orb-muted)] dark:text-[var(--orb-fg)] dark:placeholder:text-[var(--orb-muted)]"
             placeholder={placeholder || 'Ask Copilot...'}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -157,7 +157,7 @@ export const CopilotChat: React.FC<CopilotChatProps> = ({
             spellCheck={false}
           />
           <button
-            className="flex h-8 w-8 items-center justify-center rounded-full text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200"
+            className="flex h-8 w-8 items-center justify-center rounded-full text-[var(--orb-muted)] transition-colors hover:bg-[var(--orb-surface)] hover:text-[var(--orb-fg)] dark:text-[var(--orb-muted)] dark:hover:bg-[var(--orb-surface-2)]"
             onClick={onMicClick}
             type="button"
             aria-label="Microphone"

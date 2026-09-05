@@ -28,12 +28,12 @@ const KeypadButton = ({ label, onPress, emphasis = 'default' }: KeypadButtonProp
           ? theme.palette.primary.main
           : emphasis === 'danger'
             ? getOrbCompatMode() === 'dark'
-              ? 'rgba(239,68,68,0.18)'
-              : 'rgba(239,68,68,0.10)'
+              ? 'color-mix(in oklch, var(--orb-status-error) 18%, transparent)'
+              : 'color-mix(in oklch, var(--orb-status-error) 10%, transparent)'
             : getOrbCompatMode() === 'dark'
               ? 'rgba(255,255,255,0.04)'
-              : '#fff',
-      color: emphasis === 'primary' ? '#fff' : 'text.primary',
+              : 'var(--orb-canvas)',
+      color: emphasis === 'primary' ? 'var(--orb-on-primary)' : 'text.primary',
       fontSize: '1.25rem',
       fontWeight: 800,
       transition: 'transform 120ms ease, box-shadow 160ms ease, background-color 160ms ease',
@@ -217,7 +217,7 @@ export const PNumericKeypad = ({
               border: '1px solid',
               borderColor: 'primary.main',
               background: theme.palette.primary.main,
-              color: '#fff',
+              color: 'var(--orb-on-primary)',
               cursor: 'pointer',
               appearance: 'none',
               WebkitAppearance: 'none',

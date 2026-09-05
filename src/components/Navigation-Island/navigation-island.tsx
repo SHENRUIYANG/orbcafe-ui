@@ -312,8 +312,8 @@ export const NavigationIsland: React.FC<NavigationIslandProps> = ({
         collapsed ? 'w-14 rounded-full' : 'w-[234px] rounded-2xl'
       } relative ${className} ${
         isDark
-          ? isFloating ? 'border-white/25' : 'bg-[#111111] border-white/10'
-          : isFloating ? 'border-white/70' : 'bg-white/70 border-white/30'
+          ? isFloating ? 'border-white/25' : 'bg-[var(--orb-nav-bg)] border-white/10'
+          : isFloating ? 'border-white/70' : 'bg-[color-mix(in_oklch,var(--orb-canvas)_70%,transparent)] border-white/30'
       }`}
       style={{
         backdropFilter: isFloating ? 'blur(34px) saturate(230%) contrast(1.12)' : 'blur(16px) saturate(180%)',
@@ -325,8 +325,8 @@ export const NavigationIsland: React.FC<NavigationIslandProps> = ({
           : undefined,
         backgroundImage: isFloating
           ? isDark
-            ? 'radial-gradient(circle at 28% 8%, rgba(255,255,255,0.14), rgba(255,255,255,0) 44%), linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.015) 50%, rgba(33,188,255,0.05))'
-            : 'radial-gradient(circle at 28% 8%, rgba(255,255,255,0.42), rgba(255,255,255,0) 46%), linear-gradient(145deg, rgba(255,255,255,0.22), rgba(255,255,255,0.07) 50%, rgba(33,188,255,0.08))'
+            ? 'radial-gradient(circle at 28% 8%, rgba(255,255,255,0.14), rgba(255,255,255,0) 44%), linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.015) 50%, color-mix(in oklch, var(--orb-ai-accent) 5%, transparent))'
+            : 'radial-gradient(circle at 28% 8%, rgba(255,255,255,0.42), rgba(255,255,255,0) 46%), linear-gradient(145deg, rgba(255,255,255,0.22), rgba(255,255,255,0.07) 50%, color-mix(in oklch, var(--orb-ai-accent) 8%, transparent))'
           : undefined,
         boxShadow: isFloating
           ? isDark
@@ -345,8 +345,8 @@ export const NavigationIsland: React.FC<NavigationIslandProps> = ({
               onClick={onToggle}
               className={`w-10 h-10 flex items-center justify-center rounded-lg transition-colors duration-200 ${
                 isDark
-                  ? 'text-gray-300 hover:bg-gray-800'
-                  : 'text-gray-500 hover:bg-gray-50'
+                  ? 'text-[var(--orb-fg)] hover:bg-[var(--orb-surface-2)]'
+                  : 'text-[var(--orb-muted)] hover:bg-[var(--orb-surface)]'
               }`}
               title={t('navigation.expand')}
             >
@@ -360,14 +360,14 @@ export const NavigationIsland: React.FC<NavigationIslandProps> = ({
               placeholder={t('navigation.searchPlaceholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className={`w-full pl-10 pr-4 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+              className={`w-full pl-10 pr-4 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--orb-primary)] focus:border-transparent ${
                 isDark
-                  ? 'border-gray-700 bg-[#1A1A1A] text-white placeholder-gray-400'
-                  : 'border-gray-300 bg-white text-gray-900 placeholder-gray-500'
+                  ? 'border-[var(--orb-border)] bg-[var(--orb-surface-2)] text-[var(--orb-fg)] placeholder-[var(--orb-muted)]'
+                  : 'border-[var(--orb-border)] bg-[var(--orb-canvas)] text-[var(--orb-fg)] placeholder-[var(--orb-muted)]'
               }`}
             />
             <div className="absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-              <Search className={`h-4 w-4 ${isDark ? 'text-gray-500' : 'text-gray-400'}`} />
+              <Search className={`h-4 w-4 ${isDark ? 'text-[var(--orb-muted)]' : 'text-[var(--orb-muted)]'}`} />
             </div>
           </div>
         )}
@@ -376,7 +376,7 @@ export const NavigationIsland: React.FC<NavigationIslandProps> = ({
       {/* 导航菜单区域 */}
       <nav className={`flex-1 pb-4 transition-all duration-500 ease-in-out overflow-y-auto min-h-0 ${collapsed ? 'px-1' : 'px-2'}`}>
         {filteredMenuData.length === 0 ? (
-          <div className="flex items-center justify-center py-8 text-gray-500 text-sm">
+          <div className="flex items-center justify-center py-8 text-[var(--orb-muted)] text-sm">
             {collapsed ? <FolderTree className="h-5 w-5" /> : (searchTerm ? t('navigation.noMatch') : t('navigation.noAccessibleApp'))}
           </div>
         ) : (
@@ -443,16 +443,16 @@ export const NavigationIsland: React.FC<NavigationIslandProps> = ({
                       }}
                       className={`w-full flex items-center justify-center p-2 rounded-lg cursor-pointer transition-colors duration-200 ${
                         isDark
-                          ? 'text-gray-400 hover:bg-gray-800'
-                          : 'text-gray-600 hover:bg-gray-50'
+                          ? 'text-[var(--orb-muted)] hover:bg-[var(--orb-surface-2)]'
+                          : 'text-[var(--orb-muted)] hover:bg-[var(--orb-surface)]'
                       }`}
                       title={t('navigation.expandView', { title: category.title || '' })}
                     >
                       {category.icon || (
                         <div className={`w-6 h-6 rounded text-xs flex items-center justify-center font-medium ${
                           isDark
-                            ? 'bg-[#91a8d1] text-[#0b0b0b]'
-                            : 'bg-[#154194] text-white'
+                            ? 'bg-[var(--orb-nav-active-fg)] text-[#0b0b0b]'
+                            : 'bg-[var(--orb-primary)] text-[var(--orb-on-primary)]'
                         }`}>
                           {category.title?.charAt(0) || '?'}
                         </div>
@@ -471,7 +471,7 @@ export const NavigationIsland: React.FC<NavigationIslandProps> = ({
         <button
           onClick={onToggle}
           className={`absolute -bottom-1 -right-1 w-6 h-6 bg-transparent rounded-full flex items-center justify-center transition-all duration-300 ease-in-out z-20 ${
-            isDark ? 'hover:bg-gray-800/50' : 'hover:bg-white/20'
+            isDark ? 'hover:bg-[color-mix(in_oklch,var(--orb-surface-2)_50%,transparent)]' : 'hover:bg-[color-mix(in_oklch,var(--orb-canvas)_20%,transparent)]'
           }`}
           title={t('navigation.collapse')}
         >
@@ -486,12 +486,12 @@ export const NavigationIsland: React.FC<NavigationIslandProps> = ({
             }}
           >
             <div
-              className={isDark ? 'border-yellow-400' : ''}
+              className={isDark ? 'border-[var(--orb-status-warning)]' : ''}
               style={{
                 width: '32px',
                 height: '32px',
                 borderRadius: '16px',
-                border: '3px solid #21BCFF',
+                border: '3px solid var(--orb-ai-accent)',
                 backgroundColor: 'transparent',
                 position: 'absolute',
                 top: '-16px',
@@ -506,10 +506,10 @@ export const NavigationIsland: React.FC<NavigationIslandProps> = ({
         <button
           type="button"
           onClick={handleDisplayModeToggle}
-          className={`absolute -bottom-4 left-1/2 z-30 flex h-9 w-9 -translate-x-1/2 items-center justify-center rounded-full border shadow-md transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400/70 ${
+          className={`absolute -bottom-4 left-1/2 z-30 flex h-9 w-9 -translate-x-1/2 items-center justify-center rounded-full border shadow-md transition-colors focus:outline-none focus:ring-2 focus:ring-[color-mix(in_oklch,var(--orb-primary)_45%,transparent)] ${
             isDark
-              ? 'border-slate-700 bg-slate-900 text-slate-300 hover:bg-slate-800'
-              : 'border-slate-200 bg-white text-slate-600 hover:bg-blue-50 hover:text-blue-700'
+              ? 'border-[var(--orb-border)] bg-[var(--orb-surface-2)] text-[var(--orb-fg)] hover:bg-[var(--orb-hover)]'
+              : 'border-[var(--orb-border)] bg-[var(--orb-canvas)] text-[var(--orb-status-fg)] hover:bg-[var(--orb-p50)] hover:text-[var(--orb-status-primary)]'
           }`}
           style={{ touchAction: 'manipulation' }}
           title={isFloating ? t('navigation.mode.switchToFixed') : t('navigation.mode.switchToFloating')}

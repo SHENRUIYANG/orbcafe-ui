@@ -43,22 +43,22 @@ export const ChartCard: FC<ChartCardTypeContent> = ({
 }) => {
   const getIcon = () => {
     switch (type) {
-      case 'bar-chart-card': return <BarChart className="w-4 h-4 text-blue-500" />
-      case 'line-chart-card': return <LineChart className="w-4 h-4 text-green-500" />
-      case 'pie-chart-card': return <PieChart className="w-4 h-4 text-purple-500" />
-      case 'combo-chart-card': return <Activity className="w-4 h-4 text-orange-500" />
-      case 'heatmap-chart-card': return <Grid className="w-4 h-4 text-red-500" />
-      case 'fishbone-chart-card': return <GitBranch className="w-4 h-4 text-indigo-500" />
-      case 'waterfall-chart-card': return <TrendingDown className="w-4 h-4 text-teal-500" />
-      case 'google-map-card': return <Globe className="w-4 h-4 text-blue-600" />
-      case 'amap-card': return <MapPin className="w-4 h-4 text-blue-600" />
+      case 'bar-chart-card': return <BarChart className="w-4 h-4 text-[var(--orb-chart-1)]" />
+      case 'line-chart-card': return <LineChart className="w-4 h-4 text-[var(--orb-chart-positive)]" />
+      case 'pie-chart-card': return <PieChart className="w-4 h-4 text-[var(--orb-chart-2)]" />
+      case 'combo-chart-card': return <Activity className="w-4 h-4 text-[var(--orb-chart-5)]" />
+      case 'heatmap-chart-card': return <Grid className="w-4 h-4 text-[var(--orb-chart-negative)]" />
+      case 'fishbone-chart-card': return <GitBranch className="w-4 h-4 text-[var(--orb-chart-4)]" />
+      case 'waterfall-chart-card': return <TrendingDown className="w-4 h-4 text-[var(--orb-chart-6)]" />
+      case 'google-map-card': return <Globe className="w-4 h-4 text-[var(--orb-status-primary)]" />
+      case 'amap-card': return <MapPin className="w-4 h-4 text-[var(--orb-status-primary)]" />
       default: return <BarChart className="w-4 h-4" />
     }
   }
 
   const renderChart = () => {
     if (!data && type !== 'google-map-card' && type !== 'amap-card') {
-      return <div className="text-gray-500 text-sm p-4 text-center">No data available</div>
+      return <div className="text-[var(--orb-muted)] text-sm p-4 text-center">No data available</div>
     }
 
     try {
@@ -151,26 +151,26 @@ export const ChartCard: FC<ChartCardTypeContent> = ({
             />
           )
         default:
-          return <div className="text-gray-500 text-sm p-4 text-center">Unsupported chart type: {type}</div>
+          return <div className="text-[var(--orb-muted)] text-sm p-4 text-center">Unsupported chart type: {type}</div>
       }
     } catch (e) {
       console.error('Error rendering chart:', e);
-      return <div className="text-red-500 text-sm p-4 text-center">Error rendering chart</div>
+      return <div className="text-[var(--orb-status-error)] text-sm p-4 text-center">Error rendering chart</div>
     }
   }
 
   return (
-    <div className="w-full overflow-hidden rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm transition-all hover:shadow-md">
-      <div className="flex items-center px-4 py-3 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50">
+    <div className="w-full overflow-hidden rounded-lg border border-[var(--orb-border)] bg-[var(--orb-canvas)] shadow-sm transition-all hover:shadow-md">
+      <div className="flex items-center px-4 py-3 border-b border-[var(--orb-border)] bg-[color-mix(in_oklch,var(--orb-surface)_50%,transparent)]">
         <div className="mr-2 flex-shrink-0">
           {getIcon()}
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
+          <h3 className="text-sm font-semibold text-[var(--orb-fg)] truncate">
             {title}
           </h3>
           {subtitle && (
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">
+            <p className="text-xs text-[var(--orb-muted)] mt-0.5 truncate">
               {subtitle}
             </p>
           )}
@@ -184,11 +184,11 @@ export const ChartCard: FC<ChartCardTypeContent> = ({
         
         {/* Optional: Collapsible raw data view for debugging or detailed inspection */}
         <div className="mt-3">
-          <details className="text-xs text-gray-500 dark:text-gray-400">
-            <summary className="cursor-pointer hover:text-gray-700 dark:hover:text-gray-300 transition-colors select-none font-medium opacity-60 hover:opacity-100">
+          <details className="text-xs text-[var(--orb-muted)]">
+            <summary className="cursor-pointer hover:text-[var(--orb-fg)] transition-colors select-none font-medium opacity-60 hover:opacity-100">
               View Raw Data
             </summary>
-            <pre className="mt-2 p-2 bg-gray-50 dark:bg-gray-950 rounded border border-gray-100 dark:border-gray-800 overflow-x-auto max-h-40">
+            <pre className="mt-2 p-2 bg-[var(--orb-surface)] dark:bg-[var(--orb-canvas)] rounded border border-[var(--orb-border)] overflow-x-auto max-h-40">
               {JSON.stringify(data, null, 2)}
             </pre>
           </details>

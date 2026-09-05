@@ -161,7 +161,7 @@ export const PNavIsland = ({
                 width: 40,
                 height: 40,
                 bgcolor: isActive ? 'primary.main' : 'action.hover',
-                color: isActive ? '#fff' : 'text.primary',
+                color: isActive ? 'var(--orb-on-primary)' : 'text.primary',
               }}
             >
               {item.icon || (item.title || item.label || '?').slice(0, 1).toUpperCase()}
@@ -211,7 +211,7 @@ export const PNavIsland = ({
           borderRadius: 4,
           border: '1px solid',
           borderColor: 'divider',
-          bgcolor: isDark ? '#101828' : 'rgba(255,255,255,0.88)',
+          bgcolor: isDark ? 'var(--orb-surface)' : 'color-mix(in oklch, var(--orb-canvas) 88%, transparent)',
           maxHeight: maxHeight ? `${maxHeight}px` : undefined,
           overflowY: 'auto',
         }}
@@ -240,7 +240,7 @@ export const PNavIsland = ({
                 alignSelf: 'center',
                 borderRadius: 3,
                 bgcolor: isActiveItem(item) ? 'primary.main' : 'action.hover',
-                color: isActiveItem(item) ? '#fff' : 'text.primary',
+                color: isActiveItem(item) ? 'var(--orb-on-primary)' : 'text.primary',
               }}
             >
               {item.icon || (item.title || item.label || '?').slice(0, 1).toUpperCase()}
@@ -261,7 +261,7 @@ export const PNavIsland = ({
         borderRadius: 5,
         border: '1px solid',
         borderColor: 'divider',
-        bgcolor: isDark ? '#101828' : 'rgba(255,255,255,0.88)',
+        bgcolor: isDark ? 'var(--orb-surface)' : 'color-mix(in oklch, var(--orb-canvas) 88%, transparent)',
         maxHeight: maxHeight ? `${maxHeight}px` : undefined,
         overflow: 'hidden',
         display: 'flex',

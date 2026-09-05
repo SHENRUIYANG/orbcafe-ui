@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { CAppPageLayout, CChip, CPageTransition, CStandardPage, useOrbMode, useStandardReport, type OrbcafeLocale, type ReportMetadata } from 'orbcafe-ui';
+import { CChip, CPageTransition, CStandardPage, useOrbMode, useStandardReport, type OrbcafeLocale, type ReportMetadata } from 'orbcafe-ui';
+import { ExamplePageLayout } from './ExamplePageLayout';
 import Link from 'next/link';
 import { EXAMPLE_MENU } from './exampleNavigation';
 
@@ -533,7 +534,8 @@ export default function StdReportExample() {
     const menuData = EXAMPLE_MENU;
 
     return (
-        <CAppPageLayout
+          <ExamplePageLayout
+            appId="orbcafe-examples"
             appTitle=""
             navigationVariant="v2"
             searchPlacement="header"
@@ -553,6 +555,6 @@ export default function StdReportExample() {
                     </CStandardPage>
                 </div>
             </CPageTransition>
-        </CAppPageLayout>
+        </ExamplePageLayout>
     );
 }

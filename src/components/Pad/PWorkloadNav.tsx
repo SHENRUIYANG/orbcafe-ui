@@ -57,8 +57,8 @@ export const PWorkloadNav = ({ items, selectedId, orientation = 'auto', onItemSe
               borderRadius: 4,
               border: '1px solid',
               borderColor: selected ? 'primary.main' : 'divider',
-              boxShadow: selected ? '0 18px 40px rgba(37, 99, 235, 0.16)' : 'none',
-              bgcolor: getOrbCompatMode() === 'dark' ? 'rgba(30,41,59,0.6)' : 'background.paper',
+              boxShadow: selected ? '0 18px 40px color-mix(in oklch, var(--orb-primary) 16%, transparent)' : 'none',
+              bgcolor: getOrbCompatMode() === 'dark' ? 'color-mix(in oklch, var(--orb-surface-3) 60%, transparent)' : 'background.paper',
             }}
           >
             <div
@@ -90,7 +90,7 @@ export const PWorkloadNav = ({ items, selectedId, orientation = 'auto', onItemSe
                       borderRadius: 3,
                       display: 'grid',
                       placeItems: 'center',
-                      color: selected ? '#fff' : 'text.primary',
+                      color: selected ? 'var(--orb-on-primary)' : 'text.primary',
                       background: selected ? accent : 'action.hover',
                     }}
                   >
@@ -109,7 +109,7 @@ export const PWorkloadNav = ({ items, selectedId, orientation = 'auto', onItemSe
                         py: 0.4,
                         borderRadius: 999,
                         bgcolor: selected ? 'primary.main' : 'action.hover',
-                        color: selected ? '#fff' : 'text.secondary',
+                        color: selected ? 'var(--orb-on-primary)' : 'text.secondary',
                         textAlign: 'center',
                         fontWeight: 800,
                         fontSize: '0.8rem',

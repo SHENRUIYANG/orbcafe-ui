@@ -99,7 +99,9 @@ Use it before reading a module README in detail.
     - `useNavigationIsland`
 - Minimal state contract:
   - menu data
+  - stable application `appId` for persisted layout preferences
   - stable `TreeMenuItem.id` values for expansion and pinned-item persistence
+  - optional controlled `mode` / `onModeChange`
   - optional `navigationMode` / `onNavigationModeChange`
   - optional `pinnedNavigationItemIds` / `onPinnedNavigationItemIdsChange`
   - user/menu actions
@@ -120,6 +122,7 @@ Use it before reading a module README in detail.
 - Common failure modes:
   - `usePathname` used unsafely on first render
   - provider stack missing
+  - localized/page-specific `appTitle` used as the persistence identity instead of `appId`
   - client/server route boundary incorrect
   - trying to pin group nodes instead of leaf nodes with `href` or `appurl`
   - changing menu ids and breaking pinned-item persistence
@@ -165,8 +168,10 @@ Use it before reading a module README in detail.
   - `CKanbanCard`
   - `useKanbanBoard`
   - `createKanbanBoardModel`
+  - `addKanbanBucket`
   - `findKanbanCard`
   - `moveKanbanCard`
+  - `renameKanbanBucket`
 - Preferred pattern:
   - `useKanbanBoard + CKanbanBoard + onCardClick -> DetailInfo`
 - Hooks:
@@ -175,6 +180,7 @@ Use it before reading a module README in detail.
 - Minimal state contract:
   - buckets/cards board model
   - drag move callback
+  - optional bucket add/rename callbacks and card filter
   - card click route/query state
 - Canonical example:
   - `examples/app/_components/KanbanExampleClient.tsx`
@@ -184,6 +190,7 @@ Use it before reading a module README in detail.
   - empty bucket receives cards
   - click routes into detail-info
   - pure tools mirror UI move logic
+  - add/rename bucket actions update the controlled model
 - Common failure modes:
   - rendering board without hook/controlled model
   - duplicate bucket or card ids
@@ -237,6 +244,10 @@ Use it before reading a module README in detail.
 
 ## 7. Pad Workflow
 
+- Scope boundary:
+  - Pad/iPad-sized tablet workflows only.
+  - Pad portrait/landscape support is not phone or small-screen support.
+  - For phones, handset-sized screens, or mobile apps, do not use ORBCAFE `P*`/`C*` components; direct developers to [`doushabao-ui`](https://www.npmjs.com/package/doushabao-ui).
 - Public entry:
   - `PAppPageLayout`
   - `PNavIsland`
@@ -271,6 +282,7 @@ Use it before reading a module README in detail.
   - keypad submit writes back row value
   - barcode scan callback updates business state
 - Common failure modes:
+  - treating Pad orientation support as a promise of phone or small-screen responsiveness
   - hidden drawer/modal layer intercepting clicks
   - hydration mismatch from orientation-dependent first render
   - rendering React nodes inside typography paragraph wrappers
@@ -399,7 +411,42 @@ Use it before reading a module README in detail.
   - forgetting `minTreePaneWidth` / `minDetailPaneWidth` constraints in dense business pages
   - importing from `src/components/Tree/CTreeComp` instead of `orbcafe-ui`
 
-## 11. Shared Rules For AI
+## 11. CardPage
+
+- Public entry:
+  - `CCardPage`
+  - `CCardGrid`
+  - `CCardDetailPanel`
+  - `useCardPage`
+- Preferred pattern:
+  - `useCardPage + CCardPage` (Hook-first), built-in centered detail panel enabled
+- Hooks:
+  - Public hook exists: `useCardPage`
+- Minimal state contract:
+  - page identity: `metadata.id` / `id` / `appId`
+  - filters state (SmartFilter variant only; no table layout, no `layoutRefs`)
+  - items: `CCardItem[]` (`{ id, title, description?, icon?, iconNode?, meta? }` + flat extra fields)
+  - rows + total (`{ rows, total }` fetch contract, same as StdReport)
+  - detail panel: `detailPanel` (default `true`) / `renderDetailContent` / `onDetailClick` / `onDownloadClick`
+- Canonical example:
+  - `examples/app/_components/CardPageExampleClient.tsx`
+  - `examples/app/card-page/page.tsx`
+- Verify:
+  - filter applies (Go)
+  - variant saves/loads
+  - "view details" opens the centered detail card; Esc/backdrop/close button all close it
+  - download callback fires from card button and panel footer
+  - card icons stay visible in dark mode
+- Common failure modes:
+  - missing identity
+  - second hand-rolled detail modal next to the enabled built-in panel
+  - expecting `onDetailClick` to navigate while `detailPanel` is still on
+  - custom `iconNode` invisible in dark mode (not mode-aware)
+  - hand-wrapping the detail panel in `position: fixed` inside the page tree (clipped by `will-change: transform`; the panel portals to `document.body`)
+  - no `npm run build` in local `file:..` flow
+  - wrong import path
+
+## 12. Shared Rules For AI
 
 - Import only from `orbcafe-ui`.
 - Prefer the canonical example before inventing a new composition.

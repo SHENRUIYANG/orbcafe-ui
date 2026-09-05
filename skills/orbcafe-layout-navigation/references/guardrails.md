@@ -3,6 +3,7 @@
 ## Dependency constraints
 
 - ORBCAFE UI v2 is MUI-free. Do not install `@mui/*`, `@emotion/*`, or `lucide-react` for ORBCAFE components.
+- ORBCAFE UI does not use `next-themes`; do not add it only for ORBCAFE theme support.
 - `orbcafe-ui` brings its own runtime dependencies (`@radix-ui/react-slot`, `class-variance-authority`, `tailwind-merge`, `clsx`, etc.). Consumers only need to install `orbcafe-ui` and Tailwind v4 (`tailwindcss` + `@tailwindcss/postcss`) for utility-class compilation.
 - Verify with:
   - `npm ls orbcafe-ui`
@@ -25,10 +26,13 @@
 ## Navigation Island constraints
 
 - Treat `TreeMenuItem.id` as durable state. Changing ids breaks pinned-item persistence.
+- Set one stable `CAppPageLayout.appId` for the application. Do not use localized or page-specific titles as persistence identity.
 - Pin/favorites belong in `NavigationIsland` or `CAppPageLayout`, not page-local shortcut lists.
 - Pin only leaf navigation items with `href` or `appurl`; group nodes and synthetic sections should use `pinnable: false`.
 - Use `enableNavigationPinning={false}` only when the product explicitly forbids favorites.
 - Prefer `navigationPinStorageKey` for local persistence; use `pinnedNavigationItemIds` + `onPinnedNavigationItemIdsChange` when app/account settings own the state.
+- Use `mode` / `onModeChange` when another design system owns theme state; do not synchronize by polling DOM attributes.
+- LocalStorage restoration happens after mount. For a stable server/client first paint, supply controlled pinned ids from a server profile or cookie.
 - Use `navigationMode` / `onNavigationModeChange` for fixed/floating mode. Do not fork a second floating nav shell outside ORBCAFE components.
 - Verify search, expand/collapse, route click, pin/unpin, top pinned section ordering, and persistence after reload.
 - If pin appears to do nothing, check that the item is a leaf with `href`/`appurl`, `enablePinning` is true, ids are stable, and localStorage is available.

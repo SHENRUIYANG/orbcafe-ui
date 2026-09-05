@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react'
 import { ChevronDown as ChevronDownIcon, ChevronRight as ChevronRightIcon } from '@/components/Icons'
-import { useTheme } from 'next-themes'
 import styles from '../styles/thinkblock.module.css'
 
 interface ThinkBlockProps {
@@ -20,17 +19,15 @@ export const ThinkBlock: React.FC<ThinkBlockProps> = ({
   defaultExpanded = false,
   className = ''
 }) => {
-  const { theme } = useTheme()
   const [isExpanded, setIsExpanded] = useState(defaultExpanded)
 
   const toggleExpanded = () => {
     setIsExpanded(!isExpanded)
   }
 
-  const isDark = theme === 'dark'
-  const textColor = isDark ? 'text-gray-400' : 'text-gray-500'
-  const contentColor = isDark ? 'text-gray-300' : 'text-gray-600'
-  const borderColor = isDark ? 'border-gray-700' : 'border-gray-200'
+  const textColor = 'text-[var(--orb-muted)]'
+  const contentColor = 'text-[var(--orb-muted)]'
+  const borderColor = 'border-[var(--orb-border)]'
 
   return (
     <div className={`my-3 ${className}`}>
@@ -49,9 +46,9 @@ export const ThinkBlock: React.FC<ThinkBlockProps> = ({
           <span className="mr-2">{title}</span>
           {isStreaming && (
             <div className="flex items-center gap-0.5">
-              <div className={`w-0.5 h-0.5 rounded-full ${isDark ? 'bg-gray-400' : 'bg-gray-500'} ${styles.thinkingPulse}`} style={{ animationDelay: '0s' }}></div>
-              <div className={`w-0.5 h-0.5 rounded-full ${isDark ? 'bg-gray-400' : 'bg-gray-500'} ${styles.thinkingPulse}`} style={{ animationDelay: '0.5s' }}></div>
-              <div className={`w-0.5 h-0.5 rounded-full ${isDark ? 'bg-gray-400' : 'bg-gray-500'} ${styles.thinkingPulse}`} style={{ animationDelay: '1s' }}></div>
+              <div className={`w-0.5 h-0.5 rounded-full bg-[var(--orb-muted)] ${styles.thinkingPulse}`} style={{ animationDelay: '0s' }}></div>
+              <div className={`w-0.5 h-0.5 rounded-full bg-[var(--orb-muted)] ${styles.thinkingPulse}`} style={{ animationDelay: '0.5s' }}></div>
+              <div className={`w-0.5 h-0.5 rounded-full bg-[var(--orb-muted)] ${styles.thinkingPulse}`} style={{ animationDelay: '1s' }}></div>
             </div>
           )}
         </div>

@@ -10,7 +10,7 @@ Published copy of `src/components/Kanban/README.md`.
 - `CKanbanBucket`：独立封装的 bucket 样式容器
 - `CKanbanCard`：独立封装的卡片样式容器
 - `useKanbanBoard`：公开状态 Hook
-- `createKanbanBoardModel / findKanbanCard / moveKanbanCard`：公开 tools
+- `createKanbanBoardModel / findKanbanCard / moveKanbanCard / addKanbanBucket / renameKanbanBucket`：公开 tools
 
 ## 1. 最快上手（推荐）
 
@@ -19,8 +19,8 @@ import { CKanbanBoard, useKanbanBoard } from 'orbcafe-ui';
 
 const kanban = useKanbanBoard({
   initialBuckets: [
-    { id: 'backlog', title: 'Backlog', accentColor: '#5B6CFF' },
-    { id: 'doing', title: 'In Progress', accentColor: '#14B8A6', limit: 3 },
+    { id: 'backlog', title: 'Backlog', accentColor: 'var(--orb-chart-1)' },
+    { id: 'doing', title: 'In Progress', accentColor: 'var(--orb-chart-2)', limit: 3 },
   ],
   initialCards: [
     {
@@ -35,8 +35,16 @@ const kanban = useKanbanBoard({
   ],
 });
 
-<CKanbanBoard {...kanban.boardProps} />;
+<CKanbanBoard
+  {...kanban.boardProps}
+  searchable
+  bucketHeight="clamp(420px, calc(100vh - 370px), 640px)"
+  onBucketAdd={() => kanban.actions.addBucket(newBucket)}
+  onBucketRename={(bucketId, title) => kanban.actions.renameBucket(bucketId, title)}
+/>;
 ```
+
+`bucketHeight` 为每个 bucket 定义一致高度，卡片超过可用空间时只在 bucket 内部滚动。`searchable` 打开组件内置搜索，可匹配 bucket 标题/描述以及卡片 ID、标题、摘要、负责人、标签和指标。传入 `onBucketAdd` 后显示新增按钮，传入 `onBucketRename` 后每个 bucket 显示就地重命名入口。业务筛选可以通过 `cardFilter` 控制可见卡片，同时保持拖拽使用完整模型。
 
 ## 2. Hook-first 接入（标准方式）
 
@@ -57,8 +65,10 @@ import {
   CKanbanCard,
   useKanbanBoard,
   createKanbanBoardModel,
+  addKanbanBucket,
   findKanbanCard,
   moveKanbanCard,
+  renameKanbanBucket,
 } from 'orbcafe-ui';
 ```
 
@@ -138,6 +148,9 @@ AI 接入与自动化生成应使用：
 2. 点击卡片能进入 `detail-info/[id]`
 3. 空 bucket 能接收卡片，不会因为没有卡片而失去 drop 区域
 4. 超过 `limit` 时 bucket 右上角 chip 进入 warning 状态
+5. 卡片过多时 bucket 等高且只滚动卡片区，页面高度不再随最长 bucket 增长
+6. 搜索、结果计数和清空按钮正常工作，过滤状态下拖拽不会丢失隐藏卡片
+7. 新增 bucket 后可接收卡片，重命名支持 Enter 保存和 Esc 取消
 
 ## 9. Troubleshooting
 

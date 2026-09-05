@@ -1124,7 +1124,7 @@ export const CPlanningGantt = ({
                 pointerEvents: showSplitter ? 'auto' : 'none',
                 borderLeft: showSplitter ? `1px solid ${theme.palette.divider}` : '0 solid transparent',
                 borderRight: showSplitter ? `1px solid ${theme.palette.divider}` : '0 solid transparent',
-                backgroundColor: getOrbCompatMode() === 'dark' ? 'rgba(148,163,184,0.10)' : 'rgba(15,23,42,0.04)',
+                backgroundColor: getOrbCompatMode() === 'dark' ? 'color-mix(in oklch, var(--orb-muted) 10%, transparent)' : 'color-mix(in oklch, var(--orb-fg) 4%, transparent)',
                 transition: `width ${PANE_TRANSITION}, opacity ${PANE_TRANSITION}, background-color 120ms ease`,
                 position: 'relative',
                 '&:hover': {
@@ -1289,8 +1289,8 @@ export const CPlanningGantt = ({
                             },
                             backgroundImage:
                               getOrbCompatMode() === 'dark'
-                                ? 'linear-gradient(90deg, rgba(148,163,184,0.08) 1px, transparent 1px)'
-                                : 'linear-gradient(90deg, rgba(15,23,42,0.06) 1px, transparent 1px)',
+                                ? 'linear-gradient(90deg, color-mix(in oklch, var(--orb-muted) 8%, transparent) 1px, transparent 1px)'
+                                : 'linear-gradient(90deg, color-mix(in oklch, var(--orb-fg) 6%, transparent) 1px, transparent 1px)',
                             backgroundSize: timelineGridBackgroundSize,
                             cursor: isDragging ? 'grabbing' : isDraggable ? 'grab' : onTaskSelect ? 'pointer' : 'default',
                             transition: 'opacity 120ms ease',
@@ -1306,7 +1306,7 @@ export const CPlanningGantt = ({
                                 height: 24,
                                 borderRadius: 999,
                                 overflow: 'hidden',
-                                backgroundColor: getOrbCompatMode() === 'dark' ? 'rgba(148,163,184,0.18)' : 'rgba(15,23,42,0.10)',
+                                backgroundColor: getOrbCompatMode() === 'dark' ? 'color-mix(in oklch, var(--orb-muted) 18%, transparent)' : 'color-mix(in oklch, var(--orb-fg) 10%, transparent)',
                                 outline: selected ? `2px solid ${theme.palette.warning.main}` : 'none',
                                 outlineOffset: 2,
                               }}
@@ -1319,7 +1319,7 @@ export const CPlanningGantt = ({
                                   px: 1,
                                   display: 'flex',
                                   alignItems: 'center',
-                                  color: '#fff',
+                                  color: 'var(--orb-on-primary)',
                                   fontSize: 11,
                                   fontWeight: 800,
                                   textShadow: '0 1px 4px rgba(0,0,0,0.45)',

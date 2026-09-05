@@ -33,6 +33,7 @@ Rules:
 - Use `children` for groups.
 - Use `href` or `appurl` for navigable leaves.
 - Set `pinnable: false` on synthetic groups or items that must not appear in favorites.
+- Keep one stable `appId` across localized pages. Explicit `navigationPinStorageKey` still takes precedence when supplied.
 
 ## Pin / Favorites
 
@@ -42,6 +43,7 @@ Default local persistence:
 
 ```tsx
 <CAppPageLayout
+  appId="my-app"
   appTitle="ORBCAFE"
   menuData={menuData}
   enableNavigationPinning
@@ -98,6 +100,7 @@ Use `defaultNavigationMode` for uncontrolled first render. Avoid duplicating a s
 - Reload preserves local pinned items when using localStorage mode.
 - Controlled pin state calls `onPinnedNavigationItemIdsChange`.
 - Fixed/floating mode changes layout without hydration warnings.
+- Controlled `mode/onModeChange` stays synchronized with the host design system.
 
 ## Common Failures
 
@@ -106,3 +109,4 @@ Use `defaultNavigationMode` for uncontrolled first render. Avoid duplicating a s
 - Pinned state never persists because a controlled `pinnedItemIds` prop is passed without updating it in `onPinnedItemIdsChange`.
 - Floating mode is implemented outside `CAppPageLayout`, creating two competing navigation shells.
 - Route highlight mismatches on first paint because browser-only pathname state is read before mount.
+- A pinned section appears after mount because localStorage is client-only. Use server-backed controlled `pinnedNavigationItemIds` when zero first-paint movement is required.

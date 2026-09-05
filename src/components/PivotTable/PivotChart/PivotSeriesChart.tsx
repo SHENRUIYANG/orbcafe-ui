@@ -48,7 +48,7 @@ export const PivotSeriesChart: React.FC<PivotSeriesChartProps> = ({
               alignItems: 'center',
             }}
           >
-            <CTypography sx={{ fontSize: '0.78rem', fontWeight: 700 }} noWrap title={item.name}>
+            <CTypography component="div" sx={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--orb-fg-strong)' }} noWrap title={item.name}>
               {item.name}
             </CTypography>
             <CStack spacing={0.65}>
@@ -88,11 +88,11 @@ export const PivotSeriesChart: React.FC<PivotSeriesChartProps> = ({
               )}
             </CStack>
             <div sx={{ minWidth: 0 }}>
-              <CTypography sx={{ fontSize: '0.72rem', textAlign: { xs: 'left', md: 'right' }, fontWeight: 700 }}>
+              <CTypography component="div" sx={{ fontSize: '0.72rem', textAlign: { xs: 'left', md: 'right' }, fontWeight: 700, color: 'var(--orb-fg-strong)' }}>
                 {formatPrimaryValue(item.primaryValue)}
               </CTypography>
               {secondaryLabel && (
-                <CTypography sx={{ fontSize: '0.72rem', textAlign: { xs: 'left', md: 'right' }, color: 'text.secondary' }}>
+                <CTypography component="div" sx={{ fontSize: '0.72rem', textAlign: { xs: 'left', md: 'right' }, color: 'var(--orb-fg)' }}>
                   {(formatSecondaryValue ?? formatPrimaryValue)(item.secondaryValue ?? 0)}
                 </CTypography>
               )}
@@ -146,15 +146,16 @@ export const PivotSeriesChart: React.FC<PivotSeriesChartProps> = ({
                   />
                 )}
               </div>
-              <CTypography sx={{ fontSize: '0.76rem', fontWeight: 700 }} noWrap title={item.name}>
+              <CTypography component="div" sx={{ fontSize: '0.76rem', fontWeight: 700, color: 'var(--orb-fg-strong)' }} noWrap title={item.name}>
                 {item.name}
               </CTypography>
-              <CTypography sx={{ fontSize: '0.7rem', color: 'text.secondary' }} noWrap title={formatPrimaryValue(item.primaryValue)}>
+              <CTypography component="div" sx={{ fontSize: '0.7rem', color: 'var(--orb-fg)' }} noWrap title={formatPrimaryValue(item.primaryValue)}>
                 {formatPrimaryValue(item.primaryValue)}
               </CTypography>
               {secondaryLabel && (
                 <CTypography
-                  sx={{ fontSize: '0.7rem', color: 'text.secondary' }}
+                  component="div"
+                  sx={{ fontSize: '0.7rem', color: 'var(--orb-fg)' }}
                   noWrap
                   title={(formatSecondaryValue ?? formatPrimaryValue)(item.secondaryValue ?? 0)}
                 >
@@ -254,14 +255,14 @@ export const PivotSeriesChart: React.FC<PivotSeriesChartProps> = ({
               bgcolor: alpha(theme.palette.background.default, 0.35),
             })}
           >
-            <CTypography sx={{ fontSize: '0.76rem', fontWeight: 700 }} noWrap title={item.name}>
+            <CTypography component="div" sx={{ fontSize: '0.76rem', fontWeight: 700, color: 'var(--orb-fg-strong)' }} noWrap title={item.name}>
               {item.name}
             </CTypography>
-            <CTypography sx={{ fontSize: '0.71rem', color: 'text.secondary' }}>
+            <CTypography component="div" sx={{ fontSize: '0.71rem', color: 'var(--orb-fg)' }}>
               {formatPrimaryValue(item.primaryValue)}
             </CTypography>
             {secondaryLabel && (
-              <CTypography sx={{ fontSize: '0.71rem', color: 'text.secondary' }}>
+              <CTypography component="div" sx={{ fontSize: '0.71rem', color: 'var(--orb-fg)' }}>
                 {(formatSecondaryValue ?? formatPrimaryValue)(item.secondaryValue ?? 0)}
               </CTypography>
             )}

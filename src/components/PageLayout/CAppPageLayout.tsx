@@ -8,7 +8,7 @@ import { CAppHeader, CAppHeaderSearch } from './Components/CAppHeader';
 import { usePageLayout } from './Hooks/usePageLayout';
 import type { CAppPageLayoutProps } from './types';
 import { OrbcafeI18nProvider, type OrbcafeLocale } from '../../i18n';
-import { OrbisModeProvider } from '../../lib/theme';
+import { OrbisModeProvider, type OrbModeSetting } from '../../lib/theme';
 
 const FLOATING_NAV_INSET = 12;
 const FLOATING_NAV_COLLAPSED_WIDTH = 56;
@@ -16,8 +16,19 @@ const FLOATING_NAV_EXPANDED_WIDTH = 234;
 const LOCALE_STORAGE_KEY = 'orbcafe:page-layout-locale';
 const SUPPORTED_LOCALES: readonly OrbcafeLocale[] = ['en', 'zh', 'fr', 'de', 'ja', 'ko'];
 
-const createNavigationPinStorageKey = (appTitle: string) =>
+const normalizeStorageId = (value: string) =>
+  encodeURIComponent(value.trim().toLowerCase())
+    .replace(/%/g, '')
+    .replace(/[^a-z0-9._~-]+/g, '-') || 'app';
+
+const createApplicationStorageKey = (appId: string, preference: string) =>
+  `orbcafe:page-layout:${normalizeStorageId(appId)}:${preference}`;
+
+const createLegacyNavigationPinStorageKey = (appTitle: string) =>
   `orbcafe:page-layout:${appTitle.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'app'}:pinned-navigation-items`;
+
+const getNextMode = (mode: OrbModeSetting): OrbModeSetting =>
+  mode === 'system' ? 'dark' : mode === 'dark' ? 'light' : 'system';
 
 type FloatingNavigationHorizontalAnchor = 'left' | 'right';
 
@@ -45,6 +56,7 @@ const shouldIgnoreFloatingDrag = (target: EventTarget | null) => {
 };
 
 export const CAppPageLayout = ({
+  appId,
   appTitle,
   menuData = [],
   children,
@@ -53,6 +65,9 @@ export const CAppPageLayout = ({
   localeLabel,
   localeOptions,
   onLocaleChange,
+  mode: controlledMode,
+  defaultMode = 'system',
+  onModeChange,
   user,
   onUserRefresh,
   onUserSetting,
@@ -79,9 +94,16 @@ export const CAppPageLayout = ({
   onPinnedNavigationItemIdsChange,
   pinnedNavigationSectionTitle,
 }: CAppPageLayoutProps) => {
-  const modeStorageKey = 'orbcafe:page-layout-mode';
-  const navigationModeStorageKey = 'orbcafe:page-layout-navigation-mode';
-  const [mode, setMode] = useState<'light' | 'dark' | 'system'>('system');
+  const modeStorageKey = appId
+    ? createApplicationStorageKey(appId, 'mode')
+    : 'orbcafe:page-layout-mode';
+  const localeStorageKey = appId
+    ? createApplicationStorageKey(appId, 'locale')
+    : LOCALE_STORAGE_KEY;
+  const navigationModeStorageKey = appId
+    ? createApplicationStorageKey(appId, 'navigation-mode')
+    : 'orbcafe:page-layout-navigation-mode';
+  const [internalMode, setInternalMode] = useState<OrbModeSetting>(defaultMode);
   const [systemMode, setSystemMode] = useState<'light' | 'dark'>('light');
   const [hydrated, setHydrated] = useState(false);
   const [internalLocale, setInternalLocale] = useState<OrbcafeLocale>(locale);
@@ -97,6 +119,8 @@ export const CAppPageLayout = ({
   const [isDraggingFloatingNavigation, setIsDraggingFloatingNavigation] = useState(false);
   const floatingNavigationRef = useRef<HTMLDivElement | null>(null);
   const floatingNavigationDragRef = useRef<FloatingNavigationDragState | null>(null);
+  const isModeControlled = controlledMode !== undefined;
+  const mode = controlledMode ?? internalMode;
   const isLocaleControlled = onLocaleChange !== undefined;
   const effectiveLocale = isLocaleControlled ? locale : internalLocale;
   const localeOptionsKey = localeOptions?.join('|') ?? '';
@@ -109,13 +133,15 @@ export const CAppPageLayout = ({
     mode === 'system' ? (hydrated ? systemMode : 'light') : mode;
 
   useEffect(() => {
-    try {
-      const savedMode = window.localStorage.getItem(modeStorageKey);
-      if (savedMode === 'light' || savedMode === 'dark' || savedMode === 'system') {
-        setMode(savedMode);
+    if (!isModeControlled) {
+      try {
+        const savedMode = window.localStorage.getItem(modeStorageKey);
+        if (savedMode === 'light' || savedMode === 'dark' || savedMode === 'system') {
+          setInternalMode(savedMode);
+        }
+      } catch {
+        // ignore storage access failures
       }
-    } catch {
-      // ignore storage access failures
     }
 
     setHydrated(true);
@@ -126,16 +152,16 @@ export const CAppPageLayout = ({
     onChange();
     media.addEventListener('change', onChange);
     return () => media.removeEventListener('change', onChange);
-  }, []);
+  }, [isModeControlled, modeStorageKey]);
 
   useEffect(() => {
-    if (!hydrated) return;
+    if (isModeControlled || !hydrated) return;
     try {
       window.localStorage.setItem(modeStorageKey, mode);
     } catch {
       // ignore storage access failures
     }
-  }, [hydrated, mode]);
+  }, [hydrated, isModeControlled, mode, modeStorageKey]);
 
   useEffect(() => {
     if (isLocaleControlled) {
@@ -144,7 +170,7 @@ export const CAppPageLayout = ({
     }
 
     try {
-      const savedLocale = window.localStorage.getItem(LOCALE_STORAGE_KEY) as OrbcafeLocale | null;
+      const savedLocale = window.localStorage.getItem(localeStorageKey) as OrbcafeLocale | null;
       const availableLocales = localeOptions ?? SUPPORTED_LOCALES;
       if (savedLocale && SUPPORTED_LOCALES.includes(savedLocale) && availableLocales.includes(savedLocale)) {
         setInternalLocale(savedLocale);
@@ -154,16 +180,16 @@ export const CAppPageLayout = ({
     } finally {
       setLocaleHydrated(true);
     }
-  }, [isLocaleControlled, localeOptionsKey]);
+  }, [isLocaleControlled, localeOptionsKey, localeStorageKey]);
 
   useEffect(() => {
     if (isLocaleControlled || !localeHydrated) return;
     try {
-      window.localStorage.setItem(LOCALE_STORAGE_KEY, effectiveLocale);
+      window.localStorage.setItem(localeStorageKey, effectiveLocale);
     } catch {
       // ignore storage access failures
     }
-  }, [effectiveLocale, isLocaleControlled, localeHydrated]);
+  }, [effectiveLocale, isLocaleControlled, localeHydrated, localeStorageKey]);
 
   useEffect(() => {
     if (isNavigationModeControlled) {
@@ -213,6 +239,16 @@ export const CAppPageLayout = ({
     [isNavigationModeControlled, onNavigationModeChange],
   );
 
+  const setEffectiveMode = useCallback(
+    (nextMode: OrbModeSetting) => {
+      if (!isModeControlled) {
+        setInternalMode(nextMode);
+      }
+      onModeChange?.(nextMode);
+    },
+    [isModeControlled, onModeChange],
+  );
+
   const setEffectiveLocale = useCallback(
     (nextLocale: OrbcafeLocale) => {
       if (!isLocaleControlled) {
@@ -228,7 +264,12 @@ export const CAppPageLayout = ({
     initialNavigationCollapsed: false,
     initialNavigationMode: effectiveNavigationMode,
     enableNavigationPinning,
-    navigationPinStorageKey: navigationPinStorageKey ?? createNavigationPinStorageKey(appTitle),
+    navigationPinStorageKey:
+      navigationPinStorageKey ?? (
+        appId
+          ? createApplicationStorageKey(appId, 'pinned-navigation-items')
+          : createLegacyNavigationPinStorageKey(appTitle)
+      ),
     pinnedNavigationItemIds,
     defaultPinnedNavigationItemIds,
     onPinnedNavigationItemIdsChange,
@@ -412,9 +453,7 @@ export const CAppPageLayout = ({
           appTitle={appTitle}
           logo={logo}
           mode={mode}
-          onToggleMode={() =>
-            setMode((prev) => (prev === 'system' ? 'dark' : prev === 'dark' ? 'light' : 'system'))
-          }
+          onToggleMode={() => setEffectiveMode(getNextMode(mode))}
           locale={effectiveLocale}
           localeLabel={isLocaleControlled || effectiveLocale === locale ? localeLabel : undefined}
           localeOptions={localeOptions}

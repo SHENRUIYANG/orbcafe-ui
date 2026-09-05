@@ -15,6 +15,7 @@ export * from './components/Molecules/CList';
 export * from './components/Molecules/CFilterField';
 export * from './components/Molecules/CValueHelp';
 export * from './components/StdReport';
+export * from './components/CardPage';
 export * from './components/GraphReport';
 export * from './components/CustomizeAgent';
 export * from './components/DetailInfo';

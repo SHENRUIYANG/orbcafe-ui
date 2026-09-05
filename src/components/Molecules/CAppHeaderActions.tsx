@@ -80,10 +80,10 @@ export const CAppHeaderActions = () => {
     };
 
     const iconButtonStyle = {
-        color: effectiveMode === 'light' ? '#616161' : 'white',
-        backgroundColor: effectiveMode === 'light' ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.1)',
+        color: 'var(--orb-fg)',
+        backgroundColor: effectiveMode === 'light' ? 'color-mix(in oklch, var(--orb-canvas) 80%, transparent)' : 'color-mix(in oklch, var(--orb-fg) 10%, transparent)',
         backdropFilter: 'blur(10px)',
-        '&:hover': { backgroundColor: effectiveMode === 'light' ? 'rgba(255,255,255,1)' : 'rgba(255,255,255,0.2)' }
+        '&:hover': { backgroundColor: effectiveMode === 'light' ? 'var(--orb-canvas)' : 'color-mix(in oklch, var(--orb-fg) 20%, transparent)' }
     };
 
     return (

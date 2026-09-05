@@ -3,12 +3,19 @@
 import { useCallback, useMemo, useState } from 'react';
 import type {
   KanbanBoardModel,
+  KanbanBucketDefinition,
   KanbanCardClickContext,
   KanbanCardMoveEvent,
   KanbanCardRecord,
   UseKanbanBoardBindings,
 } from '../types';
-import { createKanbanBoardModel, findKanbanCard, moveKanbanCard } from '../Utils/kanbanTools';
+import {
+  addKanbanBucket,
+  createKanbanBoardModel,
+  findKanbanCard,
+  moveKanbanCard,
+  renameKanbanBucket,
+} from '../Utils/kanbanTools';
 import type { CreateKanbanBoardModelOptions } from '../types';
 
 export interface UseKanbanBoardOptions {
@@ -26,6 +33,8 @@ export interface UseKanbanBoardActions {
     cardId: string,
     updater: Partial<KanbanCardRecord> | ((card: KanbanCardRecord) => KanbanCardRecord),
   ) => void;
+  addBucket: (bucket: KanbanBucketDefinition) => boolean;
+  renameBucket: (bucketId: string, title: string) => boolean;
   getCard: (cardId: string) => ReturnType<typeof findKanbanCard>;
 }
 
@@ -105,6 +114,26 @@ export const useKanbanBoard = (options: UseKanbanBoardOptions): UseKanbanBoardRe
     [],
   );
 
+  const addBucket = useCallback(
+    (bucket: KanbanBucketDefinition) => {
+      const nextModel = addKanbanBucket(model, bucket);
+      if (nextModel === model) return false;
+      setModel(nextModel);
+      return true;
+    },
+    [model],
+  );
+
+  const renameBucket = useCallback(
+    (bucketId: string, title: string) => {
+      const nextModel = renameKanbanBucket(model, bucketId, title);
+      if (nextModel === model) return false;
+      setModel(nextModel);
+      return true;
+    },
+    [model],
+  );
+
   const boardProps = useMemo<UseKanbanBoardBindings>(
     () => ({
       model,
@@ -122,6 +151,8 @@ export const useKanbanBoard = (options: UseKanbanBoardOptions): UseKanbanBoardRe
       replaceModel,
       moveCard,
       updateCard,
+      addBucket,
+      renameBucket,
       getCard,
     },
     boardProps,

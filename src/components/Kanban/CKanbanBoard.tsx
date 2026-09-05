@@ -1,5 +1,9 @@
 'use client';
-import {  CStack } from "../Atoms";
+
+import { Box } from '../../lib/orbis-compat';
+import { CButton, CIconButton, CStack, CTextField, CTypography } from '../Atoms';
+import { Plus, Search, X } from '../Icons';
+import { useOrbcafeI18n } from '../../i18n';
 
 import {
   DndContext,
@@ -59,16 +63,18 @@ const SortableKanbanCard = ({ card, bucket, onCardClick }: SortableKanbanCardPro
 interface DroppableKanbanBucketProps {
   bucket: KanbanBucketModel;
   highlighted: boolean;
-  bucketMaxHeight?: number | string;
+  bucketHeight?: number | string;
   emptyBucketLabel?: string;
+  onBucketRename?: (title: string) => void;
   onCardClick?: (context: KanbanCardClickContext) => void;
 }
 
 const DroppableKanbanBucket = ({
   bucket,
   highlighted,
-  bucketMaxHeight,
+  bucketHeight,
   emptyBucketLabel,
+  onBucketRename,
   onCardClick,
 }: DroppableKanbanBucketProps) => {
   const { isOver, setNodeRef } = useDroppable({
@@ -76,13 +82,14 @@ const DroppableKanbanBucket = ({
   });
 
   return (
-    <div ref={setNodeRef} sx={{ minWidth: 0 }}>
+    <Box ref={setNodeRef} sx={{ minWidth: 0, minHeight: 0, height: bucketHeight }}>
       <CKanbanBucket
         bucket={bucket}
         cardCount={bucket.cards.length}
         highlighted={highlighted || isOver}
         emptyLabel={emptyBucketLabel}
-        maxHeight={bucketMaxHeight}
+        height={bucketHeight}
+        onRename={onBucketRename}
       >
         <SortableContext items={bucket.cards.map((card) => toCardDndId(card.id))} strategy={verticalListSortingStrategy}>
           <CStack spacing={1}>
@@ -92,21 +99,89 @@ const DroppableKanbanBucket = ({
           </CStack>
         </SortableContext>
       </CKanbanBucket>
-    </div>
+    </Box>
   );
+};
+
+const normalizeSearchValue = (value: unknown) => String(value ?? '').toLocaleLowerCase();
+
+const cardMatchesSearch = (card: KanbanCardRecord, query: string) => {
+  const searchableValues = [
+    card.id,
+    card.title,
+    card.summary,
+    card.kicker,
+    card.priority,
+    card.tone,
+    card.progress,
+    card.dueDate,
+    card.assignee?.id,
+    card.assignee?.name,
+    ...(card.tags?.flatMap((tag) => [tag.id, tag.label]) ?? []),
+    ...(card.metrics?.flatMap((metric) => [metric.label, metric.value]) ?? []),
+  ];
+
+  return searchableValues.some((value) => normalizeSearchValue(value).includes(query));
 };
 
 export const CKanbanBoard = ({
   model,
   onCardMove,
   onCardClick,
+  cardFilter,
+  onBucketAdd,
+  onBucketRename,
+  addBucketLabel,
   minBucketWidth = 320,
+  bucketHeight,
   bucketMaxHeight,
+  searchable = false,
+  searchValue,
+  defaultSearchValue = '',
+  onSearchValueChange,
+  searchPlaceholder,
   emptyBucketLabel,
   sx,
 }: CKanbanBoardProps) => {
+  const { t } = useOrbcafeI18n();
   const [activeCardId, setActiveCardId] = useState<string | null>(null);
   const [overBucketId, setOverBucketId] = useState<string | undefined>();
+  const [internalSearchValue, setInternalSearchValue] = useState(defaultSearchValue);
+  const effectiveSearchValue = searchValue ?? internalSearchValue;
+  const normalizedQuery = effectiveSearchValue.trim().toLocaleLowerCase();
+  const resolvedBucketHeight = bucketHeight ?? bucketMaxHeight ?? 560;
+
+  const visibleModel = useMemo(() => {
+    return {
+      buckets: model.buckets.map((bucket) => {
+        const filteredCards = cardFilter
+          ? bucket.cards.filter((card) => cardFilter(card, bucket))
+          : bucket.cards;
+        if (!normalizedQuery) return { ...bucket, cards: filteredCards };
+
+        const bucketMatches = [bucket.id, bucket.title, bucket.description].some((value) =>
+          normalizeSearchValue(value).includes(normalizedQuery),
+        );
+        return {
+          ...bucket,
+          cards: bucketMatches ? filteredCards : filteredCards.filter((card) => cardMatchesSearch(card, normalizedQuery)),
+        };
+      }),
+    };
+  }, [cardFilter, model, normalizedQuery]);
+
+  const visibleCardCount = useMemo(
+    () => visibleModel.buckets.reduce((count, bucket) => count + bucket.cards.length, 0),
+    [visibleModel],
+  );
+
+  const updateSearchValue = useCallback(
+    (value: string) => {
+      if (searchValue === undefined) setInternalSearchValue(value);
+      onSearchValueChange?.(value);
+    },
+    [onSearchValueChange, searchValue],
+  );
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -226,37 +301,120 @@ export const CKanbanBoard = ({
       onDragEnd={handleDragEnd}
       onDragCancel={resetDragState}
     >
-      <div
-        sx={[
-          {
-            display: 'grid',
-            gridAutoFlow: 'column',
-            gridAutoColumns: `minmax(${minBucketWidth}px, 1fr)`,
-            gap: 2,
-            alignItems: 'start',
-            overflowX: 'auto',
-            pb: 0.5,
-          },
-          ...(Array.isArray(sx) ? sx : sx ? [sx] : []),
-        ]}
-      >
-        {model.buckets.map((bucket) => (
-          <DroppableKanbanBucket
-            key={bucket.id}
-            bucket={bucket}
-            highlighted={bucket.id === overBucketId}
-            bucketMaxHeight={bucketMaxHeight}
-            emptyBucketLabel={emptyBucketLabel}
-            onCardClick={onCardClick}
-          />
-        ))}
-      </div>
+      <Box sx={{ display: 'flex', flexDirection: 'column', minWidth: 0, minHeight: 0, height: '100%', overflow: 'hidden' }}>
+        {(searchable || onBucketAdd) && (
+          <Box
+            role={searchable ? 'search' : undefined}
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: 1.5,
+              mb: 1.25,
+              minWidth: 0,
+            }}
+          >
+            {searchable && (
+              <Box sx={{ width: '100%', maxWidth: 360, flex: '1 1 240px' }}>
+                <CTextField
+                  dense
+                  value={effectiveSearchValue}
+                  onChange={(event) => updateSearchValue(event.target.value)}
+                  placeholder={searchPlaceholder ?? t('kanban.search.placeholder')}
+                  autoComplete="off"
+                  sx={{
+                    '& .orb-inp': {
+                      paddingLeft: '38px',
+                      paddingRight: effectiveSearchValue ? '42px' : '12px',
+                    },
+                    '& .orb-inp-adornment-end': {
+                      pointerEvents: 'auto',
+                    },
+                  }}
+                  startAdornment={<Search size={16} aria-hidden="true" />}
+                  endAdornment={effectiveSearchValue ? (
+                    <CIconButton
+                      size="small"
+                      tooltip={t('kanban.search.clear')}
+                      aria-label={t('kanban.search.clear')}
+                      onClick={() => updateSearchValue('')}
+                      sx={{ width: 26, height: 26 }}
+                    >
+                      <X size={15} />
+                    </CIconButton>
+                  ) : undefined}
+                />
+              </Box>
+            )}
+
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, ml: 'auto' }}>
+              {normalizedQuery && (
+                <CTypography
+                  component="div"
+                  aria-live="polite"
+                  sx={{ flexShrink: 0, fontSize: 12, fontWeight: 500, color: 'text.secondary' }}
+                >
+                  {visibleCardCount > 0
+                    ? t('kanban.search.results', { count: visibleCardCount })
+                    : t('kanban.search.noMatch')}
+                </CTypography>
+              )}
+              {onBucketAdd && (
+                <CButton
+                  size="small"
+                  variant="secondary"
+                  startIcon={<Plus size={15} />}
+                  onClick={onBucketAdd}
+                >
+                  {addBucketLabel ?? t('kanban.bucket.add')}
+                </CButton>
+              )}
+            </Box>
+          </Box>
+        )}
+
+        <Box
+          sx={[
+            {
+              display: 'grid',
+              gridAutoFlow: 'column',
+              gridAutoColumns: `minmax(${minBucketWidth}px, ${Math.max(minBucketWidth, 360)}px)`,
+              gap: 1.5,
+              gridAutoRows: resolvedBucketHeight === '100%' ? 'minmax(0, 1fr)' : undefined,
+              alignItems: 'stretch',
+              justifyContent: 'start',
+              flex: '1 1 0',
+              height: '100%',
+              minHeight: 0,
+              overflowX: 'auto',
+              overflowY: 'hidden',
+              overscrollBehavior: 'contain',
+              scrollbarGutter: 'stable both-edges',
+              pb: 0.5,
+            },
+            ...(Array.isArray(sx) ? sx : sx ? [sx] : []),
+          ]}
+        >
+          {visibleModel.buckets.map((bucket) => (
+            <DroppableKanbanBucket
+              key={bucket.id}
+              bucket={bucket}
+              highlighted={bucket.id === overBucketId}
+              bucketHeight={resolvedBucketHeight}
+              emptyBucketLabel={normalizedQuery ? t('kanban.search.noMatch') : emptyBucketLabel}
+              onBucketRename={onBucketRename ? (title) => onBucketRename(bucket.id, title) : undefined}
+              onCardClick={onCardClick}
+            />
+          ))}
+        </Box>
+      </Box>
 
       <DragOverlay>
         {activeLookup ? (
-          <div sx={{ width: Math.max(minBucketWidth - 24, 260) }}>
+          <Box sx={{ width: Math.max(minBucketWidth - 24, 260) }}>
             <CKanbanCard card={activeLookup.card} bucket={activeLookup.bucket} overlay />
-          </div>
+          </Box>
         ) : null}
       </DragOverlay>
     </DndContext>

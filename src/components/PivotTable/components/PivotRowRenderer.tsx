@@ -28,6 +28,9 @@ export const PivotRowRenderer: React.FC<PivotRowRendererProps> = ({
   const isExpanded = expandedKeys.has(node.key);
   const hasChildren = node.children.length > 0;
   const isGrandTotal = node.isGrandTotal;
+  const isCollapsedParent = hasChildren && !isExpanded && !isGrandTotal;
+  const labelWeight = isGrandTotal ? 800 : isCollapsedParent ? 700 : hasChildren ? 600 : 500;
+  const valueWeight = isGrandTotal ? 800 : isCollapsedParent ? 600 : 500;
 
   return (
     <>
@@ -35,26 +38,24 @@ export const PivotRowRenderer: React.FC<PivotRowRendererProps> = ({
         sx={{
           bgcolor: isGrandTotal
             ? getOrbCompatMode() === 'dark'
-              ? 'rgba(25, 118, 210, 0.22)'
-              : 'rgba(47, 91, 255, 0.08)'
+              ? 'color-mix(in oklch, var(--orb-primary) 22%, transparent)'
+              : 'color-mix(in oklch, var(--orb-primary) 8%, transparent)'
             : getOrbCompatMode() === 'dark'
-              ? '#111111'
+              ? 'var(--orb-surface)'
               : 'background.paper',
           '&:hover': {
             bgcolor: isGrandTotal
               ? getOrbCompatMode() === 'dark'
-                ? 'rgba(25, 118, 210, 0.28)'
-                : 'rgba(47, 91, 255, 0.12)'
-              : getOrbCompatMode() === 'dark'
-                ? '#181818'
-                : 'rgba(0, 0, 0, 0.02)',
+                ? 'color-mix(in oklch, var(--orb-primary) 28%, transparent)'
+                : 'color-mix(in oklch, var(--orb-primary) 12%, transparent)'
+              : 'var(--orb-hover)',
           },
         }}
       >
         <td
+          style={{ fontWeight: labelWeight }}
           sx={(theme) => ({
             fontSize: '0.76rem',
-            fontWeight: isGrandTotal ? 800 : 600,
             borderBottom: `1px solid ${theme.palette.divider}`,
             whiteSpace: 'nowrap',
             pl: level * 2 + 1,
@@ -64,11 +65,11 @@ export const PivotRowRenderer: React.FC<PivotRowRendererProps> = ({
           })}
         >
           {hasChildren && !isGrandTotal && (
-            <CIconButton size="small" onClick={() => onToggle(node.key)} sx={{ p: 0.2, mr: 0.5, ml: -1 }}>
-              {isExpanded ? <KeyboardArrowDownIcon sx={{ fontSize: 16 }} /> : <KeyboardArrowRightIcon sx={{ fontSize: 16 }} />}
+            <CIconButton size="small" onClick={() => onToggle(node.key)} sx={{ width: 22, height: 22, p: 0, mr: 0.35, ml: -0.8 }}>
+              {isExpanded ? <KeyboardArrowDownIcon size={12} /> : <KeyboardArrowRightIcon size={12} />}
             </CIconButton>
           )}
-          {!hasChildren && !isGrandTotal && level > 0 && <div sx={{ width: 20 }} />}
+          {!hasChildren && !isGrandTotal && level > 0 && <div sx={{ width: 18 }} />}
           {node.value}
         </td>
 
@@ -76,9 +77,9 @@ export const PivotRowRenderer: React.FC<PivotRowRendererProps> = ({
           <td
             key={`${node.key}-${column.id}`}
             align="right"
+            style={{ fontWeight: valueWeight }}
             sx={{
               fontSize: '0.76rem',
-              fontWeight: isGrandTotal ? 800 : 500,
               borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
               whiteSpace: 'nowrap',
             }}

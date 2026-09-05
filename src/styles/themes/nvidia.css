@@ -1,0 +1,36 @@
+/* nvidia.css — generated from the local Open Design preset "nvidia". Do not edit.
+   Regenerate with: npx orbcafe-theme apply nvidia
+   Import AFTER the base styles (import 'orbcafe-ui/styles.css').
+   Only base tokens are overridden; all derived tokens re-derive via color-mix. */
+
+:root {
+  --orb-primary: #76b900;
+  --orb-accent: #f2a900;
+  --orb-err: #d40000;
+  --orb-fg: #1a1a1a;
+  --orb-fg-strong: #1a1a1a;
+  --orb-muted: #666666;
+  --orb-canvas: #ffffff;
+  --orb-surface: #f2f2f2;
+  --orb-border: #e0e0e0;
+  --orb-link: #5c9100;
+  --orb-font-brand: "NVIDIA Sans";
+  --orb-r: 4px;
+}
+
+.orb-dark,
+[data-orb-mode="dark"] {
+  --orb-primary: #76b900;
+  --orb-accent: #f2a900;
+  --orb-err: #ff6b6b;
+  --orb-fg: #eeeeee;
+  --orb-fg-strong: #eeeeee;
+  --orb-muted: #aaaaaa;
+  --orb-canvas: #000000;
+  --orb-surface: #191919;
+  --orb-surface-2: #2a2a2a;
+  --orb-border: #3d3d3d;
+  --orb-link: #a4d24b;
+  --orb-font-brand: "NVIDIA Sans";
+  --orb-r: 4px;
+}

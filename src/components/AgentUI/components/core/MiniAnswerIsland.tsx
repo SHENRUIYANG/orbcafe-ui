@@ -44,10 +44,10 @@ export const MiniAnswerIsland: React.FC<MiniAnswerIslandProps> = ({
           aria-busy={btn.loading || undefined}
           className={cn(
             "p-1.5 rounded-md transition-colors",
-            "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100",
-            "hover:bg-gray-100 dark:hover:bg-gray-800",
+            "text-[var(--orb-muted)] hover:text-[var(--orb-fg)] dark:text-[var(--orb-muted)] dark:hover:text-[var(--orb-fg)]",
+            "hover:bg-[var(--orb-hover)]",
             "disabled:opacity-50 disabled:cursor-not-allowed",
-            btn.active && "text-blue-600 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/20",
+            btn.active && "text-[var(--orb-primary)] bg-[var(--orb-p50)]",
             btn.type === 'refresh' && btn.loading && "animate-spin"
           )}
           title={btn.type}

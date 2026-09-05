@@ -1,4 +1,3 @@
-import { getOrbCompatMode } from '../../../lib/orbis-compat';
 import { LayersClearIcon } from '../../../lib/orbis-compat';
 import React from 'react';
 import {  CIconButton, CPaper, CTypography, CTooltip } from "../../Atoms";
@@ -28,15 +27,14 @@ export const DropZone: React.FC<DropZoneProps> = ({ zone, title, hint, icon, chi
         p: 1.1,
         borderRadius: 'var(--orb-r-container)',
         border: '1px dashed',
-        borderColor: isOver ? 'primary.main' : theme.palette.divider,
+        borderColor: isOver ? 'var(--orb-primary)' : 'var(--orb-p200)',
         bgcolor: isOver
-          ? getOrbCompatMode() === 'dark'
-            ? 'rgba(25, 118, 210, 0.16)'
-            : 'rgba(47, 91, 255, 0.06)'
-          : getOrbCompatMode() === 'dark'
-            ? 'rgba(255,255,255,0.02)'
-            : 'rgba(245, 248, 255, 0.86)',
-        transition: 'all 120ms ease',
+          ? 'var(--orb-p100)'
+          : theme.palette.mode === 'dark'
+            ? 'var(--orb-surface-2)'
+            : 'var(--orb-p50)',
+        transition: 'border-color 140ms ease, background-color 140ms ease, box-shadow 140ms ease',
+        boxShadow: isOver ? '0 0 0 3px var(--orb-focus-ring)' : 'none',
         minHeight: 120,
         display: 'flex',
         flexDirection: 'column',
@@ -45,19 +43,19 @@ export const DropZone: React.FC<DropZoneProps> = ({ zone, title, hint, icon, chi
       <div sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1 }}>
         <div sx={{ display: 'flex', alignItems: 'center', gap: 0.8 }}>
           {icon}
-          <CTypography sx={{ fontSize: '0.79rem', fontWeight: 800, letterSpacing: 0.2 }}>{title}</CTypography>
-          <CTypography sx={{ fontSize: '0.72rem', color: 'text.secondary' }}>({itemCount})</CTypography>
+          <CTypography component="div" sx={{ fontSize: '0.8rem', fontWeight: 700, letterSpacing: 0.1, color: 'var(--orb-fg-strong)' }}>{title}</CTypography>
+          <CTypography component="div" sx={{ fontSize: '0.73rem', fontWeight: 500, color: 'var(--orb-fg)' }}>({itemCount})</CTypography>
         </div>
         {itemCount > 0 && onClear && (
           <CTooltip title={t('pivot.clearArea')}>
-            <CIconButton size="small" onClick={onClear} sx={{ p: 0.25 }}>
-              <LayersClearIcon sx={{ fontSize: 16 }} />
+            <CIconButton size="small" onClick={onClear} sx={{ width: 24, height: 24, p: 0 }}>
+              <LayersClearIcon size={13} />
             </CIconButton>
           </CTooltip>
         )}
       </div>
 
-      <CTypography sx={{ mt: 0.5, mb: 0.9, fontSize: '0.7rem', color: 'text.secondary' }}>{hint}</CTypography>
+      <CTypography component="div" sx={{ mt: 0.5, mb: 0.9, fontSize: '0.72rem', fontWeight: 400, color: 'var(--orb-fg)' }}>{hint}</CTypography>
       <div sx={{ flex: 1 }}>{children}</div>
     </CPaper>
   );

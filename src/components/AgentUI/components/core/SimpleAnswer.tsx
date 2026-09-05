@@ -104,11 +104,11 @@ export const SimpleAnswer: FC<IAnswerProps> = ({
       return null
 
     const isLike = rating === 'like'
-    const ratingIconClassname = isLike ? 'text-blue-600 bg-blue-100 hover:bg-blue-200' : 'text-red-600 bg-red-100 hover:bg-red-200'
+    const ratingIconClassname = isLike ? 'text-[var(--orb-status-primary)] bg-[var(--orb-p100)] hover:bg-[var(--orb-p200)]' : 'text-[var(--orb-status-error)] bg-[color-mix(in_oklch,var(--orb-status-error)_12%,transparent)] hover:bg-[color-mix(in_oklch,var(--orb-status-error)_20%,transparent)]'
     
     return (
       <div
-        className={'relative box-border flex items-center justify-center h-7 w-7 p-0.5 rounded-lg bg-white dark:bg-gray-800 cursor-pointer text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 border border-gray-200 dark:border-gray-700 shadow-sm'}
+        className={'relative box-border flex items-center justify-center h-7 w-7 p-0.5 rounded-lg bg-[var(--orb-canvas)] cursor-pointer text-[var(--orb-muted)] hover:text-[var(--orb-fg)] border border-[var(--orb-border)] shadow-sm'}
         onClick={async () => {
           await onFeedback?.(id, { rating: null })
         }}
@@ -186,13 +186,13 @@ export const SimpleAnswer: FC<IAnswerProps> = ({
 
   return (
     <div key={id} className="mb-4">
-      <div className="text-sm text-black dark:text-gray-100" style={{ lineHeight: '1.5', fontSize: '16px', fontWeight: '280', fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
-        <div className="min-w-0 break-words" style={{ lineHeight: '1.5', fontSize: '16px', fontWeight: '280', fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
+      <div className="text-sm text-[var(--orb-fg)]" style={{ lineHeight: '1.5', fontSize: '16px', fontWeight: '280', fontFamily: 'var(--orb-font)' }}>
+        <div className="min-w-0 break-words" style={{ lineHeight: '1.5', fontSize: '16px', fontWeight: '280', fontFamily: 'var(--orb-font)' }}>
           {(isResponding && (isAgentMode ? (!content && (agent_thoughts || []).filter(item => !!item.thought || !!item.tool).length === 0) : !content))
             ? (
               <div className='flex items-center justify-start'>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500 mr-2"></div>
-                <span className="ml-2 text-gray-500">Thinking...</span>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[var(--orb-primary)] mr-2"></div>
+                <span className="ml-2 text-[var(--orb-muted)]">Thinking...</span>
               </div>
             )
             : (
@@ -201,7 +201,7 @@ export const SimpleAnswer: FC<IAnswerProps> = ({
         </div>
         
         {!isResponding && content && (
-          <div className='flex flex-row justify-start gap-2 mt-3 pt-2 border-t border-gray-100 dark:border-gray-700'>
+          <div className='flex flex-row justify-start gap-2 mt-3 pt-2 border-t border-[var(--orb-border)]'>
             {!feedbackDisabled && renderItemOperation()}
             {!feedbackDisabled && renderFeedbackRating(feedback?.rating)}
           </div>

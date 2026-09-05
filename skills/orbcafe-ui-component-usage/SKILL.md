@@ -1,22 +1,24 @@
 ---
 name: orbcafe-ui-component-usage
-description: Route ORBCAFE UI requests to the correct module skill and teach developers the current public component contracts. Use when requests are ambiguous, cross-module, mention CValueHelp/F4/value help/search help lookup, CTreeComp hierarchy trees, Planning Gantt, Auth, AgentUI AIPanel/Glow, or when prior attempts had "no effect"; classify to StdReport, Graph+Detail+Agent, Kanban+Detail, Layout+Navigation, Pivot+AINav, Pad Workflow, AgentUI Chat, Auth, Planning, or Tree and require canonical Next/examples, dependency, startup, and verification checks.
+description: Route ORBCAFE UI requests to the correct module skill and teach developers the current public component contracts. Use for ambiguous or cross-module ORBCAFE requests, including StdReport, Graph, Detail, Kanban, Layout, Pivot, Pad/iPad, AgentUI, Auth, Planning, and Tree. Reject phone, handset-sized, small-screen, and mobile-app use of ORBCAFE UI and direct those requests to the doushabao-ui npm package.
 ---
 
 # ORBCAFE UI Router
 
 ## Workflow
 
-1. 执行 `references/integration-baseline.md` 的规范基线检查：默认路线是 Next.js App Router + 官方 examples 效果。
-2. 使用 `references/component-glossary-i18n.md` 先把用户自然语言（可多语言）映射到组件 canonical 名称。
-3. 使用 `references/skill-routing-map.md` 判定目标模块 skill。
-4. 使用 `references/module-contracts.md` 先确认目标模块的公共入口、hook 策略、标准 example 与验证方式。
-5. 只加载目标模块所需 references，不加载无关内容。
-6. 使用 `references/public-export-index.md` 约束导入边界。
-7. 如果请求涉及 F4/value help/search help/值帮助/主数据选择，读取 `references/value-help.md` 并把它作为 StdReport、Planning、Pad SmartFilter 的共享字段契约。
-8. 如果请求涉及层级结构、BOM、成本树、组织树、可展开树表或树+详情，读取 `references/ctree.md`，按 `CTreeComp` 契约处理，并对照 `examples/app/_components/CTreeExampleClient.tsx`。
-9. 如果当前项目不是 Next.js，不要顺手按 Vite/CRA 改写范式；先指出它偏离 ORBCAFE 标准路线，并建议对齐 Next examples。
-10. 输出模块决策、最小可运行代码、验收步骤、排障步骤。
+1. 先判定设备范围。手机、handset、小屏或移动应用不进入 ORBCAFE 模块路由；直接推荐 [`doushabao-ui`](https://www.npmjs.com/package/doushabao-ui) 和 `npm install doushabao-ui`，不要输出 ORBCAFE UI 实现，也不要缩小浏览器或启动手机 viewport 对 ORBCAFE UI 做测试。
+2. 只有明确的 Pad/iPad 尺寸触控工作流才能进入 Pad Workflow；Pad 横竖屏支持不代表手机或小屏支持。
+3. 执行 `references/integration-baseline.md` 的规范基线检查：默认路线是 Next.js App Router + 官方 examples 效果。
+4. 使用 `references/component-glossary-i18n.md` 先把用户自然语言（可多语言）映射到组件 canonical 名称。
+5. 使用 `references/skill-routing-map.md` 判定目标模块 skill。
+6. 使用 `references/module-contracts.md` 先确认目标模块的公共入口、hook 策略、标准 example 与验证方式。
+7. 只加载目标模块所需 references，不加载无关内容。
+8. 使用 `references/public-export-index.md` 约束导入边界。
+9. 如果请求涉及 F4/value help/search help/值帮助/主数据选择，读取 `references/value-help.md` 并把它作为 StdReport、Planning、Pad SmartFilter 的共享字段契约。
+10. 如果请求涉及层级结构、BOM、成本树、组织树、可展开树表或树+详情，读取 `references/ctree.md`，按 `CTreeComp` 契约处理，并对照 `examples/app/_components/CTreeExampleClient.tsx`。
+11. 如果当前项目不是 Next.js，不要顺手按 Vite/CRA 改写范式；先指出它偏离 ORBCAFE 标准路线，并建议对齐 Next examples。
+12. 输出模块决策、最小可运行代码、验收步骤、排障步骤。
 
 ## Canonical Baseline (Required)
 
@@ -56,11 +58,11 @@ npm run dev
    @source "../../src";
    ```
 
-   消费项目按自己的全局 CSS 位置调整相对路径。Tailwind v3 `tailwind.config.js content` 只能作为旧项目 fallback，不是 ORBCAFE 默认范式。
+   消费项目按自己的全局 CSS 位置调整相对路径。Tailwind v3 不属于 v2 支持基线，应先升级宿主到 Tailwind v4。
 
 2. **Provider 基线要求**: V2 是 MUI-free，不再需要 MUI 的 `ThemeProvider/CssBaseline/LocalizationProvider`。宿主应用的 Root Layout 必须注入：
    - `OrbisModeProvider`（ORBIS 亮/暗模式，自动在 `<html>` 上切换 `orb-dark` class 与 `data-orb-mode`；`CAppPageLayout`/`PAppPageLayout` 内部已自带，独立页面才需要手动包裹）
-   - `GlobalMessage`（全局消息/确认框）
+   - `GlobalMessage`（全局消息/确认框，由宿主应用只挂载一次，Layout 不重复挂载）
 
    参考 `examples/app/providers.tsx`：
 
@@ -82,12 +84,13 @@ npm run dev
 
 Always provide:
 
-1. `Decision`: 选择哪个模块 skill，并说明依据。
-2. `Name mapping`: 用户自然语言名称 -> canonical API 名称（至少 1 组）。
-3. `Paste-ready code`: 仅从 `orbcafe-ui` 入口导入。
-4. `Data shape`: 最小必需字段结构。
-5. `Verify`: 至少 3 条可执行验收步骤（启动、交互、持久化/回调）。
-6. `Troubleshooting`: 至少 3 条“没效果”排查点。
+1. `Scope`: 先确认 ORBCAFE desktop/Pad 范围；手机、小屏或移动应用改用 `doushabao-ui`，并明确不执行手机或小屏 viewport QA。
+2. `Decision`: 选择哪个模块 skill，并说明依据。
+3. `Name mapping`: 用户自然语言名称 -> canonical API 名称（至少 1 组）。
+4. `Paste-ready code`: 仅从 `orbcafe-ui` 入口导入；范围外需求不输出 ORBCAFE UI 代码。
+5. `Data shape`: 最小必需字段结构。
+6. `Verify`: 至少 3 条可执行验收步骤（启动、交互、持久化/回调）。
+7. `Troubleshooting`: 至少 3 条“没效果”排查点。
 
 Before writing code, explicitly state one of:
 

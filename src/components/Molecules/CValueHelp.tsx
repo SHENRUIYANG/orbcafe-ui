@@ -506,7 +506,7 @@ export const CValueHelp = <TRecord extends CValueHelpRecord = CValueHelpRecord,>
                   <td
                     padding="checkbox"
                     sx={(theme) => ({
-                      bgcolor: orbMode === 'dark' ? '#01091a' : theme.palette.background.paper,
+                      bgcolor: orbMode === 'dark' ? 'var(--orb-canvas)' : theme.palette.background.paper,
                       borderBottom: `1px solid ${theme.palette.divider}`,
                     })}
                   />
@@ -519,7 +519,7 @@ export const CValueHelp = <TRecord extends CValueHelpRecord = CValueHelpRecord,>
                         width: column.width,
                         fontSize: '0.78rem',
                         fontWeight: 800,
-                        bgcolor: orbMode === 'dark' ? '#01091a' : theme.palette.background.paper,
+                        bgcolor: orbMode === 'dark' ? 'var(--orb-canvas)' : theme.palette.background.paper,
                         borderBottom: `1px solid ${theme.palette.divider}`,
                       })}
                     >

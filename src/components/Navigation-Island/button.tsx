@@ -36,23 +36,23 @@ import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "../../lib/utils"
 
-import { BRAND_COLORS, composeInteractiveClasses, INTERACTIVE_VARIANTS, RADIUS } from "../../config/foundations"
+import { composeInteractiveClasses, INTERACTIVE_VARIANTS, RADIUS } from "../../config/foundations"
 
 const buttonVariants = cva(composeInteractiveClasses(), {
   variants: {
     variant: {
       default: `${INTERACTIVE_VARIANTS.primary} shadow-sm`,
       destructive:
-        "bg-red-500 text-white hover:bg-red-600 active:bg-red-700 dark:bg-red-600 dark:hover:bg-red-500 dark:active:bg-red-700 shadow-sm",
+        "bg-[var(--orb-status-error)] text-[var(--orb-on-primary)] hover:opacity-90 active:opacity-80 shadow-sm",
       outline: `${INTERACTIVE_VARIANTS.outline} shadow-sm`,
       secondary:
-        "bg-gray-200 text-gray-700 hover:bg-gray-300 active:bg-gray-400 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 dark:active:bg-gray-500 shadow-sm",
+        "bg-[var(--orb-surface-2)] text-[var(--orb-fg)] hover:bg-[var(--orb-hover)] active:bg-[var(--orb-selected)] shadow-sm",
       ghost: INTERACTIVE_VARIANTS.ghost,
-      link: "text-blue-600 dark:text-blue-400 underline-offset-4 hover:underline hover:text-blue-700 dark:hover:text-blue-300 active:text-blue-800 dark:active:text-blue-200",
+      link: "text-[var(--orb-status-primary)] underline-offset-4 hover:underline hover:text-[var(--orb-status-primary)] active:text-[var(--orb-p700)]",
       // 聊天场景专用按钮样式
       "chat-tool": "bg-[var(--orbai-surface-2)] border border-[var(--orbai-border-soft)] text-[var(--orbai-text-2)] hover:bg-[var(--orbai-surface-3)] hover:border-[var(--orbai-border-strong)] hover:text-[var(--orbai-text-1)] active:scale-95 transition-all duration-200",
-      "chat-send": `bg-[${BRAND_COLORS.primary}] hover:bg-[${BRAND_COLORS.primaryHover}] text-white border border-[var(--orbai-border-strong)] shadow-[var(--orbai-shadow-soft-sm)] hover:shadow-[var(--orbai-shadow-soft-md)] active:scale-95 transition-all duration-200`,
-      "chat-stop": "bg-red-500 hover:bg-red-600 border border-[var(--orbai-border-strong)] shadow-[var(--orbai-shadow-soft-sm)] hover:shadow-[var(--orbai-shadow-soft-md)] active:scale-95 text-white transition-all duration-200",
+      "chat-send": "bg-[var(--orb-primary)] hover:bg-[var(--orb-p600)] text-[var(--orb-on-primary)] border border-[var(--orbai-border-strong)] shadow-[var(--orbai-shadow-soft-sm)] hover:shadow-[var(--orbai-shadow-soft-md)] active:scale-95 transition-all duration-200",
+      "chat-stop": "bg-[var(--orb-status-error)] hover:opacity-90 border border-[var(--orbai-border-strong)] shadow-[var(--orbai-shadow-soft-sm)] hover:shadow-[var(--orbai-shadow-soft-md)] active:scale-95 text-[var(--orb-on-primary)] transition-all duration-200",
       "chat-disabled": "cursor-not-allowed opacity-50 bg-[var(--orbai-surface-2)] border border-[var(--orbai-border-soft)] text-[var(--orbai-muted)]"
     },
     size: {

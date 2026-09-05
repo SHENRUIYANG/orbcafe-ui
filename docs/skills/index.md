@@ -11,6 +11,7 @@ Published AI-agent skills and reference files.
 - [references/implementation-recipes.md](orbcafe-ui-component-usage/references/implementation-recipes.md)
 - [references/integration-baseline.md](orbcafe-ui-component-usage/references/integration-baseline.md)
 - [references/module-contracts.md](orbcafe-ui-component-usage/references/module-contracts.md)
+- [references/module-contracts.json](orbcafe-ui-component-usage/references/module-contracts.json)
 - [references/public-api-guardrails.md](orbcafe-ui-component-usage/references/public-api-guardrails.md)
 - [references/public-export-index.md](orbcafe-ui-component-usage/references/public-export-index.md)
 - [references/skill-routing-map.md](orbcafe-ui-component-usage/references/skill-routing-map.md)
@@ -23,6 +24,14 @@ Published AI-agent skills and reference files.
 - [references/component-selection.md](orbcafe-stdreport-workflow/references/component-selection.md)
 - [references/guardrails.md](orbcafe-stdreport-workflow/references/guardrails.md)
 - [references/recipes.md](orbcafe-stdreport-workflow/references/recipes.md)
+
+## orbcafe-cardpage-workflow
+
+- [README.md](orbcafe-cardpage-workflow/README.md)
+- [SKILL.md](orbcafe-cardpage-workflow/SKILL.md)
+- [references/component-selection.md](orbcafe-cardpage-workflow/references/component-selection.md)
+- [references/guardrails.md](orbcafe-cardpage-workflow/references/guardrails.md)
+- [references/recipes.md](orbcafe-cardpage-workflow/references/recipes.md)
 
 ## orbcafe-planning-gantt
 
@@ -77,3 +86,7 @@ Published AI-agent skills and reference files.
 - [references/domain-patterns.md](orbcafe-pivot-ainav/references/domain-patterns.md)
 - [references/guardrails.md](orbcafe-pivot-ainav/references/guardrails.md)
 - [references/recipes.md](orbcafe-pivot-ainav/references/recipes.md)
+
+## orbcafe-brand-theme
+
+- [SKILL.md](orbcafe-brand-theme/SKILL.md)

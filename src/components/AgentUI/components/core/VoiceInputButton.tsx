@@ -45,9 +45,9 @@ export const VoiceInputButton: React.FC<VoiceInputProps> = ({
       disabled={disabled}
       className={cn(
         "transition-all duration-200 flex items-center justify-center rounded-full",
-        isRecording 
-          ? "bg-red-100 text-red-600 hover:bg-red-200 animate-pulse" 
-          : "bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400 active:scale-95",
+        isRecording
+          ? "bg-[color-mix(in_oklch,var(--orb-status-error)_12%,transparent)] text-[var(--orb-status-error)] hover:bg-[color-mix(in_oklch,var(--orb-status-error)_20%,transparent)] animate-pulse"
+          : "bg-transparent hover:bg-[var(--orb-hover)] text-[var(--orb-muted)] active:scale-95",
         disabled && "opacity-50 cursor-not-allowed",
         className
       )}

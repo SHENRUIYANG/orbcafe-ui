@@ -30,31 +30,25 @@ const ThinkBox: React.FC<ThinkBoxProps> = ({
   return (
     <div 
       className={`my-6 rounded-lg overflow-hidden transition-all duration-200 ${
-        theme === 'dark' 
-          ? 'bg-gray-800' 
-          : 'bg-white'
+        theme === 'dark'
+          ? 'bg-[var(--orb-surface-2)]'
+          : 'bg-[var(--orb-canvas)]'
       }`}
       style={{
-        border: `0.5px solid ${theme === 'dark' ? '#4b5563' : '#d1d5db'}`
+        border: '0.5px solid var(--orb-border)'
       }}
     >
       <div 
-        className={`px-4 py-3 cursor-pointer flex items-center justify-between transition-colors duration-200 ${
-          theme === 'dark'
-            ? 'bg-gray-700 hover:bg-gray-650'
-            : 'bg-gray-50 hover:bg-gray-100'
-        }`}
+        className="px-4 py-3 cursor-pointer flex items-center justify-between transition-colors duration-200 bg-[var(--orb-surface)] hover:bg-[var(--orb-hover)]"
         style={{
-          borderBottom: `0.5px solid ${theme === 'dark' ? '#4b5563' : '#e5e7eb'}`
+          borderBottom: '0.5px solid var(--orb-border)'
         }}
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <span className="flex items-center">
           <Lightbulb className="mr-2 h-4 w-4" />
-          <span 
-            className={`font-medium ${
-              theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
-            }`}
+          <span
+            className="font-medium text-[var(--orb-fg)]"
             style={{
               fontSize: size === 'sm' ? '14px' : size === 'lg' ? '18px' : '16px'
             }}
@@ -63,17 +57,13 @@ const ThinkBox: React.FC<ThinkBoxProps> = ({
         <ChevronDown
           className={`w-4 h-4 transition-transform duration-200 ${
             isExpanded ? 'rotate-180' : ''
-          } ${
-            theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
-          }`}
+          } text-[var(--orb-muted)]`}
         />
       </div>
       
       {isExpanded && (
         <div 
-          className={`p-4 whitespace-pre-wrap italic font-light ${
-            theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-          }`}
+          className="p-4 whitespace-pre-wrap italic font-light text-[var(--orb-muted)]"
           style={{
             fontSize: contentFontSize,
             lineHeight: '1.3 !important',

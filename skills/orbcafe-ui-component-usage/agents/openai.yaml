@@ -1,4 +1,4 @@
 interface:
   display_name: "ORBCAFE UI Router"
   short_description: "Route ORBCAFE requests to the current public control contracts"
-  default_prompt: "Use $orbcafe-ui-component-usage first to choose the right ORBCAFE module skill, map natural-language UI requests to canonical public APIs such as NavigationIsland, CValueHelp, CPlanningGantt, AgentPanel, AIBrowserGlow, and CTreeComp, enforce the official Next.js examples baseline, then generate minimal runnable code with public imports only."
+  default_prompt: "Use $orbcafe-ui-component-usage first to choose the right ORBCAFE module skill, enforce the official Next.js examples baseline, test desktop modules only at desktop viewports and Pad modules only at Pad viewports, never run phone or small-screen QA, and generate minimal runnable code with public imports only."

@@ -1,9 +1,38 @@
 import type {
   CreateKanbanBoardModelOptions,
   KanbanBoardModel,
+  KanbanBucketDefinition,
   KanbanCardLookup,
   KanbanCardMoveInput,
 } from '../types';
+
+export const addKanbanBucket = (
+  model: KanbanBoardModel,
+  bucket: KanbanBucketDefinition,
+): KanbanBoardModel => {
+  const title = bucket.title.trim();
+  if (!bucket.id || !title || model.buckets.some((item) => item.id === bucket.id)) return model;
+
+  return {
+    buckets: [...model.buckets, { ...bucket, title, cards: [] }],
+  };
+};
+
+export const renameKanbanBucket = (
+  model: KanbanBoardModel,
+  bucketId: string,
+  title: string,
+): KanbanBoardModel => {
+  const nextTitle = title.trim();
+  if (!nextTitle) return model;
+
+  const bucket = model.buckets.find((item) => item.id === bucketId);
+  if (!bucket || bucket.title === nextTitle) return model;
+
+  return {
+    buckets: model.buckets.map((item) => (item.id === bucketId ? { ...item, title: nextTitle } : item)),
+  };
+};
 
 const clampIndex = (value: number, max: number) => {
   if (Number.isNaN(value)) return 0;

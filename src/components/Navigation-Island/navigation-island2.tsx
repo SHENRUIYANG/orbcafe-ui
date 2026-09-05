@@ -214,7 +214,7 @@ export const NavigationIsland2: React.FC<NavigationIsland2Props> = ({
           <button
             type="button"
             onClick={onToggle}
-            className="mx-auto flex h-10 w-10 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-blue-50 hover:text-blue-700"
+            className="mx-auto flex h-10 w-10 items-center justify-center rounded-lg text-[var(--orb-muted)] transition-colors hover:bg-[var(--orb-p50)] hover:text-[var(--orb-status-primary)]"
             title={t('navigation.expand')}
             aria-label={t('navigation.expand')}
           >
@@ -223,7 +223,7 @@ export const NavigationIsland2: React.FC<NavigationIsland2Props> = ({
         ) : (
           <label className="relative block">
             <span className="orb-visually-hidden">{t('navigation.searchPlaceholder')}</span>
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--orb-muted)]" />
             <input
               type="search"
               value={searchTerm}
@@ -237,7 +237,7 @@ export const NavigationIsland2: React.FC<NavigationIsland2Props> = ({
 
       <nav className={`min-h-0 flex-1 overflow-y-auto pb-2 ${collapsed ? 'px-1' : 'px-2'}`}>
         {filteredMenuData.length === 0 ? (
-          <div className="flex items-center justify-center py-8 text-sm text-gray-500">
+          <div className="flex items-center justify-center py-8 text-sm text-[var(--orb-muted)]">
             {collapsed
               ? <FolderTree className="h-5 w-5" />
               : normalizedSearch ? t('navigation.noMatch') : t('navigation.noAccessibleApp')}
@@ -249,7 +249,7 @@ export const NavigationIsland2: React.FC<NavigationIsland2Props> = ({
                 type="button"
                 key={item.id}
                 onClick={() => handleCollapsedItemClick(item)}
-                className="flex h-10 w-full items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-blue-50 hover:text-blue-700"
+                className="flex h-10 w-full items-center justify-center rounded-lg text-[var(--orb-muted)] transition-colors hover:bg-[var(--orb-p50)] hover:text-[var(--orb-status-primary)]"
                 title={t('navigation.expandView', { title: item.title || item.label || '' })}
               >
                 {item.icon || <FolderTree className="h-5 w-5" />}
@@ -276,7 +276,7 @@ export const NavigationIsland2: React.FC<NavigationIsland2Props> = ({
           <button
             type="button"
             onClick={() => onDisplayModeChange?.(isFloating ? 'fixed' : 'floating')}
-            className="flex h-9 w-9 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-blue-50 hover:text-blue-700"
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-[var(--orb-muted)] transition-colors hover:bg-[var(--orb-p50)] hover:text-[var(--orb-status-primary)]"
             title={isFloating ? t('navigation.mode.switchToFixed') : t('navigation.mode.switchToFloating')}
             aria-label={isFloating ? t('navigation.mode.switchToFixed') : t('navigation.mode.switchToFloating')}
           >
@@ -299,7 +299,7 @@ export const NavigationIsland2: React.FC<NavigationIsland2Props> = ({
             style={{ bottom: 0, right: 0, width: 16, height: 16 }}
           >
             <span
-              className="absolute rounded-full border-[3px] border-[#21BCFF]"
+              className="absolute rounded-full border-[3px] border-[var(--orb-ai-accent)]"
               style={{ width: 32, height: 32, top: -16, left: -16 }}
             />
           </span>

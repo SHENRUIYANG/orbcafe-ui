@@ -675,7 +675,7 @@ export const PTable: React.FC<PTableProps> = (props) => {
                 width: '100%',
                 height: '3px',
                 background:
-                  'linear-gradient(90deg, rgba(25, 118, 210, 0) 0%, rgba(25, 118, 210, 0.25) 25%, rgba(25, 118, 210, 1) 50%, rgba(25, 118, 210, 0.25) 75%, rgba(25, 118, 210, 0) 100%)',
+                  'linear-gradient(90deg, color-mix(in oklch, var(--orb-primary) 0%, transparent) 0%, color-mix(in oklch, var(--orb-primary) 25%, transparent) 25%, var(--orb-primary) 50%, color-mix(in oklch, var(--orb-primary) 25%, transparent) 75%, color-mix(in oklch, var(--orb-primary) 0%, transparent) 100%)',
                 backgroundSize: '220% 100%',
                 animation: 'cTableTopMarquee 1.2s linear infinite',
                 zIndex: 6,

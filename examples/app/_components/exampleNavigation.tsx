@@ -5,6 +5,7 @@ import {
   Bot,
   ChartNoAxesCombined,
   ClipboardList,
+  Grid,
   LayoutDashboard,
   MessageSquare,
   PanelRight,
@@ -29,6 +30,7 @@ export const buildExampleMenu = (detailInfoHref = '/detail-info/ID-1'): TreeMenu
     icon: <Table2 className="w-4 h-4" />,
     children: [
       { id: 'std-report', title: 'Standard Report', href: '/std-report' },
+      { id: 'card-page', title: 'Card Page', href: '/card-page', icon: <Grid className="w-4 h-4" /> },
       { id: 'ctree', title: 'CTree', href: '/ctree', icon: <TreePine className="w-4 h-4" /> },
       {
         id: 'analytics',

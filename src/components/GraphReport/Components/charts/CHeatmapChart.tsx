@@ -9,7 +9,7 @@ export interface CHeatmapChartProps {
 const toHeatColor = (ratio: number) => {
   const clamped = Math.max(0, Math.min(1, ratio));
   const alpha = 0.2 + clamped * 0.8;
-  return `rgba(30, 136, 229, ${alpha})`;
+  return `color-mix(in oklch, var(--orb-chart-1) ${Math.round(alpha * 100)}%, transparent)`;
 };
 
 export const CHeatmapChart = ({ data }: CHeatmapChartProps) => {
@@ -53,7 +53,7 @@ export const CHeatmapChart = ({ data }: CHeatmapChartProps) => {
                     height: 36,
                     borderRadius: 1,
                     background: toHeatColor(ratio),
-                    border: '1px solid rgba(148,163,184,0.2)',
+                    border: '1px solid color-mix(in oklch, var(--orb-muted) 20%, transparent)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',

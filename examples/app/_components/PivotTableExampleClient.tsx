@@ -2,7 +2,6 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import {
-  CAppPageLayout,
   CPivotTable,
   CPageTransition,
   useOrbMode,
@@ -10,6 +9,7 @@ import {
   type PivotFieldDefinition,
   type PivotTablePreset,
 } from 'orbcafe-ui';
+import { ExamplePageLayout } from './ExamplePageLayout';
 import { EXAMPLE_MENU } from './exampleNavigation';
 
 const HeaderBrandLogo = () => {
@@ -239,7 +239,8 @@ export default function PivotTableExampleClient() {
   }, [pivotPresets]);
 
   return (
-    <CAppPageLayout
+    <ExamplePageLayout
+      appId="orbcafe-examples"
       appTitle=""
       navigationVariant="v2"
       searchPlacement="header"
@@ -274,6 +275,6 @@ export default function PivotTableExampleClient() {
           />
         </div>
       </CPageTransition>
-    </CAppPageLayout>
+    </ExamplePageLayout>
   );
 }

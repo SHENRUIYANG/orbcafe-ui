@@ -192,8 +192,8 @@ export const PBarcodeScanner = ({
               minHeight: 280,
               background:
                 getOrbCompatMode() === 'dark'
-                  ? 'linear-gradient(180deg, rgba(15,23,42,0.92), rgba(2,6,23,0.96))'
-                  : 'linear-gradient(180deg, rgba(241,245,249,1), rgba(226,232,240,0.92))',
+                  ? 'linear-gradient(180deg, color-mix(in oklch, var(--orb-canvas) 92%, transparent), color-mix(in oklch, var(--orb-canvas) 96%, transparent))'
+                  : 'linear-gradient(180deg, var(--orb-surface), color-mix(in oklch, var(--orb-border) 92%, transparent))',
             }}
           >
             <video
@@ -237,8 +237,8 @@ export const PBarcodeScanner = ({
                     left: 0,
                     right: 0,
                     height: 2,
-                    bgcolor: '#38bdf8',
-                    boxShadow: '0 0 18px rgba(56,189,248,0.85)',
+                    bgcolor: 'var(--orb-ai-accent)',
+                    boxShadow: '0 0 18px color-mix(in oklch, var(--orb-ai-accent) 85%, transparent)',
                   }}
                 />
               </div>

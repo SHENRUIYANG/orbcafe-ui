@@ -2,7 +2,14 @@ import { CStack, CTypography } from '../../../Atoms';
 
 import type { GraphPieDatum } from '../../types';
 
-const DEFAULT_COLORS = ['#1E88E5', '#1ABC9C', '#FBC02D', '#EF5350', '#7E57C2', '#78909C'];
+const DEFAULT_COLORS = [
+  'var(--orb-chart-1)',
+  'var(--orb-chart-2)',
+  'var(--orb-chart-5)',
+  'var(--orb-chart-negative)',
+  'var(--orb-chart-4)',
+  'var(--orb-chart-3)',
+];
 
 export interface CPieChartProps {
   data: GraphPieDatum[];

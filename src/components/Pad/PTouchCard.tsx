@@ -7,12 +7,12 @@ import { useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import type { PTouchCardProps } from './types';
 
 const actionColorMap = {
-  default: '#475569',
-  primary: '#1d4ed8',
-  success: '#047857',
-  warning: '#b45309',
-  error: '#b91c1c',
-  info: '#0369a1',
+  default: 'var(--orb-status-fg)',
+  primary: 'var(--orb-status-primary)',
+  success: 'var(--orb-status-success)',
+  warning: 'var(--orb-status-warning)',
+  error: 'var(--orb-status-error)',
+  info: 'var(--orb-status-info)',
 } as const;
 
 export const PTouchCard = ({
@@ -111,7 +111,7 @@ export const PTouchCard = ({
           display: 'flex',
           alignItems: 'center',
           justifyContent: side === 'left' ? 'flex-start' : 'flex-end',
-          color: '#fff',
+          color: 'var(--orb-on-primary)',
           background: `linear-gradient(135deg, ${backgroundColor}, rgba(15,23,42,0.92))`,
         }}
       >
@@ -143,11 +143,11 @@ export const PTouchCard = ({
           borderColor: selected ? 'primary.main' : 'divider',
           background:
             getOrbCompatMode() === 'dark'
-              ? 'linear-gradient(180deg, rgba(30,41,59,0.96), rgba(15,23,42,0.92))'
-              : 'linear-gradient(180deg, #ffffff, #f8fafc)',
+              ? 'linear-gradient(180deg, color-mix(in oklch, var(--orb-surface-3) 96%, transparent), color-mix(in oklch, var(--orb-canvas) 92%, transparent))'
+              : 'linear-gradient(180deg, var(--orb-canvas), var(--orb-surface))',
           color: 'text.primary',
           boxShadow: selected
-            ? '0 18px 42px rgba(37, 99, 235, 0.18)'
+            ? '0 18px 42px color-mix(in oklch, var(--orb-primary) 18%, transparent)'
             : '0 12px 28px rgba(15, 23, 42, 0.08)',
           transform: `translate3d(${translateX}px, 0, 0) scale(${isDragging ? 0.985 : 1})`,
           transition: isSwiping ? 'none' : 'transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease',

@@ -11,8 +11,8 @@ export interface CComboChartProps {
 
 export const CComboChart = ({
   data,
-  barColor = '#64B5F6',
-  lineColor = '#FFB74D',
+  barColor = 'var(--orb-chart-1)',
+  lineColor = 'var(--orb-chart-5)',
   height = 220,
 }: CComboChartProps) => {
   if (data.length === 0) {
@@ -43,7 +43,7 @@ export const CComboChart = ({
   return (
     <CStack spacing={1.25}>
       <div component="svg" viewBox={`0 0 ${width} ${height}`} style={{ width: '100%', height }}>
-        <line x1={padding} y1={height - padding} x2={width - padding} y2={height - padding} stroke="rgba(148,163,184,0.4)" />
+        <line x1={padding} y1={height - padding} x2={width - padding} y2={height - padding} style={{ stroke: 'var(--orb-chart-grid)' }} />
 
         {bars.map((bar) => (
           <rect
@@ -53,18 +53,18 @@ export const CComboChart = ({
             width={bar.barWidth}
             height={Math.max(bar.barHeight, 4)}
             rx={6}
-            fill={barColor}
+            style={{ fill: barColor }}
           />
         ))}
 
         <polyline
           fill="none"
-          stroke={lineColor}
+          style={{ stroke: lineColor }}
           strokeWidth={3}
           points={points.map((point) => `${point.x},${point.y}`).join(' ')}
         />
         {points.map((point) => (
-          <circle key={`${point.item.name}-line`} cx={point.x} cy={point.y} r={3.5} fill={lineColor} />
+          <circle key={`${point.item.name}-line`} cx={point.x} cy={point.y} r={3.5} style={{ fill: lineColor }} />
         ))}
       </div>
 

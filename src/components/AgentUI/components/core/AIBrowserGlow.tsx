@@ -12,7 +12,7 @@ export interface AIBrowserGlowProps {
 }
 
 /** ORBIS brand default: 2px primary edge line while the agent runs — no color wash. */
-const defaultColors: AIBrowserGlowColors = ['#154194', '#154194', '#154194']
+const defaultColors: AIBrowserGlowColors = ['var(--orb-primary)', 'var(--orb-primary)', 'var(--orb-primary)']
 
 const styles = `
 .orbcafe-ai-browser-glow {

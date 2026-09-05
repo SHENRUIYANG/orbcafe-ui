@@ -11,7 +11,7 @@ export interface CLineChartProps {
 
 export const CLineChart = ({
   data,
-  color = '#42A5F5',
+  color = 'var(--orb-chart-1)',
   valueSuffix = '',
   height = 220,
 }: CLineChartProps) => {
@@ -37,10 +37,10 @@ export const CLineChart = ({
   return (
     <div>
       <div component="svg" viewBox={`0 0 ${width} ${height}`} style={{ width: '100%', height }}>
-        <line x1={padding} y1={height - padding} x2={width - padding} y2={height - padding} stroke="rgba(148,163,184,0.4)" />
-        <polyline fill="none" stroke={color} strokeWidth={3} points={pointsAttr} />
+        <line x1={padding} y1={height - padding} x2={width - padding} y2={height - padding} style={{ stroke: 'var(--orb-chart-grid)' }} />
+        <polyline fill="none" style={{ stroke: color }} strokeWidth={3} points={pointsAttr} />
         {points.map((point) => (
-          <circle key={point.name} cx={point.x} cy={point.y} r={4} fill={color} />
+          <circle key={point.name} cx={point.x} cy={point.y} r={4} style={{ fill: color }} />
         ))}
       </div>
 

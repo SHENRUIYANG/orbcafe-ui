@@ -1,4 +1,3 @@
-import { getOrbCompatMode } from '../../../lib/orbis-compat';
 import { KeyboardArrowDownIcon, KeyboardArrowRightIcon, UnfoldLessIcon, UnfoldMoreIcon } from '../../../lib/orbis-compat';
 import React from 'react';
 import {  CIconButton, CTypography, CCheckbox, CTooltip } from "../../Atoms";
@@ -91,7 +90,7 @@ export const CTableBody = (props: CTableBodyProps) => {
                             className={['orb-table-group-row', customGroupClassName].filter(Boolean).join(' ')}
                             onClick={customGroupOnClick}
                             sx={(theme) => ({
-                                backgroundColor: getOrbCompatMode() === 'dark' ? '#111111' : '#f5f5f5',
+                                backgroundColor: 'var(--orb-surface)',
                                 '& th, & td': {
                                     color: theme.palette.text.primary,
                                     borderBottomColor: theme.palette.divider,

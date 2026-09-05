@@ -27,23 +27,23 @@ const ToolResultCard: React.FC<ToolResultCardProps> = ({
     switch (status) {
       case 'pending':
         return {
-          iconColor: 'text-blue-500',
-          badgeBg: 'bg-blue-50 dark:bg-blue-900/30',
-          badgeText: 'text-blue-600 dark:text-blue-400',
+          iconColor: 'text-[var(--orb-primary)]',
+          badgeBg: 'bg-[var(--orb-p50)]',
+          badgeText: 'text-[var(--orb-status-primary)]',
           label: '执行中'
         }
       case 'error':
         return {
-          iconColor: 'text-red-500',
-          badgeBg: 'bg-red-50 dark:bg-red-900/30',
-          badgeText: 'text-red-600 dark:text-red-400',
+          iconColor: 'text-[var(--orb-status-error)]',
+          badgeBg: 'bg-[color-mix(in_oklch,var(--orb-status-error)_10%,transparent)]',
+          badgeText: 'text-[var(--orb-status-error)]',
           label: '失败'
         }
       default: 
         return {
-          iconColor: 'text-green-500',
-          badgeBg: 'bg-green-50 dark:bg-green-900/30',
-          badgeText: 'text-green-600 dark:text-green-400',
+          iconColor: 'text-[var(--orb-status-success)]',
+          badgeBg: 'bg-[color-mix(in_oklch,var(--orb-status-success)_8%,transparent)]',
+          badgeText: 'text-[var(--orb-status-success)]',
           label: '成功'
         }
     }
@@ -68,10 +68,10 @@ const ToolResultCard: React.FC<ToolResultCardProps> = ({
 
   return (
     <div 
-      className={`w-full overflow-hidden rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm transition-all hover:shadow-md ${className}`}
+      className={`w-full overflow-hidden rounded-lg border border-[var(--orb-border)] bg-[var(--orb-canvas)] shadow-sm transition-all hover:shadow-md ${className}`}
       {...props}
     >
-      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--orb-border)] bg-[color-mix(in_oklch,var(--orb-surface)_50%,transparent)]">
         <div className="flex items-center space-x-3">
           <div className={`flex-shrink-0 ${config.iconColor}`}>
             {icon || getDefaultIcon()}
@@ -79,7 +79,7 @@ const ToolResultCard: React.FC<ToolResultCardProps> = ({
           
           <div>
             <div className="flex items-center space-x-2">
-              <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+              <h4 className="text-sm font-semibold text-[var(--orb-fg)]">
                 {displayTitle}
               </h4>
               <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${config.badgeBg} ${config.badgeText}`}>
@@ -87,7 +87,7 @@ const ToolResultCard: React.FC<ToolResultCardProps> = ({
               </span>
             </div>
             {toolName && title && (
-              <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center mt-0.5">
+              <div className="text-xs text-[var(--orb-muted)] flex items-center mt-0.5">
                 <Terminal className="w-3 h-3 mr-1" />
                 {toolName}
               </div>
@@ -95,9 +95,9 @@ const ToolResultCard: React.FC<ToolResultCardProps> = ({
           </div>
         </div>
 
-        <div className="flex items-center space-x-2 text-xs text-gray-500 dark:text-gray-400">
+        <div className="flex items-center space-x-2 text-xs text-[var(--orb-muted)]">
           {duration && (
-            <div className="flex items-center bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
+            <div className="flex items-center bg-[var(--orb-surface)] px-2 py-1 rounded">
               <Clock className="w-3 h-3 mr-1" />
               {formatDuration(duration)}
             </div>
@@ -105,7 +105,7 @@ const ToolResultCard: React.FC<ToolResultCardProps> = ({
           {closable && onClose && (
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors p-1 rounded"
+              className="text-[var(--orb-muted)] hover:text-[var(--orb-fg)] transition-colors p-1 rounded"
             >
               <X className="w-4 h-4" />
             </button>
@@ -115,7 +115,7 @@ const ToolResultCard: React.FC<ToolResultCardProps> = ({
 
       <div className="p-4">
         {content && (
-          <div className="text-sm text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
+          <div className="text-sm text-[var(--orb-muted)] mb-4 leading-relaxed">
             {content}
           </div>
         )}
@@ -124,7 +124,7 @@ const ToolResultCard: React.FC<ToolResultCardProps> = ({
           <div className="mb-3">
             <button 
               onClick={() => setShowParameters(!showParameters)}
-              className="flex items-center text-xs font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 mb-2"
+              className="flex items-center text-xs font-medium text-[var(--orb-muted)] hover:text-[var(--orb-fg)] dark:text-[var(--orb-muted)] mb-2"
             >
               {showParameters ? <ChevronDown className="w-3.5 h-3.5 mr-1" /> : <ChevronRight className="w-3.5 h-3.5 mr-1" />}
               <div className="w-3.5 h-3.5 mr-1.5" />
@@ -132,8 +132,8 @@ const ToolResultCard: React.FC<ToolResultCardProps> = ({
             </button>
             
             {showParameters && (
-              <div className="bg-gray-50 dark:bg-gray-950 rounded border border-gray-100 dark:border-gray-800 overflow-hidden">
-                <pre className="p-3 text-xs font-mono text-gray-600 dark:text-gray-400 overflow-x-auto">
+              <div className="bg-[var(--orb-surface)] dark:bg-[var(--orb-canvas)] rounded border border-[var(--orb-border)] overflow-hidden">
+                <pre className="p-3 text-xs font-mono text-[var(--orb-muted)] overflow-x-auto">
                   {JSON.stringify(parameters, null, 2)}
                 </pre>
               </div>
@@ -145,7 +145,7 @@ const ToolResultCard: React.FC<ToolResultCardProps> = ({
           <div>
              <button 
               onClick={() => setShowResult(!showResult)}
-              className="flex items-center text-xs font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 mb-2"
+              className="flex items-center text-xs font-medium text-[var(--orb-muted)] hover:text-[var(--orb-fg)] dark:text-[var(--orb-muted)] mb-2"
             >
               {showResult ? <ChevronDown className="w-3.5 h-3.5 mr-1" /> : <ChevronRight className="w-3.5 h-3.5 mr-1" />}
               <Terminal className="w-3.5 h-3.5 mr-1.5" />
@@ -153,8 +153,8 @@ const ToolResultCard: React.FC<ToolResultCardProps> = ({
             </button>
 
             {showResult && (
-              <div className="bg-gray-50 dark:bg-gray-950 rounded border border-gray-100 dark:border-gray-800 overflow-hidden">
-                <pre className="p-3 text-xs font-mono text-gray-600 dark:text-gray-400 overflow-x-auto">
+              <div className="bg-[var(--orb-surface)] dark:bg-[var(--orb-canvas)] rounded border border-[var(--orb-border)] overflow-hidden">
+                <pre className="p-3 text-xs font-mono text-[var(--orb-muted)] overflow-x-auto">
                   {typeof result === 'string' ? result : JSON.stringify(result, null, 2)}
                 </pre>
               </div>
@@ -163,10 +163,10 @@ const ToolResultCard: React.FC<ToolResultCardProps> = ({
         )}
 
         {onAction && (
-          <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-800 flex justify-end">
+          <div className="mt-3 pt-3 border-t border-[var(--orb-border)] flex justify-end">
             <button
               onClick={onAction}
-              className="px-4 py-1.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
+              className="px-4 py-1.5 text-sm font-medium text-[var(--orb-on-primary)] bg-[var(--orb-primary)] hover:bg-[var(--orb-p600)] rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--orb-primary)] focus:ring-offset-2 dark:focus:ring-offset-gray-900"
             >
               {actionText || '执行操作'}
             </button>

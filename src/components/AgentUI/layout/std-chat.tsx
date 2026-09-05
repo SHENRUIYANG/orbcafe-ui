@@ -53,7 +53,7 @@ export const StdChat: React.FC<StdChatProps> = ({
 
   return (
     <div className={cn("flex flex-col h-full w-full relative", className)}>
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-6 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600">
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-6 scrollbar-thin scrollbar-thumb-[var(--orb-border)]">
         {messages.map((msg, index) => {
           const isLastAssistant = msg.type === 'assistant' && index === messages.length - 1
           

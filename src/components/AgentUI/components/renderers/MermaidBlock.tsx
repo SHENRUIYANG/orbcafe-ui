@@ -1,8 +1,8 @@
 'use client'
 
 import React, { useEffect, useRef, useState } from 'react'
-import { useTheme } from 'next-themes'
 import mermaid from 'mermaid'
+import { useOrbMode } from '../../../../lib/theme'
 
 export interface MermaidBlockProps {
   content: string
@@ -22,7 +22,7 @@ const MermaidBlock: React.FC<MermaidBlockProps> = ({
   const containerRef = useRef<HTMLDivElement>(null)
   const [isRendering, setIsRendering] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const { theme: currentTheme } = useTheme()
+  const currentMode = useOrbMode()
 
   useEffect(() => {
     let cancelled = false
@@ -37,7 +37,7 @@ const MermaidBlock: React.FC<MermaidBlockProps> = ({
         
         mermaid.initialize({
           startOnLoad: false,
-          theme: currentTheme === 'dark' ? 'dark' : 'default',
+          theme: currentMode === 'dark' ? 'dark' : 'default',
           securityLevel: 'loose',
           fontFamily: 'inherit',
           flowchart: { htmlLabels: false }
@@ -71,22 +71,22 @@ const MermaidBlock: React.FC<MermaidBlockProps> = ({
       cancelled = true
       clearTimeout(timer)
     }
-  }, [content, currentTheme])
+  }, [content, currentMode])
 
   return (
     <div className={`mermaid-block ${className}`} style={style}>
       {(isLoading || isRendering) && (
-        <div className="flex items-center justify-center rounded border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800">
-          <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-blue-500" />
-          <span className="text-sm text-gray-500">Generating Diagram...</span>
+        <div className="flex items-center justify-center rounded border border-[var(--orb-border)] bg-[var(--orb-surface)] p-4 dark:bg-[var(--orb-surface-2)]">
+          <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-[var(--orb-primary)]" />
+          <span className="text-sm text-[var(--orb-muted)]">Generating Diagram...</span>
         </div>
       )}
 
       {error && (
-        <div className="overflow-auto rounded border border-red-200 bg-red-50 p-4 text-sm text-red-600 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">
+        <div className="overflow-auto rounded border border-[color-mix(in_oklch,var(--orb-status-error)_30%,transparent)] bg-[color-mix(in_oklch,var(--orb-status-error)_8%,transparent)] p-4 text-sm text-[var(--orb-status-error)]">
           <p className="mb-2 font-semibold">Mermaid Error:</p>
           <pre>{error}</pre>
-          <pre className="mt-4 text-xs text-gray-500">{content}</pre>
+          <pre className="mt-4 text-xs text-[var(--orb-muted)]">{content}</pre>
         </div>
       )}
 

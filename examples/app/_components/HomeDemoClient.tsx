@@ -1,10 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { useRef, useState } from 'react';
-import { Rocket, Table2, TabletSmartphone, Workflow, X } from 'orbcafe-ui';
+import { Rocket, Table2, TabletSmartphone, Workflow } from 'orbcafe-ui';
+import { ExamplePageLayout } from './ExamplePageLayout';
 import {
-  CAppPageLayout,
   CPageTransition,
   CPaper,
   CStack,
@@ -13,9 +12,6 @@ import {
   useOrbMode,
 } from 'orbcafe-ui';
 import { EXAMPLE_MENU } from './exampleNavigation';
-
-const AI_PANEL_WIDTH = 520;
-const AI_PANEL_INSET = 24;
 
 const HeaderBrandLogo = () => {
   const mode = useOrbMode();
@@ -72,19 +68,6 @@ const overviewCards = [
 // ];
 
 export default function HomeDemoClient() {
-  const abortControllerRef = useRef<AbortController | null>(null);
-  const [panelOpen, setPanelOpen] = useState(false);
-  // const [panelAnchor, setPanelAnchor] = useState<FloatingAgentPanelAnchor>('right');
-  // const [messages, setMessages] = useState<ChatMessage[]>(initialWeatherMessages);
-  const [isResponding, setIsResponding] = useState(false);
-
-  const floatingSearchSx = {
-    left: { xs: 12, md: 24 },
-    right: { xs: 12, md: 24 },
-    bottom: { xs: 12, md: 24 },
-    width: { xs: 'auto', md: AI_PANEL_WIDTH },
-  };
-
   /* Temporarily disabled - requires AgentUI export
   const appendAssistantMessage = (runId: string, content: string) => {
     setMessages((prev) => [
@@ -157,7 +140,8 @@ export default function HomeDemoClient() {
   */
 
   return (
-    <CAppPageLayout
+    <ExamplePageLayout
+      appId="orbcafe-examples"
       appTitle=""
       navigationVariant="v2"
       searchPlacement="header"
@@ -284,6 +268,6 @@ export default function HomeDemoClient() {
         />
       )}
       */}
-    </CAppPageLayout>
+    </ExamplePageLayout>
   );
 }

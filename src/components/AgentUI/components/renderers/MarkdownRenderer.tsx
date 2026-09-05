@@ -117,7 +117,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
     },
     table({ children }: any) {
       return (
-        <div className="my-4 w-full overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-800">
+        <div className="my-4 w-full overflow-x-auto rounded-lg border border-[var(--orb-border)]">
           <table className="w-full min-w-[520px] border-collapse text-sm">
             {children}
           </table>
@@ -126,21 +126,21 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
     },
     thead({ children }: any) {
       return (
-        <thead className="bg-gray-50 dark:bg-gray-900/60">
+        <thead className="bg-[color-mix(in_oklch,var(--orb-surface)_60%,transparent)]">
           {children}
         </thead>
       )
     },
     tbody({ children }: any) {
       return (
-        <tbody className="bg-white dark:bg-gray-950">
+        <tbody className="bg-[var(--orb-canvas)] dark:bg-[var(--orb-canvas)]">
           {children}
         </tbody>
       )
     },
     tr({ children }: any) {
       return (
-        <tr className="border-b border-gray-200 dark:border-gray-800 last:border-b-0">
+        <tr className="border-b border-[var(--orb-border)] last:border-b-0">
           {children}
         </tr>
       )
@@ -148,7 +148,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
     th({ children, align }: any) {
       const alignClass = align === 'center' ? 'text-center' : align === 'right' ? 'text-right' : 'text-left'
       return (
-        <th className={`px-3 py-2 font-semibold text-gray-800 dark:text-gray-100 ${alignClass}`}>
+        <th className={`px-3 py-2 font-semibold text-[var(--orb-fg)] ${alignClass}`}>
           {children}
         </th>
       )
@@ -156,7 +156,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
     td({ children, align }: any) {
       const alignClass = align === 'center' ? 'text-center' : align === 'right' ? 'text-right' : 'text-left'
       return (
-        <td className={`px-3 py-2 text-gray-700 dark:text-gray-200 align-top ${alignClass}`}>
+        <td className={`px-3 py-2 text-[var(--orb-fg)] align-top ${alignClass}`}>
           {children}
         </td>
       )

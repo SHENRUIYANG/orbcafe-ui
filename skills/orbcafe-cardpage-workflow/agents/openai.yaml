@@ -1,0 +1,4 @@
+interface:
+  display_name: "ORBCAFE CardPage Workflow"
+  short_description: "Build store/catalog card pages with SmartFilter, card grid, centered detail panel, and variants"
+  default_prompt: "Use $orbcafe-cardpage-workflow to implement this store/catalog-style card page with CCardPage/useCardPage, CCardGrid, the built-in centered CCardDetailPanel, view-details/download actions, SmartFilter variant persistence, and official Next.js examples."

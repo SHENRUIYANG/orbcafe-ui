@@ -6,6 +6,7 @@
 import { CAppPageLayout } from 'orbcafe-ui';
 
 <CAppPageLayout
+  appId="operations-portal"
   appTitle="ORBCAFE"
   menuData={[{ id: 'std', title: 'Standard Report', href: '/std-report' }]}
   locale="zh"
@@ -21,7 +22,7 @@ import { CAppPageLayout } from 'orbcafe-ui';
 </CAppPageLayout>;
 ```
 
-Use `CAppPageLayout` for normal products. It passes navigation mode and pinned-item state into `NavigationIsland`, derives a default pin storage key from `appTitle`, and keeps the shell contract in one place.
+Use `CAppPageLayout` for normal products. It passes navigation mode and pinned-item state into `NavigationIsland`, derives stable preference keys from `appId`, and keeps the shell contract in one place. The `appTitle` fallback remains for compatibility only.
 
 ## Pattern 2: Nav-only + custom content orchestration
 
@@ -42,19 +43,27 @@ const nav = useNavigationIsland({ menuData });
 
 Use direct `NavigationIsland` only when the app has its own shell. Pin only real navigable leaf items (`href` or `appurl`); group nodes should remain containers.
 
-## Pattern 3: Controlled pin/favorites and display mode
+## Pattern 3: Controlled theme, pin/favorites, and display mode
 
 ```tsx
-import { CAppPageLayout, type NavigationIslandDisplayMode } from 'orbcafe-ui';
+import {
+  CAppPageLayout,
+  type NavigationIslandDisplayMode,
+  type OrbModeSetting,
+} from 'orbcafe-ui';
 
-const [mode, setMode] = useState<NavigationIslandDisplayMode>('floating');
+const [themeMode, setThemeMode] = useState<OrbModeSetting>('system');
+const [navigationMode, setNavigationMode] = useState<NavigationIslandDisplayMode>('floating');
 const [pinnedIds, setPinnedIds] = useState<string[]>(['std-report']);
 
 <CAppPageLayout
+  appId="operations-portal"
   appTitle="ORBCAFE"
   menuData={menuData}
-  navigationMode={mode}
-  onNavigationModeChange={setMode}
+  mode={themeMode}
+  onModeChange={setThemeMode}
+  navigationMode={navigationMode}
+  onNavigationModeChange={setNavigationMode}
   pinnedNavigationItemIds={pinnedIds}
   onPinnedNavigationItemIdsChange={setPinnedIds}
 >
