@@ -90,3 +90,11 @@ Published AI-agent skills and reference files.
 ## orbcafe-brand-theme
 
 - [SKILL.md](orbcafe-brand-theme/SKILL.md)
+
+## orbcafe-metric-chart-cards
+
+- [README.md](orbcafe-metric-chart-cards/README.md)
+- [SKILL.md](orbcafe-metric-chart-cards/SKILL.md)
+- [references/component-selection.md](orbcafe-metric-chart-cards/references/component-selection.md)
+- [references/guardrails.md](orbcafe-metric-chart-cards/references/guardrails.md)
+- [references/recipes.md](orbcafe-metric-chart-cards/references/recipes.md)

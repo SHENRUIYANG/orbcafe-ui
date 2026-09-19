@@ -28,6 +28,7 @@ export * from './components/AgentUI';
 export * from './components/Auth';
 export * from './components/Planning';
 export * from './components/Tree';
+export * from './components/MetricChart';
 export * from './i18n';
 export * from './lib/renderer/md_renderer';
 export * from './lib/transitions';

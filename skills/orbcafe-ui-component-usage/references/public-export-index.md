@@ -68,6 +68,17 @@ Use only exports reachable from `src/index.ts`. All of the following are importa
     - `type CTreeCompNode`
     - `type CTreeCompColumn`
     - `type CTreeCompPaneMode`
+  - `CardPage/*`:
+    - `CCardPage`
+    - `CCardGrid`
+    - `CCardDetailPanel`
+    - `useCardPage`
+  - `MetricChart/*`:
+    - `CMetricChartCard`
+    - `METRIC_CHART_TYPES`
+    - `type CMetricChartCardProps`
+    - `type MetricChartDatum`
+    - `type MetricChartType`
 - Shared:
   - `i18n/*` (`OrbcafeI18nProvider`, `useOrbcafeI18n`, `OrbcafeLocale`, ...)
   - `GlobalMessage`, `showMessage`, `messageManager`, `type CMessageBoxType`

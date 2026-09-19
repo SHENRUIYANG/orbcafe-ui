@@ -197,7 +197,7 @@ When using Codex or another AI coding agent with ORBCAFE UI, ask it to follow th
 
 1. Route the request through `skills/orbcafe-ui-component-usage`.
 2. Map natural names like "table", "F4", "pad table", "planning Gantt", or "copilot" to canonical exports.
-3. Check the target module skill, for example `orbcafe-stdreport-workflow`, `orbcafe-cardpage-workflow`, `orbcafe-planning-gantt`, `orbcafe-pad-workflow`, or `orbcafe-agentui-chat`.
+3. Check the target module skill, for example `orbcafe-stdreport-workflow`, `orbcafe-cardpage-workflow`, `orbcafe-metric-chart-cards`, `orbcafe-planning-gantt`, `orbcafe-pad-workflow`, or `orbcafe-agentui-chat`.
 4. Import only from `orbcafe-ui`.
 5. Validate against the official Next.js examples.
 

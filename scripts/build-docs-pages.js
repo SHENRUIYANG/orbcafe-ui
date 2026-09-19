@@ -84,6 +84,7 @@ const componentSources = [
   "src/components/CustomizeAgent/README.md",
   "src/components/AINav/README.md",
   "src/components/Tree/README.md",
+  "src/components/MetricChart/README.md",
   "src/lib/transitions/README.md",
 ];
 
@@ -152,6 +153,11 @@ const skillSources = [
   "skills/orbcafe-pivot-ainav/references/guardrails.md",
   "skills/orbcafe-pivot-ainav/references/recipes.md",
   "skills/orbcafe-brand-theme/SKILL.md",
+  "skills/orbcafe-metric-chart-cards/README.md",
+  "skills/orbcafe-metric-chart-cards/SKILL.md",
+  "skills/orbcafe-metric-chart-cards/references/component-selection.md",
+  "skills/orbcafe-metric-chart-cards/references/guardrails.md",
+  "skills/orbcafe-metric-chart-cards/references/recipes.md",
 ];
 
 ensureDir(docs);

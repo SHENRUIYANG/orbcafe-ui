@@ -22,7 +22,8 @@ const expectedModules = [
   'LayoutNavigation',
   'PivotAINav',
   'Kanban',
-  'AgentUI'
+  'AgentUI',
+  'MetricChartCards'
 ];
 
 function readFile(relativePath) {

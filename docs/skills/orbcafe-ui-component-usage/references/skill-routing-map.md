@@ -8,6 +8,8 @@
   - `orbcafe-stdreport-workflow`
 - Build store/catalog-style card page, app-store-like grid, centered card detail panel:
   - `orbcafe-cardpage-workflow`
+- Build compact KPI/metric card grids or small bar/column/line/pie/donut/scatter/bubble charts:
+  - `orbcafe-metric-chart-cards`
 - Build SAP F4/Search Help/Value Help field lookup inside filters:
   - Usually route to `orbcafe-stdreport-workflow`; for Planning or Pad pages, route to that page skill and apply the shared Value Help contract.
 - Build chart dialog, detail page, or AI settings flow:
@@ -39,6 +41,8 @@
   - StdReport skill
 - `卡片页`, `卡片网格`, `商店`, `上架`, `应用商店`, `目录页`, `card page`, `card grid`, `store`, `catalog`, `app store`, `CCardPage`, `CCardGrid`, `CCardDetailPanel`, `useCardPage`:
   - CardPage skill
+- `指标卡`, `KPI卡片`, `统计卡片`, `图表卡片`, `KPI card`, `KPI cards`, `metric card`, `metric cards`, `dashboard cards`, `metric chart card`, `chart cards`, `CMetricChartCard`, `bar card`, `donut card`, `bubble card`:
+  - Metric Chart Cards skill
 - `图表`, `graph`, `kpi`, `详情页`, `detail`, `ai prompt`, `agent settings`:
   - Graph+Detail+Agent skill
 - `kanban`, `bucket`, `board`, `泳道`, `拖拽卡片`, `卡片流转`, `看板`:
@@ -66,6 +70,7 @@
 
 - StdReport + GraphReport: choose StdReport as primary, then attach graph options.
 - CardPage vs StdReport: same SmartFilter/variant contract; choose CardPage for store/catalog grids (icon + title + short description + actions), StdReport for dense tabular data. One backend `{ rows, total }` endpoint can serve both.
+- Metric Chart Cards vs GraphReport: choose Metric Chart Cards for compact dashboard cards with one small dimension and callbacks; choose GraphReport for full graph dialogs, drilldown details, or graph-report interaction.
 - DetailInfo + CTable: choose Graph+Detail+Agent skill.
 - Kanban + DetailInfo: choose Kanban+Detail skill first, then attach DetailInfo route/query handling.
 - App shell + any page module: apply Layout+Navigation skill first for frame, then attach module skill.

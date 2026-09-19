@@ -39,6 +39,12 @@ Use this file to map natural-language requests to canonical ORBCAFE component na
 | `AIBrowserGlow` | Browser edge AI glow | 浏览器边框 AI 柔光 | Browser AI Leuchteffekt |
 | `CMessageBox` | Message/confirm dialog | 统一消息确认框 | Meldungsdialog |
 | `CTreeComp` | Tree table / hierarchy tree with detail pane | 树表 / 层级树 / BOM树 / 成本树 | Baumtabelle / Hierarchiebaum |
+| `CMetricChartCard` | Metric chart card / KPI card | 指标卡 / KPI 卡片 / 图表卡片 / 统计卡片 | Kennzahlenkarte / Diagrammkarte |
+
+### Metric chart card terms
+
+- `bar`, `column`, `line`, `pie`, `donut`, `scatter`, `bubble`, `list`, `metric`, `progress` are the canonical `MetricChartType` values.
+- “图表卡片” with a compact dashboard grid maps to `CMetricChartCard`; “图形报表/分析弹窗” maps to `CGraphReport` or `CPivotTable` based on the requested interaction.
 
 ## i18n implementation baseline for AI
 

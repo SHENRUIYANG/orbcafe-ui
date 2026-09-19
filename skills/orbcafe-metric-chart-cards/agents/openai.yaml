@@ -1,0 +1,4 @@
+interface:
+  display_name: "ORBCAFE Metric Chart Cards"
+  short_description: "Build KPI and compact ORBIS chart card grids"
+  default_prompt: "Use $orbcafe-metric-chart-cards to build this ORBCAFE metric card or compact chart card grid with CMetricChartCard, stable data ids, the right chart type, selection callbacks, and consistent loading/empty/error states."

@@ -488,6 +488,43 @@
         "no npm run build in file dependency flow",
         "wrong import path"
       ]
+    },
+    {
+      "name": "MetricChartCards",
+      "mode": "component-first",
+      "public_entries": [
+        "CMetricChartCard",
+        "METRIC_CHART_TYPES",
+        "CMetricChartCardProps",
+        "MetricChartDatum",
+        "MetricChartType"
+      ],
+      "preferred_pattern": "CMetricChartCard with page-owned data, chart type, selection state, and callbacks",
+      "public_hooks": [],
+      "canonical_examples": [
+        "examples/app/_components/ChartCardsExampleClient.tsx",
+        "examples/app/chart-cards/page.tsx"
+      ],
+      "minimal_state": [
+        "data: MetricChartDatum[] with stable id, label, finite value, optional secondaryValue/color",
+        "chartType and optional controlled onChartTypeChange",
+        "optional activeId/onItemClick",
+        "loading, error, emptyState, and optional maxItems"
+      ],
+      "verify": [
+        "card grid renders with equal-height ORBIS cards",
+        "chart type selector changes the visualization",
+        "clicking a mark or row fires onItemClick and activeId highlights the same item",
+        "loading, error, empty, and overflow states remain readable",
+        "list view provides the accessible label/value fallback"
+      ],
+      "common_failure_modes": [
+        "importing from src/components/MetricChart instead of orbcafe-ui",
+        "unstable or localized datum ids",
+        "changing selection without passing the selected id back through activeId",
+        "rendering duplicate external loading/empty/error panels",
+        "using metric cards for dense report tables or full graph/pivot analysis"
+      ]
     }
   ],
   "shared_rules": [

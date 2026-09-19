@@ -446,7 +446,41 @@ Use it before reading a module README in detail.
   - no `npm run build` in local `file:..` flow
   - wrong import path
 
-## 12. Shared Rules For AI
+## 12. Metric Chart Cards
+
+- Public entry:
+  - `CMetricChartCard`
+  - `METRIC_CHART_TYPES`
+  - `type CMetricChartCardProps`
+  - `type MetricChartDatum`
+  - `type MetricChartType`
+- Preferred pattern:
+  - `CMetricChartCard` with page-owned data, chart type, selection state, and callbacks (Component-first)
+- Hooks:
+  - No public custom hook
+  - Use component props and callbacks: `onChartTypeChange`, `onItemClick`, `activeId`
+- Minimal state contract:
+  - `data: MetricChartDatum[]` with stable `id`, `label`, finite `value`, optional `secondaryValue`/`color`
+  - `chartType` and optional controlled `onChartTypeChange`
+  - optional `activeId`/`onItemClick`
+  - `loading`, `error`, `emptyState`, and optional `maxItems`
+- Canonical example:
+  - `examples/app/_components/ChartCardsExampleClient.tsx`
+  - `examples/app/chart-cards/page.tsx`
+- Verify:
+  - card grid renders with equal-height ORBIS cards
+  - chart type selector changes the visualization
+  - clicking a mark/row fires `onItemClick` and `activeId` highlights the same item
+  - loading, error, empty, and overflow states remain readable
+  - `list` view provides the accessible label/value fallback
+- Common failure modes:
+  - importing from `src/components/MetricChart` instead of `orbcafe-ui`
+  - unstable or localized datum IDs, so selection cannot be restored
+  - changing selection without passing the selected ID back through `activeId`
+  - rendering duplicate external loading/empty/error panels
+  - using metric cards for dense report tables or full graph/pivot analysis
+
+## 13. Shared Rules For AI
 
 - Import only from `orbcafe-ui`.
 - Prefer the canonical example before inventing a new composition.
