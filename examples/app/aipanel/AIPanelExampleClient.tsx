@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useCallback, useState } from 'react'
-import { AgentPanel, type AgentPanelStatus, type ChatMessage } from 'orbcafe-ui'
+import { AgentPanel, type AgentPanelStatus, type AgentUICardHookEvent, type ChatMessage } from 'orbcafe-ui'
 import { Bot, MoreHorizontal, Play, RotateCcw, Settings } from 'orbcafe-ui'
 
 const INITIAL_MESSAGES: ChatMessage[] = [
@@ -65,6 +65,122 @@ const sampleReply = [
   '  A[Capacity] --> B{Risk?}',
   '  B -- Yes --> C[Re-plan]',
   '  B -- No --> D[Continue]',
+  '```',
+  '',
+  '## Reusable metric chart cards',
+  '',
+  'These cards use the public `CMetricChartCard` contract. Select another view in a card, click an item, hover for one second, or right-click an item and choose **Show data**.',
+  '',
+  '### 1. KPI card',
+  '',
+  '```json',
+  '{',
+  '  "type": "metric-chart-card",',
+  '  "title": "Analysis materials",',
+  '  "subtitle": "Current filtered scope",',
+  '  "chartType": "metric",',
+  '  "showChartTypeControl": false,',
+  '  "data": [{"id": "total", "label": "Classified materials", "value": 768, "secondaryValue": 86}],',
+  '  "secondaryValueLabel": "Classification coverage",',
+  '  "secondaryValueSuffix": "%"',
+  '}',
+  '```',
+  '',
+  '### 2. Progress card',
+  '',
+  '```json',
+  '{',
+  '  "type": "metric-chart-card",',
+  '  "title": "Classification change",',
+  '  "subtitle": "Compared with the previous run",',
+  '  "chartType": "progress",',
+  '  "data": [{"id": "changed", "label": "Changed", "value": 186}, {"id": "unchanged", "label": "Unchanged", "value": 582}]',
+  '}',
+  '```',
+  '',
+  '### 3. Donut card',
+  '',
+  '```json',
+  '{',
+  '  "type": "metric-chart-card",',
+  '  "title": "Classification distribution",',
+  '  "subtitle": "Materials by class",',
+  '  "chartType": "donut",',
+  '  "data": [{"id": "ax", "label": "AX", "value": 184}, {"id": "ay", "label": "AY", "value": 142}, {"id": "az", "label": "AZ", "value": 96}, {"id": "bx", "label": "BX", "value": 76}]',
+  '}',
+  '```',
+  '',
+  '### 4. Bar card',
+  '',
+  '```json',
+  '{',
+  '  "type": "metric-chart-card",',
+  '  "title": "Planning controller",',
+  '  "subtitle": "Materials by responsible planner",',
+  '  "chartType": "bar",',
+  '  "data": [{"id": "anna", "label": "Anna Müller", "value": 148}, {"id": "ben", "label": "Ben Fischer", "value": 121}, {"id": "chi", "label": "Chi Zhang", "value": 96}]',
+  '}',
+  '```',
+  '',
+  '### 5. Column card',
+  '',
+  '```json',
+  '{',
+  '  "type": "metric-chart-card",',
+  '  "title": "Storage location",',
+  '  "subtitle": "Materials by plant location",',
+  '  "chartType": "column",',
+  '  "data": [{"id": "de10", "label": "DE10 Berlin", "value": 168}, {"id": "de20", "label": "DE20 Munich", "value": 132}, {"id": "cn10", "label": "CN10 Shanghai", "value": 118}]',
+  '}',
+  '```',
+  '',
+  '### 6. Line card',
+  '',
+  '```json',
+  '{',
+  '  "type": "metric-chart-card",',
+  '  "title": "Acquisition type",',
+  '  "subtitle": "Sorted dimension sequence",',
+  '  "chartType": "line",',
+  '  "data": [{"id": "inhouse", "label": "In-house", "value": 210}, {"id": "external", "label": "External", "value": 162}, {"id": "stock", "label": "Stock transfer", "value": 120}, {"id": "subcontract", "label": "Subcontracting", "value": 83}]',
+  '}',
+  '```',
+  '',
+  '### 7. Scatter card',
+  '',
+  '```json',
+  '{',
+  '  "type": "metric-chart-card",',
+  '  "title": "Strategy group",',
+  '  "subtitle": "Index vs. material count",',
+  '  "chartType": "scatter",',
+  '  "data": [{"id": "make", "label": "Make-to-stock", "value": 132}, {"id": "order", "label": "Make-to-order", "value": 108}, {"id": "kanban", "label": "Kanban", "value": 72}]',
+  '}',
+  '```',
+  '',
+  '### 8. Bubble card',
+  '',
+  '```json',
+  '{',
+  '  "type": "metric-chart-card",',
+  '  "title": "Planning group",',
+  '  "subtitle": "Count and stock value",',
+  '  "chartType": "bubble",',
+  '  "secondaryValueSuffix": " k€",',
+  '  "data": [{"id": "p1", "label": "PG-01", "value": 122, "secondaryValue": 94}, {"id": "p2", "label": "PG-02", "value": 104, "secondaryValue": 66}, {"id": "p3", "label": "PG-03", "value": 82, "secondaryValue": 52}]',
+  '}',
+  '```',
+  '',
+  '### 9. List fallback card',
+  '',
+  '```json',
+  '{',
+  '  "type": "metric-chart-card",',
+  '  "title": "Product hierarchy",',
+  '  "subtitle": "Accessible tabular view",',
+  '  "chartType": "list",',
+  '  "data": [{"id": "finished", "label": "Finished product", "value": 212}, {"id": "semi", "label": "Semi-finished", "value": 156}, {"id": "component", "label": "Component", "value": 118}]',
+  '}',
   '```'
 ].join('\n')
 
@@ -72,6 +188,7 @@ export default function AIPanelExampleClient() {
   const [messages, setMessages] = useState<ChatMessage[]>(INITIAL_MESSAGES)
   const [isResponding, setIsResponding] = useState<boolean>(false)
   const [status, setStatus] = useState<AgentPanelStatus>('idle')
+  const [lastCardEvent, setLastCardEvent] = useState<AgentUICardHookEvent | null>(null)
 
   const statusButtons: Array<{ value: AgentPanelStatus; label: string }> = [
     { value: 'idle', label: 'Idle' },
@@ -180,6 +297,11 @@ export default function AIPanelExampleClient() {
           the full Markdown showcase appears. Current status: <span className="font-semibold uppercase text-[var(--orb-fg,#555555)]">{status}</span>
           <span className="ml-2">· working state reads through motion, not color</span>
         </div>
+        {lastCardEvent && (
+          <div className="rounded-lg border border-[var(--orb-border,#dbdbdb)] bg-[var(--orb-canvas,#ffffff)] px-3 py-2 text-xs text-[var(--orb-muted,#8c8c8c)]" role="status">
+            Card event: <span className="font-semibold text-[var(--orb-fg,#555555)]">{lastCardEvent.cardType}</span> / {lastCardEvent.action}
+          </div>
+        )}
 
         <AgentPanel
           title="Data Analysis Agent"
@@ -194,6 +316,9 @@ export default function AIPanelExampleClient() {
             setMessages(prev =>
               prev.map(msg => (msg.id === messageId ? { ...msg, isStreaming: false } : msg))
             )
+          }}
+          cardHooks={{
+            onCardEvent: setLastCardEvent
           }}
           headerActions={
             <div className="flex items-center gap-1">

@@ -17,7 +17,7 @@
 
 ## Orientation and Hydration
 
-1. 横竖屏判定推荐 `useMediaQuery(..., { noSsr: true })`，避免首屏 hydration 抖动。
+1. 横竖屏优先交给 `PAppPageLayout` / `usePadLayout`；公开 `useMediaQuery(query)` 只接受查询字符串；自定义结构分支需保持 SSR/CSR 首帧一致。
 2. `orientation='auto'` 场景下，不要在 SSR 阶段写死结构分支导致客户端结构变更过大。
 3. 竖屏优先保留关键动作按钮可见性和可点性。
 

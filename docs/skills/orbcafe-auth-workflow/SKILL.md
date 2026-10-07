@@ -5,6 +5,10 @@ description: Build ORBCAFE authentication entry pages with CAuthPage/useAuthPage
 
 # ORBCAFE Auth Workflow
 
+## Current usage contract
+
+Before implementing this module, read [references/contract.md](references/contract.md) for input shapes, state ownership, callback arguments, defaults and current limitations. Check the consuming project's installed exports against this source contract; the repository can be ahead of npm.
+
 ## Workflow
 
 1. 先对照 `skills/orbcafe-ui-component-usage/references/module-contracts.md`，确认这是 `Hook-first` 模块。
@@ -19,7 +23,7 @@ description: Build ORBCAFE authentication entry pages with CAuthPage/useAuthPage
 
 ```bash
 npm install orbcafe-ui
-# ORBCAFE UI v2 是 MUI-free；不要安装 @mui/*、@emotion/*、lucide-react。
+# ORBCAFE UI v3 是 MUI-free；不要安装 @mui/*、@emotion/*、lucide-react。
 # 组件使用 Tailwind utility classes，宿主需要 Tailwind v4：
 npm install -D tailwindcss @tailwindcss/postcss
 ```

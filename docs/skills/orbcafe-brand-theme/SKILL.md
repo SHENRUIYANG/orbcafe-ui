@@ -8,6 +8,10 @@ description: Switch ORBCAFE UI to a brand theme from the developer's local Open 
 ORBCAFE UI 默认即 ORBIS 风格，无需任何设置。若开发者本机装了 Open Design，
 `orbcafe-theme` CLI 能直接读取其品牌预设（颜色 + 字体）生成主题包——**没有手动导出步骤**。
 
+## Current usage contract
+
+Before implementing this module, read [references/contract.md](references/contract.md) for input shapes, state ownership, callback arguments, defaults and current limitations. Check the consuming project's installed exports against this source contract; the repository can be ahead of npm.
+
 ## Workflow
 
 1. **发现**：`npx orbcafe-theme list --json`
@@ -32,6 +36,6 @@ ORBCAFE UI 默认即 ORBIS 风格，无需任何设置。若开发者本机装�
 ## Rules
 
 - 不要手改 `orbcafe-theme/` 下的生成文件；预设更新后重跑 `apply` 覆盖。
-- 不要把 `orbcafe-theme/` 加进 .gitignore 之外提交策略由用户定；生成物可安全删除重建。
+- 生成物的提交策略由项目决定；CI 无法读取本机 Open Design 时，应提交 CSS、token 文件和字体以便可重复构建。
 - 主题包是纯 CSS 变量覆盖层，不需要额外 provider，也不影响 `OrbisModeProvider` 的明暗切换。
 - 没有 Open Design 的开发者想要预置品牌：可用库内置的 `orbcafe-ui/themes/orbis.css`、`orbcafe-ui/themes/nvidia.css`（示例包，详见 docs/guides/brand-theming.md）。

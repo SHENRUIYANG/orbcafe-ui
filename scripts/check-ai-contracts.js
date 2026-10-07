@@ -23,6 +23,11 @@ const expectedModules = [
   'PivotAINav',
   'Kanban',
   'AgentUI',
+  'PadWorkflow',
+  'Auth',
+  'Planning',
+  'Tree',
+  'CardPage',
   'MetricChartCards'
 ];
 
@@ -131,6 +136,14 @@ function main() {
     rootReadme.includes('Hook-first') && rootReadme.includes('Component-first'),
     'README.md must explain Hook-first and Component-first'
   );
+
+  const skillDirectories = fs.readdirSync(path.join(repoRoot, 'skills'), { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() && entry.name.startsWith('orbcafe-'))
+    .map((entry) => entry.name);
+  for (const skillName of skillDirectories) {
+    assert(fileExists(`skills/${skillName}/SKILL.md`), `Missing SKILL.md for ${skillName}`);
+    assert(fileExists(`skills/${skillName}/references/contract.md`), `Missing references/contract.md for ${skillName}`);
+  }
 
   const contracts = JSON.parse(readFile('skills/orbcafe-ui-component-usage/references/module-contracts.json'));
   assert(Array.isArray(contracts.modules), 'module-contracts.json must include a modules array');

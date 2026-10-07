@@ -10,7 +10,7 @@ const STYLES = {
 
   inputContainer: cn(
     'w-full flex flex-col border border-[var(--orb-border,#dbdbdb)] bg-[var(--orb-canvas,#ffffff)] transition-colors duration-200',
-    'rounded-[var(--orb-r,10px)]',
+    'orb-agent-input',
     'focus-within:border-[var(--orb-primary,#154194)] focus-within:ring-1 focus-within:ring-[var(--orb-focus-ring,#e4e9f5)]'
   ),
 
@@ -293,7 +293,6 @@ export const InputArea: React.FC<InputAreaProps> = ({
         />
         <div 
           className={cn(STYLES.inputContainer, isDragging && STYLES.dragActive)}
-          style={{ borderRadius: '24px' }}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}

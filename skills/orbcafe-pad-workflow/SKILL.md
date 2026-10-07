@@ -5,6 +5,10 @@ description: Build ORBCAFE touch-first Pad/iPad experiences with PAppPageLayout,
 
 # ORBCAFE Pad Workflow
 
+## Current usage contract
+
+Before implementing this module, read [references/contract.md](references/contract.md) for input shapes, state ownership, callback arguments, defaults and current limitations. Check the consuming project's installed exports against this source contract; the repository can be ahead of npm.
+
 ## Scope Boundary
 
 - Use ORBCAFE Pad components only for Pad/iPad-sized tablet workflows.
@@ -29,7 +33,7 @@ description: Build ORBCAFE touch-first Pad/iPad experiences with PAppPageLayout,
 
 ```bash
 npm install orbcafe-ui
-# ORBCAFE UI v2 是 MUI-free；不要安装 @mui/*、@emotion/*、lucide-react。
+# ORBCAFE UI v3 是 MUI-free；不要安装 @mui/*、@emotion/*、lucide-react。
 # 组件使用 Tailwind utility classes，宿主需要 Tailwind v4：
 npm install -D tailwindcss @tailwindcss/postcss
 ```
@@ -60,8 +64,8 @@ npm install -D tailwindcss @tailwindcss/postcss
 
 1. **Tailwind CSS 编译**：`orbcafe-ui` 的 Pad 组件大量依赖 Tailwind 原子类（如 `rounded-2xl`、`backdrop-blur`），宿主项目必须配置 Tailwind 扫描到该库：
    - Tailwind v4（`globals.css`）：使用 CSS `@source`，指向 `node_modules/orbcafe-ui/dist` 的正确相对路径。
-   - Tailwind v3（`tailwind.config.js`）仅作为遗留兼容：`content: ["./node_modules/orbcafe-ui/dist/**/*.{js,mjs}"]`。
-2. **Provider 基线**：V2 是 MUI-free。`PAppPageLayout` 内部已渲染 `OrbisModeProvider`；`GlobalMessage` 仍由宿主应用只挂载一次。
+   - 当前支持基线是 Tailwind v4；不要把旧版 content 配置当作等效支持。
+2. **Provider 基线**：当前 v3 是 MUI-free。`PAppPageLayout` 内部已渲染 `OrbisModeProvider`；`GlobalMessage` 仍由宿主应用只挂载一次。
 3. **CSS 基线**：全局 CSS 必须 `@import "orbcafe-ui/styles.css";` 一次（ORBIS 自写样式，含 `orb-*` 类与暗色变量）。
 4. **Examples 来源**：npm 包不包含 `examples/`。当前项目没有 `examples/` 时，查阅 ORBCAFE GitHub 仓库或本地 checkout。
 5. **依赖检查**：先看 `package.json`，缺失或不兼容时再安装。

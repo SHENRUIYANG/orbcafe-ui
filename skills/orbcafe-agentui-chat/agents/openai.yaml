@@ -1,4 +1,4 @@
 interface:
   display_name: "ORBCAFE AgentUI"
-  short_description: "Build AIPanel, Glow, Chat, Copilot, streaming, and card hooks"
-  default_prompt: "Use $orbcafe-agentui-chat to build this ORBCAFE AgentUI experience, choose AgentPanel for no-input AIPanel and status visuals, AIBrowserGlow for AI-running viewport glow, StdChat for input-included Chat, CopilotChat for floating content inside a host shell, and AgentUICardHooks for card actions."
+  short_description: "Build AIPanel, FloatingAgentPanel, Chat, Copilot, streaming, and card hooks"
+  default_prompt: "Use $orbcafe-agentui-chat to build this ORBCAFE AgentUI experience, choose AgentPanel for no-input AIPanel and status visuals, AIBrowserGlow for AI-running viewport glow, StdChat for input-included Chat, FloatingAgentPanel for horizontal snap-only floating panels, CopilotChat for custom floating content shells, and AgentUICardHooks for card actions including metric chart data inspection."

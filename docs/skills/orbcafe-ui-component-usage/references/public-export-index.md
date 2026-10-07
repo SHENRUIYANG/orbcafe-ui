@@ -17,7 +17,12 @@ Use only exports reachable from `src/index.ts`. All of the following are importa
   - types: `TreeMenuItem`, `NavigationIslandProps`, `NavigationIslandDisplayMode`, `ButtonProps`
 - Modules:
   - `StdReport/*` (incl. `CStandardPage`, `CTable`, `CSmartFilter`, `CLayoutManager`, `CVariantManager`, `CVariantManagement`, `useStandardReport`, `resolveVariantFilters`, `resolveVariantLayout`, `IVariantService`, `VariantMetadata`, `ReportColumn`, `ReportFilter`, `ReportMetadata`)
-  - `GraphReport/*`
+  - `GraphReport/*`:
+    - `CGraphReport`, `CGraphCharts`, `CGraphKpiCards`
+    - `CBarChart`, `CLineChart`, `CPieChart`, `CComboChart`, `CHeatmapChart`, `CFishboneChart`, `CWaterfallChart`
+    - `CGoogleMapChart`, `CAmapChart`
+    - `useGraphReport`, `useGraphChartData`, `useGraphInteraction`, `useGoogleMapEmbedUrl`, `useAmapEmbedUrl`
+    - types `GraphReportModel`, `GraphReportConfig`, `GraphReportFieldMapping`, `GraphReportInteractionState`, `GraphReportKpis`, `GraphRow`, `GraphBarDatum`, `GraphLineDatum`, `GraphComboDatum`, `GraphHeatmapDatum`, `GraphPieDatum`, `GraphFishboneBranch`, `GraphWaterfallDatum`, `GraphMapLocation`, `GraphTableColumn`
   - `CustomizeAgent/*`
   - `DetailInfo/*`
   - `Kanban/*`
@@ -34,20 +39,37 @@ Use only exports reachable from `src/index.ts`. All of the following are importa
     - `PTouchCard`
     - `usePadLayout`
     - `usePadRecordEditor`
-  - `AINav/*`
+  - `AINav/*`:
+    - `CAINavProvider`, `useAINav`, `useVoiceInput`
+    - compatibility aliases `VoiceNavigatorProvider`, `useVoiceNavigator`
+    - types `CAINavProviderProps`, `UseVoiceInputOptions`, `UseVoiceInputResult`, `AINavContextValue`
   - `AgentUI/*`:
     - `AgentPanel`
+    - `OMPHPanel`
+    - `OMPHApprovalCard`
+    - `type OMPHApprovalChoice`, `type OMPHApprovalDecision`, `type OMPHApprovalRequest`, `type OMPHApprovalLabels`
     - `FloatingAgentPanel`
     - `StdChat`
+    - `InputArea`
+    - `type InputAreaProps`
     - `CopilotChat`
     - `AIBrowserGlow`
     - `type ChatMessage`
     - `type AgentPanelStatus`
+    - `type OMPHPanelStatus`
+    - `type OMPHTurn`
+    - `type OMPHProcessDisplay`
+    - `type OMPHPanelProps`
+    - `parseOmphFileHref`
+    - `type OMPHFileRef`, `type OMPHFileBody`, `type OMPHFilePreviewData`, `type OMPHFilePreviewLoader`, `type OMPHFilePreviewLayout`, `type OMPHFileLinkResolver`
     - `type AIBrowserGlowColors`
+    - `type AgentPanelProps`, `type FloatingAgentPanelProps`, `type FloatingAgentPanelAnchor`
+    - `type StdChatProps`, `type CopilotChatProps`, `type AIBrowserGlowProps`
     - `type AgentUICardHooks`
     - `type AgentUICardHookEvent`
     - `type AgentUICardAction`
     - `type AgentUICardType`
+    - `type MetricChartCardTypeContent`
   - `Auth/*`:
     - `CAuthPage`
     - `useAuthPage`
@@ -77,11 +99,12 @@ Use only exports reachable from `src/index.ts`. All of the following are importa
     - `CMetricChartCard`
     - `METRIC_CHART_TYPES`
     - `type CMetricChartCardProps`
+    - `type MetricChartDataRevealSource`
     - `type MetricChartDatum`
     - `type MetricChartType`
 - Shared:
   - `i18n/*` (`OrbcafeI18nProvider`, `useOrbcafeI18n`, `OrbcafeLocale`, ...)
-  - `GlobalMessage`, `showMessage`, `messageManager`, `type CMessageBoxType`
+  - `GlobalMessage`, `message`, `messageManager`, `type CMessageBoxType`
   - `CMessageBox`, `CStatusBadge`, `CList` family, `CFilterField`
   - `CLayoutManagement` (via `StdReport/*` re-export)
   - `CValueHelp`

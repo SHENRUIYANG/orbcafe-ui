@@ -216,7 +216,7 @@ const planning = usePlanningGantt({ tasks });
 ## Recipe 4: Add custom tools to the left of standard controls
 
 ```tsx
-import { CButton, Mail } from 'orbcafe-ui'; // V2 MUI-free：使用库内 CButton 与内置图标（如 Mail 不存在时可用 CButton 文本/自定义图标）
+import { CButton, Mail } from 'orbcafe-ui'; // v3 MUI-free：使用库内 CButton 与内置图标（如 Mail 不存在时可用 CButton 文本/自定义图标）
 
 <CPlanningGantt
   {...planning.planningGanttProps}

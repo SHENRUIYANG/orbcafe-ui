@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
-import type { CSSProperties, KeyboardEvent, ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { CSSProperties, KeyboardEvent, MouseEvent as ReactMouseEvent, ReactNode } from 'react';
 import { CPaper, CSelect, CTypography } from '../Atoms';
 import type { OrbSxProps } from '../../lib/orbis-compat/sx';
 import { useOrbTokens } from '../../lib/theme';
@@ -21,6 +21,8 @@ export const METRIC_CHART_TYPES = [
 
 export type MetricChartType = (typeof METRIC_CHART_TYPES)[number];
 
+export type MetricChartDataRevealSource = 'hover' | 'contextmenu';
+
 export interface MetricChartDatum {
   id: string;
   label: string;
@@ -36,6 +38,7 @@ export interface CMetricChartCardProps {
   chartType?: MetricChartType;
   onChartTypeChange?: (chartType: MetricChartType) => void;
   onItemClick?: (item: MetricChartDatum) => void;
+  onDataDetails?: (item: MetricChartDatum, source: MetricChartDataRevealSource) => void;
   activeId?: string;
   valueFormatter?: (value: number) => string;
   secondaryValueFormatter?: (value: number) => string;
@@ -46,6 +49,8 @@ export interface CMetricChartCardProps {
   error?: ReactNode;
   maxItems?: number;
   showChartTypeControl?: boolean;
+  showDataDetails?: boolean;
+  dataRevealDelayMs?: number;
   chartTypeOptions?: MetricChartType[];
   chartTypeLabels?: Partial<Record<MetricChartType, string>>;
   footer?: ReactNode;
@@ -87,6 +92,23 @@ const truncateLabel = (label: string, maxLength = 13): string => (
 const clamp = (value: number, min: number, max: number): number => Math.min(max, Math.max(min, value));
 
 const getChartColor = (item: MetricChartDatum, index: number, colors: string[]): string => item.color ?? colors[index % colors.length];
+
+type DatumInteractionHandlers = {
+  onItemHoverStart?: (item: MetricChartDatum) => void;
+  onItemHoverEnd?: (item: MetricChartDatum) => void;
+  onItemContextMenu?: (event: ReactMouseEvent<any>, item: MetricChartDatum) => void;
+};
+
+const getDatumInteractionProps = (item: MetricChartDatum, handlers?: DatumInteractionHandlers) => (
+  handlers
+    ? {
+        onMouseEnter: () => handlers.onItemHoverStart?.(item),
+        onMouseMove: () => handlers.onItemHoverStart?.(item),
+        onMouseLeave: () => handlers.onItemHoverEnd?.(item),
+        onContextMenu: (event: ReactMouseEvent<any>) => handlers.onItemContextMenu?.(event, item),
+      }
+    : {}
+);
 
 const getChartRange = (data: MetricChartDatum[]) => {
   const values = data.map((item) => finiteValue(item.value));
@@ -141,24 +163,28 @@ const LoadingState = () => (
 const InteractiveProps = ({
   item,
   onItemClick,
+  interactions,
 }: {
   item: MetricChartDatum;
   onItemClick?: (item: MetricChartDatum) => void;
+  interactions?: DatumInteractionHandlers;
 }) => {
-  if (!onItemClick) return {};
-  const activate = () => onItemClick(item);
+  const activate = () => onItemClick?.(item);
   const onKeyDown = (event: KeyboardEvent<SVGElement>) => {
-    if (event.key === 'Enter' || event.key === ' ') {
+    if (onItemClick && (event.key === 'Enter' || event.key === ' ')) {
       event.preventDefault();
       activate();
     }
   };
   return {
-    role: 'button' as const,
-    tabIndex: 0,
-    onClick: activate,
-    onKeyDown,
-    style: { cursor: 'pointer' } as CSSProperties,
+    ...(onItemClick ? {
+      role: 'button' as const,
+      tabIndex: 0,
+      onClick: activate,
+      onKeyDown,
+    } : {}),
+    ...getDatumInteractionProps(item, interactions),
+    style: { cursor: onItemClick || interactions ? 'pointer' : 'default' } as CSSProperties,
   };
 };
 
@@ -185,12 +211,14 @@ const HorizontalBars = ({
   data,
   activeId,
   onItemClick,
+  interactions,
   valueFormatter,
   colors,
 }: {
   data: MetricChartDatum[];
   activeId?: string;
   onItemClick?: (item: MetricChartDatum) => void;
+  interactions?: DatumInteractionHandlers;
   valueFormatter: (value: number) => string;
   colors: string[];
 }) => {
@@ -218,11 +246,12 @@ const HorizontalBars = ({
             onClick={() => onItemClick(item)}
             title={`${item.label}: ${valueFormatter(value)}`}
             aria-pressed={isActive}
+            {...getDatumInteractionProps(item, interactions)}
           >
             {content}
           </button>
         ) : (
-          <div key={getItemKey(item, index)} className={`orb-metric-bar-row${isActive ? ' is-active' : ''}`} role="listitem">
+          <div key={getItemKey(item, index)} className={`orb-metric-bar-row${isActive ? ' is-active' : ''}`} role="listitem" {...getDatumInteractionProps(item, interactions)}>
             {content}
           </div>
         );
@@ -235,12 +264,14 @@ const ProgressRows = ({
   data,
   activeId,
   onItemClick,
+  interactions,
   valueFormatter,
   colors,
 }: {
   data: MetricChartDatum[];
   activeId?: string;
   onItemClick?: (item: MetricChartDatum) => void;
+  interactions?: DatumInteractionHandlers;
   valueFormatter: (value: number) => string;
   colors: string[];
 }) => {
@@ -258,8 +289,8 @@ const ProgressRows = ({
           </>
         );
         return onItemClick ? (
-          <button key={getItemKey(item, index)} type="button" className={`orb-metric-progress-row${isActive ? ' is-active' : ''}`} onClick={() => onItemClick(item)} aria-pressed={isActive}>{row}</button>
-        ) : <div key={getItemKey(item, index)} className={`orb-metric-progress-row${isActive ? ' is-active' : ''}`} role="listitem">{row}</div>;
+          <button key={getItemKey(item, index)} type="button" className={`orb-metric-progress-row${isActive ? ' is-active' : ''}`} onClick={() => onItemClick(item)} aria-pressed={isActive} {...getDatumInteractionProps(item, interactions)}>{row}</button>
+        ) : <div key={getItemKey(item, index)} className={`orb-metric-progress-row${isActive ? ' is-active' : ''}`} role="listitem" {...getDatumInteractionProps(item, interactions)}>{row}</div>;
       })}
     </div>
   );
@@ -270,6 +301,7 @@ const SvgChart = ({
   data,
   activeId,
   onItemClick,
+  interactions,
   valueFormatter,
   secondaryValueFormatter,
   colors,
@@ -279,6 +311,7 @@ const SvgChart = ({
   data: MetricChartDatum[];
   activeId?: string;
   onItemClick?: (item: MetricChartDatum) => void;
+  interactions?: DatumInteractionHandlers;
   valueFormatter: (value: number) => string;
   secondaryValueFormatter: (value: number) => string;
   colors: string[];
@@ -306,7 +339,7 @@ const SvgChart = ({
           const width = Math.min(36, Math.max(10, innerWidth / Math.max(data.length * 1.8, 1)));
           const isActive = activeId === item.id;
           return (
-            <g key={getItemKey(item, index)} {...InteractiveProps({ item, onItemClick })} aria-label={`${item.label}: ${valueFormatter(value)}`}>
+            <g key={getItemKey(item, index)} {...InteractiveProps({ item, onItemClick, interactions })} aria-label={`${item.label}: ${valueFormatter(value)}`}>
               <rect className={`orb-metric-column${isActive ? ' is-active' : ''}`} x={x} y={Math.min(point.y, zeroY)} width={width} height={height} rx={4} fill={getChartColor(item, index, colors)} />
               <title>{item.label}: {valueFormatter(value)}</title>
               {(index % labelStep === 0 || data.length <= 6) && <text className="orb-metric-svg-label" x={point.x} y={SVG_HEIGHT - 14} textAnchor="middle">{truncateLabel(item.label)}</text>}
@@ -321,7 +354,7 @@ const SvgChart = ({
               const isActive = activeId === item.id;
               const radius = type === 'bubble' ? 7 + (Math.max(finiteValue(item.secondaryValue), 0) / secondaryMax) * 12 : type === 'scatter' ? 5 : 4;
               return (
-                <g key={getItemKey(item, index)} {...InteractiveProps({ item, onItemClick })} aria-label={`${item.label}: ${valueFormatter(finiteValue(item.value))}`}>
+                <g key={getItemKey(item, index)} {...InteractiveProps({ item, onItemClick, interactions })} aria-label={`${item.label}: ${valueFormatter(finiteValue(item.value))}`}>
                   {type === 'line' && <circle className={`orb-metric-point${isActive ? ' is-active' : ''}`} cx={point.x} cy={point.y} r={isActive ? 6 : 4} fill={getChartColor(item, index, colors)} />}
                   {type !== 'line' && <circle className={`orb-metric-point${isActive ? ' is-active' : ''}`} cx={point.x} cy={point.y} r={radius} fill={getChartColor(item, index, colors)} opacity={type === 'bubble' ? 0.82 : 0.9} />}
                   <title>{item.label}: {valueFormatter(finiteValue(item.value))}{type === 'bubble' && item.secondaryValue !== undefined ? ` · Size: ${secondaryValueFormatter(finiteValue(item.secondaryValue))}` : ''}</title>
@@ -343,6 +376,7 @@ const CircularChart = ({
   data,
   activeId,
   onItemClick,
+  interactions,
   valueFormatter,
   colors,
   ariaLabel,
@@ -351,6 +385,7 @@ const CircularChart = ({
   data: MetricChartDatum[];
   activeId?: string;
   onItemClick?: (item: MetricChartDatum) => void;
+  interactions?: DatumInteractionHandlers;
   valueFormatter: (value: number) => string;
   colors: string[];
   ariaLabel: string;
@@ -371,7 +406,7 @@ const CircularChart = ({
           const path = sweep >= 359.9
             ? undefined
             : describeSlice(center, center, radius, type === 'donut' ? 46 : 0, start, start + sweep);
-          const props = InteractiveProps({ item, onItemClick });
+          const props = InteractiveProps({ item, onItemClick, interactions });
           return path ? (
             <path key={getItemKey(item, index)} className={`orb-metric-slice${isActive ? ' is-active' : ''}`} d={path} fill={getChartColor(item, index, colors)} {...props}>
               <title>{item.label}: {valueFormatter(item.value)} ({((item.value / total) * 100).toFixed(1)}%)</title>
@@ -389,7 +424,7 @@ const CircularChart = ({
         {positiveData.map((item, index) => {
           const isActive = activeId === item.id;
           return (
-            <button key={getItemKey(item, index)} type="button" className={`orb-metric-legend-item${isActive ? ' is-active' : ''}`} onClick={() => onItemClick?.(item)} disabled={!onItemClick} title={item.label}>
+            <button key={getItemKey(item, index)} type="button" className={`orb-metric-legend-item${isActive ? ' is-active' : ''}`} onClick={() => onItemClick?.(item)} disabled={!onItemClick} title={item.label} {...getDatumInteractionProps(item, interactions)}>
               <span className="orb-metric-legend-dot" style={{ backgroundColor: getChartColor(item, index, colors) }} />
               <span className="orb-metric-legend-label">{item.label}</span>
               <strong>{((item.value / total) * 100).toFixed(0)}%</strong>
@@ -405,19 +440,21 @@ const ListChart = ({
   data,
   activeId,
   onItemClick,
+  interactions,
   valueFormatter,
   secondaryValueFormatter,
 }: {
   data: MetricChartDatum[];
   activeId?: string;
   onItemClick?: (item: MetricChartDatum) => void;
+  interactions?: DatumInteractionHandlers;
   valueFormatter: (value: number) => string;
   secondaryValueFormatter: (value: number) => string;
 }) => (
   <div className="orb-metric-list" role="list" aria-label="Chart data">
     {data.map((item, index) => {
       const content = <><span className="orb-metric-list-label" title={item.label}>{item.label}</span><span className="orb-metric-list-value">{valueFormatter(finiteValue(item.value))}</span>{item.secondaryValue !== undefined && <span className="orb-metric-list-secondary">{secondaryValueFormatter(finiteValue(item.secondaryValue))}</span>}</>;
-      return onItemClick ? <button key={getItemKey(item, index)} type="button" className={`orb-metric-list-row${activeId === item.id ? ' is-active' : ''}`} onClick={() => onItemClick(item)} aria-pressed={activeId === item.id}>{content}</button> : <div key={getItemKey(item, index)} className={`orb-metric-list-row${activeId === item.id ? ' is-active' : ''}`} role="listitem">{content}</div>;
+      return onItemClick ? <button key={getItemKey(item, index)} type="button" className={`orb-metric-list-row${activeId === item.id ? ' is-active' : ''}`} onClick={() => onItemClick(item)} aria-pressed={activeId === item.id} {...getDatumInteractionProps(item, interactions)}>{content}</button> : <div key={getItemKey(item, index)} className={`orb-metric-list-row${activeId === item.id ? ' is-active' : ''}`} role="listitem" {...getDatumInteractionProps(item, interactions)}>{content}</div>;
     })}
   </div>
 );
@@ -429,6 +466,7 @@ export const CMetricChartCard = ({
   chartType = 'bar',
   onChartTypeChange,
   onItemClick,
+  onDataDetails,
   activeId,
   valueFormatter = formatDefaultValue,
   secondaryValueFormatter = formatDefaultValue,
@@ -439,6 +477,8 @@ export const CMetricChartCard = ({
   error,
   maxItems = 8,
   showChartTypeControl = true,
+  showDataDetails = true,
+  dataRevealDelayMs = 1000,
   chartTypeOptions,
   chartTypeLabels,
   footer,
@@ -448,9 +488,33 @@ export const CMetricChartCard = ({
   sx,
 }: CMetricChartCardProps) => {
   const tokens = useOrbTokens();
+  const cardRef = useRef<HTMLDivElement>(null);
+  const hoverTimerRef = useRef<number | null>(null);
   const [internalChartType, setInternalChartType] = useState<MetricChartType>(chartType);
   const [showAll, setShowAll] = useState(false);
+  const [dataDetails, setDataDetails] = useState<{ item: MetricChartDatum; source: MetricChartDataRevealSource } | null>(null);
+  const [contextMenu, setContextMenu] = useState<{ item: MetricChartDatum; left: number; top: number } | null>(null);
   useEffect(() => setInternalChartType(chartType), [chartType]);
+
+  const clearHoverTimer = useCallback(() => {
+    if (hoverTimerRef.current !== null) {
+      window.clearTimeout(hoverTimerRef.current);
+      hoverTimerRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => clearHoverTimer, [clearHoverTimer]);
+
+  useEffect(() => {
+    if (!contextMenu) return undefined;
+    const closeContextMenu = (event: PointerEvent) => {
+      const target = event.target;
+      if (target instanceof HTMLElement && target.closest('.orb-metric-context-menu')) return;
+      setContextMenu(null);
+    };
+    document.addEventListener('pointerdown', closeContextMenu);
+    return () => document.removeEventListener('pointerdown', closeContextMenu);
+  }, [contextMenu]);
 
   const currentChartType = internalChartType;
   const colors = useMemo(() => [tokens.chart1, tokens.chart2, tokens.chart3, tokens.chart4, tokens.chart5, tokens.chart6], [tokens]);
@@ -467,56 +531,156 @@ export const CMetricChartCard = ({
     onChartTypeChange?.(next);
   };
 
+  const revealData = useCallback((item: MetricChartDatum, source: MetricChartDataRevealSource) => {
+    setDataDetails({ item, source });
+    setContextMenu(null);
+    onDataDetails?.(item, source);
+  }, [onDataDetails]);
+
+  const handleItemHoverStart = useCallback((item: MetricChartDatum) => {
+    clearHoverTimer();
+    if (!showDataDetails || contextMenu) return;
+    hoverTimerRef.current = window.setTimeout(() => {
+      revealData(item, 'hover');
+      hoverTimerRef.current = null;
+    }, Math.max(0, dataRevealDelayMs));
+  }, [clearHoverTimer, contextMenu, dataRevealDelayMs, revealData, showDataDetails]);
+
+  const handleItemHoverEnd = useCallback(() => {
+    clearHoverTimer();
+  }, [clearHoverTimer]);
+
+  const handleItemContextMenu = useCallback((event: ReactMouseEvent<any>, item: MetricChartDatum) => {
+    if (!showDataDetails) return;
+    event.preventDefault();
+    clearHoverTimer();
+    const bounds = cardRef.current?.getBoundingClientRect();
+    const left = bounds ? clamp(event.clientX - bounds.left, 8, Math.max(8, bounds.width - 164)) : 8;
+    const top = bounds ? clamp(event.clientY - bounds.top, 8, Math.max(8, bounds.height - 72)) : 8;
+    setContextMenu({ item, left, top });
+  }, [clearHoverTimer, showDataDetails]);
+
+  const datumInteractions: DatumInteractionHandlers | undefined = showDataDetails ? {
+    onItemHoverStart: handleItemHoverStart,
+    onItemHoverEnd: handleItemHoverEnd,
+    onItemContextMenu: handleItemContextMenu,
+  } : undefined;
+
   const body = currentChartType === 'metric' ? (
-    <div className="orb-metric-kpi" role="img" aria-label={resolvedAriaLabel}>
+    <div className="orb-metric-kpi" role={onItemClick ? 'button' : 'img'} tabIndex={onItemClick ? 0 : undefined} onClick={() => first && onItemClick?.(first)} onKeyDown={(event) => {
+      if (first && onItemClick && (event.key === 'Enter' || event.key === ' ')) {
+        event.preventDefault();
+        onItemClick(first);
+      }
+    }} aria-label={resolvedAriaLabel} {...(first ? getDatumInteractionProps(first, datumInteractions) : {})}>
       <span className="orb-metric-kpi-label">{first?.label ?? valueLabel ?? 'Value'}</span>
       <strong>{first ? valueFormatter(finiteValue(first.value)) : '—'}</strong>
       {first?.secondaryValue !== undefined && <span className="orb-metric-kpi-secondary">{secondaryValueLabel ?? 'Compared with'} · {secondaryValueFormatter(finiteValue(first.secondaryValue))}</span>}
     </div>
   ) : currentChartType === 'progress' ? (
-    <ProgressRows data={visibleData} activeId={activeId} onItemClick={onItemClick} valueFormatter={valueFormatter} colors={colors} />
+    <ProgressRows data={visibleData} activeId={activeId} onItemClick={onItemClick} interactions={datumInteractions} valueFormatter={valueFormatter} colors={colors} />
   ) : currentChartType === 'bar' ? (
-    <HorizontalBars data={visibleData} activeId={activeId} onItemClick={onItemClick} valueFormatter={valueFormatter} colors={colors} />
+    <HorizontalBars data={visibleData} activeId={activeId} onItemClick={onItemClick} interactions={datumInteractions} valueFormatter={valueFormatter} colors={colors} />
   ) : currentChartType === 'list' ? (
-    <ListChart data={visibleData} activeId={activeId} onItemClick={onItemClick} valueFormatter={valueFormatter} secondaryValueFormatter={secondaryValueFormatter} />
+    <ListChart data={visibleData} activeId={activeId} onItemClick={onItemClick} interactions={datumInteractions} valueFormatter={valueFormatter} secondaryValueFormatter={secondaryValueFormatter} />
   ) : currentChartType === 'pie' || currentChartType === 'donut' ? (
-    <CircularChart type={currentChartType} data={visibleData} activeId={activeId} onItemClick={onItemClick} valueFormatter={valueFormatter} colors={colors} ariaLabel={resolvedAriaLabel} />
+    <CircularChart type={currentChartType} data={visibleData} activeId={activeId} onItemClick={onItemClick} interactions={datumInteractions} valueFormatter={valueFormatter} colors={colors} ariaLabel={resolvedAriaLabel} />
   ) : (
-    <SvgChart type={currentChartType} data={visibleData} activeId={activeId} onItemClick={onItemClick} valueFormatter={valueFormatter} secondaryValueFormatter={secondaryValueFormatter} colors={colors} ariaLabel={resolvedAriaLabel} />
+    <SvgChart type={currentChartType} data={visibleData} activeId={activeId} onItemClick={onItemClick} interactions={datumInteractions} valueFormatter={valueFormatter} secondaryValueFormatter={secondaryValueFormatter} colors={colors} ariaLabel={resolvedAriaLabel} />
   );
 
   return (
-    <CPaper elevation={1} variant="outlined" className={`orb-metric-chart-card ${className ?? ''}`} style={style} sx={sx}>
-      <div className="orb-metric-chart-header">
-        <div className="orb-metric-chart-heading">
-          <CTypography variant="subtitle1" component="h3" noWrap title={title}>{title}</CTypography>
-          {subtitle && <CTypography variant="caption" muted component="div" noWrap>{subtitle}</CTypography>}
+    <div
+      ref={cardRef}
+      className="orb-metric-chart-shell"
+      onMouseLeave={() => {
+        clearHoverTimer();
+        if (dataDetails?.source === 'hover') setDataDetails(null);
+      }}
+    >
+      <CPaper elevation={1} variant="outlined" className={`orb-metric-chart-card ${className ?? ''}`} style={style} sx={sx}>
+        <div className="orb-metric-chart-header">
+          <div className="orb-metric-chart-heading">
+            <CTypography variant="subtitle1" component="h3" noWrap title={title}>{title}</CTypography>
+            {subtitle && <CTypography variant="caption" muted component="div" noWrap>{subtitle}</CTypography>}
+          </div>
+          {showChartTypeControl && options.length > 1 && (
+            <CSelect
+              aria-label={`${title} chart type`}
+              className="orb-metric-chart-select"
+              value={currentChartType}
+              options={options.map((option) => ({ value: option, label: labels[option] }))}
+              onChange={(event) => setChartType(event.target.value as MetricChartType)}
+              minWidth={108}
+              fullWidth={false}
+              size="small"
+            />
+          )}
         </div>
-        {showChartTypeControl && options.length > 1 && (
-          <CSelect
-            aria-label={`${title} chart type`}
-            className="orb-metric-chart-select"
-            value={currentChartType}
-            options={options.map((option) => ({ value: option, label: labels[option] }))}
-            onChange={(event) => setChartType(event.target.value as MetricChartType)}
-            minWidth={108}
-            fullWidth={false}
-            size="small"
-          />
-        )}
-      </div>
-      <div className="orb-metric-chart-body">
-        <LoadingOrEmpty loading={loading} error={error} hasData={hasData} emptyState={emptyState}>
-          {body}
-        </LoadingOrEmpty>
-        {overflowCount > 0 && !loading && !error && (
-          <button type="button" className="orb-metric-more" onClick={() => setShowAll((current) => !current)}>
-            {showAll ? 'Show fewer' : `Show all ${data.length}`}
+        <div className="orb-metric-chart-body">
+          <LoadingOrEmpty loading={loading} error={error} hasData={hasData} emptyState={emptyState}>
+            {body}
+          </LoadingOrEmpty>
+          {overflowCount > 0 && !loading && !error && (
+            <button type="button" className="orb-metric-more" onClick={() => setShowAll((current) => !current)}>
+              {showAll ? 'Show fewer' : `Show all ${data.length}`}
+            </button>
+          )}
+        </div>
+        {footer && <div className="orb-metric-chart-footer">{footer}</div>}
+      </CPaper>
+
+      {contextMenu && (
+        <div
+          className="orb-metric-context-menu"
+          role="menu"
+          onMouseEnter={clearHoverTimer}
+          onKeyDown={(event) => { if (event.key === 'Escape') setContextMenu(null); }}
+          style={{ left: contextMenu.left, top: contextMenu.top }}
+          onPointerDown={(event) => event.stopPropagation()}
+        >
+          <div className="orb-metric-context-label">{contextMenu.item.label}</div>
+          <button
+            type="button"
+            role="menuitem"
+            onClick={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              revealData(contextMenu.item, 'contextmenu');
+            }}
+          >
+            Show data
           </button>
-        )}
-      </div>
-      {footer && <div className="orb-metric-chart-footer">{footer}</div>}
-    </CPaper>
+        </div>
+      )}
+
+      {dataDetails && (
+        <div
+          className="orb-metric-data-details"
+          role="dialog"
+          aria-label={`${dataDetails.item.label} data details`}
+          onPointerDown={(event) => event.stopPropagation()}
+        >
+          <div className="orb-metric-data-details-header">
+            <strong>{dataDetails.item.label}</strong>
+            <button type="button" aria-label="Close data details" onClick={() => setDataDetails(null)}>×</button>
+          </div>
+          <div className="orb-metric-data-details-row">
+            <span>{valueLabel ?? 'Value'}</span>
+            <strong>{valueFormatter(finiteValue(dataDetails.item.value))}</strong>
+          </div>
+          {dataDetails.item.secondaryValue !== undefined && (
+            <div className="orb-metric-data-details-row">
+              <span>{secondaryValueLabel ?? 'Secondary value'}</span>
+              <strong>{secondaryValueFormatter(finiteValue(dataDetails.item.secondaryValue))}</strong>
+            </div>
+          )}
+          <span className="orb-metric-data-details-hint">
+            {dataDetails.source === 'hover' ? `Shown after ${Math.max(0, dataRevealDelayMs) / 1000} seconds of stillness` : 'Shown from the context menu'}
+          </span>
+        </div>
+      )}
+    </div>
   );
 };
 

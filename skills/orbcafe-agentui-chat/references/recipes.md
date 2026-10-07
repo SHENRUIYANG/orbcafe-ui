@@ -84,7 +84,27 @@ try {
 
 Tie `active` to the real AI running state. Turn it off on success, error, cancel, and stop.
 
-## Recipe 4: CopilotChat inside custom shell
+## Recipe 4: FloatingAgentPanel with the ready-made shell
+
+```tsx
+import { FloatingAgentPanel, type FloatingAgentPanelAnchor } from 'orbcafe-ui'
+
+const [anchor, setAnchor] = useState<FloatingAgentPanelAnchor>('right')
+
+<FloatingAgentPanel
+  title="Assistant"
+  messages={messages}
+  isResponding={isResponding}
+  anchor={anchor}
+  onAnchorChange={setAnchor}
+  width={380}
+  cardHooks={{ onCardEvent: setLastCardEvent }}
+/>
+```
+
+`FloatingAgentPanel` owns horizontal dragging and left/center/right snapping. Keep open/close, free XY positioning and resize in the host; use `CopilotChat` when those controls are required.
+
+## Recipe 5: CopilotChat inside custom shell
 
 ```tsx
 import { CopilotChat } from 'orbcafe-ui'
@@ -105,6 +125,25 @@ import { CopilotChat } from 'orbcafe-ui'
   />
 </div>
 ```
+
+## Recipe 6: Metric chart cards in an assistant response
+
+An assistant message can include a fenced JSON card using the `metric-chart-card` payload. The renderer maps it to the public `CMetricChartCard` style and keeps card events on `cardHooks`:
+
+```json
+{
+  "type": "metric-chart-card",
+  "title": "Planning controller",
+  "subtitle": "Materials by responsible planner",
+  "chartType": "bar",
+  "data": [
+    { "id": "anna", "label": "Anna Müller", "value": 148 },
+    { "id": "ben", "label": "Ben Fischer", "value": 121 }
+  ]
+}
+```
+
+The card supports chart switching, item events, one-second hover data details, and a right-click `Show data` menu. The event payload keeps the datum and reveal source available to the host.
 
 ## Minimal state shapes
 
@@ -147,3 +186,51 @@ setMessages((prev) => [
 ```
 
 Then clear only that message's streaming flag in `onMessageStreamingComplete`.
+
+## Recipe 5: OMPHPanel
+
+宿主持有轮次，并按到达的全文追加。不要套 `AgentPanel` 的打字机。文件预览、过程行和滚动的完整规则在 `references/omph-panel.md`。
+
+```tsx
+import { useState } from 'react'
+import { InputArea, OMPHPanel, type OMPHPanelStatus, type OMPHTurn } from 'orbcafe-ui'
+
+const [turns, setTurns] = useState<OMPHTurn[]>([])
+const [status, setStatus] = useState<OMPHPanelStatus>('idle')
+const [isResponding, setIsResponding] = useState(false)
+
+async function handleSend(content: string) {
+  const id = crypto.randomUUID()
+  setStatus('running')
+  setIsResponding(true)
+  setTurns((current) => [...current, {
+    id,
+    startedAt: Date.now(),
+    user: { id: `${id}-user`, content, timestamp: new Date() },
+    assistant: { id: `${id}-assistant`, content: '', timestamp: new Date(), streaming: true },
+  }])
+  try {
+    // 每拿到一块文本，把 assistant.content 换成到目前为止的全文
+  } finally {
+    setTurns((current) => current.map((turn) => (
+      turn.id === id && turn.assistant
+        ? { ...turn, assistant: { ...turn.assistant, streaming: false } }
+        : turn
+    )))
+    setIsResponding(false)
+    setStatus('idle')
+  }
+}
+
+<>
+  <OMPHPanel
+    title="Data Analysis Agent"
+    turns={turns}
+    agentStatus={status}
+    isResponding={isResponding}
+  />
+  <InputArea onSend={handleSend} onStop={cancelTheRequest} isResponding={isResponding} />
+</>
+```
+
+面板默认不渲染输入。只有明确要内置输入条时才传 `showInput`。等待人工确认时用 `OMPHApprovalCard` 换掉 `InputArea`。回复里的可交互 HTML 写成闭合的 `html` 围栏，放在回复末尾。启用预览时再传 `loadFilePreview`。文件不存在返回 `{ body: { kind: 'missing' } }`，暂时失败才 throw。示例：`examples/app/omph-panel/OMPHPanelExampleClient.tsx`。

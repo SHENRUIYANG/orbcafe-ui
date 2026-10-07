@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useMemo } from 'react'
+import React, { useMemo, useRef } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
@@ -10,6 +10,7 @@ import type { Components } from 'react-markdown'
 import { cn } from '../../lib/utils'
 import ThinkBox from './ThinkBox'
 import CodeBlock from './CodeBlock'
+import HtmlDemo from './HtmlDemo'
 import MermaidBlock from './MermaidBlock'
 import ErrorCard from '../cards/ErrorCard'
 import WarningCard from '../cards/WarningCard'
@@ -17,6 +18,7 @@ import SuggestionsCard from '../cards/SuggestionsCard'
 import ToolResultCard from '../cards/ToolResultCard'
 import TableCard from '../cards/TableCard'
 import ChartCard from '../cards/ChartCard'
+import MetricChartCard from '../cards/MetricChartCard'
 import SAPCard from '../cards/SAPCard'
 import { parseCardPayload } from '../utils/cardParsing'
 import type { AgentUICardAction, AgentUICardHooks, AgentUICardType } from '../cardTypes'
@@ -50,8 +52,17 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
   enableCodeHighlight = true,
   enableMermaid = true,
   messageId,
-  cardHooks
+  cardHooks: incomingCardHooks
 }) => {
+  // Keep Markdown component identities stable when the host records a card event.
+  // A new renderer function would remount cards and discard their open inspector.
+  const latestHooks = useRef(incomingCardHooks)
+  latestHooks.current = incomingCardHooks
+  const hasCardHandler = Boolean(incomingCardHooks?.onCardEvent)
+  const cardHooks = useMemo<AgentUICardHooks | undefined>(() => hasCardHandler ? {
+    onCardEvent: (event) => latestHooks.current?.onCardEvent?.(event)
+  } : undefined, [hasCardHandler])
+
   
   const processedContent = useMemo(() => {
     if (!content) return ''
@@ -182,12 +193,18 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
         )
       }
 
+      if (language === 'html' || language === 'htm') {
+        return <HtmlDemo content={codeContent} />
+      }
+
       if (language === 'json') {
         const cardData = parseCardPayload(codeContent)
         if (cardData) {
           switch (cardData.type) {
             case 'table':
               return <TableCard data={cardData.data} />
+            case 'metric-chart-card':
+              return <MetricChartCard {...cardData} messageId={messageId} cardHooks={cardHooks} />
             case 'bar-chart-card':
             case 'line-chart-card':
             case 'pie-chart-card':

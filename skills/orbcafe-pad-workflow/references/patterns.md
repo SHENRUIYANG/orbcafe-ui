@@ -9,7 +9,7 @@ This is the standard, best-practice structure for a Pad application based on `Pa
 ```tsx
 import { useState } from 'react';
 import { PAppPageLayout, PNavIsland, PWorkloadNav, PTable, PNumericKeypad, PBarcodeScanner } from 'orbcafe-ui';
-import { PackageCheck, Truck } from 'orbcafe-ui'; // 图标从包入口导入，V2 不依赖 lucide-react / @mui
+import { PackageCheck, Truck } from 'orbcafe-ui'; // 图标从包入口导入，v3 不依赖 lucide-react / @mui
 
 export default function PadApp() {
   const [activeWorkload, setActiveWorkload] = useState('picking');
@@ -146,5 +146,5 @@ export default function PadApp() {
 Pad Value Help notes:
 
 - Use stable keys as selected values; the card display can use localized descriptions.
-- The popup uses the ORBIS `CDialog` (V2 is MUI-free), so keep labels short and columns few enough for touch use.
+- The popup uses the ORBIS `CDialog` (v3 is MUI-free), so keep labels short and columns few enough for touch use.
 - Prefer `PBarcodeScanner` for barcode capture and `CValueHelp` for searchable master-data lookup; do not merge both concerns into one custom input.

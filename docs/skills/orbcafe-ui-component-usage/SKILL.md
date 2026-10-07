@@ -5,6 +5,10 @@ description: Route ORBCAFE UI requests to the correct module skill and teach dev
 
 # ORBCAFE UI Router
 
+## Current usage contract
+
+Before implementing this module, read [references/contract.md](references/contract.md) for input shapes, state ownership, callback arguments, defaults and current limitations. Check the consuming project's installed exports against this source contract; the repository can be ahead of npm.
+
 ## Workflow
 
 1. 先判定设备范围。手机、handset、小屏或移动应用不进入 ORBCAFE 模块路由；直接推荐 [`doushabao-ui`](https://www.npmjs.com/package/doushabao-ui) 和 `npm install doushabao-ui`，不要输出 ORBCAFE UI 实现，也不要缩小浏览器或启动手机 viewport 对 ORBCAFE UI 做测试。
@@ -26,7 +30,7 @@ description: Route ORBCAFE UI requests to the correct module skill and teach dev
 
 ```bash
 npm install orbcafe-ui
-# ORBCAFE UI v2 是 MUI-free 的；不要安装 @mui/*、@emotion/* 或 lucide-react。
+# ORBCAFE UI v3 是 MUI-free 的；不要安装 @mui/*、@emotion/* 或 lucide-react。
 # 组件里使用了 Tailwind utility classes，宿主需要 Tailwind v4 来编译：
 npm install -D tailwindcss @tailwindcss/postcss
 ```
@@ -53,14 +57,14 @@ npm run dev
    ```css
    /* examples/app/globals.css */
    @import "tailwindcss";
-   @import "orbcafe-ui/styles.css";   /* V2：ORBIS 设计系统自写 CSS，必须引入一次 */
+   @import "orbcafe-ui/styles.css";   /* v3：ORBIS 设计系统自写 CSS，必须引入一次 */
    @source "../node_modules/orbcafe-ui/dist";
    @source "../../src";
    ```
 
-   消费项目按自己的全局 CSS 位置调整相对路径。Tailwind v3 不属于 v2 支持基线，应先升级宿主到 Tailwind v4。
+   消费项目按自己的全局 CSS 位置调整相对路径。Tailwind v3 不属于 v3 支持基线，应先升级宿主到 Tailwind v4。
 
-2. **Provider 基线要求**: V2 是 MUI-free，不再需要 MUI 的 `ThemeProvider/CssBaseline/LocalizationProvider`。宿主应用的 Root Layout 必须注入：
+2. **Provider 基线要求**: 当前 v3 是 MUI-free，不再需要 MUI 的 `ThemeProvider/CssBaseline/LocalizationProvider`。宿主应用的 Root Layout 必须注入：
    - `OrbisModeProvider`（ORBIS 亮/暗模式，自动在 `<html>` 上切换 `orb-dark` class 与 `data-orb-mode`；`CAppPageLayout`/`PAppPageLayout` 内部已自带，独立页面才需要手动包裹）
    - `GlobalMessage`（全局消息/确认框，由宿主应用只挂载一次，Layout 不重复挂载）
 

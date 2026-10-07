@@ -27,3 +27,5 @@ const data = [
 ```
 
 Supported `chartType` values are `bar`, `column`, `line`, `pie`, `donut`, `scatter`, `bubble`, `list`, `metric`, and `progress`. `secondaryValue` drives bubble size and can be shown in list or metric views. `maxItems` keeps dense cards readable and adds a `Show all` control when more data is available.
+
+When `showDataDetails` is enabled (the default), hovering a data item for one second opens a compact data inspector. Right-clicking an item opens a context menu with `Show data`; `onDataDetails` receives the item and whether it was revealed by `hover` or `contextmenu`. Item clicks still use `onItemClick`.

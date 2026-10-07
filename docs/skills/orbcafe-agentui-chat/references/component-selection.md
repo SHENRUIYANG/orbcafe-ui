@@ -18,6 +18,22 @@ Choose `AgentPanel` when:
 - 需要“只读对话展示”面板（隐藏输入框）；这是 `AIPanel` 的默认语义
 - 需要可拖拽 panel header 时，可以传 `onHeaderPointerDown`，但外层壳仍然负责位置和拖拽状态
 
+## Use `OMPHPanel`
+
+Choose `OMPHPanel` when:
+- 用户要和 Harness 会话面板对齐的对话窗口：轮次、过程行、增量流式、正文末尾运行态、贴底滚动
+- 助手回复里仍然需要 AgentUI 的 Markdown 和 `metric-chart-card`
+- 助手回复里的文件链接要在面板内预览（Markdown、代码、图片）
+- 不要用它替换现有 `AgentPanel`。展示型扁平消息继续用 `AgentPanel`
+
+写代码前读完 `references/omph-panel.md`。那里有轮次字段、状态和 `isResponding` 的分工、流式追加、操作条、滚动、文件预览的大屏/小屏，以及和 OMPH 桥的边界。
+
+不要做这些：
+- 不要加分支 / fork 按钮，组件没有 `onBranch`
+- 不要把 `reasoning-delta` 的原文写进过程行
+- 不要让面板自己读文件；只传 `loadFilePreview`
+- 不要把 PDF、Office、Excel 当成面板内置预览
+
 ## Use `StdChat`
 
 Choose `StdChat` when:
@@ -26,6 +42,15 @@ Choose `StdChat` when:
 - 需要消息区 + 输入区
 - 需要 streaming 和 card hooks，但不需要 copilot header/collapse 语义
 - 或需要同一组件在不同场景切换输入区（`showInput`）
+
+## Use `FloatingAgentPanel`
+
+Choose `FloatingAgentPanel` when:
+- 需要一个 ready-made 的 `AgentPanel` 浮层，支持横向拖动和左/中/右吸附
+- 不需要自己实现打开/关闭、自由 XY 拖动或 resize
+- 希望通过 `anchor` / `defaultAnchor`、`width`、`top`、`bottom`、`inset`、`zIndex` 调整布局
+
+它仍然是 `AgentPanel` 的壳；业务消息、状态和 `cardHooks` 由宿主传入。
 
 ## Use `CopilotChat`
 

@@ -10,11 +10,22 @@
 
 - 只从 `orbcafe-ui` 导入：
   - `AgentPanel`
+  - `OMPHPanel`
+  - `FloatingAgentPanel`
   - `StdChat`
   - `CopilotChat`
   - `AIBrowserGlow`
+  - `parseOmphFileHref`
   - `type ChatMessage`
   - `type AgentPanelStatus`
+  - `type OMPHPanelStatus`
+  - `type OMPHTurn`
+  - `type OMPHProcessItem`
+  - `type OMPHProcessDisplay`
+  - `type OMPHFileRef`
+  - `type OMPHFilePreviewData`
+  - `type OMPHFilePreviewLoader`
+  - `type OMPHFilePreviewLayout`
   - `type AIBrowserGlowColors`
   - `type AgentUICardHooks`
 - 不要指导业务代码直接从 `src/components/AgentUI/...` 引内部实现。
@@ -45,15 +56,36 @@
 - AI 结束、失败、中断时必须把 `active` 改回 `false`。
 - 它不承载消息、输入、streaming、panel header 或 agent 状态文案。
 
+## OMPHPanel contract
+
+完整规则在 `references/omph-panel.md`。这里只列会接错的边界：
+
+- 宿主拥有 `turns`。`onSend` 不追加消息，也不调用模型。
+- `streaming: true` 表示宿主还在把全文追加进来。组件直接画这份全文，不再做打字机，也没有 `onMessageStreamingComplete`。
+- `agentStatus` 管头部圆点和正文末尾运行条。`isResponding` 管输入区是发送还是停止。只改其中一个，另一个不会跟着变。
+- 运行条的时长只来自仍在 `streaming` 或 `running` / `pending` 的那一轮的 `startedAt`。
+- 过程行用稳定 `id` 就地更新。工具结果不要新建第二行。
+- 没有 `onBranch`。不要做分支按钮。
+- 操作条是浅底色的一行：左时间、中 Usage、右复制。最新一轮常显，更早的轮次悬停或聚焦才显示。
+- 文件预览默认关闭。传入 `loadFilePreview` 才拦截文件链接。文件不存在返回 `{ kind: 'missing' }`；暂时失败才 throw。
+- 预览按面板宽度而不是屏幕宽度切换：≥ 880px 并排，更窄则覆盖。覆盖时被盖住的对话列是 `inert`。
+- 面板不读文件系统，也不接 `window.ORBAIRuntime.agent`。桥事件要由宿主写成 `OMPHTurn[]`。
+- `reasoning-delta` 的原文不要渲染。审批不要画假的批准按钮。
+
 ## Card hooks contract
 
 - 卡片动作统一使用 `cardHooks.onCardEvent`。
+- `metric-chart-card` 使用 `CMetricChartCard`；条目点击回传 `action`，悬停 1 秒或右键菜单的 `Show data` 回传 `show-data`。
 - 事件对象至少关注：
   - `messageId`
   - `cardType`
   - `action`
   - `payload`
 - 不要把业务逻辑直接绑到 `MarkdownRenderer` 或 `DynamicCardRenderer`。
+
+## Floating shell boundary
+
+- `FloatingAgentPanel` 只负责水平拖动和左/中/右吸附；它不提供 open/close、自由 XY 拖动或 resize。
 
 ## Copilot shell boundary
 

@@ -122,15 +122,15 @@ import { CCardDetailPanel, type CCardItem } from 'orbcafe-ui';
 
 const [item, setItem] = useState<CCardItem | null>(null);
 
-<CCardDetailPanel
-  item={item!}
+{item && <CCardDetailPanel
+  item={item}
   open={!!item}
   onClose={() => setItem(null)}
   onDownloadClick={(it) => download(it.id)}
-/>
+/>}
 ```
 
 Notes for Recipe 4:
 
 - The panel renders through a portal to `document.body`; do not wrap it in your own `position: fixed` container (page containers like `CPageTransition` carry `will-change: transform`, which would clip fixed positioning).
-- `item` must stay non-null while the close transition runs; control visibility with `open`, not by unmounting.
+- Never render with a null item. To preserve close animation, keep the last non-null item and toggle a separate open state; conditional mounting above is the minimal safe alternative.

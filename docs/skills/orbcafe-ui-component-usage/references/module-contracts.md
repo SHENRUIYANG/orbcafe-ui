@@ -7,6 +7,13 @@ Machine-readable sibling:
 
 Use it before reading a module README in detail.
 
+## Contract reading rules
+
+- `Public entry` lists names reachable from `orbcafe-ui`; consumer code imports from that package entry.
+- `Hook-first` means the public hook owns working state and returns bindings/props. `Component-first` means the host owns state and passes props/callbacks. `Mixed` chooses the stated strategy per sub-domain.
+- `Minimal state contract` is the smallest host-owned data shape. Optional fields are marked with `?`; do not invent undocumented prop names.
+- `Verify` is behavior acceptance. With the local `file:..` examples dependency, run `npm run build` before examples checks.
+
 ## 1. StdReport
 
 - Public entry:
@@ -47,6 +54,7 @@ Use it before reading a module README in detail.
 
 - Public entry:
   - `CGraphReport`
+  - graph primitives (`CGraphCharts`, `CGraphKpiCards`, `CBarChart`, `CLineChart`, `CPieChart`, `CComboChart`, `CHeatmapChart`, `CFishboneChart`, `CWaterfallChart`, `CGoogleMapChart`, `CAmapChart`)
   - `useGraphReport`
   - `CDetailInfoPage`
   - `useDetailInfo`
@@ -64,9 +72,11 @@ Use it before reading a module README in detail.
     - `useGraphInteraction`
     - `useDetailInfo`
 - Minimal state contract:
-  - graph open/model/tableContent
-  - detail sections/tabs/search query/AI fallback
-  - settings value + template ids
+  - graph: `open`, `model: GraphReportModel`, `tableContent`; the model contains `{ title, kpis, charts, table }`
+  - detail: `sections: DetailInfoSection[]`, optional `tabs: DetailInfoTab[]`, `defaultTabId`, and AI query fallback
+  - detail field: `{ id, label, value, searchableText? }`; `ai.onSubmit(query, context)` may return Markdown text
+  - settings: `CustomizeAgentSettings` is `{ baseUrl, apiKey, model, promptLang, analysisPrompt, responsePrompt }`
+  - `onSaveAll({ settings, analysisTemplateId?, responseTemplateId? })` is the single persistence callback
 - Canonical example:
   - `examples/app/detail-info/[id]/DetailInfoExampleClient.tsx`
 - Verify:
@@ -136,6 +146,7 @@ Use it before reading a module README in detail.
   - `CAINavProvider`
   - `useAINav`
   - `useVoiceInput`
+  - `VoiceNavigatorProvider` / `useVoiceNavigator` (aliases for `CAINavProvider` / `useAINav`)
 - Preferred pattern:
   - pivot persistence: controlled hook mode
   - AINav: provider wrapper with required submit callback
@@ -145,8 +156,10 @@ Use it before reading a module README in detail.
     - `useVoiceInput`
     - `useAINav`
 - Minimal state contract:
-  - pivot rows/columns/measures/presets
-  - AINav recording/submission state
+  - pivot `fields: { id, label, type? }[]`, rows, and layout `{ rows?, columns?, filters?, values: { fieldId, aggregation? }[] }`
+  - optional chart `{ dimensionFieldId?, primaryValueFieldId?, secondaryValueFieldId?, chartType? }`
+  - `presets: PivotTablePreset[]`, persisted through `onPresetsChange` when required
+  - AINav `onVoiceSubmit(text)` is required; `onVoicePartial`, `onVoiceError`, `longPressMs`, `disableSpaceTrigger`, and `ignoreWhenFocusedInput` are optional
 - Canonical example:
   - `examples/app/_components/PivotTableExampleClient.tsx`
   - `examples/app/_components/AINavExampleClient.tsx`
@@ -178,8 +191,9 @@ Use it before reading a module README in detail.
   - Public hook exists:
     - `useKanbanBoard`
 - Minimal state contract:
-  - buckets/cards board model
-  - drag move callback
+  - buckets: `{ id, title, description?, accentColor?, limit? }[]`
+  - cards: `{ id, bucketId, title, summary?, priority?, progress?, assignee?, tags?, metrics? }[]`
+  - drag event: `{ cardId, fromBucketId, toBucketId, targetIndex?, card, model }`
   - optional bucket add/rename callbacks and card filter
   - card click route/query state
 - Canonical example:
@@ -200,17 +214,32 @@ Use it before reading a module README in detail.
 
 - Public entry:
   - `AgentPanel`
+  - `OMPHPanel`
+  - `OMPHApprovalCard`
+  - `type OMPHApprovalChoice`, `type OMPHApprovalDecision`, `type OMPHApprovalRequest`, `type OMPHApprovalLabels`
+  - `FloatingAgentPanel`
   - `StdChat`
+  - `InputArea`
   - `CopilotChat`
   - `AIBrowserGlow`
   - `type ChatMessage`
   - `type AgentPanelStatus`
+  - `type OMPHPanelStatus`
+  - `type OMPHTurn`
+  - `type OMPHProcessDisplay`
+  - `parseOmphFileHref`, `type OMPHFileRef`, `type OMPHFilePreviewData`, `type OMPHFilePreviewLoader`, `type OMPHFilePreviewLayout`
   - `type AIBrowserGlowColors`
   - `type AgentUICardHooks`
+  - `type AgentUICardHookEvent`
+  - `type AgentUICardAction`
+  - `type MetricChartCardTypeContent`
+  - `type AgentPanelProps`, `type FloatingAgentPanelProps`, `type StdChatProps`, `type CopilotChatProps`, `type AIBrowserGlowProps`
 - Preferred pattern:
   - AIPanel / no-input AI dialogue window: `AgentPanel` with default `showInput=false`
-  - Chat / input-included chat surface: `StdChat`
+  - Chat / input-included chat surface: `StdChat`（内部使用 `InputArea`）
+  - OMPH 回复面板：`OMPHPanel` 默认 `showInput=false`，输入用面板外的 `InputArea`
   - floating helper: `CopilotChat` inside custom shell
+  - ready-made floating shell: `FloatingAgentPanel` when horizontal drag and left/center/right snap are enough
 - Hooks:
   - No public custom hook
   - Use props + callback contracts instead
@@ -220,7 +249,14 @@ Use it before reading a module README in detail.
   - optional `agentStatus` for `AgentPanel`
   - optional `AIBrowserGlow active/colors/zIndex`
   - assistant `isStreaming`
-  - for copilot shell: `isOpen`, `corner`, `panelSize`, `panelPosition`
+  - `FloatingAgentPanel`: optional controlled `anchor`/`onAnchorChange`; `width`, `top`, `bottom`, `inset`, `zIndex` customize placement
+  - `CopilotChat`: host-owned `isOpen`, `corner`, `panelSize`, `panelPosition` when using a custom shell
+  - `AgentPanel showInput=false` is the AIPanel contract; `showInput=true` requires a working `onSend`
+  - `StdChat.statusLine` is an optional in-flow React node for pending/running status
+  - dynamic `metric-chart-card` JSON: `{ type, title, subtitle?, chartType?, data: [{ id, label, value, secondaryValue?, color? }], valueLabel?, secondaryValueLabel?, valueSuffix?, secondaryValueSuffix? }`
+  - card event: `{ messageId?, cardType, action, title?, payload?, rawData? }`; metric chart uses `action` for selection/type changes and `show-data` for data inspection
+    - item click payload: `{ item }`; chart switch payload: `{ chartType }`; data inspector payload: `{ item, source: 'hover' | 'contextmenu' }`
+    - keep `cardHooks` callback identity stable; the renderer preserves an open metric inspector across host state updates
 - Canonical example:
   - `examples/app/aipanel/AIPanelExampleClient.tsx`
   - `examples/app/chat/ChatExampleClient.tsx`
@@ -320,7 +356,7 @@ Use it before reading a module README in detail.
   - callback promise toggles loading and clears it
 - Common failure modes:
   - treating demo callbacks as real authentication
-  - not wrapping app with `OrbisModeProvider` + `GlobalMessage` providers (V2 is MUI-free)
+  - not wrapping app with `OrbisModeProvider` + `GlobalMessage` providers (v3 is MUI-free)
   - importing from internal component paths
   - claiming ORBCAFE UI owns tokens/sessions/cookies instead of the host auth service
 
@@ -452,6 +488,7 @@ Use it before reading a module README in detail.
   - `CMetricChartCard`
   - `METRIC_CHART_TYPES`
   - `type CMetricChartCardProps`
+  - `type MetricChartDataRevealSource`
   - `type MetricChartDatum`
   - `type MetricChartType`
 - Preferred pattern:
@@ -463,6 +500,8 @@ Use it before reading a module README in detail.
   - `data: MetricChartDatum[]` with stable `id`, `label`, finite `value`, optional `secondaryValue`/`color`
   - `chartType` and optional controlled `onChartTypeChange`
   - optional `activeId`/`onItemClick`
+  - optional `onDataDetails(item, source)`; built-in one-second hover and right-click `Show data` remain enabled by default
+  - `showDataDetails={false}` disables both reveal entrypoints; `dataRevealDelayMs` changes the stillness delay
   - `loading`, `error`, `emptyState`, and optional `maxItems`
 - Canonical example:
   - `examples/app/_components/ChartCardsExampleClient.tsx`
@@ -471,11 +510,13 @@ Use it before reading a module README in detail.
   - card grid renders with equal-height ORBIS cards
   - chart type selector changes the visualization
   - clicking a mark/row fires `onItemClick` and `activeId` highlights the same item
+  - hovering without movement for one second opens the inspector; right-click → `Show data` opens it immediately; close remains available after parent re-renders
   - loading, error, empty, and overflow states remain readable
   - `list` view provides the accessible label/value fallback
 - Common failure modes:
   - importing from `src/components/MetricChart` instead of `orbcafe-ui`
   - unstable or localized datum IDs, so selection cannot be restored
+  - recreating `cardHooks`/renderer component maps on every event and remounting the card before its inspector can open
   - changing selection without passing the selected ID back through `activeId`
   - rendering duplicate external loading/empty/error panels
   - using metric cards for dense report tables or full graph/pivot analysis

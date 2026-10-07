@@ -18,6 +18,7 @@
 - `CMetricChartCard` is component-first; the page owns query state and selection state.
 - For controlled chart selection, update `chartType` in `onChartTypeChange`.
 - For item selection, update the business filter/detail state in `onItemClick` and pass the selected datum ID back through `activeId`.
+- Keep the built-in data details enabled: one-second hover opens the inspector and right-click exposes `Show data`; use `onDataDetails(item, source)` for analytics or business detail integration.
 - Do not expect the component to fetch data, persist filters, navigate routes, or open a detail page.
 - Pass only one source of truth for loading, error, and empty states. The component renders them in `loading → error → empty → chart` order.
 

@@ -63,6 +63,7 @@ export const buildExampleMenu = (detailInfoHref = '/detail-info/ID-1'): TreeMenu
       { id: 'chat', title: 'Chat', href: '/chat', icon: <MessageSquare className="w-4 h-4" /> },
       { id: 'copilot', title: 'Copilot', href: '/copilot', icon: <PanelRight className="w-4 h-4" /> },
       { id: 'aipanel', title: 'AI Panel', href: '/aipanel' },
+      { id: 'omph-panel', title: 'OMPH Panel', href: '/omph-panel' },
       { id: 'ai-nav', title: 'AI Nav', href: '/ai-nav' },
     ],
   },

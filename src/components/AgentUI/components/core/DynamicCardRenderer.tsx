@@ -8,6 +8,7 @@ import SuggestionsCard from '../cards/SuggestionsCard'
 import ToolResultCard from '../cards/ToolResultCard'
 import TableCard from '../cards/TableCard'
 import ChartCard from '../cards/ChartCard'
+import MetricChartCard from '../cards/MetricChartCard'
 import SAPCard from '../cards/SAPCard'
 import { parseCardPayload } from '../utils/cardParsing'
 import type { AgentUICardAction, AgentUICardHooks, AgentUICardType } from '../cardTypes'
@@ -59,6 +60,8 @@ const DynamicCardRenderer: FC<DynamicCardProps> = ({ content, messageId, cardHoo
     switch (cardData.type) {
       case 'table':
         return <TableCard data={cardData.data} />
+      case 'metric-chart-card':
+        return <MetricChartCard {...cardData} messageId={messageId} cardHooks={cardHooks} />
       case 'bar-chart-card':
       case 'line-chart-card':
       case 'pie-chart-card':

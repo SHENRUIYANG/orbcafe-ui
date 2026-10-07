@@ -33,16 +33,16 @@
   - Canonical examples use Tailwind v4 CSS `@source`.
   - In the Next examples app, `examples/app/globals.css` uses `@source "../node_modules/orbcafe-ui/dist";` and `@source "../../src";`.
   - In a consuming Next app using Tailwind v4, add the correct relative `@source` path from that app's global CSS to `node_modules/orbcafe-ui/dist`.
-  - Tailwind v3 is not part of the supported v2 baseline; upgrade the host to Tailwind v4.
+  - Tailwind v3 is not part of the supported v3 baseline; upgrade the host to Tailwind v4.
 - i18n:
   - use `OrbcafeI18nProvider` or `CAppPageLayout.locale`.
   - for library text, use `useOrbcafeI18n().t()`.
   - keep option `value` stable, localize `label` only.
   - locale resources source: `src/i18n/messages.ts`.
 
-## V2 baseline (MUI-free, self-written CSS)
+## Current v3 baseline (MUI-free, self-written CSS)
 
-`orbcafe-ui@2` 是 MUI-free 版本，样式全部自写（`orbis.css` 内置于包中）。以下差异必须遵守：
+`orbcafe-ui@3` 是 MUI-free 版本，样式全部自写（`orbis.css` 内置于包中）。以下差异必须遵守：
 
 - **不要**为 ORBCAFE 组件安装 `@mui/*`、`@emotion/*` 或 `lucide-react`。
 - ORBCAFE UI 不使用 `next-themes`；React 19 宿主不需要为组件库安装它。
@@ -51,12 +51,12 @@
   @import "orbcafe-ui/styles.css";
   ```
 - 主题/暗色模式使用 `OrbisModeProvider`（自动切换 `<html class="orb-dark">` + `data-orb-mode`）；`CAppPageLayout`/`PAppPageLayout` 内部已渲染。已有宿主主题状态时，通过 `CAppPageLayout.mode/onModeChange` 同步。
-- 全局消息使用 `GlobalMessage`（配 `showMessage()` / `messageManager`），由宿主在应用层只挂载一次；Layout 不重复挂载。
-- 组件 `sx` 是 ORBIS 兼容层 `OrbSxProps`（`src/lib/orbis-compat/sx`），不再映射到 MUI theme。
+- 全局消息使用 `GlobalMessage`（配 `message.success()` / `messageManager`），由宿主在应用层只挂载一次；Layout 不重复挂载。
+- 按组件公开 Props 检查样式入口；并非所有组件支持 `sx`，有些只接受 CSSProperties/className。不要导入内部 `OrbSxProps`。
 - 图标从 `orbcafe-ui` 包入口导入（`SapIcon` + Lucide 风格别名），不依赖外部图标库。
 - 组件内部仍然使用 Tailwind utility classes，宿主必须用 Tailwind v4 + `@source` 扫描 `node_modules/orbcafe-ui/dist`。
 
-## Version-sensitive notes (>= 1.4.5)
+## Current source capabilities (check the installed package)
 
 - `useStandardReport` default rows-per-page is `20` and includes `-1` (`ALL`).
 - `CAppPageLayout` supports `locale`, `localeOptions`, `onLocaleChange`.

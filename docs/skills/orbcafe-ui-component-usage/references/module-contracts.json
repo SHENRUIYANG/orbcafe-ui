@@ -51,10 +51,31 @@
       "mode": "mixed",
       "public_entries": [
         "CGraphReport",
+        "CGraphCharts",
+        "CGraphKpiCards",
+        "CBarChart",
+        "CLineChart",
+        "CPieChart",
+        "CComboChart",
+        "CHeatmapChart",
+        "CFishboneChart",
+        "CWaterfallChart",
+        "CGoogleMapChart",
+        "CAmapChart",
         "useGraphReport",
+        "useGraphChartData",
+        "useGoogleMapEmbedUrl",
+        "useAmapEmbedUrl",
+        "useGraphInteraction",
         "CDetailInfoPage",
         "useDetailInfo",
-        "CCustomizeAgent"
+        "CCustomizeAgent",
+        "GraphReportModel",
+        "GraphReportConfig",
+        "DetailInfoSection",
+        "DetailInfoTab",
+        "CustomizeAgentSettings",
+        "CustomizeAgentSavePayload"
       ],
       "preferred_pattern": "graph/detail hook-first, agent settings component-first",
       "public_hooks": [
@@ -69,9 +90,12 @@
         "examples/app/detail-info/[id]/DetailInfoExampleClient.tsx"
       ],
       "minimal_state": [
-        "graph open/model/tableContent",
-        "detail sections/tabs/query",
-        "settings value/template ids"
+        "graph open/model/tableContent; GraphReportModel = { title, kpis, charts, table }",
+        "graph rows use GraphRow records; chart data uses the exported Graph*Datum shapes",
+        "detail sections: DetailInfoSection[] with { id, title, fields }; tabs: DetailInfoTab[]",
+        "detail fields: { id, label, value, searchableText? }; query and activeTabId are internal hook state",
+        "settings: CustomizeAgentSettings { baseUrl, apiKey, model, promptLang, analysisPrompt, responsePrompt }",
+        "onSaveAll payload: { settings, analysisTemplateId?, responseTemplateId? }"
       ],
       "verify": [
         "graph interaction works",
@@ -145,7 +169,12 @@
         "usePivotTable",
         "CAINavProvider",
         "useAINav",
-        "useVoiceInput"
+        "useVoiceInput",
+        "VoiceNavigatorProvider",
+        "useVoiceNavigator",
+        "CAINavProviderProps",
+        "UseVoiceInputOptions",
+        "UseVoiceInputResult"
       ],
       "preferred_pattern": "controlled pivot persistence + provider-based voice wrapper",
       "public_hooks": [
@@ -158,8 +187,11 @@
         "examples/app/_components/AINavExampleClient.tsx"
       ],
       "minimal_state": [
-        "pivot rows/columns/measures/presets",
-        "AINav recording/submission state"
+        "pivot fields: { id, label, type }; layout rows/columns/filters/values",
+        "pivot values: { fieldId, aggregation }; optional chart dimension + primary/secondary measures + chartType",
+        "presets: PivotTablePreset[] persisted through onPresetsChange",
+        "AINav recording/submission state from useAINav; onVoiceSubmit(text) is required",
+        "voice options: wsUrl, silenceThresholdMs, minVolumeRms, longPressMs, disableSpaceTrigger, ignoreWhenFocusedInput"
       ],
       "verify": [
         "drag/drop layout changes",
@@ -196,8 +228,9 @@
         "examples/app/kanban/page.tsx"
       ],
       "minimal_state": [
-        "buckets/cards board model",
-        "drag move callback",
+        "buckets: { id, title, description?, accentColor?, limit? }[]",
+        "cards: { id, bucketId, title, summary?, priority?, progress?, assignee?, tags?, metrics? }[]",
+        "drag move callback: { cardId, fromBucketId, toBucketId, targetIndex?, card, model }",
         "optional bucket add/rename callbacks and card filter",
         "card click route/query state"
       ],
@@ -219,18 +252,50 @@
       "mode": "component-first",
       "public_entries": [
         "AgentPanel",
+        "OMPHPanel",
+        "OMPHApprovalCard",
+        "OMPHApprovalChoice",
+        "OMPHApprovalDecision",
+        "OMPHApprovalRequest",
+        "OMPHApprovalLabels",
+        "FloatingAgentPanel",
         "StdChat",
+        "InputArea",
+        "InputAreaProps",
         "CopilotChat",
         "AIBrowserGlow",
         "ChatMessage",
+        "AgentPanelProps",
+        "FloatingAgentPanelProps",
+        "StdChatProps",
+        "CopilotChatProps",
+        "AIBrowserGlowProps",
         "AgentPanelStatus",
+        "OMPHPanelStatus",
+        "OMPHPanelProps",
+        "OMPHTurn",
+        "OMPHProcessItem",
+        "OMPHProcessDisplay",
+        "OMPHPanelLabels",
+        "OMPHFileRef",
+        "OMPHFileBody",
+        "OMPHFilePreviewData",
+        "OMPHFilePreviewLoader",
+        "OMPHFilePreviewLayout",
+        "OMPHFileLinkResolver",
+        "parseOmphFileHref",
         "AIBrowserGlowColors",
-        "AgentUICardHooks"
+        "AgentUICardHooks",
+        "AgentUICardHookEvent",
+        "AgentUICardAction",
+        "AgentUICardType",
+        "MetricChartCardTypeContent"
       ],
-      "preferred_pattern": "AgentPanel with showInput=false for AIPanel/no-input AI dialogue, StdChat for input-included chat, CopilotChat inside custom floating shell, AIBrowserGlow controlled by business AI running state",
+      "preferred_pattern": "AgentPanel with showInput=false for AIPanel/no-input AI dialogue, StdChat for input-included chat, OMPHPanel with showInput=false plus an external InputArea for the Harness transcript, CopilotChat inside custom floating shell, AIBrowserGlow controlled by business AI running state",
       "public_hooks": [],
       "canonical_examples": [
         "examples/app/aipanel/AIPanelExampleClient.tsx",
+        "examples/app/omph-panel/OMPHPanelExampleClient.tsx",
         "examples/app/chat/ChatExampleClient.tsx",
         "examples/app/copilot/CopilotExampleClient.tsx"
       ],
@@ -240,7 +305,11 @@
         "assistant isStreaming",
         "agentStatus when using AgentPanel",
         "AIBrowserGlow active/colors/zIndex state",
-        "copilot isOpen/corner/panelSize/panelPosition"
+        "copilot isOpen/corner/panelSize/panelPosition when the host owns the floating shell",
+        "AgentPanel showInput=false for AIPanel; showInput=true requires onSend",
+        "StdChat statusLine is optional in-flow ReactNode shown while the host is working",
+        "metric-chart-card JSON: { type, title, subtitle?, chartType?, data: [{ id, label, value, secondaryValue?, color? }], valueLabel?, secondaryValueLabel?, valueSuffix?, secondaryValueSuffix? }",
+        "card event: { messageId?, cardType, action, title?, payload?, rawData? }; metric chart uses action or show-data"
       ],
       "verify": [
         "user send appends",
@@ -496,6 +565,7 @@
         "CMetricChartCard",
         "METRIC_CHART_TYPES",
         "CMetricChartCardProps",
+        "MetricChartDataRevealSource",
         "MetricChartDatum",
         "MetricChartType"
       ],
@@ -509,6 +579,9 @@
         "data: MetricChartDatum[] with stable id, label, finite value, optional secondaryValue/color",
         "chartType and optional controlled onChartTypeChange",
         "optional activeId/onItemClick",
+        "optional onDataDetails(item, source), where source is 'hover' or 'contextmenu'",
+        "showDataDetails=true by default; dataRevealDelayMs=1000 by default; right-click offers Show data",
+        "valueFormatter/secondaryValueFormatter and valueLabel/secondaryValueLabel for display semantics",
         "loading, error, emptyState, and optional maxItems"
       ],
       "verify": [

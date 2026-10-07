@@ -46,7 +46,7 @@ ORBCAFE UI 采用 **Community License + Commercial License** 双授权模式。�
 | Analytics | `CPivotTable`, pivot chart companion views, draggable rows/columns/filters/values, aggregations, and presets. |
 | Workflow pages | `CKanbanBoard`, `CDetailInfoPage`, `CGraphReport`, and `CCustomizeAgent` for operational work surfaces. |
 | Pad | `PAppPageLayout`, `PTable`, `PSmartFilter`, `PNumericKeypad`, `PBarcodeScanner` for touch-first warehouse and shop-floor scenarios. |
-| AI surfaces | `StdChat`, `CopilotChat`, `AgentPanel`, dynamic markdown/cards rendering, voice navigation via `CAINavProvider`. |
+| AI surfaces | `StdChat`, `CopilotChat`, `AgentPanel`, `FloatingAgentPanel`, dynamic markdown/cards rendering, metric chart cards, voice navigation via `CAINavProvider`. |
 | AI-ready docs | Skills under `skills/` route natural-language requests to canonical ORBCAFE modules and enforce examples-first integration. |
 
 ## Documentation Map
@@ -154,7 +154,9 @@ Main routes:
 | `/pad` | Touch-first warehouse workload, pad table, keypad, and scanner flow. |
 | `/chat` | Full-page `StdChat` with markdown, math, code, Mermaid, and dynamic cards. |
 | `/copilot` | Floating draggable/resizable `CopilotChat`. |
-| `/aipanel` | Display-only `AgentPanel` with status states. |
+| `/aipanel` | `AgentPanel` status states plus `test`-triggered metric chart cards and card event output. |
+| `/omph-panel` | `OMPHPanel` turn transcript, incremental streaming, process rows, scroll-follow, and the same `test` metric chart cards. |
+| `/chart-cards` | Standalone metric chart cards with chart switching, selection, hover details, and right-click data inspection. |
 | `/ai-nav` | Space-key voice navigation provider and hook state. |
 
 ## CValueHelp Quick Start

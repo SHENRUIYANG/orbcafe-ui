@@ -24,7 +24,7 @@
   - `orbcafe-pivot-ainav`
 - Build an explicitly Pad/iPad-sized touch workflow shell, touch table, keypad writeback, or Pad orientation adaptation:
   - `orbcafe-pad-workflow`
-- Build chat page, assistant panel, or floating copilot:
+- Build chat page, assistant panel, AIPanel `test` card showcase, or floating copilot:
   - `orbcafe-agentui-chat`
 - Build login, registration, or forgot password:
   - `orbcafe-auth-workflow`
@@ -41,7 +41,7 @@
   - StdReport skill
 - `卡片页`, `卡片网格`, `商店`, `上架`, `应用商店`, `目录页`, `card page`, `card grid`, `store`, `catalog`, `app store`, `CCardPage`, `CCardGrid`, `CCardDetailPanel`, `useCardPage`:
   - CardPage skill
-- `指标卡`, `KPI卡片`, `统计卡片`, `图表卡片`, `KPI card`, `KPI cards`, `metric card`, `metric cards`, `dashboard cards`, `metric chart card`, `chart cards`, `CMetricChartCard`, `bar card`, `donut card`, `bubble card`:
+- `指标卡`, `KPI卡片`, `统计卡片`, `图表卡片`, `KPI card`, `KPI cards`, `metric card`, `metric cards`, `dashboard cards`, `metric chart card`, `chart cards`, `CMetricChartCard`, `bar card`, `donut card`, `bubble card`, `hover data`, `right-click Show data`:
   - Metric Chart Cards skill
 - `图表`, `graph`, `kpi`, `详情页`, `detail`, `ai prompt`, `agent settings`:
   - Graph+Detail+Agent skill
@@ -57,8 +57,8 @@
   - Pad Workflow skill
 - Generic `触摸`, `横竖屏`, `小键盘`, `扫码`, `camera`, or `barcode` without an explicit device class:
   - Resolve the target device first. Use Pad Workflow only for Pad/iPad-sized targets; use `doushabao-ui` for phones and small screens.
-- `聊天`, `chat`, `copilot`, `assistant`, `streaming`, `卡片消息`, `AgentUI`, `StdChat`, `CopilotChat`, `AgentPanel`:
-  - AgentUI Chat skill
+- `聊天`, `chat`, `copilot`, `assistant`, `streaming`, `卡片消息`, `AgentUI`, `StdChat`, `CopilotChat`, `AgentPanel`, `OMPHPanel`, `FloatingAgentPanel`, `AIPanel`, `cardHooks`, `show-data`:
+  - AgentUI Chat skill. Use `OMPHPanel` for a Harness-aligned turn transcript; keep `AgentPanel` for the flat AIPanel.
 - `登录`, `登陆`, `注册`, `忘记密码`, `login`, `register`, `forgot password`:
   - Auth Workflow skill
 - `甘特图`, `gantt`, `计划表`, `项目计划`, `生产计划`, `project plan`, `production plan`:

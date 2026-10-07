@@ -7,6 +7,10 @@ description: Build compact ORBIS metric and chart card grids with CMetricChartCa
 
 详细的组件选择、代码配方和排障说明见：`skills/orbcafe-metric-chart-cards/README.md`。
 
+## Current usage contract
+
+Before implementing this module, read [references/contract.md](references/contract.md) for input shapes, state ownership, callback arguments, defaults and current limitations. Check the consuming project's installed exports against this source contract; the repository can be ahead of npm.
+
 ## 这个 Skill 解决什么
 
 用于 ORBCAFE 桌面端或 Pad 页面里的紧凑指标卡片和小型图表卡片。统一处理：
@@ -16,6 +20,7 @@ description: Build compact ORBIS metric and chart card grids with CMetricChartCa
 - 图表类型切换、条目点击回调和当前条目高亮
 - `loading`、`emptyState`、`error`、数据过多时的 `maxItems`
 - 数值格式化、`secondaryValue`、键盘可操作性和列表兜底
+- 悬停 1 秒显示数据详情、右键 `Show data` 菜单，以及 `onDataDetails` 回调
 
 不要把这个 skill 用于完整图形报表弹窗、透视分析、带筛选/分页/变体的标准报表，或商店/目录卡片页；这些场景分别进入 Graph/Detail、Pivot、StdReport 或 CardPage skill。
 
@@ -42,7 +47,7 @@ description: Build compact ORBIS metric and chart card grids with CMetricChartCa
 
 ```bash
 npm install orbcafe-ui
-# ORBCAFE UI v2 是 MUI-free；不要安装 @mui/*、@emotion/*、lucide-react。
+# ORBCAFE UI v3 是 MUI-free；不要安装 @mui/*、@emotion/*、lucide-react。
 # 组件使用 Tailwind utility classes，宿主需要 Tailwind v4：
 npm install -D tailwindcss @tailwindcss/postcss
 ```
@@ -68,8 +73,8 @@ npm run dev
 2. `Decision`: 说明为什么选择 `CMetricChartCard`，并写出每张卡的 `chartType`。
 3. `Minimal code`: 可直接粘贴运行，且只从 `orbcafe-ui` 导入。
 4. `Data shape`: 至少展示 `{ id, label, value }`；需要气泡或第二指标时再加 `secondaryValue`。
-5. `State shape`: `chartType`、可选 `onChartTypeChange`、`onItemClick`、`activeId`，以及数据加载状态。
-6. `Verify`: 至少覆盖页面可见、类型切换、条目点击回调和 loading/empty/error 状态。
+5. `State shape`: `chartType`、可选 `onChartTypeChange`、`onItemClick`、`activeId`、`onDataDetails`，以及数据加载状态。
+6. `Verify`: 至少覆盖页面可见、类型切换、条目点击回调、停留 1 秒的数据详情、右键 `Show data`、关闭详情和 loading/empty/error 状态。
 7. `Troubleshooting`: 至少覆盖错误导入路径、非稳定 `id`、没有回传 `activeId`、没有把 loading/error/empty 传给卡片、没有先构建本地包。
 
 ## 关键约束（默认遵守）
@@ -81,5 +86,6 @@ npm run dev
 - 状态优先级为 `loading` → `error` → 空数据 → 图表；不要在业务层同时渲染重复的 loading/empty/error 区块。
 - 数据量较大时设置 `maxItems`；需要查看完整数据时使用卡片提供的 `Show all`，不要让卡片无限增高。
 - `list` 是可访问的表格化兜底视图；当用户需要读数或辅助技术支持时，保留它作为可选类型。
+- 默认保留 `showDataDetails`；如果业务层要自己接管数据详情，可通过 `onDataDetails` 记录或打开外部详情，但不要移除右键菜单的可发现入口。
 - 这是紧凑的 desktop/Pad 组件；手机、小屏或移动应用改用 `doushabao-ui`，不缩小 ORBCAFE viewport 做验证。
 - 不要为这些小图表再引入 ECharts、Chart.js 等外部图表库；组件已经提供稳定的 SVG/CSS 视图和统一状态。

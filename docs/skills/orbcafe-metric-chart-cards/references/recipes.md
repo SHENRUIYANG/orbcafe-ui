@@ -48,6 +48,23 @@ const [chartType, setChartType] = useState<MetricChartType>('donut');
 
 If the chart type is local to one card, omit `onChartTypeChange` and let the component manage it internally.
 
+## Hover and context-menu data details
+
+Data details are enabled by default. A one-second hover over a bar, point, slice, legend row, list row, or KPI item opens the built-in inspector. A right-click opens a context menu with `Show data`:
+
+```tsx
+<CMetricChartCard
+  title="Planning group"
+  data={planningGroups}
+  chartType="bubble"
+  onDataDetails={(item, source) => {
+    console.log('data details', source, item.id, item.value);
+  }}
+/>
+```
+
+Set `showDataDetails={false}` only when the host deliberately supplies another data-inspection interaction. Use `dataRevealDelayMs` to adjust the hover delay, rather than implementing separate timers around every chart mark.
+
 ## Nine-card dashboard
 
 ```tsx

@@ -30,6 +30,8 @@ Screenshots live under `docs/images/examples/`. Save manual captures with these 
 | `/chat` | `docs/images/examples/chat.png` |
 | `/copilot` | `docs/images/examples/copilot.png` |
 | `/aipanel` | `docs/images/examples/aipanel.png` |
+| `/omph-panel` | Turn transcript, incremental streaming, and metric chart cards. |
+| `/chart-cards` | Metric chart card variants and data inspection interactions. |
 | `/ai-nav` | `docs/images/examples/ai-nav.png` |
 
 Capture from the running examples app with a 1440 x 1100 viewport when possible. The command used for the first committed home screenshot was:
@@ -270,24 +272,61 @@ Source:
 
 ![AI panel example](images/examples/aipanel.png)
 
-The AI panel example is a display-only agent conversation surface for workflow runs, background tasks, or status-driven automation.
+The AI panel example is an AgentPanel surface for workflow runs and status-driven automation. Type `test` to render the supported metric chart cards; each card supports selection, one-second hover inspection, and right-click `Show data`.
 
 Highlights:
 
 - `AgentPanel` status states: idle, pending, running, success, error.
 - Header action slot.
 - Display-only conversation mode with an external trigger button.
+- `test` renders metric, progress, donut, bar, column, line, scatter, bubble, and list cards.
+- Card events are shown in the page so callback payloads can be inspected.
 
 Key APIs:
 
 - `AgentPanel`
 - `AgentPanelStatus`
 - `ChatMessage`
+- `AgentUICardHooks`
+- `MetricChartCardTypeContent`
 
 Source:
 
 - `examples/app/aipanel/page.tsx`
 - `examples/app/aipanel/AIPanelExampleClient.tsx`
+
+## `/omph-panel`
+
+The OMPH panel example keeps the ORBIS agent surface and aligns the transcript with a Harness conversation: turns, process rows, incremental streaming, a running clock, and scroll-follow. Type `test` to stream the same nine metric chart cards.
+
+It also demonstrates file preview. The `test` reply links to a Markdown plan, a TypeScript file with a highlighted line range, JSON, an SVG image, a 2,600-line log, a file that fails once and then loads, a missing file, and an archive with no preview. The "Panel width" buttons switch the panel between 1120, 760 and 420 px so you can see the side-by-side pane and the covering pane without resizing the window.
+
+Key APIs:
+
+- `OMPHPanel`
+- `OMPHTurn`
+- `OMPHPanelStatus`
+- `AgentUICardHooks`
+
+Source:
+
+- `examples/app/omph-panel/page.tsx`
+- `examples/app/omph-panel/OMPHPanelExampleClient.tsx`
+
+## `/chart-cards`
+
+The metric chart cards page is the direct component reference for compact KPI and chart cards. It covers chart type switching, item selection, one-second hover inspection, right-click `Show data`, loading, error, empty, and overflow states.
+
+Key APIs:
+
+- `CMetricChartCard`
+- `MetricChartDatum`
+- `MetricChartDataRevealSource`
+
+Source:
+
+- `examples/app/chart-cards/page.tsx`
+- `examples/app/_components/ChartCardsExampleClient.tsx`
 
 ## `/ai-nav`
 

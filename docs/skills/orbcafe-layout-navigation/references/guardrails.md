@@ -2,7 +2,7 @@
 
 ## Dependency constraints
 
-- ORBCAFE UI v2 is MUI-free. Do not install `@mui/*`, `@emotion/*`, or `lucide-react` for ORBCAFE components.
+- ORBCAFE UI v3 is MUI-free. Do not install `@mui/*`, `@emotion/*`, or `lucide-react` for ORBCAFE components.
 - ORBCAFE UI does not use `next-themes`; do not add it only for ORBCAFE theme support.
 - `orbcafe-ui` brings its own runtime dependencies (`@radix-ui/react-slot`, `class-variance-authority`, `tailwind-merge`, `clsx`, etc.). Consumers only need to install `orbcafe-ui` and Tailwind v4 (`tailwindcss` + `@tailwindcss/postcss`) for utility-class compilation.
 - Verify with:
@@ -45,4 +45,4 @@
 ## Styling constraints
 
 - Avoid editing `globals.css`, tailwind global tokens, or unrelated page-level CSS unless the user explicitly asks for style system changes.
-- Prefer existing `CAppPageLayout`/`NavigationIsland` props, ORBIS `sx` (`OrbSxProps`, supported by all exported components), and current ORBIS theme tokens before introducing new CSS blocks.
+- Prefer existing `CAppPageLayout`/`NavigationIsland` props, the props and style type actually declared by that component, and current ORBIS theme tokens before introducing new CSS blocks.

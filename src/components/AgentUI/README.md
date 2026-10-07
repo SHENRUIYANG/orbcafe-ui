@@ -1,20 +1,25 @@
 # AgentUI
 
-`AgentUI` 是 ORBCAFE 里用于聊天类交互的标准 UI 层。当前最核心的三个布局组件是：
+`AgentUI` 是 ORBCAFE 里用于聊天类交互的标准 UI 层。当前最核心的布局组件是：
 
 - `AgentPanel`: 带 header（AI 头像 + 状态点 + 副标题）的工作台聊天面板，ORBIS 设计语言（无光晕/霓虹，工作状态靠动效表达）。
+- `FloatingAgentPanel`: `AgentPanel` 的现成浮层壳，支持水平拖动与左/中/右吸附。
 - `StdChat`: 标准聊天容器，适合整页、卡片页、抽屉页。
 - `CopilotChat`: Copilot 浮窗内容容器，适合右下角助手、可拖拽面板、悬浮问答入口。
 - `AIBrowserGlow`: AI 运行时在浏览器视口边缘显示 2px primary 描边（ORBIS 规范，无彩色光晕）。
 
-这三个组件共用同一套消息渲染、流式输出、Markdown/卡片解析和事件回调能力。区别主要在布局壳和交互方式。
+这些布局组件共用同一套消息渲染、流式输出、Markdown/卡片解析和事件回调能力。区别主要在布局壳和交互方式。
 
 ## 公共 API
 
 当前建议作为稳定公共接口使用的只有以下内容：
 
 - `AgentPanel`
+- `OMPHPanel`
+- `FloatingAgentPanel`
 - `type AgentPanelStatus`
+- `type OMPHPanelStatus`
+- `type OMPHTurn`
 - `StdChat`
 - `CopilotChat`
 - `AIBrowserGlow`
@@ -23,12 +28,15 @@
 - `type AgentUICardHookEvent`
 - `type AgentUICardAction`
 - `type AgentUICardType`
+- `type MetricChartCardTypeContent`
 
 推荐 import：
 
 ```tsx
 import {
   AgentPanel,
+  OMPHPanel,
+  FloatingAgentPanel,
   type AgentPanelStatus,
   StdChat,
   CopilotChat,
@@ -85,7 +93,7 @@ src/components/AgentUI/
 
 - 流式输出：通过 `isStreaming`、`streamIntervalMs`、`streamChunkSize` 控制。
 - Markdown 富文本：支持 GFM、代码块、数学公式、Mermaid、引用、表格。
-- 动态卡片：消息中输出卡片 JSON 时，自动渲染为业务卡片。
+- 动态卡片：消息中输出卡片 JSON 时，自动渲染为业务卡片；`metric-chart-card` 会使用 `CMetricChartCard` 的 ORBIS 图表卡片样式。
 - 业务回调：卡片行为通过 `cardHooks.onCardEvent` 回传。
 - 响应式输入区：`InputArea` 负责输入、多行伸缩、发送/停止按钮等基础能力。
 
@@ -105,7 +113,7 @@ src/components/AgentUI/
 | `onStop()` | `AgentPanel` / `StdChat` / `InputArea` | 中断当前响应 |
 | `onRegenerate(messageId)` | `AgentPanel` / `StdChat` / `CopilotChat` | 对最后一条 assistant 消息触发重试 |
 | `onMessageStreamingComplete(messageId)` | `AgentPanel` / `StdChat` / `CopilotChat` | assistant 流式输出结束后回写消息状态 |
-| `cardHooks.onCardEvent(event)` | 整个渲染链透传 | 承接 ErrorCard / WarningCard / SuggestionsCard / ToolResultCard 等卡片事件 |
+| `cardHooks.onCardEvent(event)` | 整个渲染链透传 | 承接 ErrorCard / WarningCard / SuggestionsCard / ToolResultCard / MetricChartCard 等卡片事件 |
 | `onCollapse()` | `CopilotChat` | 收起 Copilot 面板 |
 | `onHeaderPointerDown(event)` | `CopilotChat` | 将标题栏拖拽能力交给外层浮窗壳 |
 | `onPlusClick()` | `CopilotChat` | 自定义底部附件/工具按钮动作 |
@@ -143,6 +151,7 @@ interface AgentUICardHookEvent {
 - `confirm`
 - `action`
 - `suggestion-click`
+- `show-data`（metric chart card 在悬停 1 秒或右键 `Show data` 后触发）
 
 ### 语音输入相关说明
 
@@ -259,6 +268,58 @@ const [status, setStatus] = useState<AgentPanelStatus>('idle')
 />
 ```
 
+## OMPHPanel
+
+`OMPHPanel` 是和 Harness 会话面板对齐的对话表面，样式仍用 ORBIS 的 `orb-omph-*`。`AgentPanel` 保持原来的扁平消息和打字机流式，两者互不替换。
+
+宿主传入 `turns`。每一轮可以包含用户消息、过程行（reasoning / tool / command）、助手 Markdown、失败行和用量。助手正文里的 `metric-chart-card` JSON 继续走原来的卡片事件。
+
+- 状态仍是 `idle` / `pending` / `running` / `success` / `error`。`pending` 和 `running` 让标题圆点脉冲，并在正文末尾显示分隔线、spinner、扫光文案和已用时长。
+- 流式内容由宿主按增量追加。`streaming: true` 只表示这段还在增长，组件直接渲染已经到达的全文。
+- 回复结束后，下方是一条浅底色的操作条：左侧时间；有用量数据时，一条细分隔线后是 Usage（点开在条内显示明细）；复制固定在最右。最新一轮常显，更早的轮次在悬停或键盘聚焦时显示。条与回复的间距由 `--orb-omph-actions-gap` 控制。
+- 正文在底部时跟随新内容。离开底部后出现回到底部。更早内容从顶部插入时保持当前阅读位置。宽度足够时显示轮次轨道。
+- 输入区默认显示。响应中且草稿为空时主按钮是停止；草稿有内容时仍是发送。
+
+### 文件预览
+
+传入 `loadFilePreview` 才启用。助手回复里的文件链接（相对路径或以 `/` 开头的路径，支持 `#L24`、`#L24-L30`）会打开预览窗格；不传则链接保持默认行为。面板不读取文件系统，宿主按引用返回内容：
+
+```ts
+loadFilePreview: (ref: OMPHFileRef, signal: AbortSignal) => Promise<OMPHFilePreviewData>
+// body.kind: 'markdown' | 'code' | 'image' | 'missing' | 'unsupported'
+```
+
+- **大屏并排，小屏覆盖。** 按面板自身宽度判断，不看屏幕：宽度 ≥ 880px 时预览是右侧窗格（默认占 45%，最多 70%，对话列至少留 400px，可拖动或用 ←/→/Home/End 调整，可展开铺满）；更窄时预览盖住整个正文区，用返回键收起，被盖住的对话列设为 `inert`。`filePreviewLayout` 可强制 `split` 或 `overlay`。面板宽度低于 560px 时整体进入紧凑间距。
+- **内容。** 代码带行号和命中行区间高亮（高亮配色来自 ORBIS 令牌，随明暗模式切换），可开关换行，超过 2000 行只渲染前 2000 行并提示；Markdown 限定阅读宽度；图片默认适应宽度，可缩放 25%–400%。
+- **状态。** 读取中是骨架；读取失败可重试；`missing` 只给说明；`unsupported`（PDF、Office、压缩包等）可通过 `onOpenFileExternally` 交给宿主。PDF、Office、Excel 预览不在面板内实现。
+- **键盘与焦点。** 打开后焦点进入窗格，Esc 关闭并把焦点还给被点击的链接。
+- `resolveFileLink` 可替换默认的链接判断；默认实现也以 `parseOmphFileHref` 导出。
+
+实现文件：`src/components/AgentUI/omph/omph-panel.tsx`
+
+示例：`examples/app/omph-panel/OMPHPanelExampleClient.tsx`。输入 `test` 会流式展示过程行和九种指标图卡。
+
+## FloatingAgentPanel
+
+`FloatingAgentPanel` 适合需要一个有限浮层行为的 `AgentPanel`：组件内部处理水平拖动和左/中/右吸附，并通过 `anchor` / `defaultAnchor`、`width`、`top`、`bottom`、`inset`、`zIndex` 调整位置。
+
+它不提供打开/关闭、自由 XY 定位或 resize；需要这些能力时由页面控制状态，或改用 `CopilotChat` 自己实现外层壳。
+
+```tsx
+import { FloatingAgentPanel, type FloatingAgentPanelAnchor } from 'orbcafe-ui'
+
+const [anchor, setAnchor] = useState<FloatingAgentPanelAnchor>('right')
+
+<FloatingAgentPanel
+  title="Assistant"
+  messages={messages}
+  isResponding={isResponding}
+  anchor={anchor}
+  onAnchorChange={setAnchor}
+  width={380}
+/>
+```
+
 ## AIBrowserGlow
 
 `AIBrowserGlow` 是独立基础组件，不依赖 `AgentPanel`。按 ORBIS 规范它只画一条 2px primary 视口边缘线（无彩色光晕、无颜色 wash），AI 运行时打开，结束/失败/中断时关闭：
@@ -282,6 +343,8 @@ import { AIBrowserGlow } from 'orbcafe-ui'
 3. `status`：`idle/running/success/error/pending` 手动或自动切换。
 4. 通过 `Trigger Agent Run` 按钮或输入框发送 `test`（快速测试）触发一次任务执行并回填样例回复。
 5. 面板状态视觉由 `agentStatus` 自动联动（状态点 + spinner 工作状态行）；视口边缘线由独立 `AIBrowserGlow` 控制。
+
+输入 `test` 时还会展示九种 `metric-chart-card`：KPI、进度、donut、bar、column、line、scatter、bubble 和 list。图表条目可以点击；鼠标停留 1 秒会打开数据详情，右键后选择 `Show data` 也可以打开同一详情。
 
 ## StdChat
 

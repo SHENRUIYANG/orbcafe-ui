@@ -1,4 +1,5 @@
 import { ReactNode, CSSProperties } from 'react'
+import type { MetricChartDatum, MetricChartType } from '../../MetricChart'
 
 export interface ErrorCardProps {
   title?: string
@@ -25,6 +26,20 @@ export interface ChartCardTypeContent {
   config?: any; // Optional config for specific chart settings (e.g. orientation)
 }
 
+export interface MetricChartCardTypeContent {
+  type: 'metric-chart-card';
+  title: string;
+  subtitle?: string;
+  data: MetricChartDatum[];
+  chartType?: MetricChartType;
+  maxItems?: number;
+  showChartTypeControl?: boolean;
+  valueLabel?: string;
+  secondaryValueLabel?: string;
+  valueSuffix?: string;
+  secondaryValueSuffix?: string;
+}
+
 export interface SAPCardTypeContent {
   type: 'sap-analytical-card' | 'sap-list-card' | 'sap-object-card' | 'sap-component-card';
   manifest: any;
@@ -35,7 +50,7 @@ export interface AgentUICardTypeContent {
   [key: string]: any;
 }
 
-export type ParsedCardData = TableTypeContent | ChartCardTypeContent | SAPCardTypeContent | AgentUICardTypeContent;
+export type ParsedCardData = TableTypeContent | ChartCardTypeContent | MetricChartCardTypeContent | SAPCardTypeContent | AgentUICardTypeContent;
 
 export type AgentUICardType = ParsedCardData['type']
 
@@ -46,6 +61,7 @@ export type AgentUICardAction =
   | 'confirm'
   | 'action'
   | 'suggestion-click'
+  | 'show-data'
 
 export interface AgentUICardHookEvent {
   messageId?: string

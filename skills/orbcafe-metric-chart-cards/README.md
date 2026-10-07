@@ -52,6 +52,7 @@ const data: MetricChartDatum[] = [
 - `CMetricChartCard` 是 `Component-first`：状态由页面通过 props 和 callbacks 管理。
 - `CMetricChartCard` 适合一个维度一张卡；九张卡片可以放进 CSS grid，并使用 `minmax(280px, 1fr)` 保持桌面端可读性。
 - `CMetricChartCard` 不负责请求数据、筛选持久化、路由或详情页。点击后由业务层更新查询条件、打开详情或导航。
+- 默认开启数据查看：在图表条目上停留 1 秒会显示数据详情，右键会打开 `Show data` 菜单；需要记录联动时使用 `onDataDetails(item, source)`。
 - 完整图形报表弹窗走 `orbcafe-graph-detail-ai`；透视分析走 `orbcafe-pivot-ainav`；密集表格走 `orbcafe-stdreport-workflow`；商店/目录卡片走 `orbcafe-cardpage-workflow`。
 
 ## 官方示例

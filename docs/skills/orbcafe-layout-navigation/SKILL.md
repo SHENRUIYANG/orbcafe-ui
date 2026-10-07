@@ -5,6 +5,10 @@ description: Build ORBCAFE application shell and navigation with CAppPageLayout,
 
 # ORBCAFE Layout + Navigation
 
+## Current usage contract
+
+Before implementing this module, read [references/contract.md](references/contract.md) for input shapes, state ownership, callback arguments, defaults and current limitations. Check the consuming project's installed exports against this source contract; the repository can be ahead of npm.
+
 ## Workflow
 
 1. 先对照 `skills/orbcafe-ui-component-usage/references/module-contracts.md`，确认这是 `Hook-first` 模块。
@@ -17,13 +21,13 @@ description: Build ORBCAFE application shell and navigation with CAppPageLayout,
 ## Canonical Setup
 
 先检查宿主 `package.json`，缺失或版本不兼容时才安装。  
-V2 是 MUI-free，`NavigationIsland` / `TreeMenu` / `Button` 的运行时依赖（`@radix-ui/react-slot`、`class-variance-authority`、`tailwind-merge`、`clsx` 等）已随 `orbcafe-ui` 一并安装，消费项目不需要单独安装它们。
+当前 v3 是 MUI-free，`NavigationIsland` / `TreeMenu` / `Button` 的运行时依赖（`@radix-ui/react-slot`、`class-variance-authority`、`tailwind-merge`、`clsx` 等）已随 `orbcafe-ui` 一并安装，消费项目不需要单独安装它们。
 
 标准安装命令：
 
 ```bash
 npm install orbcafe-ui
-# ORBCAFE UI v2 是 MUI-free；不要安装 @mui/*、@emotion/*、lucide-react。
+# ORBCAFE UI v3 是 MUI-free；不要安装 @mui/*、@emotion/*、lucide-react。
 # 组件使用 Tailwind utility classes，宿主需要 Tailwind v4：
 npm install -D tailwindcss @tailwindcss/postcss
 ```

@@ -43,7 +43,9 @@ npm run dev
 - `http://localhost:3000/pad`
 - `http://localhost:3000/chat`
 - `http://localhost:3000/copilot`
-- `http://localhost:3000/aipanel`
+- `http://localhost:3000/aipanel`（输入 `test` 查看 AgentUI 支持的 metric chart cards；点击、悬停 1 秒或右键查看数据）
+- `http://localhost:3000/omph-panel`（输入 `test` 查看 OMPHPanel 的轮次、增量流式、过程行和指标图卡）
+- `http://localhost:3000/chart-cards`
 - `http://localhost:3000/ai-nav`
 
 ## 示例覆盖范围
@@ -60,7 +62,9 @@ npm run dev
 | `/pad` | `PAppPageLayout`, `PTable`, `PSmartFilter`, `PNumericKeypad`, `PBarcodeScanner` |
 | `/chat` | `StdChat`, markdown/math/code/Mermaid/dynamic cards |
 | `/copilot` | `CopilotChat` + app-owned floating drag/resize shell |
-| `/aipanel` | `AgentPanel`, agent status states |
+| `/aipanel` | `AgentPanel`, agent status states, `test` metric chart cards, card events and data inspection |
+| `/omph-panel` | `OMPHPanel`, turn process rows, incremental streaming, scroll follow, `test` metric chart cards |
+| `/chart-cards` | `CMetricChartCard`, chart type switch, item selection, hover/right-click data inspection |
 | `/ai-nav` | `CAINavProvider`, `useAINav` |
 
 ## 质量检查（建议提交前执行）
