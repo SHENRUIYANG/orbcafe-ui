@@ -1,0 +1,133 @@
+/**
+ * OMPHPanel 边缘泛光外壳
+ *
+ * 内容大纲：
+ * - 视口背景模糊
+ * - 面板外侧四色径向泛光与呼吸
+ * - 面板本体去掉描边，让泛光单独负责边缘
+ *
+ * 作者：ORBAICODER
+ * 版本：1.0.1
+ * 日期：2026-10-07
+ *
+ * 作用：示例页把 OMPHPanel 托成居中浮层。模糊和泛光都画在组件外面。
+ *
+ * 代码逻辑大纲：
+ * 1. 背景层盖住视口，用 backdrop-filter 虚化后面的页面。
+ * 2. 泛光层比面板每边大一圈，四边各一块径向渐变，再整体高斯模糊。
+ * 3. 面板盖在泛光中间。卡片若裁切溢出，光就进不来，所以外壳 overflow 保持可见。
+ *
+ * ChangeLog：
+ * - 1.0.1 2026-10-07 浮层只占工具条下面的区域，面板和输入按剩余高度分配。
+ * - 1.0.0 2026-10-07 初始版本。
+ */
+
+.orb-omph-bloom {
+  --orb-bloom-spread: 168px;
+  --orb-bloom-blur: 64px;
+  --orb-bloom-backdrop: 18px;
+  --orb-bloom-breathe: 2.6s;
+  --orb-bloom-petrol: #00a3a3;
+  --orb-bloom-blue: var(--orb-primary);
+  --orb-bloom-pink: #db3360;
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.orb-dark .orb-omph-bloom,
+[data-orb-mode="dark"] .orb-omph-bloom {
+  --orb-bloom-petrol: color-mix(in oklch, #00a3a3 70%, transparent);
+  --orb-bloom-blue: color-mix(in oklch, var(--orb-primary) 72%, transparent);
+  --orb-bloom-pink: color-mix(in oklch, #db3360 64%, transparent);
+}
+
+.orb-omph-bloom-backdrop {
+  position: absolute;
+  inset: 0;
+  pointer-events: auto;
+  background: color-mix(in oklch, var(--orb-canvas) 42%, transparent);
+  backdrop-filter: blur(var(--orb-bloom-backdrop));
+  -webkit-backdrop-filter: blur(var(--orb-bloom-backdrop));
+}
+
+.orb-omph-bloom-center {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  box-sizing: border-box;
+  height: 100%;
+  min-height: 0;
+  padding: 20px 24px 24px;
+  pointer-events: none;
+}
+
+.orb-omph-bloom-panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: visible;
+  width: min(100%, var(--orb-bloom-width));
+  pointer-events: auto;
+}
+
+.orb-omph-bloom-glow {
+  position: absolute;
+  z-index: 0;
+  inset: calc(var(--orb-bloom-spread) * -1);
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 70% 48% at 50% 0%, var(--orb-bloom-petrol), transparent 68%),
+    radial-gradient(ellipse 48% 70% at 0% 50%, var(--orb-bloom-petrol), transparent 68%),
+    radial-gradient(ellipse 48% 70% at 100% 50%, var(--orb-bloom-blue), transparent 68%),
+    radial-gradient(ellipse 70% 48% at 50% 100%, var(--orb-bloom-pink), transparent 68%);
+  filter: blur(var(--orb-bloom-blur));
+  animation: orb-omph-bloom-breathe var(--orb-bloom-breathe) ease-in-out infinite;
+}
+
+.orb-omph-bloom-card {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  min-height: 0;
+  width: 100%;
+}
+
+.orb-omph-bloom-card .orb-omph-panel {
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.orb-omph-bloom-composer {
+  position: relative;
+  z-index: 2;
+  flex: 0 1 auto;
+  width: min(100%, var(--orb-bloom-width));
+  max-height: 46%;
+  min-height: 0;
+  overflow: auto;
+  pointer-events: auto;
+}
+
+@keyframes orb-omph-bloom-breathe {
+  0%,
+  100% { opacity: 0.78; }
+  50% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orb-omph-bloom-glow {
+    animation: none;
+    opacity: 1;
+  }
+}

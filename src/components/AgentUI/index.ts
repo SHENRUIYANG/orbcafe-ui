@@ -15,6 +15,7 @@ export type {
   OMPHApprovalDecision,
   OMPHApprovalLabels,
   OMPHApprovalRequest,
+  OMPHConversation,
   OMPHPanelLabels,
   OMPHPanelStatus,
   OMPHProcessDisplay,

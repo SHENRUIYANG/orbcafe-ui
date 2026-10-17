@@ -234,3 +234,30 @@ async function handleSend(content: string) {
 ```
 
 面板默认不渲染输入。只有明确要内置输入条时才传 `showInput`。等待人工确认时用 `OMPHApprovalCard` 换掉 `InputArea`。回复里的可交互 HTML 写成闭合的 `html` 围栏，放在回复末尾。启用预览时再传 `loadFilePreview`。文件不存在返回 `{ body: { kind: 'missing' } }`，暂时失败才 throw。示例：`examples/app/omph-panel/OMPHPanelExampleClient.tsx`。
+
+需要新建和会话列表时，宿主保存每条会话的 `turns`，再把摘要交给面板。关掉面板后，用 Header 的 `onOpenPanel` 打开同一条，不要在那个按钮里发送或新建。
+
+```tsx
+<CAppPageLayout
+  appTitle="Plant 1000"
+  searchPlacement="header"
+  panelOpen={panelOpen}
+  onOpenPanel={() => setPanelOpen(true)}
+  onSearch={(query) => {
+    setPanelOpen(true)
+    void handleSend(query)
+  }}
+>
+  {panelOpen && (
+    <OMPHPanel
+      turns={activeTurns}
+      conversations={conversations}
+      activeConversationId={activeId}
+      onNewConversation={createEmptyConversation}
+      onSelectConversation={selectConversation}
+      agentStatus={status}
+      isResponding={isResponding}
+    />
+  )}
+</CAppPageLayout>
+```

@@ -58,6 +58,7 @@ Use only exports reachable from `src/index.ts`. All of the following are importa
     - `type AgentPanelStatus`
     - `type OMPHPanelStatus`
     - `type OMPHTurn`
+    - `type OMPHConversation`
     - `type OMPHProcessDisplay`
     - `type OMPHPanelProps`
     - `parseOmphFileHref`

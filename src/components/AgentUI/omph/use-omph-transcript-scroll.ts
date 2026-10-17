@@ -8,8 +8,8 @@
  * - 轮次轨道的当前轮次
  *
  * 作者：ORBAICODER
- * 版本：1.0.0
- * 日期：2026-10-04
+ * 版本：1.1.0
+ * 日期：2026-10-14
  *
  * 作用：让 OMPHPanel 的正文滚动对齐 Harness 会话面板：读者在底部时跟随新内容，离开后不被拽回。
  *
@@ -17,9 +17,11 @@
  * 1. 用离底距离判断是否跟随。
  * 2. 内容变高时，只有跟随中才把滚动位置推到底部。
  * 3. 列表头部插入更早轮次时，按高度差补偿，避免阅读位置跳动。
- * 4. 正文溢出且读者滚到顶部时，请求加载更早内容。
+ * 4. 整段换成另一条会话时，回到底部并重新跟随。
+ * 5. 正文溢出且读者滚到顶部时，请求加载更早内容。
  *
  * ChangeLog：
+ * - 1.1.0 2026-10-14 切换会话时回到底部，不再把换会话当成加载更早。
  * - 1.0.0 2026-10-04 初始版本。
  */
 
@@ -104,8 +106,19 @@ export const useOmphTranscriptScroll = ({
     if (!scroller) return
     const firstId = turns[0]?.id
     const previousFirst = firstIdRef.current
-    const prepended = previousFirst !== undefined && firstId !== undefined && firstId !== previousFirst
+    const previousStillPresent = previousFirst !== undefined && turns.some((turn) => turn.id === previousFirst)
+    const prepended = previousStillPresent && firstId !== undefined && firstId !== previousFirst
+    const replaced = previousFirst !== undefined && !previousStillPresent
     firstIdRef.current = firstId
+
+    if (replaced) {
+      followRef.current = true
+      setFollowing(true)
+      scroller.scrollTop = scroller.scrollHeight
+      remember()
+      updateActiveTurn()
+      return
+    }
 
     if (prepended) {
       followRef.current = false

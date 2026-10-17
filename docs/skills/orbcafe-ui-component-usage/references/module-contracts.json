@@ -274,6 +274,7 @@
         "OMPHPanelStatus",
         "OMPHPanelProps",
         "OMPHTurn",
+        "OMPHConversation",
         "OMPHProcessItem",
         "OMPHProcessDisplay",
         "OMPHPanelLabels",
@@ -306,6 +307,7 @@
         "agentStatus when using AgentPanel",
         "AIBrowserGlow active/colors/zIndex state",
         "copilot isOpen/corner/panelSize/panelPosition when the host owns the floating shell",
+        "OMPHPanel conversations/activeConversationId when the host offers new conversation and conversation list",
         "AgentPanel showInput=false for AIPanel; showInput=true requires onSend",
         "StdChat statusLine is optional in-flow ReactNode shown while the host is working",
         "metric-chart-card JSON: { type, title, subtitle?, chartType?, data: [{ id, label, value, secondaryValue?, color? }], valueLabel?, secondaryValueLabel?, valueSuffix?, secondaryValueSuffix? }",
@@ -318,7 +320,9 @@
         "card hooks emit",
         "AIBrowserGlow active toggles with AI running state",
         "AIBrowserGlow active turns off on success/error/cancel/stop",
-        "copilot shell interactions work"
+        "copilot shell interactions work",
+        "OMPHPanel new conversation starts empty and selecting another conversation restores its turns",
+        "header Open conversation reopens the same panel without sending"
       ],
       "common_failure_modes": [
         "calling input-included chat AIPanel",
@@ -327,7 +331,9 @@
         "coupling to internal renderers",
         "putting browser-edge glow inside AgentPanel instead of using AIBrowserGlow",
         "assuming AgentPanel.onHeaderPointerDown stores position instead of handing dragging to the outer shell",
-        "resize observer overwriting shell state"
+        "resize observer overwriting shell state",
+        "building a second conversation list outside OMPHPanel when onNewConversation and onSelectConversation are available",
+        "using onOpenPanel to send text or start a new conversation"
       ]
     },
     {

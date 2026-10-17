@@ -282,7 +282,9 @@ const [status, setStatus] = useState<AgentPanelStatus>('idle')
 - 流式内容由宿主按增量追加。`streaming: true` 只表示这段还在增长，组件直接渲染已经到达的全文。
 - 回复结束后，下方是一条浅底色的操作条：左侧时间；有用量数据时，一条细分隔线后是 Usage（点开在条内显示明细）；复制固定在最右。最新一轮常显，更早的轮次在悬停或键盘聚焦时显示。条与回复的间距由 `--orb-omph-actions-gap` 控制。
 - 正文在底部时跟随新内容。离开底部后出现回到底部。更早内容从顶部插入时保持当前阅读位置。宽度足够时显示轮次轨道。
-- 输入区默认显示。响应中且草稿为空时主按钮是停止；草稿有内容时仍是发送。
+- 输入区默认关闭。打开 `showInput` 后，响应中且草稿为空时主按钮是停止；草稿有内容时仍是发送。平时把 `InputArea` 放在面板外。
+- 新建对话和对话列表也由宿主持有。传入 `onNewConversation` 后头部出现新建；传入 `onSelectConversation` 后出现列表。`conversations` 提供 `id`、`title`，可选 `preview` 和 `updatedAt`，`activeConversationId` 标出当前条。组件不保存会话。
+- 面板本身没有「重新打开」。关掉之后，把 `onOpenPanel` 传给 Header AI 输入条；那个按钮不发送内容。
 
 ### 文件预览
 

@@ -226,6 +226,7 @@ Use it before reading a module README in detail.
   - `type AgentPanelStatus`
   - `type OMPHPanelStatus`
   - `type OMPHTurn`
+  - `type OMPHConversation`
   - `type OMPHProcessDisplay`
   - `parseOmphFileHref`, `type OMPHFileRef`, `type OMPHFilePreviewData`, `type OMPHFilePreviewLoader`, `type OMPHFilePreviewLayout`
   - `type AIBrowserGlowColors`
@@ -237,7 +238,7 @@ Use it before reading a module README in detail.
 - Preferred pattern:
   - AIPanel / no-input AI dialogue window: `AgentPanel` with default `showInput=false`
   - Chat / input-included chat surface: `StdChat`（内部使用 `InputArea`）
-  - OMPH 回复面板：`OMPHPanel` 默认 `showInput=false`，输入用面板外的 `InputArea`
+  - OMPH 回复面板：`OMPHPanel` 默认 `showInput=false`，输入用面板外的 `InputArea`。新建和会话列表用 `onNewConversation` / `onSelectConversation`。关掉后用 Header 的 `onOpenPanel` 打开，该按钮不发送
   - floating helper: `CopilotChat` inside custom shell
   - ready-made floating shell: `FloatingAgentPanel` when horizontal drag and left/center/right snap are enough
 - Hooks:
@@ -251,6 +252,7 @@ Use it before reading a module README in detail.
   - assistant `isStreaming`
   - `FloatingAgentPanel`: optional controlled `anchor`/`onAnchorChange`; `width`, `top`, `bottom`, `inset`, `zIndex` customize placement
   - `CopilotChat`: host-owned `isOpen`, `corner`, `panelSize`, `panelPosition` when using a custom shell
+  - `OMPHPanel` sessions: host-owned `conversations`, `activeConversationId`, `onNewConversation`, `onSelectConversation`
   - `AgentPanel showInput=false` is the AIPanel contract; `showInput=true` requires a working `onSend`
   - `StdChat.statusLine` is an optional in-flow React node for pending/running status
   - dynamic `metric-chart-card` JSON: `{ type, title, subtitle?, chartType?, data: [{ id, label, value, secondaryValue?, color? }], valueLabel?, secondaryValueLabel?, valueSuffix?, secondaryValueSuffix? }`
@@ -269,6 +271,8 @@ Use it before reading a module README in detail.
   - `AIBrowserGlow active` toggles with business AI running state
   - `AIBrowserGlow active` turns off on success/error/cancel/stop
   - copilot open/close/drag/resize works when shell exists
+  - OMPHPanel new conversation is empty, and choosing another conversation restores its turns
+  - header Open conversation reopens the same panel without sending
 - Common failure modes:
   - calling an input-included chat surface `AIPanel`
   - treating `CopilotChat` as full floating system
@@ -277,6 +281,8 @@ Use it before reading a module README in detail.
   - putting browser-edge glow inside `AgentPanel` instead of using `AIBrowserGlow`
   - assuming `AgentPanel.onHeaderPointerDown` stores position instead of handing dragging to the outer shell
   - resize observer overwriting shell resize state
+  - drawing a second conversation list when `OMPHPanel` already has `onNewConversation` and `onSelectConversation`
+  - using `onOpenPanel` to send text or start a new conversation
 
 ## 7. Pad Workflow
 

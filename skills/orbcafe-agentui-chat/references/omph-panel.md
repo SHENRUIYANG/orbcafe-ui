@@ -32,6 +32,7 @@
 - `turns`
 - `agentStatus` 与 `isResponding`（两者分开，见下）
 - 追加、停止、失败、用量
+- 会话列表：`conversations`、`activeConversationId`、`onNewConversation`、`onSelectConversation`（可选，见「会话列表」）
 - `loadFilePreview`（可选）
 - `onSend` / `onStop` / `onLoadOlder`
 
@@ -117,6 +118,7 @@ interface OMPHProcessItem {
 
 - 读者在底部时，新内容把滚动位置推到底。
 - 离开底部后出现回到底部，不再跟随。
+- 整段换成另一条会话（原来的第一轮不在了）时，重新贴底跟随。头部插入更早轮次仍保持阅读位置。
 - `hasOlder` 且传了 `onLoadOlder` 时，顶部有「加载更早」。内容高出一屏并且读者滚到顶部时也会调用。插入更早轮次后保持当前阅读位置。
 - 正文宽于 900px 时，左侧有轮次刻度，点一下跳到该轮。
 
@@ -126,6 +128,22 @@ interface OMPHProcessItem {
 - 面板圆角是 `--orb-shell-radius`（24px），和 `InputArea` 相同。
 - 正文滚动条的滑槽是 `--orb-canvas`，滑块是前景色混进画布，不用系统灰。
 - 宽于 900px 时，轮次刻度在左侧。
+
+## 边缘泛光
+
+居中、背景模糊和边缘泛光都画在 `OMPHPanel` 外面，不进组件。面板自己是 `overflow: hidden` 加 `isolation: isolate`，光晕若放进卡片里，超出圆角的部分会被裁掉。
+
+从后到前只有三层：
+
+1. 背景层盖住视口。半透明底色加上 `backdrop-filter: blur(18px)`，后面的页面被虚化，面板自己保持清晰。
+2. 泛光层是面板的前一个兄弟节点，每边比面板大 168px。上、左用 petrol（`#00a3a3`），右用蓝（`--orb-primary`），下用粉（`#db3360`）。整层再 `filter: blur(64px)`。卡片不透明，盖住光晕中间，只露出卡片外面的一圈。
+3. 内容层才是 `OMPHPanel`。外壳把它的 `border-color` 设成透明、`box-shadow` 去掉，描边交给泛光，不要两条边抢。
+
+泛光 `z-index: 0`，卡片 `z-index: 1`。泛光 `pointer-events: none`，也 `aria-hidden`，不挡点击，不参与读屏。呼吸只改透明度，2.6 秒里在 0.78 和 1 之间循环，不用 `transform`。系统开启「减少动态效果」时动画关掉，光晕保持不透明。
+
+浅色主题直接用品牌色。深色主题用 `color-mix` 把同样的颜色降到大约 64%–72%，避免夜里过亮。
+
+示例页的 Edge glow 开关默认开。关掉后回到普通文档流，面板恢复自己的描边。
 
 ## 审批
 
@@ -174,6 +192,25 @@ type OMPHApprovalDecision =
 - 演示页把自己的高度报回来，显示高度限制在 160–560px。
 - 围栏还没闭合时仍按代码显示。不要把 HTML 直接写进 Markdown 正文，指望它在宿主页面里执行。
 - 长回复会贴底跟随。把演示放在回复末尾，流完后读者才能看到。示例 `test` 的每条回复末尾都有 Recovered hours 演示。
+
+## 会话列表
+
+宿主拥有每一条会话和它的 `turns`。组件只画入口，不保存会话，也不生成 id。两个回调都不传时，头部保持原来的样子。
+
+```ts
+interface OMPHConversation {
+  id: string
+  title: string
+  preview?: string
+  updatedAt?: Date
+}
+```
+
+- `onNewConversation`：头部出现新建。点了之后宿主新建一条空会话，把它设为 `activeConversationId`，并把 `turns` 换成 `[]`。
+- `onSelectConversation`：头部出现对话列表。点一条之后宿主换成那条的 `turns`。`conversations` 为空时，列表里是空状态。
+- `activeConversationId` 标出当前条。
+- 正在回复时能不能切换，由宿主决定。示例会先停掉当前这一轮再换，避免后到的文字写进另一条会话。
+- 关掉面板不是组件的事。Header AI 输入条在传入 `onOpenPanel` 后，于面板关闭时出现打开对话按钮，只把宿主的面板重新打开，不发送，也不新建会话。把同一个开关传给 `panelOpen`，面板一打开按钮就隐藏。示例在 `/omph-panel`：关掉面板后再点这个按钮，回来的是同一条会话；从输入条发送则会打开面板并把内容送进当前会话。
 
 ## 输入
 
@@ -330,6 +367,8 @@ async function handleSend(content: string) {
 4. 回复里的 `json` 图卡能点，事件进 `cardHooks.onCardEvent`。
 5. 若启用预览：宽面板里文件在右侧打开；把面板缩到 880px 以下后，同一链接改为盖住正文；Esc 关闭且焦点回到链接。
 6. 缺失文件没有重试；读取失败有重试；不支持的类型只有在传了 `onOpenFileExternally` 时才有外部打开。
+7. 若接了会话列表：新建后正文是空的；再从列表点回原来的会话，之前的轮次还在。
+8. 若页面有 Header AI 输入条：关掉面板后，点打开对话，同一会话回来，输入框里没发出去的字还留着。
 
 ## 看得到但没效果
 
@@ -340,3 +379,6 @@ async function handleSend(content: string) {
 - 图卡不出现：`json` 围栏还没闭合，或 JSON 里有函数、注释。
 - HTML 还是一坨代码：围栏还没闭合，或看的不是回复末尾。闭合后应出现 Interactive HTML。
 - 操作条离正文很远：宿主样式覆盖了 `--orb-omph-actions-gap` 或 `.orb-omph-turn-actions`。
+- 关掉面板后没有地方打开：Header 没传 `onOpenPanel`，或 `panelOpen` 仍是 true。这个按钮不在 `OMPHPanel` 里面。
+- 面板头部没有新建或列表：没传 `onNewConversation` 或 `onSelectConversation`。
+- 点了新建还是旧对话：宿主没有把 `turns` 换成空数组，或没有换 `activeConversationId`。

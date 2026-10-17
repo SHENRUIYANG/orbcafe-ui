@@ -79,6 +79,8 @@ export const CAppPageLayout = ({
   floatingSearchSx,
   onSearch,
   onSearchAdd,
+  onOpenPanel,
+  panelOpen,
   rightHeaderSlot,
   leftHeaderSlot,
   contentSx,
@@ -467,6 +469,8 @@ export const CAppPageLayout = ({
           showSearch={showHeaderSearch}
           onSearch={onSearch}
           onSearchAdd={onSearchAdd}
+          onOpenPanel={onOpenPanel}
+          panelOpen={panelOpen}
           leftSlot={leftHeaderSlot}
           rightSlot={rightHeaderSlot}
         />
@@ -477,6 +481,8 @@ export const CAppPageLayout = ({
               searchPlaceholder={searchPlaceholder}
               onSearch={onSearch}
               onSearchAdd={onSearchAdd}
+              onOpenPanel={onOpenPanel}
+              panelOpen={panelOpen}
               maxWidth="100%"
             />
           </div>

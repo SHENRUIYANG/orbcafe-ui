@@ -102,8 +102,10 @@ import { LogOut, Settings } from 'orbcafe-ui';
 | `onUserLogout` | `() => void` | 默认 `Logout` 点击回调。 |
 | `userMenuItems` | `Array<{ key; label; icon?; onClick?; disabled? }>` | 覆盖默认菜单，完全自定义项。 |
 | `searchPlacement` | `'hidden' \| 'header' \| 'floating'` | AI 输入条位置；默认 `'hidden'`，标准 Layout 不会自动在 Header 中显示 AI 输入框。 |
-| `onSearch` | `(query: string) => void` | AI 输入条发送回调；回车、发送按钮、语音完成都会触发。提交成功后输入框会自动清空。 |
+| `onSearch` | `(query: string) => void` | AI 输入条发送回调；回车和语音完成会触发。提交成功后输入框会自动清空。输入条上没有发送按钮。 |
 | `onSearchAdd` | `() => void` | Header 中间 AI 输入条左侧 `+` 按钮回调，可用于打开功能菜单。 |
+| `onOpenPanel` | `() => void` | 传入后，AI 输入条在面板关闭时显示打开对话。按钮不发送内容，也不新建会话。 |
+| `panelOpen` | `boolean` | 面板是否已经打开。为真时隐藏打开对话按钮，关掉后按钮再出现。 |
 | `locale` | `'en' \| 'zh' \| 'fr' \| 'de' \| 'ja' \| 'ko'` | 受控模式下的当前语言；未传 `onLocaleChange` 时作为初始语言，之后由 Layout 管理。 |
 | `onLocaleChange` | `(locale) => void` | 可选的受控语言回调；不传时 Header 仍可切换语言，并自动保存用户选择。 |
 | `enableNavigationPinning` | `boolean` | 是否允许菜单 pin 到顶部；默认 `true`。 |
@@ -118,7 +120,7 @@ import { LogOut, Settings } from 'orbcafe-ui';
 - 支持 light/dark/system 主题切换，也支持由宿主受控。
 - Header 语言菜单默认可用；非受控模式会使用共享的 localStorage 偏好，刷新或进入其他非受控页面后继续沿用所选语言。
 - Header logo、用户信息、左右扩展插槽可配置；未传 `logo` 时显示离线内置图标，不请求宿主静态文件，传 `logo={null}` 可隐藏。
-- Header AI 输入条是显式 opt-in：需要顶部输入框时传 `searchPlacement="header"`；需要跟随 AI Panel 浮动时传 `searchPlacement="floating"` 和 `floatingSearchSx`。
+- Header AI 输入条是显式 opt-in：需要顶部输入框时传 `searchPlacement="header"`；需要跟随 AI Panel 浮动时传 `searchPlacement="floating"` 和 `floatingSearchSx`。需要在关掉面板后从这条输入重新打开时，再传 `onOpenPanel`。
 - Navigation Island 默认允许 pin 叶子菜单项，pin 后会在顶部出现收藏分组；分组节点自身不会被 pin。
 - localStorage pin 状态会在客户端挂载后恢复。要求首帧完全稳定时，应从服务端用户配置/cookie 初始化并使用 `pinnedNavigationItemIds` 受控模式。
 - 详细设计说明见同目录 `pagelayout.md`。

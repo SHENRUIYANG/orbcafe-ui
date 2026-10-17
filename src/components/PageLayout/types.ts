@@ -37,6 +37,10 @@ export interface CAppHeaderProps {
   showSearch?: boolean;
   onSearch?: (query: string) => void;
   onSearchAdd?: () => void;
+  /** 传入后，Header AI 输入条在面板关闭时显示打开对话按钮。按钮不发送内容。 */
+  onOpenPanel?: () => void;
+  /** 为真时隐藏打开对话按钮。 */
+  panelOpen?: boolean;
   user?: CAppHeaderUser;
   onUserRefresh?: () => void;
   onUserSetting?: () => void;
@@ -77,6 +81,10 @@ export interface CAppPageLayoutProps {
   floatingSearchSx?: CSSProperties;
   onSearch?: (query: string) => void;
   onSearchAdd?: () => void;
+  /** 传入后，Header 或浮动 AI 输入条在面板关闭时显示打开对话按钮。按钮不发送内容。 */
+  onOpenPanel?: () => void;
+  /** 为真时隐藏打开对话按钮。 */
+  panelOpen?: boolean;
   rightHeaderSlot?: ReactNode;
   leftHeaderSlot?: ReactNode;
   contentSx?: CSSProperties;

@@ -2,23 +2,30 @@
  * OMPHPanel 示例
  *
  * 内容大纲：
+ * - 顶栏 AI 输入条打开同一会话，关闭后再打开
+ * - 面板内新建对话、对话列表和切换
  * - 历史轮次、更早一轮、输入 test 后的增量流式回复
  * - 过程行、指标图卡、状态和卡片事件
  * - 文件预览：回复里的文件链接、面板宽度与预览布局切换
  *
  * 作者：ORBAICODER
- * 版本：1.6.0
- * 日期：2026-10-07
+ * 版本：1.8.1
+ * 日期：2026-10-14
  *
  * 作用：演示 OMPHPanel。输入 test 会按增量追加过程行和九种指标图卡，而不是一次性打字机播放。
  *
  * 代码逻辑大纲：
- * 1. 宿主保存轮次、状态和是否仍在响应。
- * 2. 发送后先写入用户消息，再逐段追加推理、工具、命令和助手 Markdown。
- * 3. 冻结序列前用审批卡换掉输入区。可选冻结后重排、只重排、只监视，或 Other 输入；拒绝或停止都结束等待。
- * 4. 回复里带各种文件链接；宽度按钮改变面板容器宽度，用来在同一页看到并排与覆盖两种预览。
+ * 1. 宿主保存多条会话，当前条的轮次、状态和是否仍在响应。
+ * 2. 顶栏打开按钮只把面板再打开；顶栏发送则打开面板并把内容送进当前会话。
+ * 3. 发送后先写入用户消息，再逐段追加推理、工具、命令和助手 Markdown。
+ * 4. 冻结序列前用审批卡换掉输入区。可选冻结后重排、只重排、只监视，或 Other 输入；拒绝或停止都结束等待。
+ * 5. 回复里带各种文件链接；宽度按钮改变面板容器宽度，用来在同一页看到并排与覆盖两种预览。
  *
  * ChangeLog：
+ * - 1.8.1 2026-10-14 面板打开时隐藏顶栏的打开对话按钮。
+ * - 1.8.0 2026-10-14 顶栏可重新打开面板；面板内可新建并切换会话。
+ * - 1.7.1 2026-10-07 泛光打开时，示例开关留在浮层外面，不再压住面板。
+ * - 1.7.0 2026-10-07 示例增加可开关的边缘泛光外壳，泛光画在面板外面。
  * - 1.6.0 2026-10-07 test 的完整回复里加入可交互 HTML 演示。
  * - 1.5.0 2026-10-07 审批卡改为完整单选，并带 Other 输入。
  * - 1.4.0 2026-10-07 test 在冻结序列前停住，输入区换成审批卡。
@@ -32,9 +39,11 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
+  CAppHeader,
   InputArea,
   OMPHApprovalCard,
   OMPHPanel,
+  X,
   type AgentUICardHookEvent,
   type MetricChartCardTypeContent,
   type OMPHApprovalChoice,
@@ -47,6 +56,7 @@ import {
   type OMPHTurn,
 } from 'orbcafe-ui'
 import { createDemoFileLoader } from './omphDemoWorkspace'
+import './omph-edge-bloom.css'
 
 const STREAM_CHUNK_CHARS = 64
 const STREAM_INTERVAL_MS = 16
@@ -100,6 +110,19 @@ const PANEL_WIDTHS = [
 ] as const
 
 const PREVIEW_LAYOUTS: OMPHFilePreviewLayout[] = ['auto', 'split', 'overlay']
+const LINE2_CONVERSATION_ID = 'line-2-capacity'
+const YESTERDAY_CONVERSATION_ID = 'yesterday-warning'
+const NEW_CONVERSATION_TITLE = 'New conversation'
+const TITLE_LIMIT = 42
+const PREVIEW_LIMIT = 72
+
+interface DemoConversation {
+  id: string
+  title: string
+  updatedAt: Date
+  turns: OMPHTurn[]
+  hasOlder: boolean
+}
 
 const REASONING_TEXT = [
   'Line 2 is the constraint.',
@@ -453,11 +476,80 @@ const olderTurn = (): OMPHTurn => ({
   usage: { inputTokens: 40, outputTokens: 18, durationMs: 900 },
 })
 
+const oneLine = (value: string) => value.replace(/\s+/g, ' ').trim()
+
+const clipText = (value: string, limit: number) => (
+  value.length > limit ? `${value.slice(0, limit).trimEnd()}…` : value
+)
+
+const conversationPreview = (source: OMPHTurn[]) => {
+  for (let index = source.length - 1; index >= 0; index -= 1) {
+    const turn = source[index]
+    const text = oneLine(turn.assistant?.content || turn.user?.content || '')
+    if (text) return clipText(text, PREVIEW_LIMIT)
+  }
+  return ''
+}
+
+const titleFromTurns = (source: OMPHTurn[]) => {
+  const text = oneLine(source.find((turn) => oneLine(turn.user?.content ?? ''))?.user?.content ?? '')
+  return text ? clipText(text, TITLE_LIMIT) : ''
+}
+
+const turnSignature = (source: OMPHTurn[]) => source.map((turn) => [
+  turn.id,
+  turn.user?.content.length ?? 0,
+  turn.assistant?.content.length ?? 0,
+  turn.assistant?.streaming ? '1' : '0',
+  (turn.process ?? []).map((item) => `${item.id}:${item.status}:${item.content?.length ?? 0}`).join(','),
+].join(':')).join('|')
+
+const freezeTurns = (source: OMPHTurn[]): OMPHTurn[] => source.map((turn) => ({
+  ...turn,
+  assistant: turn.assistant?.streaming ? { ...turn.assistant, streaming: false } : turn.assistant,
+  process: turn.process?.map((item) => (
+    item.streaming || item.status === 'running' || item.status === 'pending'
+      ? { ...item, streaming: false, status: 'error' as const, summary: item.summary || INTERRUPTED_SUMMARY }
+      : item
+  )),
+}))
+
+const seedFor = (id: string): Pick<DemoConversation, 'title' | 'turns' | 'hasOlder' | 'updatedAt'> => {
+  if (id === YESTERDAY_CONVERSATION_ID) {
+    return {
+      title: 'Yesterday warning',
+      turns: [olderTurn()],
+      hasOlder: false,
+      updatedAt: new Date(OLDER_AT),
+    }
+  }
+  if (id === LINE2_CONVERSATION_ID) {
+    return {
+      title: 'Line 2 capacity',
+      turns: [historyTurn()],
+      hasOlder: true,
+      updatedAt: new Date(HISTORY_AT),
+    }
+  }
+  return {
+    title: NEW_CONVERSATION_TITLE,
+    turns: [],
+    hasOlder: false,
+    updatedAt: new Date(),
+  }
+}
+
 const patchTurn = (turns: OMPHTurn[], turnId: string, recipe: (turn: OMPHTurn) => OMPHTurn) =>
   turns.map((turn) => (turn.id === turnId ? recipe(turn) : turn))
 
 export default function OMPHPanelExampleClient() {
-  const [turns, setTurns] = useState<OMPHTurn[]>(() => [historyTurn()])
+  const [conversations, setConversations] = useState<DemoConversation[]>(() => [
+    { id: LINE2_CONVERSATION_ID, ...seedFor(LINE2_CONVERSATION_ID) },
+    { id: YESTERDAY_CONVERSATION_ID, ...seedFor(YESTERDAY_CONVERSATION_ID) },
+  ])
+  const [activeId, setActiveId] = useState(LINE2_CONVERSATION_ID)
+  const [panelOpen, setPanelOpen] = useState(true)
+  const [turns, setTurns] = useState<OMPHTurn[]>(() => seedFor(LINE2_CONVERSATION_ID).turns)
   const [status, setStatus] = useState<OMPHPanelStatus>('idle')
   const [isResponding, setIsResponding] = useState(false)
   const [hasOlder, setHasOlder] = useState(true)
@@ -466,6 +558,7 @@ export default function OMPHPanelExampleClient() {
   const [lastCardEvent, setLastCardEvent] = useState<AgentUICardHookEvent | null>(null)
   const [panelWidth, setPanelWidth] = useState<number>(PANEL_WIDTHS[0].px)
   const [previewLayout, setPreviewLayout] = useState<OMPHFilePreviewLayout>('auto')
+  const [edgeGlow, setEdgeGlow] = useState(true)
   const [externalPath, setExternalPath] = useState<string | null>(null)
   const [approval, setApproval] = useState<OMPHApprovalRequest | null>(null)
   const loadFilePreview = useMemo(() => createDemoFileLoader(), [])
@@ -473,6 +566,15 @@ export default function OMPHPanelExampleClient() {
   const timers = useRef<number[]>([])
   const olderTimer = useRef<number | null>(null)
   const approvalResolver = useRef<((decision: OMPHApprovalDecision) => void) | null>(null)
+  const conversationSeq = useRef(1)
+  const turnsRef = useRef(turns)
+  const hasOlderRef = useRef(hasOlder)
+  const activeIdRef = useRef(activeId)
+  const conversationsRef = useRef(conversations)
+  turnsRef.current = turns
+  hasOlderRef.current = hasOlder
+  activeIdRef.current = activeId
+  conversationsRef.current = conversations
 
   const clearTimers = useCallback(() => {
     timers.current.forEach((timer) => window.clearTimeout(timer))
@@ -702,18 +804,113 @@ export default function OMPHPanelExampleClient() {
     }, OLDER_DELAY_MS)
   }, [hasOlder, loadingOlder])
 
-  const resetConversation = () => {
+  const abandonRun = useCallback(() => {
     runToken.current += 1
     clearTimers()
     cancelApproval()
-    setTurns([historyTurn()])
-    setStatus('idle')
     setIsResponding(false)
-    setHasOlder(true)
+    setStatus('idle')
     setLoadingOlder(false)
+  }, [cancelApproval, clearTimers])
+
+  const rememberLeaving = useCallback((list: DemoConversation[], leavingId: string) => {
+    const liveTurns = freezeTurns(turnsRef.current)
+    return list.map((item) => {
+      if (item.id !== leavingId) return item
+      const changed = turnSignature(liveTurns) !== turnSignature(item.turns)
+      return {
+        ...item,
+        title: item.title === NEW_CONVERSATION_TITLE ? (titleFromTurns(liveTurns) || item.title) : item.title,
+        turns: liveTurns,
+        hasOlder: hasOlderRef.current,
+        updatedAt: changed ? new Date() : item.updatedAt,
+      }
+    })
+  }, [])
+
+  const selectConversation = (id: string) => {
+    if (id === activeIdRef.current) return
+    const nextList = rememberLeaving(conversationsRef.current, activeIdRef.current)
+    const selected = nextList.find((item) => item.id === id)
+    if (!selected) return
+    abandonRun()
+    setConversations(nextList)
+    setActiveId(id)
+    setTurns(selected.turns)
+    setHasOlder(selected.hasOlder)
+    setPanelOpen(true)
+  }
+
+  const createConversation = () => {
+    const id = `conversation-${conversationSeq.current}`
+    conversationSeq.current += 1
+    const created: DemoConversation = {
+      id,
+      title: NEW_CONVERSATION_TITLE,
+      updatedAt: new Date(),
+      turns: [],
+      hasOlder: false,
+    }
+    const nextList = [created, ...rememberLeaving(conversationsRef.current, activeIdRef.current)]
+    abandonRun()
+    setConversations(nextList)
+    setActiveId(id)
+    setTurns([])
+    setHasOlder(false)
+    setPanelOpen(true)
+  }
+
+  const resetConversation = () => {
+    const id = activeIdRef.current
+    const seed = seedFor(id)
+    abandonRun()
+    setTurns(seed.turns)
+    setHasOlder(seed.hasOlder)
     setLastCardEvent(null)
     setExternalPath(null)
+    setConversations((current) => current.map((item) => (
+      item.id === id ? { ...item, ...seed } : item
+    )))
   }
+
+  const conversationItems = conversations.map((item) => {
+    const live = item.id === activeId
+    const itemTurns = live ? turns : item.turns
+    return {
+      id: item.id,
+      title: live && item.title === NEW_CONVERSATION_TITLE ? (titleFromTurns(itemTurns) || item.title) : item.title,
+      preview: conversationPreview(itemTurns),
+      updatedAt: live && turnSignature(itemTurns) !== turnSignature(item.turns) ? new Date() : item.updatedAt,
+    }
+  })
+
+  const panel = (
+    <OMPHPanel
+      className={edgeGlow ? 'min-h-0 w-full flex-1' : 'h-full'}
+      title="Data Analysis Agent"
+      description="Plant 1000 context"
+      agentStatus={status}
+      isResponding={isResponding}
+      turns={turns}
+      processDisplay={processDisplay}
+      hasOlder={hasOlder}
+      loadingOlder={loadingOlder}
+      onLoadOlder={handleLoadOlder}
+      cardHooks={{ onCardEvent: setLastCardEvent }}
+      loadFilePreview={loadFilePreview}
+      filePreviewLayout={previewLayout}
+      onOpenFileExternally={(ref) => setExternalPath(ref.path)}
+      conversations={conversationItems}
+      activeConversationId={activeId}
+      onNewConversation={createConversation}
+      onSelectConversation={selectConversation}
+      headerActions={(
+        <button type="button" className="orb-omph-icon-btn" aria-label="Close panel" onClick={() => setPanelOpen(false)}>
+          <X size={16} />
+        </button>
+      )}
+    />
+  )
 
   const chipClass = (selected: boolean) =>
     selected
@@ -721,12 +918,25 @@ export default function OMPHPanelExampleClient() {
       : 'border-[var(--orb-border,#dbdbdb)] text-[var(--orb-muted,#8c8c8c)] hover:bg-[var(--orb-hover,#eef2f9)]'
 
   return (
-    <div className="flex min-h-screen w-full items-center justify-center bg-[var(--orb-surface,#f5f5f5)] p-4 md:p-8">
-      <div className="flex h-[84vh] w-full flex-col gap-4" style={{ maxWidth: panelWidth }}>
+    <div className="flex h-screen min-h-0 w-full flex-col bg-[var(--orb-surface,#f5f5f5)]">
+      <CAppHeader
+        appTitle="OMPH Panel"
+        showSearch
+        panelOpen={panelOpen}
+        onOpenPanel={() => setPanelOpen(true)}
+        onSearch={(query) => {
+          setPanelOpen(true)
+          void handleSend(query)
+        }}
+      />
+      <div className="flex shrink-0 flex-col gap-3 px-4 pb-3 pt-4 md:px-8">
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
-            onClick={() => { void handleSend('test') }}
+            onClick={() => {
+              setPanelOpen(true)
+              void handleSend('test')
+            }}
             disabled={isResponding}
             className="rounded-lg bg-[var(--orb-primary,#154194)] px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
           >
@@ -783,11 +993,20 @@ export default function OMPHPanelExampleClient() {
               {value}
             </button>
           ))}
+          <button
+            type="button"
+            aria-pressed={edgeGlow}
+            onClick={() => setEdgeGlow((current) => !current)}
+            className={`rounded-lg border px-3 py-2 text-xs font-semibold ${chipClass(edgeGlow)}`}
+          >
+            Edge glow
+          </button>
         </div>
 
         <div className="text-xs text-[var(--orb-muted,#8c8c8c)]">
-          Type <span className="font-semibold text-[var(--orb-primary,#154194)]">test</span> to stream a turn, then click a file link.
-          Scroll up for the earlier warning. Hover an older reply to copy it.
+          Type <span className="font-semibold text-[var(--orb-primary,#154194)]">test</span> in the header or below to continue this session.
+          Close the panel, then use Open conversation in the header to bring the same session back.
+          New conversation and the conversation list are in the panel header.
           {externalPath && <span> Open externally requested: {externalPath}.</span>}
         </div>
         {lastCardEvent && (
@@ -795,25 +1014,18 @@ export default function OMPHPanelExampleClient() {
             Card event: <span className="font-semibold text-[var(--orb-fg,#555555)]">{lastCardEvent.cardType}</span> / {lastCardEvent.action}
           </div>
         )}
+      </div>
 
-        <div className="flex min-h-0 flex-1 flex-col gap-3">
+      <div className="relative min-h-0 flex-1">
+        {!panelOpen && (
+          <div className="flex h-full items-center justify-center px-6 text-center text-sm text-[var(--orb-muted,#8c8c8c)]">
+            This session is still here. Use Open conversation in the header to bring the panel back.
+          </div>
+        )}
+        {panelOpen && !edgeGlow && (
+        <div className="mx-auto flex h-full min-h-0 w-full flex-col gap-3 px-4 pb-4 md:px-8" style={{ maxWidth: panelWidth }}>
           <div className="min-h-0 flex-1">
-            <OMPHPanel
-              className="h-full"
-              title="Data Analysis Agent"
-              description="Plant 1000 context"
-              agentStatus={status}
-              isResponding={isResponding}
-              turns={turns}
-              processDisplay={processDisplay}
-              hasOlder={hasOlder}
-              loadingOlder={loadingOlder}
-              onLoadOlder={handleLoadOlder}
-              cardHooks={{ onCardEvent: setLastCardEvent }}
-              loadFilePreview={loadFilePreview}
-              filePreviewLayout={previewLayout}
-              onOpenFileExternally={(ref) => setExternalPath(ref.path)}
-            />
+            {panel}
           </div>
           <div className="[&>div]:max-w-none">
             {approval ? (
@@ -833,6 +1045,37 @@ export default function OMPHPanelExampleClient() {
             )}
           </div>
         </div>
+        )}
+        {panelOpen && edgeGlow && (
+          <div className="orb-omph-bloom" style={{ '--orb-bloom-width': `${panelWidth}px` } as React.CSSProperties}>
+            <div className="orb-omph-bloom-backdrop" />
+            <div className="orb-omph-bloom-center">
+              <div className="orb-omph-bloom-panel">
+                <div className="orb-omph-bloom-glow" aria-hidden="true" />
+                <div className="orb-omph-bloom-card">
+                  {panel}
+                </div>
+              </div>
+              <div className="orb-omph-bloom-composer [&>div]:max-w-none">
+                {approval ? (
+                  <OMPHApprovalCard request={approval} onDecide={(decision) => {
+                    const resolve = approvalResolver.current
+                    approvalResolver.current = null
+                    setApproval(null)
+                    resolve?.(decision)
+                  }} />
+                ) : (
+                  <InputArea
+                    onSend={handleSend}
+                    onStop={handleStop}
+                    isResponding={isResponding}
+                    placeholder="Type test"
+                  />
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

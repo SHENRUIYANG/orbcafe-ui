@@ -9,6 +9,7 @@ Default composition is **component-first** `<CAppPageLayout appId="my-app" appTi
 - Controlled pairs: `mode/onModeChange`, `navigationMode/onNavigationModeChange`, `pinnedNavigationItemIds/onPinnedNavigationItemIdsChange`. Use defaultMode/defaultNavigationMode/defaultPinnedNavigationItemIds for initial uncontrolled values.
 - Locale with `onLocaleChange` is host-controlled; without it the shell switches/persists its initial locale. Keep locale and option values separate from application IDs.
 - `searchPlacement` defaults to `'hidden'`; choose `'header'` or `'floating'` with `onSearch(query)` / `onSearchAdd()` to enable AI input. `CAppHeader` alone defaults `showSearch=false`.
+- `onOpenPanel` shows an Open conversation button in that AI input while `panelOpen` is false. Pass the host's panel visibility as `panelOpen` so the button hides as soon as the panel is open and returns after it closes. The button does not send text and does not start a new session. Sending stays on `onSearch`.
 - Mount `GlobalMessage` once in the host. Layout contains its own OrbisModeProvider. Do not assume every component has `sx`: CAppPageLayout offers contentSx/floatingSearchSx, navigation offers className, and many others use their specific prop types.
 
 ## Menu and event names

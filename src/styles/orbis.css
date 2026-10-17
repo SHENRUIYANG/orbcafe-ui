@@ -2797,6 +2797,8 @@ button.orb-app-header-locale:hover,
 }
 
 .orb-omph-header {
+  position: relative;
+  z-index: 2;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -2804,6 +2806,107 @@ button.orb-app-header-locale:hover,
   padding: 12px 14px;
   border-bottom: 1px solid var(--orb-border);
   background: var(--orb-canvas);
+}
+
+.orb-omph-header-actions {
+  margin-left: auto;
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 2px;
+}
+
+.orb-omph-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--orb-muted);
+  cursor: pointer;
+}
+
+.orb-omph-icon-btn:hover,
+.orb-omph-icon-btn[aria-expanded="true"] {
+  background: var(--orb-hover);
+  color: var(--orb-primary);
+}
+
+.orb-omph-icon-btn:focus-visible {
+  outline: 2px solid var(--orb-focus-ring);
+  outline-offset: 1px;
+}
+
+.orb-omph-conversation-anchor {
+  position: relative;
+}
+
+.orb-omph-conversations {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 3;
+  width: min(280px, calc(100vw - 48px));
+  max-height: 320px;
+  overflow: auto;
+  padding: 6px;
+  border: 1px solid var(--orb-border);
+  border-radius: var(--orb-r);
+  background: var(--orb-canvas);
+  box-shadow: var(--orb-shadow-1);
+}
+
+.orb-omph-conversation {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  width: 100%;
+  min-width: 0;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--orb-fg);
+  text-align: left;
+  cursor: pointer;
+}
+
+.orb-omph-conversation:hover,
+.orb-omph-conversation[data-active="true"] {
+  background: var(--orb-p50);
+}
+
+.orb-omph-conversation:focus-visible {
+  outline: 2px solid var(--orb-focus-ring);
+  outline-offset: -2px;
+}
+
+.orb-omph-conversation-title,
+.orb-omph-conversation-meta {
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.orb-omph-conversation-title {
+  font: 600 13px/1.3 var(--orb-font);
+}
+
+.orb-omph-conversation-meta {
+  font: 500 11px/1.3 var(--orb-font);
+  color: var(--orb-muted);
+}
+
+.orb-omph-conversation-empty {
+  margin: 0;
+  padding: 12px 10px;
+  color: var(--orb-muted);
+  font: 500 13px/1.4 var(--orb-font);
 }
 
 .orb-omph-avatar {

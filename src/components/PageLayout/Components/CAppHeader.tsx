@@ -1,3 +1,28 @@
+/**
+ * 应用顶栏
+ *
+ * 内容大纲：
+ * - 品牌、标题与左右插槽
+ * - 中间 AI 输入条：功能入口、打开对话、语音；回车或语音完成才发送
+ * - 语言、主题和用户菜单
+ *
+ * 作者：ORBAICODER
+ * 版本：1.3.0
+ * 日期：2026-10-14
+ *
+ * 作用：页面壳的顶栏。传入 onOpenPanel 后，AI 输入条可以不发送内容就重新打开对话面板。
+ *
+ * 代码逻辑大纲：
+ * 1. 输入条自己持有草稿，提交后清空。
+ * 2. 打开对话按钮只调用 onOpenPanel，不提交输入。panelOpen 为真时按钮隐藏。
+ * 3. 语言和主题交给宿主回调。
+ *
+ * ChangeLog：
+ * - 1.3.0 2026-10-14 面板打开时隐藏打开对话按钮。
+ * - 1.2.0 2026-10-14 去掉输入条上的发送按钮，回车和语音完成仍然发送。
+ * - 1.1.0 2026-10-14 AI 输入条增加打开对话按钮。
+ */
+
 'use client';
 
 import { useCallback, useState, type FormEvent, type CSSProperties } from 'react';
@@ -24,6 +49,10 @@ export interface CAppHeaderSearchProps {
   searchPlaceholder?: string;
   onSearch?: (query: string) => void;
   onSearchAdd?: () => void;
+  /** 不发送内容，只让宿主把已经关掉的对话面板再打开。 */
+  onOpenPanel?: () => void;
+  /** 面板已经打开时隐藏打开对话按钮。 */
+  panelOpen?: boolean;
   maxWidth?: number | string;
   sx?: CSSProperties;
 }
@@ -32,6 +61,8 @@ export const CAppHeaderSearch = ({
   searchPlaceholder,
   onSearch,
   onSearchAdd,
+  onOpenPanel,
+  panelOpen = false,
   maxWidth = 540,
   sx,
 }: CAppHeaderSearchProps) => {
@@ -74,7 +105,6 @@ export const CAppHeaderSearch = ({
   }, [isRecording, startRecording, stopRecording]);
 
   const effectiveSearchPlaceholder = searchPlaceholder || t('header.searchPlaceholder');
-  const canSubmitSearch = query.trim().length > 0;
 
   return (
     <form
@@ -100,6 +130,17 @@ export const CAppHeaderSearch = ({
           style={{ border: 'none', background: 'transparent', flex: 1, minWidth: 0 }}
         />
         <div className="orb-inp-adornment orb-inp-adornment-end">
+          {onOpenPanel && !panelOpen && (
+            <CIconButton
+              className="orb-app-header-ai-action"
+              size="small"
+              aria-label={t('header.searchOpenPanel')}
+              tooltip={t('header.searchOpenPanel')}
+              onClick={onOpenPanel}
+            >
+              <SapIcon name="message" size={16} />
+            </CIconButton>
+          )}
           <CIconButton
             className="orb-app-header-ai-action"
             size="small"
@@ -108,9 +149,6 @@ export const CAppHeaderSearch = ({
             sx={{ color: isRecording ? 'var(--orb-err)' : undefined }}
           >
             <SapIcon name="microphone" size={16} />
-          </CIconButton>
-          <CIconButton className="orb-app-header-ai-action" size="small" type="submit" disabled={!canSubmitSearch} tooltip={t('header.searchSend')}>
-            <SapIcon name="paperPlane" size={16} />
           </CIconButton>
         </div>
       </div>
@@ -130,6 +168,8 @@ export const CAppHeader = ({
   showSearch = false,
   onSearch,
   onSearchAdd,
+  onOpenPanel,
+  panelOpen,
   user,
   onUserRefresh,
   onUserSetting,
@@ -191,6 +231,8 @@ export const CAppHeader = ({
             searchPlaceholder={searchPlaceholder}
             onSearch={onSearch}
             onSearchAdd={onSearchAdd}
+            onOpenPanel={onOpenPanel}
+            panelOpen={panelOpen}
           />
         )}
       </div>

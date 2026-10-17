@@ -7,8 +7,8 @@
  * - 可覆盖的界面文案
  *
  * 作者：ORBAICODER
- * 版本：1.5.0
- * 日期：2026-10-07
+ * 版本：1.6.0
+ * 日期：2026-10-14
  *
  * 作用：定义 OMPHPanel 的宿主数据契约。状态枚举保留 AgentPanel 的五态，消息改成 Harness 会话面板的轮次结构。
  *
@@ -17,6 +17,7 @@
  * 2. 提供默认英文文案，宿主用 labels 覆盖，组件内部不写死业务句子。
  *
  * ChangeLog：
+ * - 1.6.0 2026-10-14 增加会话摘要，以及新建对话、对话列表的文案。
  * - 1.5.0 2026-10-07 审批决定增加预置选项和 Other 输入。
  * - 1.4.0 2026-10-07 增加审批卡的请求、决定和默认文案。
  * - 1.3.0 2026-10-04 增加操作条的无障碍名称。
@@ -108,6 +109,14 @@ export interface OMPHTurnUsage {
   durationMs?: number
 }
 
+/** 会话列表里的一条。正文仍由宿主按 id 换成对应的 turns。 */
+export interface OMPHConversation {
+  id: string
+  title: string
+  preview?: string
+  updatedAt?: Date
+}
+
 export interface OMPHTurn {
   id: string
   /** 本轮开始的时间戳（毫秒）。运行态用它计算已经过了多久。 */
@@ -163,6 +172,10 @@ export interface OMPHPanelLabels {
   zoomIn: string
   zoomOut: string
   zoomFit: string
+  newConversation: string
+  conversationList: string
+  conversations: string
+  noConversations: string
 }
 
 export const DEFAULT_OMPH_PANEL_LABELS: OMPHPanelLabels = {
@@ -209,6 +222,10 @@ export const DEFAULT_OMPH_PANEL_LABELS: OMPHPanelLabels = {
   zoomIn: 'Zoom in',
   zoomOut: 'Zoom out',
   zoomFit: 'Fit to width',
+  newConversation: 'New conversation',
+  conversationList: 'Conversation list',
+  conversations: 'Conversations',
+  noConversations: 'No conversations yet',
 }
 
 export const resolveOmphLabels = (override?: Partial<OMPHPanelLabels>): OMPHPanelLabels => ({

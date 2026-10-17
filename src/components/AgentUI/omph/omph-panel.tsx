@@ -6,11 +6,12 @@
  * - 轮次正文、运行态扫光和已用时长
  * - 贴底滚动、回到底部、轮次轨道、更早内容
  * - 会话输入：默认关闭。需要时再打开内置输入条
+ * - 新建对话和对话列表：只在宿主传入回调时出现
  * - 文件预览：助手回复里的文件链接打开右侧窗格（大屏并排，小屏覆盖）
  *
  * 作者：ORBAICODER
- * 版本：1.3.0
- * 日期：2026-10-04
+ * 版本：1.4.0
+ * 日期：2026-10-14
  *
  * 作用：Harness 会话面板与 AgentPanel 的并集。宿主持有轮次，组件负责 ORBIS 样式下的状态、流式、卡片和滚动。
  *
@@ -21,8 +22,10 @@
  * 4. 输入条默认不渲染。打开后，忙碌且草稿为空时变成停止，有内容时仍然发送。
  * 5. 提供 loadFilePreview 才启用文件预览；主体是一个网格：左列是对话与输入，右列是预览窗格。
  *    覆盖模式下预览盖住整个主体，被盖住的对话列设为 inert，键盘不会落到看不见的控件上。
+ * 6. onNewConversation 画出新建，onSelectConversation 画出列表。组件不保存会话。
  *
  * ChangeLog：
+ * - 1.4.0 2026-10-14 头部增加新建对话和对话列表。
  * - 1.3.0 2026-10-04 输入条默认关闭，回复正文 14px。
  * - 1.2.0 2026-10-04 去掉 onBranch（OMPH 桥没有 fork 能力）。
  * - 1.1.0 2026-10-04 文件预览与大小屏两种布局。
@@ -35,6 +38,7 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties, type PointerE
 import { ArrowUp, ChevronDown, CircleStop } from '../../Icons'
 import { cn } from '../lib/utils'
 import type { AgentUICardHooks } from '../components/cardTypes'
+import { OmphConversationControls } from './omph-conversation-controls'
 import { OmphFilePreview } from './omph-file-preview'
 import { parseOmphFileHref } from './omph-file-link'
 import type {
@@ -47,6 +51,7 @@ import { OmphTurnList, turnRailPreview } from './omph-turn-list'
 import {
   formatOmphElapsed,
   resolveOmphLabels,
+  type OMPHConversation,
   type OMPHPanelLabels,
   type OMPHPanelStatus,
   type OMPHProcessDisplay,
@@ -77,6 +82,14 @@ export interface OMPHPanelProps {
   onSend?: (content: string) => void | Promise<void>
   onStop?: () => void
   onHeaderPointerDown?: PointerEventHandler<HTMLDivElement>
+  /** 会话列表。不传 onSelectConversation 时不显示。 */
+  conversations?: OMPHConversation[]
+  /** 列表里标出当前会话。 */
+  activeConversationId?: string
+  /** 传入后头部出现新建对话。宿主负责创建空会话并切换 turns。 */
+  onNewConversation?: () => void
+  /** 传入后头部出现对话列表。宿主按 id 换上那条会话的 turns。 */
+  onSelectConversation?: (conversationId: string) => void
   /** 提供后才启用文件预览：助手回复里的文件链接会打开预览窗格。 */
   loadFilePreview?: OMPHFilePreviewLoader
   /** 判断链接是不是文件。默认把相对路径和以 `/` 开头的路径当作文件。 */
@@ -148,6 +161,10 @@ export const OMPHPanel = ({
   onSend,
   onStop,
   onHeaderPointerDown,
+  conversations = [],
+  activeConversationId,
+  onNewConversation,
+  onSelectConversation,
   loadFilePreview,
   resolveFileLink = parseOmphFileHref,
   filePreviewLayout = 'auto',
@@ -219,7 +236,21 @@ export const OMPHPanel = ({
             <span className="truncate">{subtitle || labels.idle}</span>
           </div>
         </div>
-        {headerActions && <div className="ml-auto flex flex-none items-center gap-1">{headerActions}</div>}
+        {(onNewConversation || onSelectConversation || headerActions) && (
+          <div
+            className="orb-omph-header-actions"
+            onPointerDown={(event) => event.stopPropagation()}
+          >
+            <OmphConversationControls
+              conversations={conversations}
+              activeConversationId={activeConversationId}
+              labels={labels}
+              onNewConversation={onNewConversation}
+              onSelectConversation={onSelectConversation}
+            />
+            {headerActions}
+          </div>
+        )}
       </div>
 
       <div

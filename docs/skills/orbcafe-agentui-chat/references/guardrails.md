@@ -61,6 +61,8 @@
 完整规则在 `references/omph-panel.md`。这里只列会接错的边界：
 
 - 宿主拥有 `turns`。`onSend` 不追加消息，也不调用模型。
+- 宿主也拥有会话列表。不传 `onNewConversation` / `onSelectConversation` 时不要自己画一套新建和列表。传入之后，新建必须换成一条空会话，选择必须换成那条会话的 `turns`。
+- 面板关掉之后从 Header 的 `onOpenPanel` 打开。同时把 `panelOpen` 传进去：打开时按钮隐藏，关掉后才出现。这个按钮不发送、不新建会话。没传 `onOpenPanel` 时按钮不会出现。
 - `streaming: true` 表示宿主还在把全文追加进来。组件直接画这份全文，不再做打字机，也没有 `onMessageStreamingComplete`。
 - `agentStatus` 管头部圆点和正文末尾运行条。`isResponding` 管输入区是发送还是停止。只改其中一个，另一个不会跟着变。
 - 运行条的时长只来自仍在 `streaming` 或 `running` / `pending` 的那一轮的 `startedAt`。
