@@ -2933,6 +2933,19 @@ button.orb-app-header-locale:hover,
   color: var(--orb-on-primary);
   font: 600 12px/1 var(--orb-font);
 }
+/* 传 <img> 时放开圆形底：宽高自适应、无底色，宿主用它放品牌标识（如 MIXER pill） */
+.orb-omph-avatar:has(img) {
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  background: none;
+  overflow: visible;
+}
+.orb-omph-avatar img {
+  display: block;
+  height: 28px;
+  width: auto;
+}
 
 .orb-omph-title {
   font: 600 14px/1.2 var(--orb-font);

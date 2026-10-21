@@ -67,6 +67,8 @@ const CLOCK_INTERVAL_MS = 1000
 export interface OMPHPanelProps {
   turns: OMPHTurn[]
   title?: string
+  /** 头部圆标内容；传 <img> 时自动放开圆形底（见 orb-omph-avatar:has(img)） */
+  avatar?: ReactNode
   description?: string
   headerActions?: ReactNode
   agentStatus?: OMPHPanelStatus
@@ -145,7 +147,8 @@ const RunningRow = ({
 
 export const OMPHPanel = ({
   turns,
-  title = 'OMPH Agent',
+  title,
+  avatar,
   description,
   headerActions,
   agentStatus,
@@ -231,9 +234,9 @@ export const OMPHPanel = ({
         className={cn('orb-omph-header', onHeaderPointerDown && 'cursor-grab active:cursor-grabbing')}
         onPointerDown={onHeaderPointerDown}
       >
-        <span className="orb-omph-avatar" aria-hidden="true">AI</span>
+        <span className="orb-omph-avatar" aria-hidden="true">{avatar ?? 'AI'}</span>
         <div className="min-w-0 flex-1">
-          <div className="orb-omph-title">{title}</div>
+          {title && <div className="orb-omph-title">{title}</div>}
           <div className="orb-omph-subtitle">
             <span className="orb-omph-dot" data-active={busy || undefined} />
             <span className="truncate">{subtitle || labels.idle}</span>
