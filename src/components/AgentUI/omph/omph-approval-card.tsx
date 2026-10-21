@@ -26,9 +26,10 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { useOrbcafeI18n } from '../../../i18n'
 import type { KeyboardEvent } from 'react'
 import {
-  resolveOmphApprovalLabels,
+  omphApprovalLabelsFromI18n,
   type OMPHApprovalDecision,
   type OMPHApprovalLabels,
   type OMPHApprovalRequest,
@@ -50,7 +51,9 @@ export const OMPHApprovalCard = ({
   onDecide: (decision: OMPHApprovalDecision, request: OMPHApprovalRequest) => void
   labels?: Partial<OMPHApprovalLabels>
 }) => {
-  const labels = resolveOmphApprovalLabels(labelOverride)
+  // 默认文案走 i18n 字典；宿主 labels 仍然逐条最高优先
+  const { t } = useOrbcafeI18n()
+  const labels = { ...omphApprovalLabelsFromI18n(t), ...labelOverride }
   const detailRef = useRef<HTMLDivElement | null>(null)
   const otherRef = useRef<HTMLTextAreaElement | null>(null)
   const composing = useRef(false)

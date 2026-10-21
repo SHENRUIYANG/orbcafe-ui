@@ -3,6 +3,7 @@
 import { AddRoundedIcon, Close, InsertDriveFile, SendRoundedIcon, Stop } from '../../../../lib/orbis-compat';
 import React, { useState, useCallback, useRef } from 'react'
 import { cn } from '../../lib/utils'
+import { useOrbcafeI18n } from '../../../../i18n'
 import { VoiceInputButton } from './VoiceInputButton'
 
 const STYLES = {
@@ -81,17 +82,20 @@ interface AttachmentButtonProps {
   onClick: () => void
 }
 
-const AttachmentButton: React.FC<AttachmentButtonProps> = ({ enabled, onClick }) => (
+const AttachmentButton: React.FC<AttachmentButtonProps> = ({ enabled, onClick }) => {
+  const { t } = useOrbcafeI18n()
+  return (
   <button
     className={cn(STYLES.buttonBase, STYLES.buttonSmall, STYLES.buttonNormal)}
     onClick={onClick}
     disabled={!enabled}
-    aria-label="Upload file"
+    aria-label={t('omph.input.upload')}
     type="button"
   >
-    <AddRoundedIcon size={16} />
-  </button>
-)
+      <AddRoundedIcon size={16} />
+    </button>
+  )
+}
 
 interface SendButtonProps {
   canSend: boolean
@@ -101,12 +105,13 @@ interface SendButtonProps {
 }
 
 const SendButton: React.FC<SendButtonProps> = ({ canSend, isResponding, onSend, onStop }) => {
+  const { t } = useOrbcafeI18n()
   if (isResponding) {
     return (
       <button 
         className={cn(STYLES.buttonBase, STYLES.buttonSmall, STYLES.stopButton)}
         onClick={onStop}
-        aria-label="Stop generating"
+        aria-label={t('omph.input.stop')}
         type="button"
       >
         <Stop size={15} />
@@ -123,7 +128,7 @@ const SendButton: React.FC<SendButtonProps> = ({ canSend, isResponding, onSend, 
       )}
       onClick={onSend}
       disabled={!canSend}
-      aria-label="Send message"
+      aria-label={t('omph.input.send')}
       type="button"
     >
       <SendRoundedIcon size={16} className={canSend ? 'text-[var(--orb-on-primary,#ffffff)]' : 'text-[var(--orb-disabled-fg,#8c8c8c)]'} />
@@ -153,7 +158,11 @@ export const InputArea: React.FC<InputAreaProps> = ({
   const [isDragging, setIsDragging] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const placeholderText = placeholder || (getText ? getText('00019', 'Type a message...') : 'Type a message...')
+  // 占位符优先级：prop > getText(SAP 文案号) > i18n 字典 > 英文兜底（无 Provider 时 t 返回键名，退回英文）
+  const { t } = useOrbcafeI18n()
+  const i18nPlaceholder = t('omph.input.placeholder')
+  const fallbackPlaceholder = i18nPlaceholder !== 'omph.input.placeholder' ? i18nPlaceholder : 'Type a message...'
+  const placeholderText = placeholder || (getText ? getText('00019', fallbackPlaceholder) : fallbackPlaceholder)
 
   const canSend = (query.trim().length > 0 || files.length > 0) && !isResponding
   const visionConfig = { enabled: true }
@@ -316,14 +325,14 @@ export const InputArea: React.FC<InputAreaProps> = ({
                 onCompositionStart={handleCompositionStart}
                 onCompositionEnd={handleCompositionEnd}
                 style={TEXTAREA_STYLE}
-                aria-label="Message input"
+                aria-label={t('omph.input.message')}
                 spellCheck={false}
                 rows={1}
               />
             </div>
 
             <div className="flex items-center justify-between px-1 pb-0.5">
-              <div className="flex items-center gap-1" role="toolbar" aria-label="Input tools">
+              <div className="flex items-center gap-1" role="toolbar" aria-label={t('omph.input.tools')}>
                 <AttachmentButton
                   enabled={visionConfig.enabled}
                   onClick={triggerFileSelect}

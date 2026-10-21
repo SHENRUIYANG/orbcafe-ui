@@ -217,7 +217,7 @@ export const OmphFilePreview = ({
           <iframe
             key={body.url}
             src={body.url}
-            title={body.caption ?? 'Embedded document'}
+            title={body.caption ?? labels.previewTitle}
             className="orb-omph-pv-embed"
           />
         )

@@ -50,7 +50,7 @@ import type {
 import { OmphTurnList, turnRailPreview } from './omph-turn-list'
 import {
   formatOmphElapsed,
-  resolveOmphLabels,
+  omphLabelsFromI18n,
   type OMPHConversation,
   type OMPHPanelLabels,
   type OMPHPanelStatus,
@@ -58,6 +58,7 @@ import {
   type OMPHTurn,
 } from './omph-panel-types'
 import { useOmphFilePreview } from './use-omph-file-preview'
+import { useOrbcafeI18n } from '../../../i18n'
 import { PREVIEW_PREF_VAR, PREVIEW_WIDTH_VAR, useOmphPreviewLayout } from './use-omph-preview-layout'
 import { useOmphTranscriptScroll } from './use-omph-transcript-scroll'
 
@@ -170,7 +171,9 @@ export const OMPHPanel = ({
   filePreviewLayout = 'auto',
   onOpenFileExternally,
 }: OMPHPanelProps) => {
-  const labels = resolveOmphLabels(labelOverride)
+  // 默认文案走 i18n 字典（OrbcafeI18nProvider 决定语言）；宿主 labels 仍然逐条最高优先
+  const { t } = useOrbcafeI18n()
+  const labels = { ...omphLabelsFromI18n(t), ...labelOverride }
   const resolvedStatus: OMPHPanelStatus = agentStatus ?? (isResponding ? 'running' : 'idle')
   const busy = resolvedStatus === 'running' || resolvedStatus === 'pending'
   const subtitle = [statusLabel(resolvedStatus, labels), description].filter(Boolean).join(' · ')

@@ -26,6 +26,8 @@
  * - 1.0.0 2026-10-04 初始版本。
  */
 
+import type { OrbcafeMessageKey, OrbcafeMessageParams } from '../../../i18n'
+
 export type OMPHPanelStatus = 'idle' | 'pending' | 'running' | 'success' | 'error'
 
 export type OMPHProcessKind = 'reasoning' | 'tool' | 'command'
@@ -233,6 +235,75 @@ export const DEFAULT_OMPH_PANEL_LABELS: OMPHPanelLabels = {
 export const resolveOmphLabels = (override?: Partial<OMPHPanelLabels>): OMPHPanelLabels => ({
   ...DEFAULT_OMPH_PANEL_LABELS,
   ...override,
+})
+
+/** i18n 翻译函数形态（与 useOrbcafeI18n().t 一致，签名单独声明避免组件层依赖 context） */
+export type OmphTranslate = (key: OrbcafeMessageKey, params?: OrbcafeMessageParams) => string
+
+/** 面板文案从 i18n 字典取；宿主 override 仍然最高优先 */
+export const omphLabelsFromI18n = (t: OmphTranslate): OMPHPanelLabels => ({
+  idle: t('omph.status.idle'),
+  pending: t('omph.status.pending'),
+  running: t('omph.status.running'),
+  success: t('omph.status.success'),
+  error: t('omph.status.error'),
+  working: t('omph.working'),
+  workingFor: (duration) => t('omph.workingFor', { duration }),
+  loadOlder: t('omph.loadOlder'),
+  loadingOlder: t('omph.loadingOlder'),
+  toBottom: t('omph.toBottom'),
+  copy: t('omph.copy'),
+  copied: t('omph.copied'),
+  turnActions: t('omph.turnActions'),
+  usage: t('omph.usage'),
+  inputTokens: t('omph.inputTokens'),
+  outputTokens: t('omph.outputTokens'),
+  duration: t('omph.duration'),
+  send: t('omph.send'),
+  stop: t('omph.stop'),
+  turnRail: t('omph.turnRail'),
+  secondUnit: t('omph.secondUnit'),
+  minuteUnit: t('omph.minuteUnit'),
+  previewTitle: t('omph.preview.title'),
+  previewClose: t('omph.preview.close'),
+  previewBack: t('omph.preview.back'),
+  previewExpand: t('omph.preview.expand'),
+  previewCollapse: t('omph.preview.collapse'),
+  previewCopyContent: t('omph.preview.copyContent'),
+  previewCopyPath: t('omph.preview.copyPath'),
+  previewDownload: t('omph.preview.download'),
+  previewOpenExternal: t('omph.preview.openExternal'),
+  previewWrap: t('omph.preview.wrap'),
+  previewLoading: t('omph.preview.loading'),
+  previewMissing: t('omph.preview.missing'),
+  previewFailed: t('omph.preview.failed'),
+  previewUnsupported: t('omph.preview.unsupported'),
+  previewRetry: t('omph.preview.retry'),
+  previewResize: t('omph.preview.resize'),
+  previewLines: (start, end) => t(start === end ? 'omph.preview.line' : 'omph.preview.lines', { start, end }),
+  previewTruncated: (shown, total) => t('omph.preview.truncated', { shown, total }),
+  imageFailed: t('omph.preview.imageFailed'),
+  zoomIn: t('omph.preview.zoomIn'),
+  zoomOut: t('omph.preview.zoomOut'),
+  zoomFit: t('omph.preview.zoomFit'),
+  newConversation: t('omph.newConversation'),
+  conversationList: t('omph.conversationList'),
+  conversations: t('omph.conversations'),
+  noConversations: t('omph.noConversations'),
+})
+
+/** 审批卡文案从 i18n 字典取；宿主 override 仍然最高优先 */
+export const omphApprovalLabelsFromI18n = (t: OmphTranslate): OMPHApprovalLabels => ({
+  waiting: t('omph.approval.waiting'),
+  choose: t('omph.approval.choose'),
+  details: t('omph.approval.details'),
+  choices: t('omph.approval.choices'),
+  reject: t('omph.approval.reject'),
+  allowOnce: t('omph.approval.allowOnce'),
+  confirm: t('omph.approval.confirm'),
+  other: t('omph.approval.other'),
+  otherPlaceholder: t('omph.approval.otherPlaceholder'),
+  escalation: (toolName) => t('omph.approval.escalation', { toolName }),
 })
 
 export const DEFAULT_OMPH_APPROVAL_LABELS: OMPHApprovalLabels = {

@@ -2,6 +2,8 @@ export * from './layout/agent-panel'
 export * from './omph/omph-panel'
 export { OMPHApprovalCard } from './omph/omph-approval-card'
 export { parseOmphFileHref } from './omph/omph-file-link'
+// i18n 文案合成器：宿主可用它 + ORBCAFE_I18N_MESSAGES 在面板外预合成某语言的完整 labels
+export { omphLabelsFromI18n, omphApprovalLabelsFromI18n } from './omph/omph-panel-types'
 export type {
   OMPHFileBody,
   OMPHFileLinkResolver,
@@ -26,6 +28,7 @@ export type {
   OMPHTurnFailure,
   OMPHTurnMessage,
   OMPHTurnUsage,
+  OmphTranslate,
 } from './omph/omph-panel-types'
 export * from './layout/floating-agent-panel'
 export * from './layout/std-chat'
