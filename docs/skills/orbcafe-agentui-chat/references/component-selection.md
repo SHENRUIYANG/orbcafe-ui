@@ -32,7 +32,7 @@ Choose `OMPHPanel` when:
 - 不要加分支 / fork 按钮，组件没有 `onBranch`
 - 不要把 `reasoning-delta` 的原文写进过程行
 - 不要让面板自己读文件；只传 `loadFilePreview`
-- 不要把 PDF、Office、Excel 当成面板内置预览
+- 不要把 Office、Excel 当成面板内置预览；PDF 走 `embed` 用 iframe 原生查看器，面板自己不做分页
 
 ## Use `StdChat`
 

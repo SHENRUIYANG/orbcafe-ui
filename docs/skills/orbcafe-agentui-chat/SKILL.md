@@ -114,7 +114,7 @@ npm run dev
 - `OMPHPanel` 的文件预览只有在传入 `loadFilePreview` 后才启用。面板不读文件系统。细节以 `references/omph-panel.md` 为准。
 - 助手回复里闭合的 `html` / `htm` 围栏渲染成沙箱中的可交互演示，标题为 Interactive HTML。围栏未闭合时仍是代码。不要把 HTML 脚本插进宿主页面。
 - 人工确认用 `OMPHApprovalCard` 换掉 `InputArea`。没有 `choices` 时只有允许一次和拒绝；有 `choices` 时是单选，并可带 Other 输入。不要把审批画进回复正文。
-- 边缘泛光、背景模糊和居中浮层都画在 `OMPHPanel` 外面。不要写进组件。泛光和面板必须是兄弟节点，面板保持裁切。细节见 `references/omph-panel.md` 的「边缘泛光」。
+- 边缘泛光和居中浮层用库自带的 `orb-omph-bloom` 外壳类，不要自己再写一套。工作态（`running` / `pending`）由面板 `data-status` 经 `:has()` 自动泛金光，也可手动加 `.is-working`。细节见 `references/omph-panel.md` 的「边缘泛光」。
 - `AgentPanel` 支持 `onHeaderPointerDown`，但只透出 header pointer 事件；拖拽/定位仍由外层负责。
 - `AgentPanel` 的 `agentStatus` 驱动面板状态视觉（状态点 + 工作状态行）；视口边缘线使用独立的 `AIBrowserGlow`。
 - `CopilotChat` 只负责内容，不负责壳（开关/定位/拖拽/缩放）。

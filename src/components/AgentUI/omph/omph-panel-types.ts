@@ -158,6 +158,7 @@ export interface OMPHPanelLabels {
   previewCollapse: string
   previewCopyContent: string
   previewCopyPath: string
+  previewDownload: string
   previewOpenExternal: string
   previewWrap: string
   previewLoading: string
@@ -208,6 +209,7 @@ export const DEFAULT_OMPH_PANEL_LABELS: OMPHPanelLabels = {
   previewCollapse: 'Restore preview size',
   previewCopyContent: 'Copy content',
   previewCopyPath: 'Copy path',
+  previewDownload: 'Download',
   previewOpenExternal: 'Open externally',
   previewWrap: 'Wrap',
   previewLoading: 'Loading file',

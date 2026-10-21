@@ -1,6 +1,6 @@
 'use client'
 
-import { AddRoundedIcon, Close, HardwareRoundedIcon, InsertDriveFile, SendRoundedIcon, Stop } from '../../../../lib/orbis-compat';
+import { AddRoundedIcon, Close, InsertDriveFile, SendRoundedIcon, Stop } from '../../../../lib/orbis-compat';
 import React, { useState, useCallback, useRef } from 'react'
 import { cn } from '../../lib/utils'
 import { VoiceInputButton } from './VoiceInputButton'
@@ -9,7 +9,8 @@ const STYLES = {
   container: 'w-full max-w-4xl mx-auto',
 
   inputContainer: cn(
-    'w-full flex flex-col border border-[var(--orb-border,#dbdbdb)] bg-[var(--orb-canvas,#ffffff)] transition-colors duration-200',
+    // 玻璃面：64% canvas + 磨砂（素背景上≈实心，设计背景上即玻璃；嵌套处由外层提供玻璃）
+    'w-full flex flex-col border border-[var(--orb-border,#dbdbdb)] bg-[color-mix(in_oklch,var(--orb-canvas)_64%,transparent)] backdrop-blur-[28px] transition-colors duration-200',
     'orb-agent-input',
     'focus-within:border-[var(--orb-primary,#154194)] focus-within:ring-1 focus-within:ring-[var(--orb-focus-ring,#e4e9f5)]'
   ),
@@ -89,17 +90,6 @@ const AttachmentButton: React.FC<AttachmentButtonProps> = ({ enabled, onClick })
     type="button"
   >
     <AddRoundedIcon size={16} />
-  </button>
-)
-
-const ToolsButton: React.FC = () => (
-  <button
-    className={cn(STYLES.buttonBase, 'h-[38px] gap-1 rounded-full px-2.5 md:h-8 md:px-2', STYLES.buttonNormal)}
-    aria-label="Tools"
-    type="button"
-  >
-    <HardwareRoundedIcon size={15} />
-    <span className="text-xs font-medium">Tools</span>
   </button>
 )
 
@@ -334,11 +324,10 @@ export const InputArea: React.FC<InputAreaProps> = ({
 
             <div className="flex items-center justify-between px-1 pb-0.5">
               <div className="flex items-center gap-1" role="toolbar" aria-label="Input tools">
-                <AttachmentButton 
-                  enabled={visionConfig.enabled} 
+                <AttachmentButton
+                  enabled={visionConfig.enabled}
                   onClick={triggerFileSelect}
                 />
-                <ToolsButton />
               </div>
               
               <div className="flex items-center gap-1">

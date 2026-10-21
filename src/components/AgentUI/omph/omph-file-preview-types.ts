@@ -34,9 +34,11 @@ export type OMPHFileBody =
   | { kind: 'markdown'; text: string }
   | { kind: 'code'; text: string; language?: string }
   | { kind: 'image'; url: string; alt?: string }
+  /** 可内嵌渲染的文档（PDF 等）。宿主保证 URL 可达；面板用 iframe 承载浏览器的原生查看器。 */
+  | { kind: 'embed'; url: string; mimeType?: string; caption?: string }
   /** 文件不存在。不提供重试，只给说明。 */
   | { kind: 'missing'; message?: string }
-  /** 文件存在但本面板无法渲染（PDF、Office、压缩包等）。 */
+  /** 文件存在但本面板无法渲染（Office、压缩包等）。 */
   | { kind: 'unsupported'; message?: string }
 
 export interface OMPHFilePreviewData {

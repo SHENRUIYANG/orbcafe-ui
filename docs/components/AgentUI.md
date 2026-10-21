@@ -292,12 +292,13 @@ const [status, setStatus] = useState<AgentPanelStatus>('idle')
 
 ```ts
 loadFilePreview: (ref: OMPHFileRef, signal: AbortSignal) => Promise<OMPHFilePreviewData>
-// body.kind: 'markdown' | 'code' | 'image' | 'missing' | 'unsupported'
+// body.kind: 'markdown' | 'code' | 'image' | 'embed' | 'missing' | 'unsupported'
 ```
 
 - **大屏并排，小屏覆盖。** 按面板自身宽度判断，不看屏幕：宽度 ≥ 880px 时预览是右侧窗格（默认占 45%，最多 70%，对话列至少留 400px，可拖动或用 ←/→/Home/End 调整，可展开铺满）；更窄时预览盖住整个正文区，用返回键收起，被盖住的对话列设为 `inert`。`filePreviewLayout` 可强制 `split` 或 `overlay`。面板宽度低于 560px 时整体进入紧凑间距。
-- **内容。** 代码带行号和命中行区间高亮（高亮配色来自 ORBIS 令牌，随明暗模式切换），可开关换行，超过 2000 行只渲染前 2000 行并提示；Markdown 限定阅读宽度；图片默认适应宽度，可缩放 25%–400%。
-- **状态。** 读取中是骨架；读取失败可重试；`missing` 只给说明；`unsupported`（PDF、Office、压缩包等）可通过 `onOpenFileExternally` 交给宿主。PDF、Office、Excel 预览不在面板内实现。
+- **内容。** 代码带行号和命中行区间高亮（高亮配色来自 ORBIS 令牌，随明暗模式切换），可开关换行，超过 2000 行只渲染前 2000 行并提示；Markdown 限定阅读宽度；图片默认适应宽度，可缩放 25%–400%；`embed` 文档（PDF 等）由 iframe 交给浏览器原生查看器，不加 sandbox，`url` 须由宿主保证可达且可信。
+- **下载。** 头部右侧有下载按钮：`markdown` / `code` 按正文生成文件，`image` / `embed` 抓取 `url` 落盘（跨域取不到时退回新窗口打开）；`missing` 与 `unsupported` 无下载。
+- **状态。** 读取中是骨架；读取失败可重试；`missing` 只给说明；`unsupported`（Office、压缩包等）可通过 `onOpenFileExternally` 交给宿主。Office、Excel 预览不在面板内实现；要在面板内预览 Office 文件，宿主先转成 PDF 再返回 `embed`。
 - **键盘与焦点。** 打开后焦点进入窗格，Esc 关闭并把焦点还给被点击的链接。
 - `resolveFileLink` 可替换默认的链接判断；默认实现也以 `parseOmphFileHref` 导出。
 

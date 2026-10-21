@@ -2,7 +2,7 @@
 
 `OMPHPanel` 是 ORBCAFE 里和 DeepSeek Harness 会话栏对齐的对话面板。样式用 ORBIS（`orb-omph-*` 与 `--orb-*`）。它不替换 `AgentPanel`。
 
-官方示例：`examples/app/omph-panel/OMPHPanelExampleClient.tsx`，路由 `/omph-panel`。输入 `test` 会增量流出过程行、文件链接和九种指标图卡。示例上的 Panel width（1120 / 760 / 420）和 Preview（auto / split / overlay）用来在同一页看并排和覆盖，不必改窗口。
+官方示例：`examples/app/omph-panel/OMPHPanelExampleClient.tsx`，路由 `/omph-panel`。输入 `test` 会增量流出过程行、文件链接和九种指标图卡。示例上的 Panel width（1120 / 760 / 420）和 Preview（auto / split / overlay）用来在同一页看并排和覆盖，不必改窗口。顶栏右侧可切换明暗，选择存在 `orbcafe:page-layout-mode`，和其他示例页共用。
 
 只从 `orbcafe-ui` 导入。实现在 `src/components/AgentUI/omph/`，不要从那里导入。
 
@@ -126,22 +126,33 @@ interface OMPHProcessItem {
 
 - 回复正文是 Montserrat 500、14px、行高 1.6。深色底不要用 300。
 - 面板圆角是 `--orb-shell-radius`（24px），和 `InputArea` 相同。
+- 面板本体是玻璃：64% canvas 加 28px 磨砂。嵌套浮层（预览、审批详情）保持透明，玻璃由外层提供——半透明叠半透明会变回实心。素背景上玻璃≈实心，泛光或纹理背景上才是玻璃。
 - 正文滚动条的滑槽是 `--orb-canvas`，滑块是前景色混进画布，不用系统灰。
 - 宽于 900px 时，轮次刻度在左侧。
 
 ## 边缘泛光
 
-居中、背景模糊和边缘泛光都画在 `OMPHPanel` 外面，不进组件。面板自己是 `overflow: hidden` 加 `isolation: isolate`，光晕若放进卡片里，超出圆角的部分会被裁掉。
+外壳类随库发布（`orbis.css` 的 `orb-omph-bloom` 一组），不要自己再写一套。居中、背景模糊和泛光都发生在 `OMPHPanel` 外面；面板自己是 `overflow: hidden` 加 `isolation: isolate`，光晕放进卡片会被圆角裁掉。
 
-从后到前只有三层：
+结构从后到前：
 
-1. 背景层盖住视口。半透明底色加上 `backdrop-filter: blur(18px)`，后面的页面被虚化，面板自己保持清晰。
-2. 泛光层是面板的前一个兄弟节点，每边比面板大 168px。上、左用 petrol（`#00a3a3`），右用蓝（`--orb-primary`），下用粉（`#db3360`）。整层再 `filter: blur(64px)`。卡片不透明，盖住光晕中间，只露出卡片外面的一圈。
-3. 内容层才是 `OMPHPanel`。外壳把它的 `border-color` 设成透明、`box-shadow` 去掉，描边交给泛光，不要两条边抢。
+```
+orb-omph-bloom
+├─ orb-omph-bloom-backdrop        ::before 留给宿主画环境光洗
+└─ orb-omph-bloom-center
+   ├─ orb-omph-bloom-panel
+   │  ├─ orb-omph-bloom-glow      四角径向泛光
+   │  └─ orb-omph-bloom-card      内放 OMPHPanel
+   └─ orb-omph-bloom-composer     InputArea 或 OMPHApprovalCard
+```
 
-泛光 `z-index: 0`，卡片 `z-index: 1`。泛光 `pointer-events: none`，也 `aria-hidden`，不挡点击，不参与读屏。呼吸只改透明度，2.6 秒里在 0.78 和 1 之间循环，不用 `transform`。系统开启「减少动态效果」时动画关掉，光晕保持不透明。
+宿主只做三件事：在 `backdrop::before` 的 background 上画自己的环境光洗；在 backdrop 本体上画纹理；把 bloom-panel 和 bloom-composer 摆进 center。backdrop 是 42% canvas 加 `blur(18px)`，虚化后面的页面；泛光层每边比面板大 168px，整层 `filter: blur(64px)`；外壳把面板的 `border-color` 设成透明、`box-shadow` 去掉，描边交给泛光，不要两条边抢。
 
-浅色主题直接用品牌色。深色主题用 `color-mix` 把同样的颜色降到大约 64%–72%，避免夜里过亮。
+面板本体是玻璃（64% canvas + 28px 磨砂），泛光会透过面板微微可见，这是有意的。bloom-card 里的预览窗格和审批浮层会被置成透明，玻璃由外壳统一提供。
+
+工作态自动联动：面板的 `data-status` 是 `running` 或 `pending` 时，外壳用 `:has()` 把四角泛光换成金色（`#d4af37` 一族），同时环境光洗在 0.6 秒里整体淡出，金光成为唯一光源。宿主也可以手动给外壳加 `.is-working`，效果等价。金色是产品显式要求，超出 CI 色板。
+
+浅色主题四色是 petrol `#00a3a3`（上、左）、蓝（右）、粉 `#db3360`（下），按 58%/58%/48% 混入透明；深色主题加重到 70%/72%/64%，夜里依然读得出光。泛光 `z-index: 0`，卡片 `z-index: 1`；泛光 `pointer-events: none`，不挡点击，宿主给它标 `aria-hidden` 让它离开读屏树。呼吸只改透明度，2.6 秒里在 0.78 和 1 之间循环，不用 `transform`；系统开启「减少动态效果」时动画关掉，光晕保持不透明。
 
 示例页的 Edge glow 开关默认开。关掉后回到普通文档流，面板恢复自己的描边。
 
@@ -252,15 +263,19 @@ type OMPHFileBody =
   | { kind: 'markdown'; text: string }
   | { kind: 'code'; text: string; language?: string }
   | { kind: 'image'; url: string; alt?: string }
+  | { kind: 'embed'; url: string; mimeType?: string; caption?: string }
   | { kind: 'missing'; message?: string }
   | { kind: 'unsupported'; message?: string }
 ```
 
 返回值：
 
-- 读成功：`markdown`、`code` 或 `image`。`code.language` 可省略，面板按扩展名判断。
+- 读成功：`markdown`、`code`、`image` 或 `embed`。`code.language` 可省略，面板按扩展名判断。
+- 可内嵌的文档（PDF 等）：返回 `{ kind: 'embed', url }`。面板用 iframe 承载浏览器原生查看器，不加 sandbox——插件式查看器会被沙箱挡住，所以 `url` 必须是宿主保证可达且可信的地址。`caption` 可选，作 iframe 标题。浏览器原生只认 PDF；Word/Excel/PPT 想在面板内预览，宿主先转成 PDF（或拼 Office Online viewer 之类查看器 URL）再返回 `embed`，原始 Office 地址放进 iframe 不会被渲染。
 - 文件不存在：返回 `{ kind: 'missing' }`，不要 throw。界面只有说明，没有重试。
-- 类型无法预览（PDF、Office、Excel、压缩包、HTML）：返回 `{ kind: 'unsupported' }`。若同时传了 `onOpenFileExternally`，界面给出「在外部打开」，由宿主真正打开。
+- 类型无法预览（Office、Excel、压缩包、HTML）：返回 `{ kind: 'unsupported' }`。若同时传了 `onOpenFileExternally`，界面给出「在外部打开」，由宿主真正打开。
+
+头部右侧有下载按钮：`markdown` / `code` 按正文生成文件，`image` / `embed` 抓取 `url` 落盘（跨域取不到时退回新窗口打开，交给浏览器自行下载），文件名取链接的文件名。`missing` 和 `unsupported` 没有下载——数据不在面板手里，要走「在外部打开」。
 - 暂时失败（网络、权限、超时）：throw。界面给重试。取消造成的中止会被忽略。
 
 `signal` 在切换文件、关闭、卸载时中止。过期响应不要再写进自己的状态；面板自己也会丢掉过期结果。同一路径再次打开只更新行区间，不重新读取。
@@ -284,8 +299,9 @@ type OMPHFileBody =
 - 代码：行号、命中行高亮、换行开关。超过 2000 行只画前 2000 行并提示。有行区间时，起始行滚到视口上三分之一。
 - Markdown：阅读列，复用 AgentUI Markdown。
 - 图片：默认适应宽度且不放大；缩放档位 25%–400%。`url` 由宿主给（blob、data 或 http）。
+- embed：iframe 吃满内容区，滚动交给浏览器原生查看器；面板不做工具栏、页码和缩略图。
 
-不做：PDF、Office、Excel、把 `.html` 文件当成预览页打开、多标签、文件变更自动刷新、悬停缩略图。回复里的 `html` 围栏另见「回复里的 HTML」。
+不做：Office、Excel、把 `.html` 文件当成预览页打开、多标签、文件变更自动刷新、悬停缩略图。PDF 走 `embed` 用原生查看器，面板自己不做分页。回复里的 `html` 围栏另见「回复里的 HTML」。
 
 ## 和 OMPH / DSH 的边界
 
@@ -369,6 +385,7 @@ async function handleSend(content: string) {
 6. 缺失文件没有重试；读取失败有重试；不支持的类型只有在传了 `onOpenFileExternally` 时才有外部打开。
 7. 若接了会话列表：新建后正文是空的；再从列表点回原来的会话，之前的轮次还在。
 8. 若页面有 Header AI 输入条：关掉面板后，点打开对话，同一会话回来，输入框里没发出去的字还留着。
+9. 若页面接了 bloom 外壳：回复进行中四角泛金光、环境光隐去，结束后回到四色；过程行的开合箭头折叠时朝右、展开时朝下。
 
 ## 看得到但没效果
 
@@ -382,3 +399,5 @@ async function handleSend(content: string) {
 - 关掉面板后没有地方打开：Header 没传 `onOpenPanel`，或 `panelOpen` 仍是 true。这个按钮不在 `OMPHPanel` 里面。
 - 面板头部没有新建或列表：没传 `onNewConversation` 或 `onSelectConversation`。
 - 点了新建还是旧对话：宿主没有把 `turns` 换成空数组，或没有换 `activeConversationId`。
+- 接了外壳但工作态不泛金：面板不在 `bloom-card` 里，`:has()` 联不上 `data-status`；或宿主没把状态写进面板，也没手动加 `.is-working`。
+- 泛光看不到了：宿主样式把面板背景改成实心，或自己又给面板加了一层半透明底。

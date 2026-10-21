@@ -13,6 +13,14 @@ export interface MermaidBlockProps {
   style?: React.CSSProperties
 }
 
+/** 从 mermaid 报错里提一行人话摘要；长错误与源码折叠在详情里 */
+const summarizeMermaidError = (message: string): string => {
+  const line = /line (\d+)/i.exec(message)?.[1]
+  return line
+    ? `Mermaid syntax error around line ${line} — expand for details`
+    : 'Mermaid syntax error — expand for details'
+}
+
 const MermaidBlock: React.FC<MermaidBlockProps> = ({
   content,
   isLoading,
@@ -83,10 +91,13 @@ const MermaidBlock: React.FC<MermaidBlockProps> = ({
       )}
 
       {error && (
-        <div className="overflow-auto rounded border border-[color-mix(in_oklch,var(--orb-status-error)_30%,transparent)] bg-[color-mix(in_oklch,var(--orb-status-error)_8%,transparent)] p-4 text-sm text-[var(--orb-status-error)]">
-          <p className="mb-2 font-semibold">Mermaid Error:</p>
-          <pre>{error}</pre>
-          <pre className="mt-4 text-xs text-[var(--orb-muted)]">{content}</pre>
+        <div className="rounded border border-[color-mix(in_oklch,var(--orb-status-error)_30%,transparent)] bg-[color-mix(in_oklch,var(--orb-status-error)_8%,transparent)] p-3 text-sm text-[var(--orb-status-error)]">
+          <p className="font-medium">{summarizeMermaidError(error)}</p>
+          <details className="mt-1">
+            <summary className="cursor-pointer text-xs text-[var(--orb-muted)]">Details &amp; source</summary>
+            <pre className="mt-2 max-h-40 overflow-auto whitespace-pre-wrap break-words">{error}</pre>
+            <pre className="mt-2 max-h-40 overflow-auto text-xs text-[var(--orb-muted)]">{content}</pre>
+          </details>
         </div>
       )}
 

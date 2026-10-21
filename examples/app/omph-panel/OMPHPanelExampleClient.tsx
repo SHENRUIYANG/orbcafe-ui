@@ -43,6 +43,7 @@ import {
   InputArea,
   OMPHApprovalCard,
   OMPHPanel,
+  OrbisModeProvider,
   X,
   type AgentUICardHookEvent,
   type MetricChartCardTypeContent,
@@ -54,11 +55,13 @@ import {
   type OMPHProcessDisplay,
   type OMPHProcessItem,
   type OMPHTurn,
+  type OrbModeSetting,
 } from 'orbcafe-ui'
 import { createDemoFileLoader } from './omphDemoWorkspace'
 import './omph-edge-bloom.css'
 
 const STREAM_CHUNK_CHARS = 64
+const MODE_STORAGE_KEY = 'orbcafe:page-layout-mode'
 const STREAM_INTERVAL_MS = 16
 const PROCESS_BEAT_MS = 700
 const SUCCESS_HOLD_MS = 900
@@ -301,6 +304,7 @@ const buildTestReply = (prompt: string) => [
   '- Capacity check: [src/capacity.ts, lines 12–18](src/capacity.ts#L12-L18)',
   '- Orders: [data/orders.json](data/orders.json)',
   '- Layout image: [assets/line2-layout.svg](assets/line2-layout.svg)',
+  '- Embedded PDF: [docs/line2-report.pdf](docs/line2-report.pdf)',
   '- Run log, a long file: [logs/run.log](logs/run.log#L40)',
   '- Fails once, then loads: [data/flaky.csv](data/flaky.csv)',
   '- Not there: [reports/missing.txt](reports/missing.txt)',
@@ -340,6 +344,7 @@ const FILE_LINKS = [
   '- Plan: [docs/line2-plan.md](docs/line2-plan.md)',
   '- Capacity check: [src/capacity.ts, lines 12–18](src/capacity.ts#L12-L18)',
   '- Orders: [data/orders.json](data/orders.json)',
+  '- Embedded PDF: [docs/line2-report.pdf](docs/line2-report.pdf)',
 ].join('\n')
 
 const withHtmlDemo = (markdown: string) => [
@@ -561,6 +566,35 @@ export default function OMPHPanelExampleClient() {
   const [edgeGlow, setEdgeGlow] = useState(true)
   const [externalPath, setExternalPath] = useState<string | null>(null)
   const [approval, setApproval] = useState<OMPHApprovalRequest | null>(null)
+  const [modeSetting, setModeSetting] = useState<OrbModeSetting>('system')
+  const [modeHydrated, setModeHydrated] = useState(false)
+
+  useEffect(() => {
+    try {
+      const savedMode = window.localStorage.getItem(MODE_STORAGE_KEY)
+      if (savedMode === 'light' || savedMode === 'dark' || savedMode === 'system') {
+        // Hydrate the persisted mode before the header toggle can overwrite it.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setModeSetting(savedMode)
+      }
+    } catch {
+      // ignore storage access failures
+    }
+    setModeHydrated(true)
+  }, [])
+
+  useEffect(() => {
+    if (!modeHydrated) return
+    try {
+      window.localStorage.setItem(MODE_STORAGE_KEY, modeSetting)
+    } catch {
+      // ignore storage access failures
+    }
+  }, [modeHydrated, modeSetting])
+
+  const toggleMode = useCallback(() => {
+    setModeSetting((current) => (current === 'system' ? 'dark' : current === 'dark' ? 'light' : 'system'))
+  }, [])
   const loadFilePreview = useMemo(() => createDemoFileLoader(), [])
   const runToken = useRef(0)
   const timers = useRef<number[]>([])
@@ -918,10 +952,12 @@ export default function OMPHPanelExampleClient() {
       : 'border-[var(--orb-border,#dbdbdb)] text-[var(--orb-muted,#8c8c8c)] hover:bg-[var(--orb-hover,#eef2f9)]'
 
   return (
+    <OrbisModeProvider mode={modeSetting}>
     <div className="flex h-screen min-h-0 w-full flex-col bg-[var(--orb-surface,#f5f5f5)]">
       <CAppHeader
         appTitle="OMPH Panel"
         showSearch
+        onToggleMode={toggleMode}
         panelOpen={panelOpen}
         onOpenPanel={() => setPanelOpen(true)}
         onSearch={(query) => {
@@ -1078,5 +1114,6 @@ export default function OMPHPanelExampleClient() {
         )}
       </div>
     </div>
+    </OrbisModeProvider>
   )
 }

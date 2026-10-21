@@ -2634,6 +2634,10 @@ button.orb-app-header-locale:hover,
 
 /* ---------- OMPHPanel ---------- */
 /* ORBIS tokens only. Working state is motion: pulse, spinner, shimmer. */
+/* ── 玻璃面默认值 ──
+   可见透光 = (1-不透明度) × 背景浓度：78%×13%≈3% 不可见，64% 起才有玻璃感；
+   磨砂靠 backdrop-filter 保可读；嵌套面必须透明（64%×64%≈87% 会变实心）。
+   素背景上玻璃≈实心（canvas 叠 canvas），设计背景（泛光/纹理）上即玻璃。 */
 .orb-omph-panel {
   --orb-omph-column: 800px;
   --orb-omph-process-max: 240px;
@@ -2649,7 +2653,9 @@ button.orb-app-header-locale:hover,
   overflow: hidden;
   border: 1px solid var(--orb-border);
   border-radius: var(--orb-shell-radius);
-  background: var(--orb-canvas);
+  background: color-mix(in oklch, var(--orb-canvas) 64%, transparent);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
   box-shadow: var(--orb-shadow-1);
   color: var(--orb-fg);
   font-family: var(--orb-font);
@@ -2670,7 +2676,9 @@ button.orb-app-header-locale:hover,
   overflow: hidden;
   border: 1px solid var(--orb-warn);
   border-radius: var(--orb-shell-radius);
-  background: var(--orb-canvas);
+  background: color-mix(in oklch, var(--orb-canvas) 64%, transparent);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
   box-shadow: var(--orb-shadow-2);
 }
 
@@ -2805,7 +2813,9 @@ button.orb-app-header-locale:hover,
   flex: none;
   padding: 12px 14px;
   border-bottom: 1px solid var(--orb-border);
-  background: var(--orb-canvas);
+  background: color-mix(in oklch, var(--orb-canvas) 64%, transparent);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
 }
 
 .orb-omph-header-actions {
@@ -2855,7 +2865,9 @@ button.orb-app-header-locale:hover,
   padding: 6px;
   border: 1px solid var(--orb-border);
   border-radius: var(--orb-r);
-  background: var(--orb-canvas);
+  background: color-mix(in oklch, var(--orb-canvas) 72%, transparent);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
   box-shadow: var(--orb-shadow-1);
 }
 
@@ -3054,11 +3066,12 @@ button.orb-app-header-locale:hover,
 }
 
 .orb-omph-process-chevron {
+  transform: rotate(-90deg);
   transition: transform var(--orb-t-fast);
 }
 
 .orb-omph-process[data-open="true"] .orb-omph-process-chevron {
-  transform: rotate(180deg);
+  transform: rotate(0deg);
 }
 
 .orb-omph-process-summary {
@@ -3170,7 +3183,9 @@ button.orb-app-header-locale:hover,
 .orb-omph-older,
 .orb-omph-to-bottom {
   border: 1px solid var(--orb-border);
-  background: var(--orb-canvas);
+  background: color-mix(in oklch, var(--orb-canvas) 72%, transparent);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   color: var(--orb-muted);
   cursor: pointer;
 }
@@ -3337,7 +3352,7 @@ button.orb-app-header-locale:hover,
   flex: none;
   padding: 12px 16px 16px;
   border-top: 1px solid var(--orb-border);
-  background: var(--orb-canvas);
+  background: transparent;
 }
 
 .orb-omph-input {
@@ -3459,7 +3474,7 @@ button.orb-app-header-locale:hover,
   width: var(--orb-omph-pv-pref);
   display: flex;
   flex-direction: column;
-  background: var(--orb-canvas);
+  background: transparent;
 }
 
 .orb-omph-preview[data-placement="overlay"] {
@@ -3612,6 +3627,15 @@ button.orb-app-header-locale:hover,
 
 .orb-omph-pv-body[data-kind="image"] {
   overflow: hidden;
+}
+
+/* embed 文档（PDF 等）：iframe 吃满内容区，原生查看器负责滚动 */
+.orb-omph-pv-embed {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  border: 0;
+  background: var(--orb-canvas);
 }
 
 .orb-omph-pv-note {
@@ -4000,5 +4024,161 @@ button.orb-app-header-locale:hover,
   .orb-omph-pv-skel span,
   .orb-omph-code .orb-omph-code-line[data-hit] {
     animation: none;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   OMPHPanel 边缘泛光外壳（orb-omph-bloom）
+   
+   宿主结构：bloom > backdrop + center > panel(> glow + card) + composer。
+   状态机制：OMPHPanel 根节点自带 data-status；外壳经 :has() 自动联动——
+   静息 = CI 四色泛光 + 背景环境光；running/pending = 四周泛金光，
+   环境光（backdrop::before，宿主自绘）整体淡出，金光成为唯一光源。
+   宿主也可手动加 .is-working 类驱动（等价）。宿主只负责：
+   ① backdrop::before 画自己的环境光洗 ② backdrop 本体画纹理
+   ③ center 内摆放 bloom-panel（glow + card）与 bloom-composer。
+   ═══════════════════════════════════════════════════════════════ */
+
+.orb-omph-bloom {
+  --orb-bloom-spread: 168px;
+  --orb-bloom-blur: 64px;
+  --orb-bloom-backdrop: 18px;
+  --orb-bloom-breathe: 2.6s;
+  --orb-bloom-petrol: color-mix(in oklch, #00a3a3 58%, transparent);
+  --orb-bloom-blue: color-mix(in oklch, #00488a 58%, transparent);
+  --orb-bloom-pink: color-mix(in oklch, #db3360 48%, transparent);
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+html.orb-dark .orb-omph-bloom,
+html[data-orb-mode="dark"] .orb-omph-bloom {
+  --orb-bloom-petrol: color-mix(in oklch, #00a3a3 70%, transparent);
+  --orb-bloom-blue: color-mix(in oklch, #00488a 72%, transparent);
+  --orb-bloom-pink: color-mix(in oklch, #db3360 64%, transparent);
+}
+
+.orb-omph-bloom-backdrop {
+  position: absolute;
+  inset: 0;
+  pointer-events: auto;
+  background: color-mix(in oklch, var(--orb-canvas) 42%, transparent);
+  backdrop-filter: blur(var(--orb-bloom-backdrop));
+  -webkit-backdrop-filter: blur(var(--orb-bloom-backdrop));
+}
+
+/* 环境光层：库只给壳（定位 + 淡出过渡），宿主在其 background 上画光洗 */
+.orb-omph-bloom-backdrop::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transition: opacity 0.6s ease;
+}
+
+.orb-omph-bloom-center {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  box-sizing: border-box;
+  height: 100%;
+  min-height: 0;
+  padding: 20px 24px 24px;
+  pointer-events: none;
+}
+
+.orb-omph-bloom-panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: visible;
+  width: min(100%, var(--orb-bloom-width));
+  pointer-events: auto;
+}
+
+.orb-omph-bloom-glow {
+  position: absolute;
+  z-index: 0;
+  inset: calc(var(--orb-bloom-spread) * -1);
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 70% 48% at 50% 0%, var(--orb-bloom-petrol), transparent 68%),
+    radial-gradient(ellipse 48% 70% at 0% 50%, var(--orb-bloom-petrol), transparent 68%),
+    radial-gradient(ellipse 48% 70% at 100% 50%, var(--orb-bloom-blue), transparent 68%),
+    radial-gradient(ellipse 70% 48% at 50% 100%, var(--orb-bloom-pink), transparent 68%);
+  filter: blur(var(--orb-bloom-blur));
+  animation: orb-omph-bloom-breathe var(--orb-bloom-breathe) ease-in-out infinite;
+}
+
+.orb-omph-bloom-card {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  min-height: 0;
+  width: 100%;
+}
+
+/* bloom 美学：面板去边框，泛光负责边缘；嵌套浮层透明靠外层玻璃 */
+.orb-omph-bloom-card .orb-omph-panel {
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.orb-omph-bloom-card .orb-omph-pv,
+.orb-omph-bloom-card .orb-omph-approval-other {
+  background: transparent;
+}
+
+.orb-omph-bloom-composer {
+  position: relative;
+  z-index: 2;
+  flex: 0 1 auto;
+  width: min(100%, var(--orb-bloom-width));
+  max-height: 46%;
+  min-height: 0;
+  overflow: auto;
+  pointer-events: auto;
+}
+
+/* ── AI 工作态：四周泛金光 + 环境光隐退 ──
+   面板 data-status 自动联动（:has），或宿主手动 .is-working；
+   金色为产品显式要求，超出 CI 色板。 */
+.orb-omph-bloom.is-working,
+.orb-omph-bloom:has(.orb-omph-panel[data-status="running"]),
+.orb-omph-bloom:has(.orb-omph-panel[data-status="pending"]),
+html.orb-dark .orb-omph-bloom.is-working,
+html[data-orb-mode="dark"] .orb-omph-bloom.is-working {
+  --orb-bloom-petrol: color-mix(in oklch, #d4af37 66%, transparent);
+  --orb-bloom-blue: color-mix(in oklch, #d4af37 66%, transparent);
+  --orb-bloom-pink: color-mix(in oklch, #e6c35c 60%, transparent);
+}
+
+.orb-omph-bloom.is-working .orb-omph-bloom-backdrop::before,
+.orb-omph-bloom:has(.orb-omph-panel[data-status="running"]) .orb-omph-bloom-backdrop::before,
+.orb-omph-bloom:has(.orb-omph-panel[data-status="pending"]) .orb-omph-bloom-backdrop::before {
+  opacity: 0;
+}
+
+@keyframes orb-omph-bloom-breathe {
+  0%,
+  100% { opacity: 0.78; }
+  50% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orb-omph-bloom-glow {
+    animation: none;
+    opacity: 1;
   }
 }

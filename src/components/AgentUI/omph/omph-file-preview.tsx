@@ -8,7 +8,7 @@
  * - 并排时的拖拽把手
  *
  * 作者：ORBAICODER
- * 版本：1.0.0
+ * 版本：1.1.0
  * 日期：2026-10-04
  *
  * 作用：对齐 DSH 右栏的文件预览。并排（大屏）时是右侧窗格，覆盖（小屏）时盖住整个正文区并以返回键收起。
@@ -17,8 +17,10 @@
  * 1. 窗格始终挂载，开合由 data-open 驱动，这样滑入滑出有过渡，关闭后不可聚焦。
  * 2. 内容区按阶段与 body.kind 分支；文件缺失不给重试，读取失败给重试。
  * 3. 复制按钮在文本类内容复制正文，否则复制路径。
+ * 4. 下载按钮把文本类正文或 url 内容落成文件；缺失和不支持没有下载。
  *
  * ChangeLog：
+ * - 1.1.0 2026-10-21 头部新增下载按钮（markdown/code 走正文，image/embed 抓 url）。
  * - 1.0.0 2026-10-04 初始版本。
  */
 
@@ -26,7 +28,7 @@
 
 import { useEffect, useState } from 'react'
 import type { KeyboardEvent, ReactNode } from 'react'
-import { AlertCircle, Check, ChevronLeft, Copy, Expand, File, Image, X } from '../../Icons'
+import { AlertCircle, Check, ChevronLeft, Copy, Download, Expand, File, Image, X } from '../../Icons'
 import { OmphCodeView, OmphImageView, OmphMarkdownView } from './omph-file-viewers'
 import { baseName, describeLanguage, dirName, extensionOf, formatBytes } from './omph-file-link'
 import type { OMPHFilePreviewState } from './use-omph-file-preview'
@@ -37,6 +39,18 @@ import type { OMPHFileRef } from './omph-file-preview-types'
 const COPY_FEEDBACK_MS = 1000
 const SKELETON_ROWS = 9
 const ICON_SIZE = 16
+
+const TEXT_MIME = { markdown: 'text/markdown;charset=utf-8', code: 'text/plain;charset=utf-8' } as const
+
+/** 触发浏览器下载；objectURL 在下一轮宏任务后回收 */
+const saveBlob = (blob: Blob, filename: string) => {
+  const url = URL.createObjectURL(blob)
+  const anchor = document.createElement('a')
+  anchor.href = url
+  anchor.download = filename
+  anchor.click()
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000)
+}
 
 type GripProps = ReturnType<typeof useOmphPreviewLayout>['gripProps']
 
@@ -107,6 +121,26 @@ export const OmphFilePreview = ({
   const copyText = body && (body.kind === 'markdown' || body.kind === 'code') ? body.text : fullPath
   const copyLabel = copyText === fullPath ? labels.previewCopyPath : labels.previewCopyContent
   const language = body?.kind === 'code' && ref ? describeLanguage(ref.path, body.language) : null
+  const downloadable = Boolean(ref && body && (body.kind === 'markdown' || body.kind === 'code' || body.kind === 'image' || body.kind === 'embed'))
+
+  const handleDownload = () => {
+    if (!body || !ref) return
+    const filename = baseName(ref.path)
+    if (body.kind === 'markdown' || body.kind === 'code') {
+      saveBlob(new Blob([body.text], { type: TEXT_MIME[body.kind] }), filename)
+      return
+    }
+    if (body.kind === 'image' || body.kind === 'embed') {
+      // 先取成 blob 再落盘，避免浏览器改成导航；跨域取不到（无 CORS）就退回新窗口打开，交给浏览器自行下载
+      void fetch(body.url)
+        .then((response) => {
+          if (!response.ok) throw new Error(`HTTP ${response.status}`)
+          return response.blob()
+        })
+        .then((blob) => saveBlob(blob, filename))
+        .catch(() => window.open(body.url, '_blank', 'noopener'))
+    }
+  }
 
   const meta: string[] = []
   if (language) meta.push(language.label)
@@ -172,6 +206,16 @@ export const OmphFilePreview = ({
         )
       case 'image':
         return <OmphImageView key={body.url} url={body.url} alt={body.alt} labels={labels} />
+      case 'embed':
+        // PDF 等文档交给浏览器/宿主的原生查看器；不加 sandbox，插件式查看器会被沙箱挡住
+        return (
+          <iframe
+            key={body.url}
+            src={body.url}
+            title={body.caption ?? 'Embedded document'}
+            className="orb-omph-pv-embed"
+          />
+        )
       default:
         return null
     }
@@ -216,6 +260,17 @@ export const OmphFilePreview = ({
                 onClick={() => setWrap((value) => !value)}
               >
                 {labels.previewWrap}
+              </button>
+            )}
+            {downloadable && (
+              <button
+                type="button"
+                className="orb-omph-icon-button"
+                aria-label={labels.previewDownload}
+                title={labels.previewDownload}
+                onClick={handleDownload}
+              >
+                <Download size={ICON_SIZE} />
               </button>
             )}
             {ref && (

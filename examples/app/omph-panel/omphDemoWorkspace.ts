@@ -131,6 +131,10 @@ const WORKSPACE: Record<string, OMPHFilePreviewData> = {
     size: LAYOUT_SVG.length,
   },
   'logs/run.log': { body: { kind: 'code', text: buildRunLog() }, size: LOG_LINE_COUNT * 72 },
+  'docs/line2-report.pdf': {
+    body: { kind: 'embed', url: '/demo/line2-report.pdf', mimeType: 'application/pdf', caption: 'Line 2 recovery report' },
+    size: 640,
+  },
   'archive/q3.zip': { body: { kind: 'unsupported', message: 'Archives cannot be previewed here.' }, size: 482_113 },
 }
 
