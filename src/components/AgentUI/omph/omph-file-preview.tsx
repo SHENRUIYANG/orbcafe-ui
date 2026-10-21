@@ -8,7 +8,7 @@
  * - 并排时的拖拽把手
  *
  * 作者：ORBAICODER
- * 版本：1.1.0
+ * 版本：1.1.1
  * 日期：2026-10-04
  *
  * 作用：对齐 DSH 右栏的文件预览。并排（大屏）时是右侧窗格，覆盖（小屏）时盖住整个正文区并以返回键收起。
@@ -20,6 +20,7 @@
  * 4. 下载按钮把文本类正文或 url 内容落成文件；缺失和不支持没有下载。
  *
  * ChangeLog：
+ * - 1.1.1 2026-10-22 previewOnly 的 markdown/code 不出下载按钮；下载文件名改用 absolutePath，markdown 无文本扩展名时补 .md。
  * - 1.1.0 2026-10-21 头部新增下载按钮（markdown/code 走正文，image/embed 抓 url）。
  * - 1.0.0 2026-10-04 初始版本。
  */
@@ -121,11 +122,15 @@ export const OmphFilePreview = ({
   const copyText = body && (body.kind === 'markdown' || body.kind === 'code') ? body.text : fullPath
   const copyLabel = copyText === fullPath ? labels.previewCopyPath : labels.previewCopyContent
   const language = body?.kind === 'code' && ref ? describeLanguage(ref.path, body.language) : null
-  const downloadable = Boolean(ref && body && (body.kind === 'markdown' || body.kind === 'code' || body.kind === 'image' || body.kind === 'embed'))
+  const previewOnly = Boolean(body && (body.kind === 'markdown' || body.kind === 'code') && body.previewOnly)
+  // previewOnly 的 markdown/code 是宿主的预览渲染而非文件本体，不给下载——真文件走 onOpenFileExternally
+  const downloadable = Boolean(ref && body && !previewOnly && (body.kind === 'markdown' || body.kind === 'code' || body.kind === 'image' || body.kind === 'embed'))
 
   const handleDownload = () => {
     if (!body || !ref) return
-    const filename = baseName(ref.path)
+    // 文件名优先宿主显示名；ref.path 可能带模型美化的后缀或编码
+    let filename = baseName(fullPath)
+    if (body.kind === 'markdown' && !/\.(md|markdown|txt)$/i.test(filename)) filename = `${filename}.md`
     if (body.kind === 'markdown' || body.kind === 'code') {
       saveBlob(new Blob([body.text], { type: TEXT_MIME[body.kind] }), filename)
       return

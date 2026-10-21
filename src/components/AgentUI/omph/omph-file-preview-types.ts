@@ -31,8 +31,9 @@ export interface OMPHFileRef {
 }
 
 export type OMPHFileBody =
-  | { kind: 'markdown'; text: string }
-  | { kind: 'code'; text: string; language?: string }
+  /** previewOnly：text 只是宿主的预览渲染（如 xlsx 转表格），不是文件本体——不出现下载按钮，真文件走 onOpenFileExternally。 */
+  | { kind: 'markdown'; text: string; previewOnly?: boolean }
+  | { kind: 'code'; text: string; language?: string; previewOnly?: boolean }
   | { kind: 'image'; url: string; alt?: string }
   /** 可内嵌渲染的文档（PDF 等）。宿主保证 URL 可达；面板用 iframe 承载浏览器的原生查看器。 */
   | { kind: 'embed'; url: string; mimeType?: string; caption?: string }

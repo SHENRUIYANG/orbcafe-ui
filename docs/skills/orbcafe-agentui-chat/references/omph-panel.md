@@ -260,8 +260,8 @@ interface OMPHFileRef {
 }
 
 type OMPHFileBody =
-  | { kind: 'markdown'; text: string }
-  | { kind: 'code'; text: string; language?: string }
+  | { kind: 'markdown'; text: string; previewOnly?: boolean }
+  | { kind: 'code'; text: string; language?: string; previewOnly?: boolean }
   | { kind: 'image'; url: string; alt?: string }
   | { kind: 'embed'; url: string; mimeType?: string; caption?: string }
   | { kind: 'missing'; message?: string }
@@ -275,7 +275,7 @@ type OMPHFileBody =
 - 文件不存在：返回 `{ kind: 'missing' }`，不要 throw。界面只有说明，没有重试。
 - 类型无法预览（Office、Excel、压缩包、HTML）：返回 `{ kind: 'unsupported' }`。若同时传了 `onOpenFileExternally`，界面给出「在外部打开」，由宿主真正打开。
 
-头部右侧有下载按钮：`markdown` / `code` 按正文生成文件，`image` / `embed` 抓取 `url` 落盘（跨域取不到时退回新窗口打开，交给浏览器自行下载），文件名取链接的文件名。`missing` 和 `unsupported` 没有下载——数据不在面板手里，要走「在外部打开」。
+头部右侧有下载按钮：`markdown` / `code` 按正文生成文件，`image` / `embed` 抓取 `url` 落盘（跨域取不到时退回新窗口打开，交给浏览器自行下载）。文件名优先取 `absolutePath`，没有时取链接的文件名；`markdown` 落盘时若扩展名不是 `.md`/`.markdown`/`.txt`，自动补 `.md`，避免「表格文本存成 .xlsx」这类内容/扩展名错配。`body.previewOnly` 标记的 `markdown` / `code` 是宿主的预览渲染（如 xlsx 转表格）而非文件本体，不出下载按钮——真文件走「在外部打开」。`missing` 和 `unsupported` 没有下载——数据不在面板手里，要走「在外部打开」。
 - 暂时失败（网络、权限、超时）：throw。界面给重试。取消造成的中止会被忽略。
 
 `signal` 在切换文件、关闭、卸载时中止。过期响应不要再写进自己的状态；面板自己也会丢掉过期结果。同一路径再次打开只更新行区间，不重新读取。
@@ -401,3 +401,4 @@ async function handleSend(content: string) {
 - 点了新建还是旧对话：宿主没有把 `turns` 换成空数组，或没有换 `activeConversationId`。
 - 接了外壳但工作态不泛金：面板不在 `bloom-card` 里，`:has()` 联不上 `data-status`；或宿主没把状态写进面板，也没手动加 `.is-working`。
 - 泛光看不到了：宿主样式把面板背景改成实心，或自己又给面板加了一层半透明底。
+- 预览里点了下载没反应：Electron 宿主没处理 `session.on('will-download')`，`<a download>` 会被静默吞掉。宿主补事件处理，或用 `onOpenFileExternally` 自带保存框的下载。
